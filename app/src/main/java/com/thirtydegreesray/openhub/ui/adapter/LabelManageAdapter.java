@@ -1,0 +1,75 @@
+package com.thirtydegreesray.openhub.ui.adapter;
+
+import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageView;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.mvp.model.Label;
+import com.thirtydegreesray.openhub.ui.adapter.base.BaseAdapter;
+import com.thirtydegreesray.openhub.ui.adapter.base.BaseViewHolder;
+import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
+import com.thirtydegreesray.openhub.util.ViewUtils;
+
+import javax.inject.Inject;
+
+
+/**
+ * Created by ThirtyDegreesRay on 2018/1/11 10:54:08
+ */
+
+public class LabelManageAdapter extends BaseAdapter<LabelManageAdapter.ViewHolder, Label> {
+
+    @Inject
+    public LabelManageAdapter(Context context, BaseFragment fragment) {
+        super(context, fragment);
+    }
+
+    @Override
+    protected int getLayoutId(int viewType) {
+        return R.layout.layout_item_label;
+    }
+
+    @Override
+    protected ViewHolder getViewHolder(View itemView, int viewType) {
+        return new ViewHolder(itemView);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        super.onBindViewHolder(holder, position);
+        Label model = data.get(position);
+        if(model.isSelect()){
+            holder.labelBg.setBackgroundColor(model.getColorValue());
+            holder.name.getPaint().setFakeBoldText(true);
+            holder.name.setTextColor(ViewUtils.getLabelTextColor(context, model.getColorValue()));
+        } else {
+            holder.labelBg.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+            holder.name.getPaint().setFakeBoldText(false);
+            holder.name.setTextColor(ViewUtils.getPrimaryTextColor(context));
+        }
+        holder.color.setBackgroundColor(model.getColorValue());
+        holder.name.setText(model.getName());
+    }
+
+    class ViewHolder extends BaseViewHolder {
+        AppCompatImageView color;
+        TextView name;
+        LinearLayout labelBg;
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+
+        @Override
+        protected void bindViews(View root) {
+            super.bindViews(root);
+            color = root.findViewById(R.id.color);
+            name = root.findViewById(R.id.name);
+            labelBg = root.findViewById(R.id.label_bg);
+        }
+    }
+
+}

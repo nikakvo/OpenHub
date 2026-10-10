@@ -1,0 +1,157 @@
+apply plugin: 'com.android.application'
+
+// Build properties, highest priority first: Gradle project properties (-Pkey or the
+// ORG_GRADLE_PROJECT_<key> environment variable, used by build.sh for signing),
+// local.properties (not in git), public.properties.
+def loadProps = { String name ->
+    def props = new Properties()
+    def f = rootProject.file(name)
+    if (f.exists()) f.withInputStream { props.load(it) }
+    return props
+}
+def publicProps = loadProps('public.properties')
+def localProps = loadProps('local.properties')
+def prop = { String key ->
+    def v = project.findProperty(key) ?: localProps.getProperty(key) ?: publicProps.getProperty(key)
+    return v == null ? null : v.toString().trim()
+}
+def quotedProp = { String key ->
+    def v = prop(key)
+    if (v == null) return '""'
+    return v.startsWith('"') ? v : "\"${v}\""
+}
+
+android {
+    namespace = "com.thirtydegreesray.openhub"
+    buildFeatures {
+        buildConfig = true
+        // app_name comes from resValue in the product flavors (off by default in AGP 9)
+        resValues = true
+    }
+    compileSdk = COMPILE_SDK_VERSION as int
+    defaultConfig {
+        // Own package id, so it installs next to the original OpenHub.
+        // Keep in sync with targetPackage in res/xml/shortcuts.xml.
+        applicationId = "io.github.nikakvo.openhub"
+        minSdk = MIN_SDK_VERSION as int
+        targetSdk = TARGET_SDK_VERSION as int
+        versionCode = VERSION_CODE as int
+        versionName = VERSION_NAME
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+
+        buildConfigField "String", "OPENHUB_CLIENT_ID", quotedProp('openhub_client_id')
+        buildConfigField "String", "OPENHUB_CLIENT_SECRET", quotedProp('openhub_client_secret')
+    }
+
+    // Release signing only when a keystore is configured (see public.properties).
+    def hasReleaseKey = prop('sign_path') != null && !prop('sign_path').isEmpty()
+    signingConfigs  {
+        if (hasReleaseKey) {
+            release {
+                storeFile = file(prop('sign_path'))
+                storePassword = prop('store_password')
+                keyAlias = prop('key_alias')
+                keyPassword = prop('key_password')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = true
+            shrinkResources = true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig = hasReleaseKey ? signingConfigs.release : signingConfigs.debug
+        }
+        debug {
+            if (hasReleaseKey) signingConfig = signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    lint {
+        checkReleaseBuilds = true
+        abortOnError = false
+    }
+
+    flavorDimensions.add("default")
+
+    productFlavors {
+        normal {
+            dimension = "default"
+            resValue "string", "app_name", "OpenHub"
+        }
+        fullName {
+            dimension = "default"
+            resValue "string", "app_name", "OpenHub for GitHub"
+        }
+    }
+
+}
+
+dependencies {
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+    annotationProcessor "javax.annotation:javax.annotation-api:1.3.2"
+
+    implementation 'com.google.android.material:material:1.14.0'
+    implementation 'androidx.arch.core:core-runtime:2.2.0'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.transition:transition:1.4.1'
+    implementation 'androidx.webkit:webkit:1.14.0'
+    implementation 'androidx.browser:browser:1.9.0'
+    implementation 'androidx.work:work-runtime:2.12.0'
+
+
+    //数据库工具
+    implementation "org.greenrobot:greendao:${GREEN_DAO_VERSION}"
+    //事件总线
+    implementation "org.greenrobot:eventbus:${EVENT_BUS_VERSION}"
+    //文件下载
+
+    //RxJava
+    implementation "io.reactivex.rxjava3:rxjava:${RXJAVA_VERSION}"
+    implementation "io.reactivex.rxjava3:rxandroid:${RXANDROID_VERSION}"
+
+    //Type-safe HTTP client for Android and Java by Square, Inc.
+    implementation "com.squareup.retrofit2:retrofit:${RETROFIT_VERSION}"
+    implementation "com.squareup.retrofit2:converter-gson:${RETROFIT_VERSION}"
+    implementation "com.squareup.retrofit2:adapter-rxjava3:${RETROFIT_VERSION}"
+    implementation ("com.squareup.retrofit2:converter-simplexml:${RETROFIT_VERSION}"){
+        exclude group: 'xpp3', module: 'xpp3'
+        exclude group: 'stax', module: 'stax-api'
+        exclude group: 'stax', module: 'stax'
+    }
+
+    //dagger依赖注入
+    implementation "com.google.dagger:dagger:${DAGGER_VERSION}"
+    annotationProcessor "com.google.dagger:dagger-compiler:${DAGGER_VERSION}"
+
+
+    implementation "com.github.bumptech.glide:glide:${GLIDE_VERSION}"
+    annotationProcessor "com.github.bumptech.glide:compiler:${GLIDE_VERSION}"
+
+    implementation "de.hdodenhof:circleimageview:${CIRCLE_IMAGEVIEW_VERSION}"
+
+    implementation "com.github.GrenderG:Toasty:${TOASTY_VERSION}"
+
+
+    // Markdown preview in the editor (replaces richtext, which only existed on JCenter)
+    implementation "io.noties.markwon:core:${MARKWON_VERSION}"
+    implementation "io.noties.markwon:ext-strikethrough:${MARKWON_VERSION}"
+    implementation "io.noties.markwon:ext-tables:${MARKWON_VERSION}"
+    implementation "io.noties.markwon:ext-tasklist:${MARKWON_VERSION}"
+    implementation "io.noties.markwon:linkify:${MARKWON_VERSION}"
+
+    implementation "com.orhanobut:logger:${LOGGER_VERSION}"
+
+    implementation "org.jsoup:jsoup:${JSOUP_VERSION}"
+}

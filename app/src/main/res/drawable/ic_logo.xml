@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Round OpenHub logo for use inside the app (login, splash, About, placeholders). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="72dp"
+    android:height="72dp"
+    android:viewportWidth="72"
+    android:viewportHeight="72">
+    <path
+        android:fillColor="@color/logo_background"
+        android:pathData="M0,36 a36,36 0 1,0 72,0 a36,36 0 1,0 -72,0 Z"/>
+    <group
+        android:translateX="-18"
+        android:translateY="-18">
+        <group
+            android:pivotX="54"
+            android:pivotY="54"
+            android:scaleX="0.82"
+            android:scaleY="0.82">
+            <path
+                android:pathData="M44,40 L44,68 M66,46 C66,58 44,54 44,64"
+                android:strokeColor="#FFFFFF"
+                android:strokeWidth="5.5"
+                android:strokeLineCap="round"/>
+            <path
+                android:fillColor="#FFFFFF"
+                android:pathData="M37.5,36 a6.5,6.5 0 1,0 13,0 a6.5,6.5 0 1,0 -13,0 Z M37.5,72 a6.5,6.5 0 1,0 13,0 a6.5,6.5 0 1,0 -13,0 Z M59.5,40 a6.5,6.5 0 1,0 13,0 a6.5,6.5 0 1,0 -13,0 Z"/>
+        </group>
+    </group>
+</vector>

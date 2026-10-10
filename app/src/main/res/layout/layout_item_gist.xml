@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/card_view_horizontal_margin"
+    android:layout_marginRight="@dimen/card_view_horizontal_margin"
+    android:layout_marginBottom="@dimen/card_view_vertical_margin"
+    android:layout_marginTop="@dimen/card_view_vertical_margin"
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardBackgroundColor="?card_background"
+    app:cardCornerRadius="@dimen/card_view_corner_radius">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_normal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/gist_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textSize="@dimen/text_normal"
+                android:textColor="?colorAccent"/>
+
+            <TextView
+                android:id="@+id/gist_secret"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_small"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="1dp"
+                android:paddingBottom="1dp"
+                android:background="@drawable/bg_badge"
+                android:text="@string/gist_secret"
+                android:textSize="@dimen/text_mini"
+                android:textColor="?colorAccent"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/gist_files"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textSize="@dimen/text_small"
+            android:textColor="?subtitle_color"/>
+
+        <TextView
+            android:id="@+id/gist_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_mini"
+            android:gravity="end"
+            android:textSize="@dimen/text_mini"
+            android:textColor="?android:textColorSecondary"/>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

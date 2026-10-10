@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_title"
+        android:title="@string/search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView"/>
+    <item
+        android:id="@+id/action_sort"
+        android:icon="@drawable/ic_sort_title"
+        android:title="@string/sort"
+        app:showAsAction="always">
+        <menu xmlns:android="http://schemas.android.com/apk/res/android">
+            <item
+                android:id="@+id/action_bast_match"
+                android:title="@string/best_match"/>
+            <item
+                android:id="@+id/action_most_stars"
+                android:title="@string/most_stars"/>
+            <item
+                android:id="@+id/action_fewest_stars"
+                android:title="@string/fewest_stars"/>
+            <item
+                android:id="@+id/action_most_forks"
+                android:title="@string/most_forks"/>
+            <item
+                android:id="@+id/action_fewest_forks"
+                android:title="@string/fewest_forks"/>
+            <item
+                android:id="@+id/action_recently_updated"
+                android:title="@string/recently_updated"/>
+            <item
+                android:id="@+id/action_least_recently_updated"
+                android:title="@string/least_recently_updated"/>
+
+
+            <item
+                android:id="@+id/action_most_followers"
+                android:title="@string/most_followers"/>
+            <item
+                android:id="@+id/action_fewest_followers"
+                android:title="@string/fewest_followers"/>
+            <item
+                android:id="@+id/action_most_recently_joined"
+                android:title="@string/most_recently_joined"/>
+            <item
+                android:id="@+id/action_least_recently_joined"
+                android:title="@string/least_recently_joined"/>
+            <item
+                android:id="@+id/action_most_repositories"
+                android:title="@string/most_repositories"/>
+            <item
+                android:id="@+id/action_fewest_repositories"
+                android:title="@string/fewest_repositories"/>
+
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_info"
+        android:icon="@drawable/ic_info_title"
+        android:title="@string/info"
+        app:showAsAction="always"/>
+</menu>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?colorPrimary"
+    android:gravity="center_horizontal"
+    android:padding="@dimen/activity_margin"
+    tools:context=".ui.activity.LoginActivity">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/spacing_normal"
+        android:minHeight="380dp"
+        android:minWidth="250dp"
+        app:cardElevation="@dimen/spacing_large"
+        android:background="?card_background">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:padding="@dimen/spacing_normal"
+                android:src="@drawable/ic_logo"
+                android:background="?colorAccent"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingRight="@dimen/spacing_normal"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:gravity="center_horizontal"
+                android:background="?card_background">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/login_bn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="52dp"
+                    android:minWidth="220dp"
+                    android:paddingLeft="24dp"
+                    android:paddingRight="24dp"
+                    android:layout_marginTop="@dimen/spacing_huge"
+                    android:background="@drawable/bg_outlined_accent_button"
+                    android:stateListAnimator="@null"
+                    android:text="@string/login_in_browser"
+                    android:textSize="18sp"
+                    android:textAllCaps="true"
+                    android:textColor="?colorAccent"/>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/token_login_bn"
+                    style="?attr/borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:minWidth="220dp"
+                    android:layout_marginTop="@dimen/spacing_normal"
+                    android:layout_marginBottom="@dimen/spacing_large"
+                    android:text="@string/login_with_token"
+                    android:textAllCaps="true"
+                    android:textColor="?colorAccent"/>
+
+                <View
+                    style="@style/DividerLine.Horizontal"
+                    android:layout_marginTop="@dimen/spacing_normal"
+                    android:layout_marginBottom="@dimen/spacing_normal"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/oauth_tip"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
