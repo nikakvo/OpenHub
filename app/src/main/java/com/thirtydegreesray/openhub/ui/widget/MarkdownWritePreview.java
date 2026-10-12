@@ -2,6 +2,7 @@ package com.thirtydegreesray.openhub.ui.widget;
 
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
@@ -35,12 +36,8 @@ import okhttp3.ResponseBody;
  */
 public class MarkdownWritePreview {
 
-    private final View tabWrite;
-    private final View tabPreview;
-    private final TextView tabWriteText;
-    private final TextView tabPreviewText;
-    private final View tabWriteLine;
-    private final View tabPreviewLine;
+    private final TextView tabWrite;
+    private final TextView tabPreview;
     private final TextInputLayout inputLayout;
     private final TextInputEditText edit;
     private final View previewContainer;
@@ -63,17 +60,13 @@ public class MarkdownWritePreview {
         this.repoFullName = repoFullName;
         tabWrite = root.findViewById(R.id.md_tab_write);
         tabPreview = root.findViewById(R.id.md_tab_preview);
-        tabWriteText = root.findViewById(R.id.md_tab_write_text);
-        tabPreviewText = root.findViewById(R.id.md_tab_preview_text);
-        tabWriteLine = root.findViewById(R.id.md_tab_write_line);
-        tabPreviewLine = root.findViewById(R.id.md_tab_preview_line);
         inputLayout = root.findViewById(R.id.md_input_layout);
         edit = root.findViewById(R.id.md_edit);
         previewContainer = root.findViewById(R.id.md_preview_container);
         previewWeb = root.findViewById(R.id.md_preview_web);
         previewEmpty = root.findViewById(R.id.md_preview_empty);
         previewLoader = root.findViewById(R.id.md_preview_loader);
-        normalColor = tabWriteText.getTextColors();
+        normalColor = tabWrite.getTextColors();
         tabWrite.setOnClickListener(v -> showWrite());
         tabPreview.setOnClickListener(v -> showPreview());
         updateTabs();
@@ -122,12 +115,21 @@ public class MarkdownWritePreview {
 
     private void updateTabs() {
         ColorStateList accent = ColorStateList.valueOf(ViewUtils.getAccentColor(tabWrite.getContext()));
-        tabWriteText.setTextColor(preview ? normalColor : accent);
-        tabPreviewText.setTextColor(preview ? accent : normalColor);
-        tabWriteText.setTypeface(null, preview ? Typeface.NORMAL : Typeface.BOLD);
-        tabPreviewText.setTypeface(null, preview ? Typeface.BOLD : Typeface.NORMAL);
-        tabWriteLine.setVisibility(preview ? View.INVISIBLE : View.VISIBLE);
-        tabPreviewLine.setVisibility(preview ? View.VISIBLE : View.INVISIBLE);
+        style(tabWrite, !preview, accent);
+        style(tabPreview, preview, accent);
+    }
+
+    private void style(@NonNull TextView tab, boolean selected, @NonNull ColorStateList accent) {
+        tab.setTextColor(selected ? accent : normalColor);
+        tab.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
+        if (selected) {
+            tab.setBackgroundResource(R.drawable.bg_tab_selected);
+        } else {
+            TypedValue ripple = new TypedValue();
+            tab.getContext().getTheme().resolveAttribute(
+                    android.R.attr.selectableItemBackground, ripple, true);
+            tab.setBackgroundResource(ripple.resourceId);
+        }
     }
 
     private void render() {

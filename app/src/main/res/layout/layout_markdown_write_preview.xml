@@ -12,28 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <LinearLayout
+        <TextView
             android:id="@+id/md_tab_write"
-            style="@style/MarkdownTab">
-            <TextView
-                android:id="@+id/md_tab_write_text"
-                style="@style/MarkdownTabText"
-                android:text="@string/write"/>
-            <View
-                android:id="@+id/md_tab_write_line"
-                style="@style/MarkdownTabLine"/>
-        </LinearLayout>
-        <LinearLayout
+            style="@style/MarkdownTab"
+            android:text="@string/write"/>
+        <TextView
             android:id="@+id/md_tab_preview"
-            style="@style/MarkdownTab">
-            <TextView
-                android:id="@+id/md_tab_preview_text"
-                style="@style/MarkdownTabText"
-                android:text="@string/preview"/>
-            <View
-                android:id="@+id/md_tab_preview_line"
-                style="@style/MarkdownTabLine"/>
-        </LinearLayout>
+            style="@style/MarkdownTab"
+            android:text="@string/preview"/>
     </LinearLayout>
 
     <View
@@ -52,9 +38,7 @@
             android:layout_height="wrap_content"
             android:inputType="textMultiLine|textCapSentences"
             android:gravity="top|start"
-            android:minLines="6"
-            android:maxLines="20"
-            android:scrollbars="vertical"/>
+            android:minLines="6"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <FrameLayout
