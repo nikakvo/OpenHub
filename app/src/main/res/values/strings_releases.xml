@@ -110,4 +110,22 @@
     <string name="upload_size_changed">The file changed while it was uploaded</string>
     <string name="open_release">Open release</string>
 
+
+    <!-- share to OpenHub -->
+    <string name="share_upload_label">Upload to GitHub release</string>
+    <string name="share_upload_title">Upload to a release</string>
+    <string name="share_upload_subtitle">Choose a repository</string>
+    <string name="share_upload_search">Search your repositories</string>
+    <plurals name="share_upload_files">
+        <item quantity="one">%1$d file: %2$s</item>
+        <item quantity="other">%1$d files: %2$s</item>
+    </plurals>
+    <string name="share_upload_no_files">Nothing to upload: share one or more files</string>
+    <string name="share_upload_no_repos">You have no repositories you can upload to</string>
+    <string name="share_upload_no_match">No repository matches</string>
+    <string name="share_upload_private">Private</string>
+    <string name="share_upload_choose_release">Upload to %1$s</string>
+    <string name="share_upload_replace_title">Replace files?</string>
+    <string name="share_upload_replace_message">The release already has files with these names. Replace them with the shared ones?</string>
+    <string name="share_upload_replace">Replace</string>
 </resources>

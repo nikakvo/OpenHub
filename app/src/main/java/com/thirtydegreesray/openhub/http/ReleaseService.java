@@ -43,6 +43,14 @@ public interface ReleaseService {
             @Path("id") String id
     );
 
+    /** Newest first; drafts included for users with push access. */
+    @NonNull @GET("repos/{owner}/{repo}/releases?per_page=50")
+    Observable<Response<ArrayList<Release>>> getReleases(
+            @Header("forceNetWork") boolean forceNetWork,
+            @Path("owner") String owner,
+            @Path("repo") String repo
+    );
+
     @NonNull @GET("repos/{owner}/{repo}/releases/latest")
     Observable<Response<Release>> getLatestRelease(
             @Header("forceNetWork") boolean forceNetWork,

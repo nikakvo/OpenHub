@@ -88,7 +88,10 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
     public static Intent createIntent(@NonNull Context context, @NonNull String owner, @NonNull String repo,
                                       @Nullable ArrayList<UploadItem> files) {
         Intent intent = createIntent(context, owner, repo);
-        if (files != null) intent.putParcelableArrayListExtra("pendingFiles", files);
+        if (files != null) {
+            intent.putParcelableArrayListExtra("pendingFiles", files);
+            ContentFiles.grantRead(intent, files);
+        }
         return intent;
     }
 

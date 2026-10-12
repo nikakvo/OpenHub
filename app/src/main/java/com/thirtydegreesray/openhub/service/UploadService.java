@@ -115,6 +115,7 @@ public class UploadService extends Service {
                         .put("publish", publish)
                         .put("makeLatest", makeLatest)
                         .build());
+        ContentFiles.grantRead(intent, items);
         ContextCompat.startForegroundService(context, intent);
     }
 

@@ -146,6 +146,10 @@ GitHub website does.
   every file arrived, so nobody downloads an incomplete release. This also works for
   repositories with **release immutability** turned on, where files cannot change
   after publishing.
+- **From other apps**: share one or more files (from a file manager, Termux with
+  `termux-share`, Telegram...) and choose **Upload to GitHub release**. Pick the
+  repository (the last used one is on top, with search), then an existing release or
+  **New release**. Files that already exist in the release can be replaced.
 - Uploads run in the background with a progress notification and **Cancel**; a lost
   connection is retried automatically. You can leave the app meanwhile.
 - In an open release, the menu has **Edit**, **Publish release** (drafts), **Set as

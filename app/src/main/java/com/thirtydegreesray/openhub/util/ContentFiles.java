@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.util;
 
+import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import androidx.annotation.Nullable;
 import com.thirtydegreesray.openhub.mvp.model.UploadItem;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Files picked with the system file picker (or shared from another app), described
@@ -87,6 +89,49 @@ public final class ContentFiles {
     public static String assetName(@NonNull String name) {
         String clean = name.trim().replaceAll("[\\\\/:*?\"<>|\\p{Cntrl}]", "_");
         return clean.isEmpty() ? "file" : clean;
+    }
+
+    /**
+     * Passes this app's read access to the files on to the started component. Files
+     * shared from another app are readable only while the receiving screen lives;
+     * carried on the intent, the access goes with the upload.
+     */
+    public static void grantRead(@NonNull Intent intent, @NonNull List<UploadItem> items) {
+        if (items.isEmpty()) return;
+        ClipData clip = null;
+        for (UploadItem item : items) {
+            Uri uri = Uri.parse(item.getUri());
+            if (clip == null) clip = ClipData.newRawUri(item.getName(), uri);
+            else clip.addItem(new ClipData.Item(uri));
+        }
+        intent.setClipData(clip);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    }
+
+    /** Files of an ACTION_SEND / ACTION_SEND_MULTIPLE intent. */
+    @NonNull
+    @SuppressWarnings("deprecation")
+    public static ArrayList<UploadItem> fromShareIntent(@NonNull Context context, @NonNull Intent intent) {
+        ArrayList<Uri> uris = new ArrayList<>();
+        if (Intent.ACTION_SEND_MULTIPLE.equals(intent.getAction())) {
+            ArrayList<Uri> list = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            if (list != null) uris.addAll(list);
+        } else {
+            Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            if (uri != null) uris.add(uri);
+        }
+        if (uris.isEmpty() && intent.getClipData() != null) {
+            for (int i = 0; i < intent.getClipData().getItemCount(); i++) {
+                Uri uri = intent.getClipData().getItemAt(i).getUri();
+                if (uri != null) uris.add(uri);
+            }
+        }
+        ArrayList<UploadItem> items = new ArrayList<>();
+        for (Uri uri : uris) {
+            if ("file".equals(uri.getScheme())) continue; // not readable on Android 7+
+            items.add(describe(context, uri));
+        }
+        return items;
     }
 
     public static void keepReadAccess(@NonNull Context context, @NonNull Uri uri) {

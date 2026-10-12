@@ -31,6 +31,13 @@ public interface RepoAdminService {
             @Header("forceNetWork") boolean forceNetWork
     );
 
+    /** Repositories you can push to: yours, as collaborator and in your organizations. */
+    @NonNull @GET("user/repos?affiliation=owner,collaborator,organization_member&sort=pushed&per_page=100")
+    Observable<Response<ArrayList<Repository>>> getMyRepos(
+            @Header("forceNetWork") boolean forceNetWork,
+            @retrofit2.http.Query("page") int page
+    );
+
     @NonNull @GET("gitignore/templates")
     Observable<Response<ArrayList<String>>> getGitignoreTemplates(
             @Header("forceNetWork") boolean forceNetWork
