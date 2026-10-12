@@ -127,7 +127,9 @@ on github.com:
   **delete** the repository (you type its full name to confirm). Deleting needs a
   token with the `delete_repo` scope; **Create token** asks for it. For a token you
   already use, open it on github.com (Settings, Developer settings, Personal access
-  tokens), tick `delete_repo` and press *Update token*: the token stays the same.
+  tokens), tick `delete_repo` and press *Update token*: the token stays the same. If
+  you signed in with the browser, log out and use **Login with browser** again; GitHub
+  asks you to allow the new permissions.
 
 **Branches** (in the repository menu, and in Settings) lists all branches with the
 default and protected ones marked. With write access: **+** creates a branch from

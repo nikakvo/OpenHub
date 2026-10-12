@@ -83,7 +83,7 @@
     <string name="settings_deleted">%1$s deleted</string>
     <string name="settings_delete_scope">Your token is not allowed to delete repositories. Create a new token with the delete_repo scope (Create token on the login screen asks for it).</string>
     <string name="settings_delete_needs_scope">Your token cannot delete repositories yet; tap for how to allow it</string>
-    <string name="settings_delete_scope_help">GitHub only lets a token delete repositories when it has the delete_repo permission (on the website you confirm with your password or 2FA instead; a token cannot do that).\n\nOpen your tokens on GitHub, open the token OpenHub uses, tick delete_repo (and workflow, if it is missing) and press Update token. The token stays the same, so you do not have to log in again.</string>
+    <string name="settings_delete_scope_help">GitHub only lets an app delete repositories when its sign-in has the delete_repo permission (on the website you confirm with your password or 2FA instead; an app cannot do that).\n\nSigned in with the browser: log out and use Login with browser again. GitHub asks you to allow the new permissions.\n\nSigned in with a token: open your tokens on GitHub, open the token OpenHub uses, tick delete_repo (and workflow, if it is missing) and press Update token. The token stays the same, so you do not have to log in again.</string>
     <string name="settings_open_tokens">Open token settings</string>
     <string name="settings_type_to_confirm">Type %1$s to confirm:</string>
     <string name="settings_confirm_mismatch">The name does not match</string>
