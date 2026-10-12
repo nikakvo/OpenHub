@@ -54,10 +54,13 @@ public interface RepoAdminService {
             @Header("forceNetWork") boolean forceNetWork
     );
 
-    /** 200 when the repository exists (and is visible), 404 when the name is free. */
+    /**
+     * 200 when the repository exists (and is visible), 404 when the name is free.
+     * Never cached: the answer changes the moment the repository is created.
+     */
     @NonNull @GET("repos/{owner}/{repo}")
+    @retrofit2.http.Headers("Cache-Control: no-cache, no-store")
     Observable<Response<Repository>> getRepo(
-            @Header("forceNetWork") boolean forceNetWork,
             @Path("owner") String owner,
             @Path("repo") String repo
     );

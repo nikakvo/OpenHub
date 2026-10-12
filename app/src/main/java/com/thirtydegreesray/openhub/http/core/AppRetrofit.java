@@ -142,6 +142,15 @@ public enum  AppRetrofit {
             Request request = chain.request();
             Response originalResponse = chain.proceed(request);
 
+            // Never keep an error: a cached 404 ("not found yet") would hide a repository,
+            // file or release that exists a moment later.
+            if (!originalResponse.isSuccessful()) {
+                return originalResponse.newBuilder()
+                        .header("Cache-Control", "no-store")
+                        .removeHeader("Pragma")
+                        .build();
+            }
+
 //            String serverCacheControl = originalResponse.header("Cache-Control");
             String requestCacheControl = request.cacheControl().toString();
 

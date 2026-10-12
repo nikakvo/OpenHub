@@ -282,6 +282,13 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
                                 getHttpSubscriber(this, progressDialog));
                     }
                     httpObserver.onSuccess(response);
+                } else if (response.getOriResponse().raw().networkResponse() == null
+                        && NetHelper.INSTANCE.getNetEnabled()
+                        && requestTimesMap.get(observableCreator.toString()) < 2) {
+                    // An error that came from the cache (stored by older versions): ask GitHub.
+                    requestTimesMap.put(observableCreator.toString(), 2);
+                    generalRxHttpExecute(observableCreator.createObservable(true),
+                            getHttpSubscriber(this, progressDialog));
                 } else if(response.getOriResponse().code() == 404){
                     onError(new HttpPageNoFoundError());
                 } else if(response.getOriResponse().code() == 504){

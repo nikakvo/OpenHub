@@ -243,7 +243,7 @@ public class CreateRepositoryActivity extends BaseActivity<IBaseContract.Present
         if (name.isEmpty()) return;
         nameCheck = Single.fromCallable(() -> {
             try {
-                GitHubApi.call(GitHubApi.service(RepoAdminService.class).getRepo(true, owner, name));
+                GitHubApi.call(GitHubApi.service(RepoAdminService.class).getRepo(owner, name));
                 return true;
             } catch (GitHubApi.ApiException e) {
                 if (e.code == 404) return false;
@@ -455,7 +455,7 @@ public class CreateRepositoryActivity extends BaseActivity<IBaseContract.Present
                 showWarningToast(getString(R.string.gitignore_commit_failed, gitignoreError));
             }
             showSuccessToast(getString(R.string.repo_create_done, repository.getFullName()));
-            RepositoryActivity.show(this, repository.getOwner().getLogin(), repository.getName());
+            RepositoryActivity.show(this, repository);
             finish();
         }, error -> {
             dismissProgressDialog();
