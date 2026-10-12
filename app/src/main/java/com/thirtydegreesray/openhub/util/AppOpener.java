@@ -207,6 +207,12 @@ public class AppOpener {
             ViewerActivity.showImage(context, url);
             return;
         }
+        // pull requests open in the app (github.com/o/r/pull/12 and API addresses)
+        Intent pullIntent = com.thirtydegreesray.openhub.ui.activity.PullRequestActivity.createIntent(context, url);
+        if (pullIntent != null) {
+            context.startActivity(pullIntent);
+            return;
+        }
         GitHubName gitHubName = GitHubName.fromUrl(url);
         String userName ;
         String repoName ;

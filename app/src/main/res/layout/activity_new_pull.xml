@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/layout_appbar"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="@dimen/spacing_large"
+                android:paddingEnd="@dimen/spacing_large"
+                android:paddingTop="@dimen/spacing_small"
+                android:paddingBottom="@dimen/spacing_large">
+
+                <LinearLayout
+                    android:id="@+id/target_row"
+                    style="@style/FormChoiceRow"
+                    android:visibility="gone">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/new_pull_target"
+                        android:textSize="@dimen/text_normal"
+                        android:textColor="?android:textColorPrimary"/>
+                    <TextView
+                        android:id="@+id/target_text"
+                        style="@style/FormChoiceValue"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/base_row"
+                    style="@style/FormChoiceRow">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/new_pull_base"
+                        android:textSize="@dimen/text_normal"
+                        android:textColor="?android:textColorPrimary"/>
+                    <TextView
+                        android:id="@+id/base_text"
+                        style="@style/FormChoiceValue"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/head_row"
+                    style="@style/FormChoiceRow">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/new_pull_head"
+                        android:textSize="@dimen/text_normal"
+                        android:textColor="?android:textColorPrimary"/>
+                    <TextView
+                        android:id="@+id/head_text"
+                        style="@style/FormChoiceValue"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/compare_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_mini"
+                    android:layout_marginTop="@dimen/spacing_mini"
+                    android:layout_marginBottom="@dimen/spacing_small"
+                    android:textSize="@dimen/text_small"
+                    android:textColor="?android:textColorSecondary"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/title_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/title">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/title_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapSentences|textMultiLine"
+                        android:maxLines="3"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <include layout="@layout/layout_markdown_write_preview"/>
+
+                <CheckBox
+                    android:id="@+id/draft_check"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_small"
+                    android:text="@string/new_pull_draft"/>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <ProgressBar
+            android:id="@+id/loader"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:indeterminate="true"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:listDivider"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:paddingStart="@dimen/spacing_normal"
+        android:paddingEnd="@dimen/spacing_normal"
+        android:paddingTop="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_small">
+        <Button
+            android:id="@+id/create_bn"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_pull_create"/>
+    </LinearLayout>
+</LinearLayout>

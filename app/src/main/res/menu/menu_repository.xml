@@ -58,6 +58,10 @@
         android:title="@string/actions"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_pulls"
+        android:title="@string/pulls_title"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_branches"
         android:title="@string/settings_branches"
         app:showAsAction="never"/>

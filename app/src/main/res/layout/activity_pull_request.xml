@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/layout_appbar"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_small">
+        <TextView
+            android:id="@+id/tab_conversation"
+            style="@style/MarkdownTab"
+            android:text="@string/pull_tab_conversation"/>
+        <TextView
+            android:id="@+id/tab_commits"
+            style="@style/MarkdownTab"
+            android:text="@string/pull_tab_commits"/>
+        <TextView
+            android:id="@+id/tab_files"
+            style="@style/MarkdownTab"
+            android:text="@string/pull_tab_files"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:listDivider"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Conversation -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/conversation_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="@dimen/spacing_normal"
+                android:paddingBottom="@dimen/spacing_x_large">
+
+                <TextView
+                    android:id="@+id/pr_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_large"
+                    android:layout_marginEnd="@dimen/spacing_large"
+                    android:textSize="@dimen/text_large"
+                    android:textStyle="bold"
+                    android:textColor="?android:textColorPrimary"
+                    android:textIsSelectable="true"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="@dimen/spacing_large"
+                    android:layout_marginEnd="@dimen/spacing_large"
+                    android:layout_marginTop="@dimen/spacing_small">
+                    <TextView
+                        android:id="@+id/pr_state"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="@dimen/spacing_normal"
+                        android:paddingEnd="@dimen/spacing_normal"
+                        android:paddingTop="@dimen/spacing_mini"
+                        android:paddingBottom="@dimen/spacing_mini"
+                        android:textSize="@dimen/text_small"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"/>
+                    <TextView
+                        android:id="@+id/pr_summary"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_small"
+                        android:textSize="@dimen/text_small"
+                        android:textColor="?android:textColorSecondary"/>
+                </LinearLayout>
+
+                <com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView
+                    android:id="@+id/pr_body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_small"
+                    app:webview_background="?android:windowBackground"/>
+
+                <LinearLayout
+                    android:id="@+id/timeline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"/>
+
+                <LinearLayout
+                    android:id="@+id/merge_box"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_margin="@dimen/spacing_large"
+                    android:padding="@dimen/spacing_normal"
+                    android:background="@drawable/bg_box">
+                    <TextView
+                        android:id="@+id/checks_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/spacing_small"
+                        android:textSize="@dimen/text_normal"
+                        android:textColor="?android:textColorPrimary"
+                        android:visibility="gone"/>
+                    <TextView
+                        android:id="@+id/merge_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/text_normal"
+                        android:textColor="?android:textColorPrimary"/>
+                    <Button
+                        android:id="@+id/merge_bn"
+                        style="@style/Widget.AppCompat.Button.Colored"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:text="@string/pull_merge"/>
+                    <Button
+                        android:id="@+id/ready_bn"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pull_ready"/>
+                    <Button
+                        android:id="@+id/delete_branch_bn"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pull_delete_branch"/>
+                    <Button
+                        android:id="@+id/close_bn"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pull_close"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="end"
+                    android:paddingStart="@dimen/spacing_normal"
+                    android:paddingEnd="@dimen/spacing_normal">
+                    <Button
+                        android:id="@+id/review_bn"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pull_review"/>
+                    <Button
+                        android:id="@+id/comment_bn"
+                        style="@style/Widget.AppCompat.Button.Colored"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pull_comment"/>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Commits -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/commits_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+            <LinearLayout
+                android:id="@+id/commits_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Files -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/files_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/files_summary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/spacing_large"
+                    android:textSize="@dimen/text_small"
+                    android:textColor="?android:textColorSecondary"/>
+                <LinearLayout
+                    android:id="@+id/files_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"/>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <ProgressBar
+            android:id="@+id/loader"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:indeterminate="true"
+            android:visibility="gone"/>
+    </FrameLayout>
+</LinearLayout>

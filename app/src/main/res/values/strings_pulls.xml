@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pull requests: list, details, review, merge, new pull request. -->
+<resources>
+    <string name="pulls_title">Pull requests</string>
+    <string name="pulls_open">Open</string>
+    <string name="pulls_closed">Closed</string>
+    <string name="pulls_load_more">Load more</string>
+    <string name="pulls_none_open">No open pull requests</string>
+    <string name="pulls_none_closed">No closed pull requests</string>
+    <string name="pulls_new">New pull request</string>
+    <string name="pulls_meta">#%1$d opened %2$s by %3$s · %4$s → %5$s</string>
+
+    <string name="pull_title_number">Pull request #%1$d</string>
+    <string name="pull_state_open">Open</string>
+    <string name="pull_state_merged">Merged</string>
+    <string name="pull_state_closed">Closed</string>
+    <string name="pull_state_draft">Draft</string>
+    <string name="pull_tab_conversation">Conversation</string>
+    <string name="pull_tab_commits">Commits</string>
+    <string name="pull_tab_files">Files</string>
+    <string name="pull_tab_commits_count">Commits %1$d</string>
+    <string name="pull_tab_files_count">Files %1$d</string>
+    <string name="pull_summary_open">%1$s wants to merge %2$d commit(s) into %3$s from %4$s</string>
+    <string name="pull_summary_merged">%1$s merged %2$d commit(s) into %3$s from %4$s</string>
+    <string name="pull_no_description">No description provided.</string>
+    <string name="pull_file_meta">%1$s · +%2$d −%3$d</string>
+    <string name="pull_files_summary">%1$d files changed · +%2$d −%3$d</string>
+
+    <string name="pull_checks_passed">All checks have passed (%1$d)</string>
+    <string name="pull_checks_failing">%1$d failing</string>
+    <string name="pull_checks_pending">%1$d pending</string>
+    <string name="pull_checks_successful">%1$d successful</string>
+    <string name="pull_checking_merge">Checking whether it can be merged…</string>
+    <string name="pull_mergeable">No conflicts with the base branch. Merging can be done automatically.</string>
+    <string name="pull_conflicts">This branch has conflicts that must be resolved before merging (on github.com or with git).</string>
+    <string name="pull_blocked">Merging is blocked: required reviews or checks are missing. Admins may be able to merge anyway.</string>
+    <string name="pull_behind">This branch is out of date with the base branch.</string>
+    <string name="pull_unstable">Some checks were not successful, but merging is allowed.</string>
+    <string name="pull_draft_status">This pull request is still a draft and cannot be merged yet.</string>
+    <string name="pull_merged_into">Merged into %1$s.</string>
+    <string name="pull_closed_unmerged">Closed without merging.</string>
+
+    <string name="pull_merge">Merge pull request</string>
+    <string name="pull_merge_commit">Create a merge commit</string>
+    <string name="pull_merge_squash">Squash and merge</string>
+    <string name="pull_merge_rebase">Rebase and merge</string>
+    <string name="pull_merge_commit_title">Commit title</string>
+    <string name="pull_merge_commit_message">Commit message</string>
+    <string name="pull_merge_default_title">Merge pull request #%1$d from %2$s</string>
+    <string name="pull_merge_confirm">Confirm merge</string>
+    <string name="pull_merged_toast">Pull request merged</string>
+    <string name="pull_ready">Ready for review</string>
+    <string name="pull_to_draft">Convert to draft</string>
+    <string name="pull_delete_branch">Delete branch</string>
+    <string name="pull_close">Close pull request</string>
+    <string name="pull_reopen">Reopen pull request</string>
+    <string name="pull_close_message">Close this pull request without merging it? You can reopen it later.</string>
+    <string name="pull_edit">Edit</string>
+    <string name="pull_description_hint">Description (Markdown)</string>
+
+    <string name="pull_comment">Comment</string>
+    <string name="pull_comment_hint">Leave a comment (Markdown)</string>
+    <string name="pull_review">Review changes</string>
+    <string name="pull_review_hint">Review summary (Markdown)</string>
+    <string name="pull_review_comment">Comment: general feedback without approving</string>
+    <string name="pull_review_approve">Approve: the changes can be merged</string>
+    <string name="pull_review_request_changes">Request changes: must be addressed before merging</string>
+    <string name="pull_review_submit">Submit review</string>
+    <string name="pull_review_approved">approved</string>
+    <string name="pull_review_changes">changes requested</string>
+    <string name="pull_review_dismissed">dismissed</string>
+    <string name="pull_review_commented">reviewed</string>
+
+    <string name="new_pull_target">Target repository</string>
+    <string name="new_pull_base">Base (merge into)</string>
+    <string name="new_pull_head">Compare (changes from)</string>
+    <string name="new_pull_same_branch">Choose two different branches</string>
+    <string name="new_pull_comparing">Comparing…</string>
+    <string name="new_pull_nothing">%2$s has no commits that are not in %1$s: nothing to compare</string>
+    <plurals name="new_pull_compare">
+        <item quantity="one">%1$d commit, %2$d file(s) changed. Able to create the pull request.</item>
+        <item quantity="other">%1$d commits, %2$d file(s) changed. Able to create the pull request.</item>
+    </plurals>
+    <string name="new_pull_draft">Create as draft</string>
+    <string name="new_pull_create">Create pull request</string>
+    <string name="new_pull_created">Pull request #%1$d created</string>
+</resources>

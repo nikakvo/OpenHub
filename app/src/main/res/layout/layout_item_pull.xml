@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/spacing_large"
+    android:paddingEnd="@dimen/spacing_large"
+    android:paddingTop="@dimen/spacing_normal"
+    android:paddingBottom="@dimen/spacing_normal"
+    android:background="?android:selectableItemBackground">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/pull_icon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="2dp"
+        app:srcCompat="@drawable/ic_pull"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/pull_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_normal"
+            android:textStyle="bold"
+            android:textColor="?android:textColorPrimary"
+            android:maxLines="3"
+            android:ellipsize="end"/>
+        <TextView
+            android:id="@+id/pull_meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_micro"
+            android:textSize="@dimen/text_small"
+            android:textColor="?android:textColorSecondary"/>
+        <TextView
+            android:id="@+id/pull_badge"
+            style="@style/ReleaseBadge"
+            android:layout_marginTop="@dimen/spacing_mini"/>
+    </LinearLayout>
+</LinearLayout>

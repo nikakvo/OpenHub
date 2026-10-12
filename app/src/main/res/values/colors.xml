@@ -269,4 +269,10 @@
     <color name="commit_file_renamed_color">#6a737d</color>
     <color name="commit_file_modified_color">#dbab09</color>
 
+    <!-- pull request states, as on github.com -->
+    <color name="pull_open">#3FB950</color>
+    <color name="pull_merged">#A371F7</color>
+    <color name="pull_closed">#F85149</color>
+    <color name="pull_draft">#8B949E</color>
+    <color name="box_border">#4030363D</color>
 </resources>

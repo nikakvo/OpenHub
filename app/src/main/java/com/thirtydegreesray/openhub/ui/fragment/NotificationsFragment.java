@@ -108,12 +108,13 @@ public class NotificationsFragment extends ListFragment<NotificationsPresenter, 
                     CommitDetailActivity.show(getActivity(), url);
                     break;
                 case PullRequest:
-                    showInfoToast(getString(R.string.developing));
+                    android.content.Intent pull = com.thirtydegreesray.openhub.ui.activity
+                            .PullRequestActivity.createIntent(getActivity(), url);
+                    if (pull != null) startActivity(pull);
                     break;
             }
 
-            if(notification.isUnread() &&
-                    !notification.getSubject().getType().equals(NotificationSubject.Type.PullRequest)){
+            if(notification.isUnread()){
                 mPresenter.markNotificationAsRead(notification.getId());
                 notification.setUnread(false);
                 adapter.notifyItemChanged(position);
