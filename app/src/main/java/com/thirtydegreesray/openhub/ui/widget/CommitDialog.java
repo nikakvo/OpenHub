@@ -43,7 +43,9 @@ public final class CommitDialog {
         TextInputEditText branchEdit = view.findViewById(R.id.branch_edit);
         CheckBox pullCheck = view.findViewById(R.id.pull_check);
 
-        messageEdit.setHint(defaultMessage);
+        // prefilled like on github.com; typing replaces it
+        messageEdit.setText(defaultMessage);
+        messageEdit.selectAll();
         current.setText(Html.fromHtml(context.getString(R.string.commit_to_current_branch,
                 Html.escapeHtml(branch)), Html.FROM_HTML_MODE_LEGACY));
         String login = AppData.INSTANCE.getLoggedUser() == null ? "patch"

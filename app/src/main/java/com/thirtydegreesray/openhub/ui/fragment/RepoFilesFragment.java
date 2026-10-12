@@ -29,7 +29,7 @@ import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 
 import android.content.Intent;
-import android.widget.PopupMenu;
+import androidx.appcompat.widget.PopupMenu;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -147,15 +147,27 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
         return mPresenter.getRepo().getName();
     }
 
+    /** The "Add file" button belongs to the screen; it shows only while this tab is shown. */
     private void updateAddButton() {
+        if (addButton == null && getActivity() != null) {
+            addButton = getActivity().findViewById(R.id.float_action_bn);
+            if (addButton != null) addButton.setOnClickListener(this::showAddMenu);
+        }
         if (addButton == null) return;
-        if (canEdit()) addButton.show();
+        if (canEdit() && isFragmentShowed()) addButton.show();
         else addButton.hide();
+    }
+
+    @Override
+    public void onFragmentHided() {
+        super.onFragmentHided();
+        updateAddButton();
     }
 
     private void showAddMenu(View anchor) {
         if (!canEdit()) return;
-        PopupMenu popup = new PopupMenu(requireContext(), anchor);
+        PopupMenu popup = new PopupMenu(requireContext(), anchor, android.view.Gravity.NO_GRAVITY,
+                R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.file_create);
         popup.getMenu().add(0, 2, 1, R.string.file_upload);
         popup.setOnMenuItemClickListener(item -> {
@@ -171,7 +183,8 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
     }
 
     private void showFileMenu(@NonNull View anchor, @NonNull FileModel file) {
-        PopupMenu popup = new PopupMenu(requireContext(), anchor);
+        PopupMenu popup = new PopupMenu(requireContext(), anchor, android.view.Gravity.NO_GRAVITY,
+                R.attr.popup_menu_theme, 0);
         boolean edit = canEdit();
         if (edit) popup.getMenu().add(0, 1, 0, R.string.file_edit);
         if (edit) popup.getMenu().add(0, 2, 1, R.string.file_rename);
@@ -249,6 +262,7 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
     @Override
     public void onFragmentShowed() {
         super.onFragmentShowed();
+        updateAddButton();
         if(mPresenter != null) mPresenter.prepareLoadData();
     }
 
@@ -275,7 +289,5 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
     protected void bindViews(View root) {
         super.bindViews(root);
         pathRecyclerView = root.findViewById(R.id.path_recycler_view);
-        addButton = root.findViewById(R.id.fragment_fab);
-        if (addButton != null) addButton.setOnClickListener(this::showAddMenu);
     }
 }

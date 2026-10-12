@@ -1,35 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+
+
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/path_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/path_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?colorPrimary"/>
-
-        <include layout="@layout/fragment_list"/>
-
-    </LinearLayout>
-
-    <!-- "Add file" for users with write access; the scroll-to-top button moves above it -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fragment_fab"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:contentDescription="@string/file_add"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_add"
-        android:tint="?title_color"/>
+        android:background="?colorPrimary"/>
 
-</FrameLayout>
+    <include layout="@layout/fragment_list"/>
+
+</LinearLayout>

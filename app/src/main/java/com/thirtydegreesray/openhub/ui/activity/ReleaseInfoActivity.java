@@ -14,7 +14,7 @@ import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
+import androidx.appcompat.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -228,7 +228,8 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
     }
 
     private void showAssetMenu(@NonNull View anchor, @NonNull ReleaseAsset asset) {
-        PopupMenu popup = new PopupMenu(this, anchor);
+        PopupMenu popup = new PopupMenu(this, anchor, android.view.Gravity.NO_GRAVITY,
+                R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.rename);
         popup.getMenu().add(0, 2, 1, R.string.copy_link);
         popup.getMenu().add(0, 3, 2, R.string.delete);
