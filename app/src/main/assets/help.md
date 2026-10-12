@@ -125,14 +125,17 @@ on github.com:
   immutability (when GitHub offers it for the repository).
 - **Danger zone**: change visibility, archive or unarchive, transfer ownership and
   **delete** the repository (you type its full name to confirm). Deleting needs a
-  token with the `delete_repo` scope; **Create token** asks for it.
+  token with the `delete_repo` scope; **Create token** asks for it. For a token you
+  already use, open it on github.com (Settings, Developer settings, Personal access
+  tokens), tick `delete_repo` and press *Update token*: the token stays the same.
 
 **Branches** (in the repository menu, and in Settings) lists all branches with the
 default and protected ones marked. With write access: **+** creates a branch from
 another one, tap a branch to **rename** or **delete** it. Admins also get **Branch
 protection**: require a pull request (with a number of approvals), conversation
 resolution, linear history, allow or forbid force pushes and deletions, and apply
-the rules to admins too. Protecting branches of private repositories needs a paid
+the rules to admins too. Without that last option you, as the owner, can still
+commit directly to a protected branch. Protecting branches of private repositories needs a paid
 GitHub plan.
 
 ### Creating a repository

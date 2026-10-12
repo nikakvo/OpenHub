@@ -87,6 +87,8 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
     private JsonObject repoJson;
     /** null: not supported for this repository / account */
     @Nullable private Boolean immutableReleases;
+    /** false when the token is known to lack the delete_repo scope */
+    private boolean canDeleteWithToken = true;
     /** RESULT_CANCELED until something changed, then RESULT_OK or RESULT_MOVED */
     private int resultCode = RESULT_CANCELED;
 
@@ -124,7 +126,13 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
     private void load() {
         loader.setVisibility(View.VISIBLE);
         background(() -> {
-            JsonObject json = GitHubApi.call(service().getRepo(owner, repo));
+            Response<JsonObject> repoResponse = service().getRepo(owner, repo).blockingFirst();
+            if (!repoResponse.isSuccessful()) {
+                throw new GitHubApi.ApiException(repoResponse.code(), GitHubApi.errorMessage(repoResponse));
+            }
+            JsonObject json = repoResponse.body();
+            // classic tokens list their scopes here; fine-grained tokens send nothing
+            String scopes = repoResponse.headers().get("X-OAuth-Scopes");
             Boolean immutable;
             try {
                 Response<ResponseBody> response = service().getImmutableReleases(owner, repo).blockingFirst();
@@ -139,10 +147,12 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
             } catch (Exception e) {
                 immutable = null;
             }
-            return new Object[]{json, immutable};
+            return new Object[]{json, immutable, scopes};
         }, (Object[] result) -> {
             loader.setVisibility(View.GONE);
             repoJson = (JsonObject) result[0];
+            String scopes = (String) result[2];
+            canDeleteWithToken = scopes == null || scopes.contains("delete_repo");
             immutableReleases = (Boolean) result[1];
             show();
         }, error -> {
@@ -220,8 +230,12 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
                 true, v -> confirmArchive(!archived));
         actionRow(getString(R.string.settings_transfer), getString(R.string.settings_transfer_summary), true,
                 v -> showTransfer());
-        actionRow(getString(R.string.settings_delete), getString(R.string.settings_delete_summary), true,
-                v -> confirmDelete());
+        actionRow(getString(R.string.settings_delete), getString(canDeleteWithToken
+                        ? R.string.settings_delete_summary : R.string.settings_delete_needs_scope), true,
+                v -> {
+                    if (canDeleteWithToken) confirmDelete();
+                    else explainDeleteScope();
+                });
     }
 
     private void section(@StringRes int title) {
@@ -548,6 +562,18 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
             }, error -> dismissProgressDialog());
         }));
         dialog.show();
+    }
+
+    /** The token cannot delete repositories: say how to allow it. */
+    private void explainDeleteScope() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.settings_delete)
+                .setMessage(R.string.settings_delete_scope_help)
+                .setPositiveButton(R.string.settings_open_tokens, (d, w) ->
+                        com.thirtydegreesray.openhub.util.AppOpener.openInCustomTabsOrBrowser(this,
+                                "https://github.com/settings/tokens"))
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     private void confirmDelete() {
