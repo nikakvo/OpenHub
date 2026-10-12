@@ -55,6 +55,11 @@
         android:id="@+id/repositories"
         android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_new_repo"
+            android:checkable="false"
+            android:icon="@drawable/ic_add"
+            android:title="@string/repo_create_title"/>
+        <item
             android:id="@+id/nav_owned"
             android:icon="@drawable/ic_menu_repo"
             android:title="@string/my_repos"/>

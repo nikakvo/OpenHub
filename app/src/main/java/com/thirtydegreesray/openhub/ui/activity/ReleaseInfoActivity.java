@@ -182,6 +182,9 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
             View action = row.findViewById(R.id.asset_action_bn);
             action.setVisibility(mPresenter.canEdit() ? View.VISIBLE : View.GONE);
             action.setOnClickListener(v -> showAssetMenu(v, asset));
+            View edit = row.findViewById(R.id.asset_edit_bn);
+            edit.setVisibility(mPresenter.canEdit() ? View.VISIBLE : View.GONE);
+            edit.setOnClickListener(v -> renameAsset(asset));
             row.findViewById(R.id.asset_download_bn).setOnClickListener(v -> download(asset));
             row.setOnClickListener(v -> download(asset));
             row.setOnLongClickListener(v -> {
@@ -213,6 +216,14 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
         AppOpener.startDownload(this, url, asset.getName());
     }
 
+    private void renameAsset(@NonNull ReleaseAsset asset) {
+        TextInputDialog.show(this, R.string.release_rename_file, R.string.release_file_name,
+                asset.getName(), true, name -> {
+                    String clean = ContentFiles.assetName(name);
+                    if (!clean.equals(asset.getName())) mPresenter.renameAsset(asset, clean);
+                });
+    }
+
     private void showAssetMenu(@NonNull View anchor, @NonNull ReleaseAsset asset) {
         PopupMenu popup = new PopupMenu(this, anchor);
         popup.getMenu().add(0, 1, 0, R.string.rename);
@@ -220,12 +231,7 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
         popup.getMenu().add(0, 3, 2, R.string.delete);
         popup.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == 1) {
-                TextInputDialog.show(this, R.string.release_rename_file, R.string.release_file_name,
-                        asset.getName(), true, name -> {
-                            if (!name.equals(asset.getName())) {
-                                mPresenter.renameAsset(asset, ContentFiles.assetName(name));
-                            }
-                        });
+                renameAsset(asset);
             } else if (item.getItemId() == 2) {
                 AppUtils.copyToClipboard(this, asset.getDownloadUrl());
             } else if (item.getItemId() == 3) {

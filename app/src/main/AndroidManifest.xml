@@ -144,6 +144,7 @@
         <activity android:name=".ui.activity.GistsActivity" android:label="@string/gists"/>
         <activity android:name=".ui.activity.ViewerActivity"/>
         <activity android:name=".ui.activity.ReleaseInfoActivity"/>
+        <activity android:name=".ui.activity.CreateRepositoryActivity" android:windowSoftInputMode="stateVisible|adjustResize"/>
         <activity android:name=".ui.activity.EditReleaseActivity" android:windowSoftInputMode="stateHidden|adjustResize"/>
         <activity android:name=".ui.activity.IssuesActivity"/>
         <activity android:name=".ui.activity.IssueDetailActivity"/>

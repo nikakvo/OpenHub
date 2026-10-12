@@ -64,4 +64,38 @@
         <item name="android:visibility">gone</item>
     </style>
 
+    <!-- Forms (new repository, release editor) -->
+    <style name="FormSectionTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/spacing_large</item>
+        <item name="android:layout_marginStart">@dimen/spacing_mini</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_mini</item>
+        <item name="android:textSize">@dimen/text_small</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
+    </style>
+
+    <style name="FormChoiceRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:paddingStart">@dimen/spacing_mini</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <style name="FormChoiceValue">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginStart">@dimen/spacing_small</item>
+        <item name="android:gravity">end</item>
+        <item name="android:textSize">@dimen/text_normal</item>
+        <item name="android:textColor">?colorAccent</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
 </resources>

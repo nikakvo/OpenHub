@@ -52,6 +52,16 @@
         android:background="?android:selectableItemBackgroundBorderless"/>
 
     <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/asset_edit_bn"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:srcCompat="@drawable/ic_edit"
+        android:padding="9dp"
+        android:contentDescription="@string/rename"
+        android:background="?android:selectableItemBackgroundBorderless"
+        android:visibility="gone"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/asset_action_bn"
         android:layout_width="40dp"
         android:layout_height="40dp"

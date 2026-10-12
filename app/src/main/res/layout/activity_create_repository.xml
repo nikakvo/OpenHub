@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/layout_appbar"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="@dimen/spacing_large"
+                android:paddingEnd="@dimen/spacing_large"
+                android:paddingTop="@dimen/spacing_normal"
+                android:paddingBottom="@dimen/spacing_large">
+
+                <!-- Owner -->
+                <LinearLayout
+                    android:id="@+id/owner_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:minHeight="56dp"
+                    android:background="?android:selectableItemBackground">
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/owner_avatar"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="@dimen/spacing_mini"/>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_normal"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/repo_create_owner"
+                            android:textSize="@dimen/text_small"
+                            android:textColor="?android:textColorSecondary"/>
+                        <TextView
+                            android:id="@+id/owner_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_normal"
+                            android:textColor="?android:textColorPrimary"/>
+                    </LinearLayout>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/owner_arrow"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        app:srcCompat="@drawable/ic_arrow_drop_down"/>
+                </LinearLayout>
+
+                <!-- Name -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/name_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_small"
+                    android:hint="@string/repo_create_name">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/name_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text|textNoSuggestions"
+                        android:imeOptions="actionNext"
+                        android:maxLength="100"
+                        android:maxLines="1"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/name_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_mini"
+                    android:text="@string/repo_create_name_hint"
+                    android:textSize="@dimen/text_small"
+                    android:textColor="?android:textColorSecondary"/>
+
+                <!-- Description -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_normal"
+                    android:hint="@string/repo_create_description">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/description_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:maxLines="4"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Visibility -->
+                <TextView
+                    style="@style/FormSectionTitle"
+                    android:text="@string/repo_create_visibility"/>
+                <RadioGroup
+                    android:id="@+id/visibility_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <RadioButton
+                        android:id="@+id/visibility_public"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/repo_create_public"/>
+                    <RadioButton
+                        android:id="@+id/visibility_private"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/repo_create_private"/>
+                </RadioGroup>
+
+                <!-- Initialize -->
+                <TextView
+                    style="@style/FormSectionTitle"
+                    android:text="@string/repo_create_initialize"/>
+                <CheckBox
+                    android:id="@+id/readme_check"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/repo_create_readme"/>
+
+                <LinearLayout
+                    android:id="@+id/gitignore_row"
+                    style="@style/FormChoiceRow">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/repo_create_gitignore"
+                        android:textSize="@dimen/text_normal"
+                        android:textColor="?android:textColorPrimary"/>
+                    <TextView
+                        android:id="@+id/gitignore_text"
+                        style="@style/FormChoiceValue"/>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        app:srcCompat="@drawable/ic_arrow_drop_down"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/license_row"
+                    style="@style/FormChoiceRow">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/repo_create_license"
+                        android:textSize="@dimen/text_normal"
+                        android:textColor="?android:textColorPrimary"/>
+                    <TextView
+                        android:id="@+id/license_text"
+                        style="@style/FormChoiceValue"/>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        app:srcCompat="@drawable/ic_arrow_drop_down"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/summary_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_large"
+                    android:layout_marginStart="@dimen/spacing_mini"
+                    android:textSize="@dimen/text_small"
+                    android:textColor="?android:textColorSecondary"/>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <ProgressBar
+            android:id="@+id/loader"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:indeterminate="true"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:listDivider"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical|end"
+        android:paddingStart="@dimen/spacing_normal"
+        android:paddingEnd="@dimen/spacing_normal"
+        android:paddingTop="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_small">
+        <Button
+            android:id="@+id/create_bn"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/repo_create_button"/>
+    </LinearLayout>
+
+</LinearLayout>

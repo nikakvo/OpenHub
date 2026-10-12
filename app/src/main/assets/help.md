@@ -89,6 +89,20 @@ Tap the **Stargazers** or **Watchers** numbers to see who they are. Since July 2
 GitHub shows these lists only to the repository's owners and collaborators, so for
 other repositories you will see a note instead.
 
+### Creating a repository
+
+**New repository** in the side menu works like github.com/new:
+
+- **Owner**: your account, or one of your organizations (tap to switch).
+- **Repository name**: OpenHub checks while you type whether the name is still free.
+  GitHub allows letters, digits, `-`, `_` and `.`; other characters become `-`, and the
+  form shows the final name.
+- **Description**, **Public** or **Private**.
+- **Initialize this repository with**: a README file, a **.gitignore template** and a
+  **License**. Leave them all off to get an empty repository you can push to.
+
+After **Create repository** the new repository opens.
+
 ---
 
 ## Releases and downloads
@@ -118,8 +132,9 @@ GitHub website does.
   release notes. **Generate release notes** lets GitHub write the notes from the merged
   pull requests since the previous release.
 - **Add files** attaches files from the phone, for example an APK or a module zip you
-  built in Termux or a Linux container. Tap a file to change the name it gets on
-  GitHub, or the cross to remove it.
+  built in Termux or a Linux container (Termux appears in the file picker's side
+  menu). The **pencil** changes the name a file gets on GitHub, the **cross** removes
+  it.
 - **Save draft** keeps the release private. **Publish release** makes it public. With
   new files, the release stays a draft while they upload and is published only when
   every file arrived, so nobody downloads an incomplete release. This also works for
@@ -129,7 +144,8 @@ GitHub website does.
   connection is retried automatically. You can leave the app meanwhile.
 - In an open release, the menu has **Edit**, **Publish release** (drafts), **Set as
   latest release**, **Upload files** and **Delete release** (optionally together with
-  its tag). Each file has a menu to **rename** or **delete** it.
+  its tag). Each file has a **pencil** to rename it and a menu to copy its link or
+  delete it.
 
 Writing to releases needs a token with the `repo` scope (see **Logging in**).
 

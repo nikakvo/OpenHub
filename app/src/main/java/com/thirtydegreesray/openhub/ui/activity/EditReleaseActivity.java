@@ -533,14 +533,18 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
                     : size);
             action.setImageResource(R.drawable.ic_close);
             action.setContentDescription(getString(R.string.release_remove_file));
-            row.setOnClickListener(v -> TextInputDialog.show(this, R.string.release_rename_file,
+            View.OnClickListener rename = v -> TextInputDialog.show(this, R.string.release_rename_file,
                     R.string.release_file_name, name.getText().toString(), true, text -> {
                         String clean = ContentFiles.assetName(text);
                         if (clean.equals(asset.getName())) renamedAssets.remove(asset.getId());
                         else renamedAssets.put(asset.getId(), clean);
                         markDirty();
                         renderFiles();
-                    }));
+                    });
+            View edit = row.findViewById(R.id.asset_edit_bn);
+            edit.setVisibility(View.VISIBLE);
+            edit.setOnClickListener(rename);
+            row.setOnClickListener(rename);
         }
         action.setOnClickListener(v -> {
             if (deleted) deletedAssetIds.remove(asset.getId());
@@ -569,12 +573,16 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
             markDirty();
             renderFiles();
         });
-        row.setOnClickListener(v -> TextInputDialog.show(this, R.string.release_rename_file,
+        View.OnClickListener rename = v -> TextInputDialog.show(this, R.string.release_rename_file,
                 R.string.release_file_name, item.getName(), true, text -> {
                     item.setName(ContentFiles.assetName(text));
                     markDirty();
                     renderFiles();
-                }));
+                });
+        View edit = row.findViewById(R.id.asset_edit_bn);
+        edit.setVisibility(View.VISIBLE);
+        edit.setOnClickListener(rename);
+        row.setOnClickListener(rename);
         return row;
     }
 

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- New repository form. -->
+<resources>
+    <string name="repo_create_title">New repository</string>
+    <string name="repo_create_owner">Owner</string>
+    <string name="repo_create_name">Repository name</string>
+    <string name="repo_create_name_hint">Short and memorable, for example my-module</string>
+    <string name="repo_create_name_reserved">This name is reserved</string>
+    <string name="repo_create_checking">Checking the name…</string>
+    <string name="repo_create_name_free">%1$s is available</string>
+    <string name="repo_create_name_taken">%1$s/%2$s already exists</string>
+    <string name="repo_create_will_be_named">Will be created as %1$s</string>
+    <string name="repo_create_description">Description (optional)</string>
+    <string name="repo_create_visibility">Visibility</string>
+    <string name="repo_create_public">Public: anyone on the internet can see it</string>
+    <string name="repo_create_private">Private: only you and people you invite can see it</string>
+    <string name="repo_create_initialize">Initialize this repository with</string>
+    <string name="repo_create_readme">Add a README file</string>
+    <string name="repo_create_gitignore">.gitignore template</string>
+    <string name="repo_create_license">License</string>
+    <string name="repo_create_none">None</string>
+    <string name="repo_create_in_account">your personal account</string>
+    <string name="repo_create_in_org">the organization %1$s</string>
+    <string name="repo_create_summary_public">You are creating a public repository in %1$s.</string>
+    <string name="repo_create_summary_private">You are creating a private repository in %1$s.</string>
+    <string name="repo_create_button">Create repository</string>
+    <string name="repo_create_creating">Creating repository…</string>
+    <string name="repo_create_done">%1$s created</string>
+</resources>
