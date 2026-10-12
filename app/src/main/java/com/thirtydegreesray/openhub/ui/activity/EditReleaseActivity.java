@@ -534,7 +534,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
             name.setPaintFlags(name.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             meta.setText(getString(R.string.release_file_will_be_deleted));
             row.setAlpha(0.5f);
-            action.setImageResource(R.drawable.ic_refresh);
+            action.setImageResource(R.drawable.ic_undo);
             action.setContentDescription(getString(R.string.release_keep_file));
         } else {
             meta.setText(newName != null ? size + " · " + getString(R.string.release_file_renamed, asset.getName())

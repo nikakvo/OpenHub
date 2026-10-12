@@ -128,4 +128,20 @@
     <string name="share_upload_replace_title">Replace files?</string>
     <string name="share_upload_replace_message">The release already has files with these names. Replace them with the shared ones?</string>
     <string name="share_upload_replace">Replace</string>
+
+    <!-- updater -->
+    <string name="update_pref_title">Check for updates</string>
+    <string name="update_pref_summary">Tell me when a new version of OpenHub is released</string>
+    <string name="update_check_now">Check for updates now</string>
+    <string name="update_check_now_summary">Installed version: %1$s</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_check_failed">Update check failed: %1$s</string>
+    <string name="update_up_to_date">OpenHub %1$s is up to date</string>
+    <string name="update_title">Update available</string>
+    <string name="update_message">**OpenHub %1$s** is available. You have %2$s.</string>
+    <string name="update_download">Download</string>
+    <string name="update_open_release">Open release</string>
+    <string name="update_skip">Skip this version</string>
+    <string name="update_later">Later</string>
+    <string name="update_downloading">Downloading the update. Tap Install in the notification when it is done.</string>
 </resources>

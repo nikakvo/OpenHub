@@ -41,6 +41,7 @@ import com.thirtydegreesray.openhub.ui.fragment.RepositoriesFragment;
 import com.thirtydegreesray.openhub.ui.fragment.TopicsFragment;
 import com.thirtydegreesray.openhub.ui.fragment.TraceFragment;
 import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
+import com.thirtydegreesray.openhub.util.AppUpdater;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
@@ -138,6 +139,7 @@ public class MainActivity extends BaseDrawerActivity<MainPresenter>
         super.initView(savedInstanceState);
 
         setToolbarScrollAble(true);
+        if (savedInstanceState == null) AppUpdater.checkOnStart(this);
         updateStartDrawerContent(R.menu.activity_main_drawer);
         removeEndDrawer();
         if (mPresenter.isFirstUseAndNoNewsUser()) {

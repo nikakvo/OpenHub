@@ -56,4 +56,16 @@
         android:key="disableLoadingImage"
         android:defaultValue="false"/>
 
+    <SwitchPreference
+        android:icon="@drawable/ic_update"
+        android:title="@string/update_pref_title"
+        android:summary="@string/update_pref_summary"
+        android:key="checkUpdates"
+        android:defaultValue="true"/>
+
+    <Preference
+        android:icon="@drawable/ic_update"
+        android:title="@string/update_check_now"
+        android:key="checkUpdatesNow"/>
+
 </PreferenceScreen>

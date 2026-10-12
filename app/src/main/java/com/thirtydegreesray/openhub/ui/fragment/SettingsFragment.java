@@ -16,6 +16,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.ui.widget.colorChooser.ColorChooserPreference;
+import com.thirtydegreesray.openhub.util.AppUpdater;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 
 import java.util.Arrays;
@@ -72,6 +73,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
         findPreference(PrefUtils.START_PAGE).setOnPreferenceClickListener(this);
         findPreference(WATCHED_RELEASES).setOnPreferenceClickListener(this);
         findPreference(RELEASE_CHECK_INTERVAL).setOnPreferenceClickListener(this);
+        findPreference(AppUpdater.PREF_CHECK_NOW).setOnPreferenceClickListener(this);
+        findPreference(AppUpdater.PREF_CHECK_NOW).setSummary(
+                getString(R.string.update_check_now_summary, AppUpdater.currentVersion()));
         updateWatchedReleasesSummary();
         findPreference(PrefUtils.START_PAGE).setSummary(nameList.get(getStartPageIndex()));
         ((ColorChooserPreference) findPreference(PrefUtils.ACCENT_COLOR))
@@ -100,6 +104,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 return true;
             case RELEASE_CHECK_INTERVAL:
                 showReleaseIntervalChooser();
+                return true;
+            case AppUpdater.PREF_CHECK_NOW:
+                if (getActivity() != null) AppUpdater.check(getActivity(), true);
                 return true;
         }
         return false;

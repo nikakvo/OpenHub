@@ -229,6 +229,12 @@ preview), edit, close and reopen issues, and manage labels in your own repositor
 | Use built-in downloader | On: OpenHub downloads files itself, over any network. Off: download links are handed to another app (browser, download manager) |
 | Use Custom Tabs | Open web links in a tab inside the app instead of a separate browser |
 | Disable loading network image | Do not load pictures and avatars on mobile data, to save data |
+| Check for updates | On (default): when a new OpenHub version is released, the app says so at start (at most every 6 hours) |
+| Check for updates now | Check right away; shows the installed version |
+
+When an update is offered, **Download** fetches the new APK with the built-in
+downloader; tap **Install** in its notification. **Skip this version** stops the
+reminder for that version (Check for updates now still shows it).
 
 ---
 
