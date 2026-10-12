@@ -162,6 +162,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activity.CreateRepositoryActivity" android:windowSoftInputMode="stateVisible|adjustResize"/>
+        <activity
+            android:name=".ui.activity.EditFileActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:windowSoftInputMode="stateHidden|adjustResize"/>
         <activity android:name=".ui.activity.EditReleaseActivity" android:windowSoftInputMode="stateHidden|adjustResize"/>
         <activity android:name=".ui.activity.IssuesActivity"/>
         <activity android:name=".ui.activity.IssueDetailActivity"/>

@@ -12,6 +12,25 @@
         app:showAsAction="ifRoom"/>
 
     <item
+        android:id="@+id/action_edit_file"
+        android:title="@string/file_edit"
+        android:icon="@drawable/ic_edit_title"
+        android:visible="false"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_rename_file"
+        android:title="@string/file_rename"
+        android:visible="false"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_delete_file"
+        android:title="@string/file_delete"
+        android:visible="false"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/action_open_in_browser"
         android:title="@string/open_in_browser"
         android:icon="@drawable/ic_open_in_browser_title"

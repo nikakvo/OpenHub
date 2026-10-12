@@ -9,6 +9,7 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/md_tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -23,6 +24,7 @@
     </LinearLayout>
 
     <View
+        android:id="@+id/md_tabs_divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?android:listDivider"/>

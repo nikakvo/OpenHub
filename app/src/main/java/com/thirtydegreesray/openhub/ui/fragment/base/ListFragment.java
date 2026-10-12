@@ -149,7 +149,9 @@ public abstract class ListFragment <P extends IBaseContract.Presenter, A extends
     /** Sits above the screen's own floating button (e.g. Actions "run") when there is one. */
     private void avoidActivityFab() {
         if (scrollTopBn == null || getActivity() == null) return;
-        View activityFab = getActivity().findViewById(R.id.float_action_bn);
+        // this fragment's own button (e.g. Files: "Add file"), else the screen's button
+        View activityFab = getView() == null ? null : getView().findViewById(R.id.fragment_fab);
+        if (activityFab == null) activityFab = getActivity().findViewById(R.id.float_action_bn);
         int margin = getResources().getDimensionPixelSize(R.dimen.fab_margin);
         if (activityFab != null && activityFab.getVisibility() == View.VISIBLE) {
             margin += activityFab.getHeight() + margin;

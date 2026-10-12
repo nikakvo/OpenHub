@@ -37,7 +37,8 @@ public class AppConfig {
 
     public final static String OPENHUB_CLIENT_SECRET = BuildConfig.OPENHUB_CLIENT_SECRET;
 
-    public final static String OAUTH2_SCOPE = "user,repo,gist,notifications";
+    /** workflow: needed to create or change files under .github/workflows */
+    public final static String OAUTH2_SCOPE = "user,repo,workflow,gist,notifications";
 
 
     public final static String OAUTH2_URL = GITHUB_BASE_URL + "login/oauth/authorize";

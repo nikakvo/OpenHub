@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Creating, editing, uploading, renaming and deleting repository files; commits. -->
+<resources>
+    <string name="file_add">Add file</string>
+    <string name="file_create">Create new file</string>
+    <string name="file_upload">Upload files</string>
+    <string name="file_new">New file</string>
+    <string name="file_edit">Edit file</string>
+    <string name="file_rename">Rename or move</string>
+    <string name="file_rename_title">Rename or move file</string>
+    <string name="file_delete">Delete file</string>
+    <string name="file_path">Path and file name</string>
+    <string name="file_path_hint">Type a / to create a folder, e.g. docs/notes.md</string>
+    <string name="file_content_hint">File content</string>
+    <string name="file_on_branch">Branch: %1$s</string>
+    <string name="file_name_required">Enter a file name</string>
+    <string name="file_name_invalid">This is not a valid file path</string>
+    <string name="file_no_changes">Nothing changed</string>
+    <string name="file_cannot_edit">Cannot edit this file</string>
+    <string name="file_not_a_file">This is not a file</string>
+    <string name="file_too_large">The file is too large to edit on the phone (over 512 KB).</string>
+    <string name="file_binary">This is a binary file. Replace it with Upload files instead.</string>
+    <string name="file_discard_message">Your changes to this file have not been committed.</string>
+    <string name="file_upload_too_big">%1$s is larger than %2$s. Put big files in a release.</string>
+    <string name="file_upload_replace">These files already exist in this folder and will be replaced: %1$s</string>
+
+    <string name="commit_title">Commit changes</string>
+    <string name="commit_changes">Commit changes…</string>
+    <string name="commit_button">Commit</string>
+    <string name="commit_message">Commit message</string>
+    <string name="commit_description">Extended description (optional)</string>
+    <string name="commit_to_current_branch">Commit directly to the &lt;b&gt;%1$s&lt;/b&gt; branch</string>
+    <string name="commit_to_new_branch">Create a new branch for this commit</string>
+    <string name="commit_branch_name">New branch name</string>
+    <string name="commit_branch_invalid">This is not a valid branch name</string>
+    <string name="commit_branch_same">Choose a name different from the current branch</string>
+    <string name="commit_open_pull">Start a pull request</string>
+    <string name="commit_working">Committing…</string>
+    <string name="commit_progress">Committing… file %1$d of %2$d</string>
+    <string name="commit_done">Committed to %1$s</string>
+    <string name="commit_default_create">Create %1$s</string>
+    <string name="commit_default_update">Update %1$s</string>
+    <string name="commit_default_rename">Rename %1$s to %2$s</string>
+    <string name="commit_default_delete">Delete %1$s</string>
+    <plurals name="commit_default_upload">
+        <item quantity="one">Add file via upload</item>
+        <item quantity="other">Add files via upload</item>
+    </plurals>
+</resources>

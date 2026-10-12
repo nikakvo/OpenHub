@@ -123,6 +123,66 @@ public class ViewerActivity extends SingleFragmentActivity<IBaseContract.Present
         return super.onCreateOptionsMenu(menu);
     }
 
+    // ---------------------------------------------------------------------------------
+    // Editing a repository file (push access)
+    // ---------------------------------------------------------------------------------
+
+    /** owner, repo, path, branch of a repository file, from its contents API url */
+    @Nullable private String[] fileRef;
+    private boolean canEdit;
+    @Nullable private io.reactivex.rxjava3.disposables.Disposable permissionCheck;
+
+    @Nullable
+    private static String[] parseFileRef(@Nullable String url) {
+        if (url == null) return null;
+        android.net.Uri uri = android.net.Uri.parse(url);
+        java.util.List<String> parts = uri.getPathSegments();
+        // repos/{owner}/{repo}/contents/{path...}
+        if (parts.size() < 5 || !"repos".equals(parts.get(0)) || !"contents".equals(parts.get(3))) return null;
+        String path = String.join("/", parts.subList(4, parts.size()));
+        String ref = uri.getQueryParameter("ref");
+        return new String[]{parts.get(1), parts.get(2), path, ref};
+    }
+
+    private void checkCanEdit() {
+        if (!ViewerType.RepoFile.equals(viewerType) || fileModel == null) return;
+        fileRef = parseFileRef(fileModel.getUrl());
+        if (fileRef == null) return;
+        final String owner = fileRef[0];
+        final String repo = fileRef[1];
+        permissionCheck = io.reactivex.rxjava3.core.Single.fromCallable(() ->
+                com.thirtydegreesray.openhub.http.GitHubApi.call(
+                        com.thirtydegreesray.openhub.http.GitHubApi.service(
+                                com.thirtydegreesray.openhub.http.RepoService.class)
+                                .getRepoInfo(false, owner, repo)))
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(repository -> {
+                    canEdit = com.thirtydegreesray.openhub.mvp.presenter.ReleaseInfoPresenter
+                            .hasPushAccess(repository);
+                    if (fileRef[3] == null) fileRef[3] = repository.getDefaultBranch();
+                    invalidateOptionsMenu();
+                }, error -> { });
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean edit = canEdit && fileRef != null && fileRef[3] != null;
+        MenuItem item = menu.findItem(R.id.action_edit_file);
+        if (item != null) item.setVisible(edit);
+        item = menu.findItem(R.id.action_rename_file);
+        if (item != null) item.setVisible(edit && fileModel.getSha() != null);
+        item = menu.findItem(R.id.action_delete_file);
+        if (item != null) item.setVisible(edit);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (permissionCheck != null) permissionCheck.dispose();
+        super.onDestroy();
+    }
+
     @Override
     protected void initView(Bundle savedInstanceState) {
         super.initView(savedInstanceState);
@@ -135,6 +195,7 @@ public class ViewerActivity extends SingleFragmentActivity<IBaseContract.Present
             title = this.title;
         }
         setToolbarTitle(title);
+        checkCanEdit();
     }
 
     @Override
@@ -162,6 +223,19 @@ public class ViewerActivity extends SingleFragmentActivity<IBaseContract.Present
             return super.onOptionsItemSelected(item);
         if(item.getItemId() == R.id.action_fullscreen){
             intoFullScreen();
+            return true;
+        }
+        if (fileRef != null && item.getItemId() == R.id.action_edit_file) {
+            startActivity(EditFileActivity.editIntent(this, fileRef[0], fileRef[1], fileRef[3], fileRef[2]));
+            finish();
+            return true;
+        } else if (fileRef != null && item.getItemId() == R.id.action_rename_file) {
+            com.thirtydegreesray.openhub.ui.widget.RepoFileActions.rename(this, fileRef[0], fileRef[1],
+                    fileRef[3], fileRef[2], fileModel.getSha(), this::finish);
+            return true;
+        } else if (fileRef != null && item.getItemId() == R.id.action_delete_file) {
+            com.thirtydegreesray.openhub.ui.widget.RepoFileActions.delete(this, fileRef[0], fileRef[1],
+                    fileRef[3], fileRef[2], this::finish);
             return true;
         }
         String htmlUrl = null;

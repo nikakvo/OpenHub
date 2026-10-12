@@ -28,6 +28,20 @@ import com.thirtydegreesray.openhub.ui.adapter.RepoFilesAdapter;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 
+import android.content.Intent;
+import android.widget.PopupMenu;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.thirtydegreesray.openhub.mvp.presenter.ReleaseInfoPresenter;
+import com.thirtydegreesray.openhub.ui.activity.EditFileActivity;
+import com.thirtydegreesray.openhub.ui.widget.RepoFileActions;
+import com.thirtydegreesray.openhub.util.AppOpener;
+import com.thirtydegreesray.openhub.util.ContentFiles;
+import com.thirtydegreesray.openhub.util.RepoChanges;
+
 import java.util.ArrayList;
 
 import javax.inject.Inject;
@@ -48,6 +62,16 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
     }
 
     RecyclerView pathRecyclerView;
+    FloatingActionButton addButton;
+    private long loadedStamp = RepoChanges.stamp();
+
+    private final ActivityResultLauncher<Intent> uploadPicker = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() != android.app.Activity.RESULT_OK || getActivity() == null) return;
+                RepoFileActions.upload(getActivity(), owner(), repoName(), mPresenter.getBranch(),
+                        mPresenter.getCurPath(), ContentFiles.fromPickerResult(getActivity(), result.getData()),
+                        mPresenter.getShownNames(), this::reloadAfterChange);
+            });
     @Inject FilePathAdapter filePathAdapter;
 
     @Override
@@ -103,6 +127,92 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
         filePathAdapter.setOnItemClickListener((position, view) ->
                 mPresenter.loadFiles(filePathAdapter.getData().get(position).getFullPath(), false)
         );
+        updateAddButton();
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Writing (push access)
+    // ---------------------------------------------------------------------------------
+
+    private boolean canEdit() {
+        return mPresenter != null && mPresenter.getRepo() != null
+                && ReleaseInfoPresenter.hasPushAccess(mPresenter.getRepo());
+    }
+
+    private String owner() {
+        return mPresenter.getRepo().getOwner().getLogin();
+    }
+
+    private String repoName() {
+        return mPresenter.getRepo().getName();
+    }
+
+    private void updateAddButton() {
+        if (addButton == null) return;
+        if (canEdit()) addButton.show();
+        else addButton.hide();
+    }
+
+    private void showAddMenu(View anchor) {
+        if (!canEdit()) return;
+        PopupMenu popup = new PopupMenu(requireContext(), anchor);
+        popup.getMenu().add(0, 1, 0, R.string.file_create);
+        popup.getMenu().add(0, 2, 1, R.string.file_upload);
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 1) {
+                startActivity(EditFileActivity.createIntent(requireContext(), owner(), repoName(),
+                        mPresenter.getBranch(), mPresenter.getCurPath()));
+            } else {
+                uploadPicker.launch(ContentFiles.pickerIntent());
+            }
+            return true;
+        });
+        popup.show();
+    }
+
+    private void showFileMenu(@NonNull View anchor, @NonNull FileModel file) {
+        PopupMenu popup = new PopupMenu(requireContext(), anchor);
+        boolean edit = canEdit();
+        if (edit) popup.getMenu().add(0, 1, 0, R.string.file_edit);
+        if (edit) popup.getMenu().add(0, 2, 1, R.string.file_rename);
+        if (edit) popup.getMenu().add(0, 3, 2, R.string.file_delete);
+        if (file.getDownloadUrl() != null) popup.getMenu().add(0, 4, 3, R.string.download);
+        popup.setOnMenuItemClickListener(item -> {
+            String branch = mPresenter.getBranch();
+            if (item.getItemId() == 1) {
+                startActivity(EditFileActivity.editIntent(requireContext(), owner(), repoName(),
+                        branch, file.getPath()));
+            } else if (item.getItemId() == 2) {
+                RepoFileActions.rename(requireActivity(), owner(), repoName(), branch, file.getPath(),
+                        file.getSha(), this::reloadAfterChange);
+            } else if (item.getItemId() == 3) {
+                RepoFileActions.delete(requireActivity(), owner(), repoName(), branch, file.getPath(),
+                        this::reloadAfterChange);
+            } else if (item.getItemId() == 4) {
+                AppOpener.startDownload(requireContext(), file.getDownloadUrl(), file.getName());
+            }
+            return true;
+        });
+        popup.show();
+    }
+
+    private void reloadAfterChange() {
+        loadedStamp = RepoChanges.stamp();
+        if (mPresenter != null) mPresenter.loadFiles(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mPresenter != null && RepoChanges.changedSince(loadedStamp)) reloadAfterChange();
+    }
+
+    @Override
+    public boolean onItemLongClick(int position, @NonNull View view) {
+        FileModel model = adapter.getData().get(position);
+        if (model.isDir()) return false;
+        showFileMenu(view, model);
+        return true;
     }
 
     @Override
@@ -144,7 +254,10 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
 
     @Override
     public void onRepositoryInfoUpdated(Repository repository) {
-
+        if (mPresenter != null && repository != null) {
+            mPresenter.setRepo(repository);
+            updateAddButton();
+        }
     }
 
     @Override
@@ -162,5 +275,7 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
     protected void bindViews(View root) {
         super.bindViews(root);
         pathRecyclerView = root.findViewById(R.id.path_recycler_view);
+        addButton = root.findViewById(R.id.fragment_fab);
+        if (addButton != null) addButton.setOnClickListener(this::showAddMenu);
     }
 }

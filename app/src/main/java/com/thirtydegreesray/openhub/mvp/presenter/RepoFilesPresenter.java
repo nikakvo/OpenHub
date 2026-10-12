@@ -181,6 +181,27 @@ public class RepoFilesPresenter extends BasePagerPresenter<IRepoFilesContract.Vi
         return repo.getName();
     }
 
+    public Repository getRepo() {
+        return repo;
+    }
+
+    public void setRepo(Repository repo) {
+        this.repo = repo;
+    }
+
+    /** Branch shown in the list (the default branch until another one is picked). */
+    public String getBranch() {
+        return StringUtils.isBlank(curBranch) ? repo.getDefaultBranch() : curBranch;
+    }
+
+    /** Names of the files in the folder shown now, if loaded. */
+    public java.util.Set<String> getShownNames() {
+        java.util.Set<String> names = new java.util.HashSet<>();
+        ArrayList<FileModel> files = cacheMap.get(getCacheKey());
+        if (files != null) for (FileModel file : files) names.add(file.getName());
+        return names;
+    }
+
     public void setCurBranch(String curBranch) {
         this.curBranch = curBranch;
         curPath = "";

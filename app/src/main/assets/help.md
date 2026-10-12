@@ -89,6 +89,27 @@ Tap the **Stargazers** or **Watchers** numbers to see who they are. Since July 2
 GitHub shows these lists only to the repository's owners and collaborators, so for
 other repositories you will see a note instead.
 
+### Adding and editing files
+
+In repositories where you have write access, the **Files** tab works like the GitHub
+website:
+
+- The **+** button: **Create new file** (type a `/` in the name to make folders, e.g.
+  `docs/notes.md`) or **Upload files** from the phone into the folder you are in.
+  Several uploaded files become one commit. Files up to 25 MB; bigger files belong in
+  a release.
+- Long-press a file: **Edit file**, **Rename or move**, **Delete file**, **Download**.
+  An open file has the same actions in its toolbar and menu.
+- The editor shows the file in a monospace font; Markdown files also get **Write** and
+  **Preview**. Text files up to 512 KB can be edited.
+- **Commit changes** asks for a commit message (and an optional description), then
+  either commits directly to the branch shown at the bottom, or creates a **new
+  branch** and, if you like, starts a **pull request** from it. File permissions such
+  as executable scripts are kept.
+- Changing files under `.github/workflows` needs a token with the `workflow` scope.
+  Tokens made with **Create token** in this version have it; for an older token,
+  create a new one.
+
 ### Creating a repository
 
 **New repository** in the side menu works like github.com/new:

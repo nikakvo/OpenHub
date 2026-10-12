@@ -36,6 +36,8 @@ import okhttp3.ResponseBody;
  */
 public class MarkdownWritePreview {
 
+    private final View tabsRow;
+    private final View tabsDivider;
     private final TextView tabWrite;
     private final TextView tabPreview;
     private final TextInputLayout inputLayout;
@@ -58,6 +60,8 @@ public class MarkdownWritePreview {
      */
     public MarkdownWritePreview(@NonNull View root, @Nullable String repoFullName) {
         this.repoFullName = repoFullName;
+        tabsRow = root.findViewById(R.id.md_tabs);
+        tabsDivider = root.findViewById(R.id.md_tabs_divider);
         tabWrite = root.findViewById(R.id.md_tab_write);
         tabPreview = root.findViewById(R.id.md_tab_preview);
         inputLayout = root.findViewById(R.id.md_input_layout);
@@ -70,6 +74,13 @@ public class MarkdownWritePreview {
         tabWrite.setOnClickListener(v -> showWrite());
         tabPreview.setOnClickListener(v -> showPreview());
         updateTabs();
+    }
+
+    /** Shows or hides the tabs (a file that is not Markdown has nothing to preview). */
+    public void setPreviewAvailable(boolean available) {
+        if (!available) showWrite();
+        tabsRow.setVisibility(available ? View.VISIBLE : View.GONE);
+        tabsDivider.setVisibility(available ? View.VISIBLE : View.GONE);
     }
 
     @NonNull
