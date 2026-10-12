@@ -46,6 +46,7 @@ import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ContentFiles;
+import com.thirtydegreesray.openhub.util.MarkdownHtml;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
@@ -129,8 +130,10 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
         setToolbarTitle(StringUtils.isBlank(release.getTagName())
                         ? getString(R.string.release_draft_badge) : release.getTagName(),
                 mPresenter.getOwner().concat("/").concat(mPresenter.getRepoName()));
-        String body = StringUtils.isBlank(release.getBodyHtml()) ? release.getBody() : release.getBodyHtml();
-        webView.setMdSource(StringUtils.isBlank(body) ? "" : body, null);
+        // GitHub's rendered HTML when we have it; a just-saved release only has the Markdown
+        String body = !StringUtils.isBlank(release.getBodyHtml()) ? release.getBodyHtml()
+                : StringUtils.isBlank(release.getBody()) ? "" : MarkdownHtml.render(release.getBody());
+        webView.setMdSource(body, null);
 
         if (release.getAuthor() != null) {
             GlideApp.with(getActivity())

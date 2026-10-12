@@ -57,6 +57,20 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/release_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_micro"
+            android:paddingStart="@dimen/spacing_mini"
+            android:paddingEnd="@dimen/spacing_mini"
+            android:textSize="@dimen/text_normal"
+            android:textStyle="bold"
+            android:textColor="?android:textColorPrimary"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:visibility="gone"/>
+
+        <TextView
             android:id="@+id/body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

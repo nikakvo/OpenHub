@@ -39,6 +39,7 @@ import com.thirtydegreesray.openhub.mvp.model.Repository;
 import com.thirtydegreesray.openhub.mvp.model.UploadItem;
 import com.thirtydegreesray.openhub.service.UploadService;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.MarkdownWritePreview;
 import com.thirtydegreesray.openhub.ui.widget.TextInputDialog;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ContentFiles;
@@ -124,6 +125,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
     private TextView targetText;
     private TextInputEditText titleEdit;
     private TextInputEditText bodyEdit;
+    private MarkdownWritePreview notesEditor;
     private CheckBox preReleaseCheck;
     private CheckBox latestCheck;
     private TextView latestHint;
@@ -188,6 +190,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
     @Override
     protected void onDestroy() {
         disposables.clear();
+        if (notesEditor != null) notesEditor.dispose();
         super.onDestroy();
     }
 
@@ -455,6 +458,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void applyNotes(@NonNull GeneratedNotes notes) {
         Runnable apply = () -> {
+            notesEditor.showWrite();
             bodyEdit.setText(notes.getBody());
             if (StringUtils.isBlank(textOf(titleEdit)) && !StringUtils.isBlank(notes.getName())) {
                 titleEdit.setText(notes.getName());
@@ -482,6 +486,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MARKDOWN_EDITOR_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             String text = data.getStringExtra("text");
+            notesEditor.showWrite();
             bodyEdit.setText(text);
             if (text != null) bodyEdit.setSelection(text.length());
         }
@@ -823,7 +828,9 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
         targetRow = root.findViewById(R.id.target_row);
         targetText = root.findViewById(R.id.target_text);
         titleEdit = root.findViewById(R.id.title_edit);
-        bodyEdit = root.findViewById(R.id.body_edit);
+        notesEditor = new MarkdownWritePreview(root, owner + "/" + repo);
+        notesEditor.setHint(getString(R.string.release_notes_hint));
+        bodyEdit = notesEditor.getEditText();
         preReleaseCheck = root.findViewById(R.id.prerelease_check);
         latestCheck = root.findViewById(R.id.latest_check);
         latestHint = root.findViewById(R.id.latest_hint);

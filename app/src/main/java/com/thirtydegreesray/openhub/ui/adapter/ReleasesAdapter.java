@@ -41,8 +41,13 @@ public class ReleasesAdapter extends BaseAdapter<ReleasesAdapter.ViewHolder, Rel
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
         Release model = data.get(position);
-        holder.releaseName.setText(StringUtils.isBlank(model.getName()) ? model.getTagName()
-                : model.getName());
+        String tag = StringUtils.isBlank(model.getTagName())
+                ? context.getString(R.string.release_draft_badge) : model.getTagName();
+        holder.releaseName.setText(tag);
+        String title = model.getName();
+        boolean showTitle = !StringUtils.isBlank(title) && !title.equals(model.getTagName());
+        holder.title.setText(showTitle ? title : "");
+        holder.title.setVisibility(showTitle ? View.VISIBLE : View.GONE);
         if (model.isDraft()) {
             holder.badge.setText(R.string.release_draft_badge);
             holder.badge.setVisibility(View.VISIBLE);
@@ -79,6 +84,7 @@ public class ReleasesAdapter extends BaseAdapter<ReleasesAdapter.ViewHolder, Rel
     class ViewHolder extends BaseViewHolder {
 
         TextView releaseName;
+        TextView title;
         TextView badge;
         TextView time;
         TextView body;
@@ -91,6 +97,7 @@ public class ReleasesAdapter extends BaseAdapter<ReleasesAdapter.ViewHolder, Rel
         protected void bindViews(View root) {
             super.bindViews(root);
             releaseName = root.findViewById(R.id.release_name);
+            title = root.findViewById(R.id.release_title);
             badge = root.findViewById(R.id.release_badge);
             time = root.findViewById(R.id.time);
             body = root.findViewById(R.id.body);

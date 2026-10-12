@@ -157,21 +157,9 @@
                         android:tint="?android:textColorSecondary"/>
                 </LinearLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/body_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/release_notes_hint">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/body_edit"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textMultiLine|textCapSentences"
-                        android:gravity="top|start"
-                        android:minLines="6"
-                        android:maxLines="20"
-                        android:scrollbars="vertical"/>
-                </com.google.android.material.textfield.TextInputLayout>
+                <include
+                    android:id="@+id/notes_editor"
+                    layout="@layout/layout_markdown_write_preview"/>
 
                 <!-- Options -->
                 <CheckBox

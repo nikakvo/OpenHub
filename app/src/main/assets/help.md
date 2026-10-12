@@ -134,7 +134,9 @@ GitHub website does.
   existing one with the tag button, or type a new one such as `v1.2.0`; a new tag is
   created from the **Target** branch when the release is published), a title and the
   release notes. **Generate release notes** lets GitHub write the notes from the merged
-  pull requests since the previous release.
+  pull requests since the previous release. **Write** and **Preview** above the notes
+  switch between the text and how it will look on GitHub (rendered by GitHub itself,
+  so `#12`, `@user` and commit hashes become links).
 - **Add files** attaches files from the phone, for example an APK or a module zip you
   built in Termux or a Linux container (Termux appears in the file picker's side
   menu). The **pencil** changes the name a file gets on GitHub, the **cross** removes
