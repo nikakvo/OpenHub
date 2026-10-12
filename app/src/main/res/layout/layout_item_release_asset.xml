@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One release asset: in the release screen (download, maintainer menu) and in the
+     release editor (existing files and files waiting for upload). -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/asset_row"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="56dp"
+    android:gravity="center_vertical"
+    android:background="?attr/selectableItemBackground"
+    android:paddingStart="@dimen/spacing_large"
+    android:paddingEnd="@dimen/spacing_small"
+    android:paddingTop="@dimen/spacing_mini"
+    android:paddingBottom="@dimen/spacing_mini">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/asset_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        app:srcCompat="@drawable/ic_file"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="@dimen/spacing_large"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/asset_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_normal"
+            android:textColor="?android:textColorPrimary"/>
+        <TextView
+            android:id="@+id/asset_meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_small"
+            android:textColor="?android:textColorSecondary"/>
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/asset_download_bn"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:srcCompat="@drawable/ic_download"
+        android:padding="8dp"
+        android:contentDescription="@string/download"
+        android:background="?android:selectableItemBackgroundBorderless"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/asset_action_bn"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:srcCompat="@drawable/ic_more_vert"
+        android:padding="8dp"
+        android:contentDescription="@string/more_options"
+        android:background="?android:selectableItemBackgroundBorderless"
+        android:visibility="gone"/>
+</LinearLayout>

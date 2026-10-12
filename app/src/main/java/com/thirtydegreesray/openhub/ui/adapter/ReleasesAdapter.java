@@ -41,8 +41,12 @@ public class ReleasesAdapter extends BaseAdapter<ReleasesAdapter.ViewHolder, Rel
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
         Release model = data.get(position);
-        holder.releaseName.setText(model.getTagName());
-        if (model.isPreRelease()) {
+        holder.releaseName.setText(StringUtils.isBlank(model.getName()) ? model.getTagName()
+                : model.getName());
+        if (model.isDraft()) {
+            holder.badge.setText(R.string.release_draft_badge);
+            holder.badge.setVisibility(View.VISIBLE);
+        } else if (model.isPreRelease()) {
             holder.badge.setText(R.string.release_prerelease_badge);
             holder.badge.setVisibility(View.VISIBLE);
         } else if (position == getLatestPosition()) {
@@ -51,7 +55,8 @@ public class ReleasesAdapter extends BaseAdapter<ReleasesAdapter.ViewHolder, Rel
         } else {
             holder.badge.setVisibility(View.GONE);
         }
-        holder.time.setText(StringUtils.getNewsTimeStr(context, model.getPublishedAt()));
+        holder.time.setText(model.getDisplayDate() == null ? ""
+                : StringUtils.getNewsTimeStr(context, model.getDisplayDate()));
         if(!StringUtils.isBlank(model.getBodyHtml())){
             holder.body.setText(Html.fromHtml(model.getBodyHtml()));
             holder.body.setVisibility(View.VISIBLE);

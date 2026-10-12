@@ -96,14 +96,42 @@ other repositories you will see a note instead.
 A **release** is a published version of a project, usually with files to download
 (APKs, zip modules, binaries).
 
-- The releases list marks the newest stable one **Latest** and test versions
-  **Pre-release**.
-- Open a release and tap the **download button** to see its files with their size and
-  how many times they were downloaded. Tap a file to download it.
+- The releases list marks the newest stable one **Latest**, test versions
+  **Pre-release** and unpublished ones **Draft** (only people with write access see
+  drafts).
+- Open a release to read its notes and see its files (**Assets**) with their size and
+  how many times they were downloaded. Tap a file to download it, long-press it to
+  copy its link. The **download button** also offers the source code archives.
 - Downloads go to the phone's **Download** folder. The built-in downloader works on
   Wi-Fi, mobile data, roaming and VPN, and resumes after a lost connection.
 - When a download finishes, the notification has **Install** (APK files) or **Open**,
   and **Share**, for example to send a module zip to your root manager or to a chat.
+
+### Publishing your own releases
+
+In repositories where you have write access, OpenHub can manage releases like the
+GitHub website does.
+
+- **New release**: the **+** button in the releases list. Enter a **tag** (pick an
+  existing one with the tag button, or type a new one such as `v1.2.0`; a new tag is
+  created from the **Target** branch when the release is published), a title and the
+  release notes. **Generate release notes** lets GitHub write the notes from the merged
+  pull requests since the previous release.
+- **Add files** attaches files from the phone, for example an APK or a module zip you
+  built in Termux or a Linux container. Tap a file to change the name it gets on
+  GitHub, or the cross to remove it.
+- **Save draft** keeps the release private. **Publish release** makes it public. With
+  new files, the release stays a draft while they upload and is published only when
+  every file arrived, so nobody downloads an incomplete release. This also works for
+  repositories with **release immutability** turned on, where files cannot change
+  after publishing.
+- Uploads run in the background with a progress notification and **Cancel**; a lost
+  connection is retried automatically. You can leave the app meanwhile.
+- In an open release, the menu has **Edit**, **Publish release** (drafts), **Set as
+  latest release**, **Upload files** and **Delete release** (optionally together with
+  its tag). Each file has a menu to **rename** or **delete** it.
+
+Writing to releases needs a token with the `repo` scope (see **Logging in**).
 
 ---
 
@@ -191,6 +219,8 @@ preview), edit, close and reopen issues, and manage labels in your own repositor
 | Commit | One saved change to the files |
 | Release | A published version, usually with files to download |
 | Pre-release | A test version, not considered stable |
+| Draft | A release that is not published yet; only people with write access see it |
+| Asset | A file attached to a release |
 | Issue | A bug report, question or request |
 | Pull request | A proposed change from someone else, waiting to be merged |
 | Workflow | An automation in GitHub Actions, e.g. "Build APK" |

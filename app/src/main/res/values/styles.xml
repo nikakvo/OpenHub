@@ -49,4 +49,19 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <!-- Draft / Pre-release / Latest marker of a release -->
+    <style name="ReleaseBadge">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginEnd">@dimen/spacing_small</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:background">@drawable/bg_badge</item>
+        <item name="android:textSize">@dimen/text_mini</item>
+        <item name="android:textColor">?colorAccent</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
 </resources>

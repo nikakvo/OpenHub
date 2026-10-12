@@ -31,6 +31,9 @@ public class Release implements Parcelable {
     private User author;
     private List<ReleaseAsset> assets;
 
+    @SerializedName("html_url") private String htmlUrl;
+    @SerializedName("upload_url") private String uploadUrl;
+
     public String getId() {
         return id;
     }
@@ -147,6 +150,30 @@ public class Release implements Parcelable {
         this.assets = assets;
     }
 
+    /** Published date, or the creation date for a draft (drafts have no published_at). */
+    public Date getDisplayDate() {
+        return publishedAt != null ? publishedAt : createdAt;
+    }
+
+    public String getHtmlUrl() {
+        return htmlUrl;
+    }
+
+    public void setHtmlUrl(String htmlUrl) {
+        this.htmlUrl = htmlUrl;
+    }
+
+    /** Upload endpoint without the URI template part ("{?name,label}"). */
+    public String getUploadUrl() {
+        if (uploadUrl == null) return null;
+        int brace = uploadUrl.indexOf('{');
+        return brace >= 0 ? uploadUrl.substring(0, brace) : uploadUrl;
+    }
+
+    public void setUploadUrl(String uploadUrl) {
+        this.uploadUrl = uploadUrl;
+    }
+
     public String getBodyHtml() {
         return bodyHtml;
     }
@@ -176,6 +203,8 @@ public class Release implements Parcelable {
         dest.writeLong(this.publishedAt != null ? this.publishedAt.getTime() : -1);
         dest.writeParcelable(this.author, flags);
         dest.writeTypedList(this.assets);
+        dest.writeString(this.htmlUrl);
+        dest.writeString(this.uploadUrl);
     }
 
     public Release() {
@@ -198,6 +227,8 @@ public class Release implements Parcelable {
         this.publishedAt = tmpPublishedAt == -1 ? null : new Date(tmpPublishedAt);
         this.author = in.readParcelable(User.class.getClassLoader());
         this.assets = in.createTypedArrayList(ReleaseAsset.CREATOR);
+        this.htmlUrl = in.readString();
+        this.uploadUrl = in.readString();
     }
 
     public static final Parcelable.Creator<Release> CREATOR = new Parcelable.Creator<Release>() {

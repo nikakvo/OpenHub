@@ -47,6 +47,70 @@
                             android:layout_marginStart="@dimen/spacing_small"/>
                     </LinearLayout>
 
+                    <TextView
+                        android:id="@+id/release_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_normal"
+                        android:layout_marginEnd="@dimen/spacing_normal"
+                        android:layout_marginTop="@dimen/spacing_mini"
+                        android:textSize="@dimen/text_large"
+                        android:textStyle="bold"
+                        android:textColor="?android:textColorPrimary"
+                        android:visibility="gone"/>
+
+                    <LinearLayout
+                        android:id="@+id/badges"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginStart="@dimen/spacing_normal"
+                        android:layout_marginEnd="@dimen/spacing_normal"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:visibility="gone">
+                        <TextView
+                            android:id="@+id/badge_draft"
+                            style="@style/ReleaseBadge"
+                            android:text="@string/release_draft_badge"/>
+                        <TextView
+                            android:id="@+id/badge_prerelease"
+                            style="@style/ReleaseBadge"
+                            android:text="@string/release_prerelease_badge"/>
+                        <TextView
+                            android:id="@+id/badge_latest"
+                            style="@style/ReleaseBadge"
+                            android:text="@string/release_latest_badge"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/assets_section"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:visibility="gone">
+                        <TextView
+                            android:id="@+id/assets_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_normal"
+                            android:layout_marginEnd="@dimen/spacing_normal"
+                            android:layout_marginBottom="@dimen/spacing_mini"
+                            android:textSize="@dimen/text_small"
+                            android:textStyle="bold"
+                            android:textColor="?android:textColorSecondary"/>
+                        <LinearLayout
+                            android:id="@+id/assets_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"/>
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="@dimen/spacing_mini"
+                            android:background="?android:listDivider"/>
+                    </LinearLayout>
+
                     <com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView
                         android:id="@+id/web_view"
                         android:layout_width="match_parent"

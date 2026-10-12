@@ -96,7 +96,7 @@ public class ReleaseCheckWorker extends Worker {
 
     /** Token of the selected account, read from the database (the app may not be running). */
     @Nullable
-    private static String loadToken() {
+    static String loadToken() {
         try {
             AuthUserDao dao = AppApplication.get().getAppComponent().getDaoSession().getAuthUserDao();
             List<AuthUser> users = dao.queryBuilder()

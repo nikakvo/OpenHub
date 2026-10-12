@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/layout_appbar"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/form_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="@dimen/spacing_large"
+                android:paddingEnd="@dimen/spacing_large"
+                android:paddingTop="@dimen/spacing_normal"
+                android:paddingBottom="@dimen/spacing_large">
+
+                <!-- Tag -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tag_layout"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="@string/release_tag">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/tag_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text|textNoSuggestions"
+                            android:imeOptions="actionNext"
+                            android:maxLines="1"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/choose_tag_bn"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:padding="12dp"
+                        app:srcCompat="@drawable/ic_tag"
+                        android:contentDescription="@string/release_choose_tag"
+                        android:background="?android:selectableItemBackgroundBorderless"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tag_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_mini"
+                    android:textSize="@dimen/text_small"
+                    android:textColor="?android:textColorSecondary"
+                    android:visibility="gone"/>
+
+                <LinearLayout
+                    android:id="@+id/target_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:minHeight="48dp"
+                    android:background="?android:selectableItemBackground"
+                    android:visibility="gone">
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="@dimen/spacing_mini"
+                        app:srcCompat="@drawable/ic_branch"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_normal"
+                        android:text="@string/release_target"
+                        android:textSize="@dimen/text_normal"
+                        android:textColor="?android:textColorPrimary"/>
+                    <TextView
+                        android:id="@+id/target_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_small"
+                        android:textSize="@dimen/text_normal"
+                        android:textColor="?colorAccent"
+                        android:maxLines="1"
+                        android:ellipsize="middle"/>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        app:srcCompat="@drawable/ic_arrow_drop_down"/>
+                </LinearLayout>
+
+                <!-- Title -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/title_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_normal"
+                    android:hint="@string/release_title">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/title_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapSentences"
+                        android:imeOptions="actionNext"
+                        android:maxLines="1"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Notes -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="@dimen/spacing_normal">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_mini"
+                        android:text="@string/release_notes"
+                        android:textSize="@dimen/text_small"
+                        android:textStyle="bold"
+                        android:textColor="?android:textColorSecondary"/>
+                    <TextView
+                        android:id="@+id/generate_notes_bn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:gravity="center_vertical"
+                        android:paddingStart="@dimen/spacing_small"
+                        android:paddingEnd="@dimen/spacing_small"
+                        android:text="@string/release_generate_notes"
+                        android:textSize="@dimen/text_small"
+                        android:textColor="?colorAccent"
+                        android:background="?android:selectableItemBackground"/>
+                    <com.thirtydegreesray.openhub.ui.widget.ToastAbleImageButton
+                        android:id="@+id/markdown_editor_bn"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:padding="@dimen/spacing_small"
+                        app:srcCompat="@drawable/ic_markdown_edit"
+                        app:toast_text="@string/markdown_editor"
+                        android:background="?android:selectableItemBackgroundBorderless"
+                        android:tint="?android:textColorSecondary"/>
+                </LinearLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/body_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/release_notes_hint">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/body_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:gravity="top|start"
+                        android:minLines="6"
+                        android:maxLines="20"
+                        android:scrollbars="vertical"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Options -->
+                <CheckBox
+                    android:id="@+id/prerelease_check"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_normal"
+                    android:text="@string/release_set_prerelease"/>
+
+                <CheckBox
+                    android:id="@+id/latest_check"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/release_set_latest"/>
+
+                <TextView
+                    android:id="@+id/latest_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:textSize="@dimen/text_small"
+                    android:textColor="?android:textColorSecondary"
+                    android:visibility="gone"/>
+
+                <!-- Files -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="@dimen/spacing_large">
+                    <TextView
+                        android:id="@+id/files_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_mini"
+                        android:text="@string/release_files"
+                        android:textSize="@dimen/text_small"
+                        android:textStyle="bold"
+                        android:textColor="?android:textColorSecondary"/>
+                    <TextView
+                        android:id="@+id/add_files_bn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:gravity="center_vertical"
+                        android:drawablePadding="@dimen/spacing_mini"
+                        android:paddingStart="@dimen/spacing_small"
+                        android:paddingEnd="@dimen/spacing_small"
+                        android:text="@string/release_add_files"
+                        android:textSize="@dimen/text_small"
+                        android:textColor="?colorAccent"
+                        android:background="?android:selectableItemBackground"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/files_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="-16dp"
+                    android:layout_marginEnd="-16dp"
+                    android:orientation="vertical"/>
+
+                <TextView
+                    android:id="@+id/files_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_mini"
+                    android:layout_marginTop="@dimen/spacing_mini"
+                    android:text="@string/release_files_hint"
+                    android:textSize="@dimen/text_small"
+                    android:textColor="?android:textColorSecondary"/>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <ProgressBar
+            android:id="@+id/loader"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:indeterminate="true"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:listDivider"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical|end"
+        android:paddingStart="@dimen/spacing_normal"
+        android:paddingEnd="@dimen/spacing_normal"
+        android:paddingTop="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_small">
+        <Button
+            android:id="@+id/secondary_bn"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/release_save_draft"/>
+        <Button
+            android:id="@+id/primary_bn"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_small"
+            android:text="@string/release_publish"/>
+    </LinearLayout>
+
+</LinearLayout>

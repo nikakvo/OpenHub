@@ -15,6 +15,9 @@ public interface IReleasesContract {
         void showReleases(ArrayList<Release> releases);
         void setCanLoadMore(boolean canLoadMore);
         void showLoadError(String error);
+
+        /** Push access is known: show or hide "New release". */
+        void onPermissionChecked(boolean canEdit);
     }
 
     interface Presenter extends IBaseContract.Presenter<IReleasesContract.View>{

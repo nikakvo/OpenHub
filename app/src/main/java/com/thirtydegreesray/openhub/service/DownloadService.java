@@ -536,6 +536,10 @@ public class DownloadService extends Service {
                 // OkHttp drops this header automatically on a redirect to another host.
                 rb.header("Authorization", token.startsWith("Basic") ? token : "token " + token);
             }
+            if (needsGitHubToken(url) && url.contains("/releases/assets/")) {
+                // API address of a release asset (e.g. of a draft): ask for the file itself
+                rb.header("Accept", "application/octet-stream");
+            }
             if (written > 0) rb.header("Range", "bytes=" + written + "-");
 
             call = client.newCall(rb.build());

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Release management: editor, release screen actions, uploads. -->
+<resources>
+
+    <!-- general -->
+    <string name="rename">Rename</string>
+    <string name="copy_link">Copy link</string>
+    <string name="more_options">More options</string>
+    <string name="please_wait">Please wait…</string>
+    <string name="field_required">This field is required</string>
+
+    <!-- release screen -->
+    <string name="release_draft_badge">Draft</string>
+    <string name="release_drafted_this">created this draft</string>
+    <string name="release_assets_count">Assets (%1$d)</string>
+    <string name="release_asset_incomplete">upload not finished</string>
+    <string name="release_new">New release</string>
+    <string name="release_edit">Edit release</string>
+    <string name="release_edit_draft">Edit draft</string>
+    <string name="release_publish">Publish release</string>
+    <string name="release_publish_message">Publish %1$s? Everyone can see a published release.</string>
+    <string name="release_publish_incomplete_files">Some files did not finish uploading. They are not part of the published release until they are uploaded again.</string>
+    <string name="release_published">%1$s published</string>
+    <string name="release_published_short">Release published</string>
+    <string name="release_make_latest">Set as latest release</string>
+    <string name="release_now_latest">%1$s is now the latest release</string>
+    <string name="release_upload_files">Upload files</string>
+    <string name="release_delete">Delete release</string>
+    <string name="release_delete_message">Delete the release %1$s and all its files? This cannot be undone.</string>
+    <string name="release_delete_tag_too">Also delete the tag %1$s</string>
+    <string name="release_deleted">Release deleted</string>
+    <string name="release_gone">This release no longer exists</string>
+    <string name="release_rename_file">Rename file</string>
+    <string name="release_file_name">File name</string>
+    <string name="release_delete_file">Delete file</string>
+    <string name="release_delete_file_message">Delete %1$s from this release?</string>
+    <string name="release_asset_deleted">%1$s deleted</string>
+
+    <!-- release editor -->
+    <string name="release_tag">Tag</string>
+    <string name="release_choose_tag">Choose a tag</string>
+    <string name="release_tags_loading">Loading tags…</string>
+    <string name="release_no_tags">This repository has no tags yet. Type a new tag name.</string>
+    <string name="release_tag_existing">Existing tag</string>
+    <string name="release_tag_new">New tag, created when the release is published</string>
+    <string name="release_tag_required">Enter a tag, for example v1.0.0</string>
+    <string name="release_tag_required_for_notes">Enter a tag first</string>
+    <string name="release_tag_no_spaces">A tag cannot contain spaces</string>
+    <string name="release_target">Target</string>
+    <string name="release_title">Release title</string>
+    <string name="release_notes">Release notes</string>
+    <string name="release_notes_hint">Describe this release (Markdown)</string>
+    <string name="release_generate_notes">Generate release notes</string>
+    <string name="release_replace_notes">Replace the current release notes with the generated ones?</string>
+    <string name="release_replace">Replace</string>
+    <string name="release_set_prerelease">Set as a pre-release</string>
+    <string name="release_set_latest">Set as the latest release</string>
+    <string name="release_latest_prerelease_hint">A pre-release cannot be the latest release.</string>
+    <string name="release_latest_current_hint">This is the latest release. To change that, set another release as latest.</string>
+    <string name="release_files">Files</string>
+    <string name="release_files_count">Files (%1$d)</string>
+    <string name="release_add_files">Add files</string>
+    <string name="release_files_hint">New files are uploaded in the background after saving. When you publish with new files, the release stays a draft until every file is uploaded.</string>
+    <string name="release_file_new">new, uploaded after saving</string>
+    <string name="release_file_renamed">was %1$s</string>
+    <string name="release_file_will_be_deleted">Deleted when you save</string>
+    <string name="release_remove_file">Remove file</string>
+    <string name="release_keep_file">Keep file</string>
+    <string name="release_save_draft">Save draft</string>
+    <string name="release_update">Update release</string>
+    <string name="release_saving">Saving release…</string>
+    <string name="release_draft_saved">Draft saved</string>
+    <string name="release_updated">Release updated</string>
+    <string name="release_discard_title">Discard changes?</string>
+    <string name="release_discard_message">Your changes to this release have not been saved.</string>
+    <string name="release_discard">Discard</string>
+    <string name="release_keep_editing">Keep editing</string>
+
+    <!-- uploads -->
+    <string name="upload_channel_name">Uploads</string>
+    <plurals name="uploads_active">
+        <item quantity="one">Uploading %d file</item>
+        <item quantity="other">Uploading %d files</item>
+    </plurals>
+    <plurals name="upload_started">
+        <item quantity="one">Uploading %d file in the background</item>
+        <item quantity="other">Uploading %d files in the background</item>
+    </plurals>
+    <plurals name="upload_started_then_publish">
+        <item quantity="one">Uploading %d file. The release is published when the upload is complete.</item>
+        <item quantity="other">Uploading %d files. The release is published when all of them are uploaded.</item>
+    </plurals>
+    <plurals name="upload_done">
+        <item quantity="one">%d file uploaded.</item>
+        <item quantity="other">%d files uploaded.</item>
+    </plurals>
+    <string name="upload_waiting">Waiting…</string>
+    <string name="upload_preparing">Preparing…</string>
+    <string name="upload_processing">Processing on GitHub…</string>
+    <string name="upload_progress_title">%1$d/%2$d · %3$s</string>
+    <string name="upload_retrying">Connection lost, retry %1$d/%2$d in %3$ds</string>
+    <string name="upload_complete_title">Upload complete: %1$s</string>
+    <string name="upload_failed_title">Upload failed: %1$s</string>
+    <string name="upload_cancelled">Upload cancelled</string>
+    <string name="upload_release_published">The release is published.</string>
+    <string name="upload_kept_draft">The release stays a draft because not every file was uploaded.</string>
+    <string name="upload_publish_failed">Publishing failed: %1$s</string>
+    <string name="upload_name_exists">A file named %1$s already exists in this release</string>
+    <string name="upload_cannot_read">Cannot read the file. Pick it again.</string>
+    <string name="upload_size_changed">The file changed while it was uploaded</string>
+    <string name="open_release">Open release</string>
+
+</resources>

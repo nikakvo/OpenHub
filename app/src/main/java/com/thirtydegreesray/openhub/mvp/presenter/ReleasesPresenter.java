@@ -6,6 +6,8 @@ import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.mvp.contract.IReleasesContract;
 import com.thirtydegreesray.openhub.mvp.model.Release;
+import com.thirtydegreesray.openhub.mvp.model.Repository;
+import com.thirtydegreesray.openhub.util.ReleaseChanges;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
 
 import java.util.ArrayList;
@@ -24,7 +26,9 @@ public class ReleasesPresenter extends BasePresenter<IReleasesContract.View>
 
     @AutoAccess String owner;
     @AutoAccess String repo;
+    @AutoAccess boolean canEdit;
     private ArrayList<Release> releases;
+    private long loadedStamp;
 
     @Inject
     public ReleasesPresenter(DaoSession daoSession) {
@@ -40,6 +44,35 @@ public class ReleasesPresenter extends BasePresenter<IReleasesContract.View>
             mView.showReleases(releases);
             mView.hideLoading();
         }
+        if (canEdit) mView.onPermissionChecked(true);
+        checkPermission();
+    }
+
+    /** Reloads when a release was created, edited or deleted on another screen. */
+    public void onResume() {
+        if (ReleaseChanges.changedSince(loadedStamp)) loadReleases(1, true);
+    }
+
+    private void checkPermission() {
+        generalRxHttpExecute(new IObservableCreator<Repository>() {
+            @Override
+            public Observable<Response<Repository>> createObservable(boolean forceNetWork) {
+                return getRepoService().getRepoInfo(forceNetWork, owner, repo);
+            }
+        }, new HttpObserver<Repository>() {
+            @Override
+            public void onError(Throwable error) {
+            }
+
+            @Override
+            public void onSuccess(HttpResponse<Repository> response) {
+                boolean edit = ReleaseInfoPresenter.hasPushAccess(response.body());
+                if (edit != canEdit) {
+                    canEdit = edit;
+                    mView.onPermissionChecked(canEdit);
+                }
+            }
+        }, true);
     }
 
     @Override
@@ -55,6 +88,7 @@ public class ReleasesPresenter extends BasePresenter<IReleasesContract.View>
             @Override
             public void onSuccess(HttpResponse<ArrayList<Release>> response) {
                 mView.hideLoading();
+                if (page == 1) loadedStamp = ReleaseChanges.stamp();
                 if (isReload || releases == null || readCacheFirst) {
                     releases = response.body();
                 } else {
@@ -83,5 +117,9 @@ public class ReleasesPresenter extends BasePresenter<IReleasesContract.View>
 
     public String getOwner() {
         return owner;
+    }
+
+    public boolean canEdit() {
+        return canEdit;
     }
 }

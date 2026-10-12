@@ -24,6 +24,8 @@ public class ReleaseAsset implements Parcelable {
     @SerializedName("created_at") private Date createdAt;
     @SerializedName("updated_at") private Date updatedAt;
     @SerializedName("browser_download_url") private String downloadUrl;
+    /** API address of the asset; with Accept: application/octet-stream it serves the file, drafts included. */
+    @SerializedName("url") private String apiUrl;
 
     public String getId() {
         return id;
@@ -113,6 +115,10 @@ public class ReleaseAsset implements Parcelable {
         this.downloadUrl = downloadUrl;
     }
 
+    public String getApiUrl() {
+        return apiUrl;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -131,6 +137,7 @@ public class ReleaseAsset implements Parcelable {
         dest.writeLong(this.createdAt != null ? this.createdAt.getTime() : -1);
         dest.writeLong(this.updatedAt != null ? this.updatedAt.getTime() : -1);
         dest.writeString(this.downloadUrl);
+        dest.writeString(this.apiUrl);
     }
 
     public ReleaseAsset() {
@@ -150,6 +157,7 @@ public class ReleaseAsset implements Parcelable {
         long tmpUpdatedAt = in.readLong();
         this.updatedAt = tmpUpdatedAt == -1 ? null : new Date(tmpUpdatedAt);
         this.downloadUrl = in.readString();
+        this.apiUrl = in.readString();
     }
 
     public static final Parcelable.Creator<ReleaseAsset> CREATOR = new Parcelable.Creator<ReleaseAsset>() {

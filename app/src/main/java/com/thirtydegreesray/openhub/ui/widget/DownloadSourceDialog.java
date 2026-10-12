@@ -43,14 +43,21 @@ public class DownloadSourceDialog {
 
     private static ArrayList<DownloadSource> getDownloadSources(Context context, Release release){
         ArrayList<DownloadSource> sources = new ArrayList<>();
-        for(ReleaseAsset asset : release.getAssets()){
-            sources.add(new DownloadSource(asset.getDownloadUrl(), asset.getName(), asset.getSize(),
-                    asset.getDownloadCount()));
+        if (release.getAssets() != null) {
+            for(ReleaseAsset asset : release.getAssets()){
+                sources.add(new DownloadSource(asset.getDownloadUrl(), asset.getName(), asset.getSize(),
+                        asset.getDownloadCount()));
+            }
         }
-        sources.add(new DownloadSource(release.getZipballUrlWrap(), true,
-                context.getString(R.string.source_code_zip)));
-        sources.add(new DownloadSource(release.getTarballUrlWrap(), true,
-                context.getString(R.string.source_code_tar)));
+        // a draft has no tag yet, so there is no source archive
+        if (release.getZipballUrl() != null) {
+            sources.add(new DownloadSource(release.getZipballUrlWrap(), true,
+                    context.getString(R.string.source_code_zip)));
+        }
+        if (release.getTarballUrl() != null) {
+            sources.add(new DownloadSource(release.getTarballUrlWrap(), true,
+                    context.getString(R.string.source_code_tar)));
+        }
         return sources;
     }
 

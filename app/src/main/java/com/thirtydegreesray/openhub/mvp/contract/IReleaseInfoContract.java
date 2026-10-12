@@ -14,6 +14,14 @@ public interface IReleaseInfoContract {
 
         /** The repository has no (non pre-release) release. */
         void onNoRelease();
+
+        /** Push access is known: show or hide the maintainer actions. */
+        void onPermissionChecked(boolean canEdit);
+
+        void onReleaseDeleted();
+
+        /** The release no longer exists (deleted elsewhere). */
+        void onReleaseGone();
     }
 
     interface Presenter extends IBaseContract.Presenter<IReleaseInfoContract.View>{

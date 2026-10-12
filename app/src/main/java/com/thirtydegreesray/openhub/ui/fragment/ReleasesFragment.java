@@ -12,6 +12,7 @@ import com.thirtydegreesray.openhub.mvp.contract.IReleasesContract;
 import com.thirtydegreesray.openhub.mvp.model.Release;
 import com.thirtydegreesray.openhub.mvp.presenter.ReleasesPresenter;
 import com.thirtydegreesray.openhub.ui.activity.ReleaseInfoActivity;
+import com.thirtydegreesray.openhub.ui.activity.ReleasesActivity;
 import com.thirtydegreesray.openhub.ui.adapter.ReleasesAdapter;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
 import com.thirtydegreesray.openhub.ui.widget.DownloadSourceDialog;
@@ -43,6 +44,19 @@ public class ReleasesFragment extends ListFragment<ReleasesPresenter, ReleasesAd
             showOperationTip(R.string.releases_click_tip);
             PrefUtils.set(PrefUtils.RELEASES_LONG_CLICK_TIP_ABLE, false);
         }
+    }
+
+    @Override
+    public void onPermissionChecked(boolean canEdit) {
+        if (getActivity() instanceof ReleasesActivity) {
+            ((ReleasesActivity) getActivity()).setCanCreate(canEdit);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mPresenter != null) mPresenter.onResume();
     }
 
     @Override
