@@ -204,33 +204,35 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
         String[] sources = new String[branches.size()];
         for (int i = 0; i < branches.size(); i++) sources[i] = name(branches.get(i));
         if (sources.length == 0) return;
+        if (sources.length == 1) {
+            askNewBranchName(sources[0]);
+            return;
+        }
         final int[] source = {0};
         new AlertDialog.Builder(this)
                 .setTitle(R.string.branches_new_source)
-                .setSingleChoiceItems(sources, 0, (dialog, which) -> {
-                    source[0] = which;
-                    dialog.dismiss();
-                    TextInputDialog.show(this, R.string.branches_new, R.string.commit_branch_name, "", false,
-                            newName -> {
-                                if (!isValidBranchName(newName)) {
-                                    showErrorToast(getString(R.string.commit_branch_invalid));
-                                    return;
-                                }
-                                String from = sources[source[0]];
-                                run(() -> {
-                                    GitDataService git = GitHubApi.service(GitDataService.class);
-                                    JsonObject ref = GitHubApi.call(git.getBranchRef(owner, repo,
-                                            RepoCommitter.encode(from)));
-                                    Map<String, Object> body = new HashMap<>();
-                                    body.put("ref", "refs/heads/" + newName);
-                                    body.put("sha", ref.getAsJsonObject("object").get("sha").getAsString());
-                                    GitHubApi.call(git.createRef(owner, repo, body));
-                                    return Boolean.TRUE;
-                                }, getString(R.string.branches_created, newName, from));
-                            });
-                })
+                .setSingleChoiceItems(sources, 0, (dialog, which) -> source[0] = which)
+                .setPositiveButton(R.string.ok, (dialog, which) -> askNewBranchName(sources[source[0]]))
                 .setNegativeButton(R.string.cancel, null)
                 .show();
+    }
+
+    private void askNewBranchName(@NonNull String from) {
+        TextInputDialog.show(this, R.string.branches_new, R.string.commit_branch_name, "", false, newName -> {
+            if (!isValidBranchName(newName)) {
+                showErrorToast(getString(R.string.commit_branch_invalid));
+                return;
+            }
+            run(() -> {
+                GitDataService git = GitHubApi.service(GitDataService.class);
+                JsonObject ref = GitHubApi.call(git.getBranchRef(owner, repo, RepoCommitter.encode(from)));
+                Map<String, Object> body = new HashMap<>();
+                body.put("ref", "refs/heads/" + newName);
+                body.put("sha", ref.getAsJsonObject("object").get("sha").getAsString());
+                GitHubApi.call(git.createRef(owner, repo, body));
+                return Boolean.TRUE;
+            }, getString(R.string.branches_created, newName, from));
+        });
     }
 
     private void rename(@NonNull String branch) {

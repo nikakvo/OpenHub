@@ -138,13 +138,17 @@ public interface RepoService {
             @Query("ref") String branch
     );
 
-    @NonNull @GET("repos/{owner}/{repo}/branches")
+    /** Never cached: branches are created and deleted from the app. */
+    @NonNull @GET("repos/{owner}/{repo}/branches?per_page=100")
+    @Headers("Cache-Control: no-cache, no-store")
     Observable<Response<ArrayList<Branch>>> getBranches(
             @Path("owner") String owner,
             @Path("repo") String repo
     );
 
-    @NonNull @GET("repos/{owner}/{repo}/tags")
+    /** Never cached: branches are created and deleted from the app. */
+    @NonNull @GET("repos/{owner}/{repo}/tags?per_page=100")
+    @Headers("Cache-Control: no-cache, no-store")
     Observable<Response<ArrayList<Branch>>> getTags(
             @Path("owner") String owner,
             @Path("repo") String repo

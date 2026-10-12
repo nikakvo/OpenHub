@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.presenter;
 
+import com.thirtydegreesray.openhub.util.RepoChanges;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
@@ -74,8 +75,12 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
         }
     }
 
+    private long branchesStamp;
+
     @Override
     public void loadBranchesAndTags() {
+        // a branch was created, renamed or deleted elsewhere in the app: load the list again
+        if (branches != null && RepoChanges.changedSince(branchesStamp)) branches = null;
         if (branches != null) {
             mView.showBranchesAndTags(branches, curBranch);
             return;
@@ -97,6 +102,7 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
                             }
                         }
                 );
+        branchesStamp = RepoChanges.stamp();
         Observable<Response<ArrayList<Branch>>> observable = getRepoService().getBranches(owner, repoName)
                 .flatMap(arrayListResponse -> {
                     branches = arrayListResponse.body();
