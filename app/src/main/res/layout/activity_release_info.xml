@@ -82,13 +82,24 @@
                             android:text="@string/release_latest_badge"/>
                     </LinearLayout>
 
+                    <com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView
+                        android:id="@+id/web_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:webview_background="?android:windowBackground"/>
+
                     <LinearLayout
                         android:id="@+id/assets_section"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_marginTop="@dimen/spacing_small"
+                        android:paddingBottom="88dp"
                         android:visibility="gone">
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginBottom="@dimen/spacing_small"
+                            android:background="?android:listDivider"/>
                         <TextView
                             android:id="@+id/assets_title"
                             android:layout_width="match_parent"
@@ -104,18 +115,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"/>
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginTop="@dimen/spacing_mini"
-                            android:background="?android:listDivider"/>
                     </LinearLayout>
 
-                    <com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView
-                        android:id="@+id/web_view"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        app:webview_background="?android:windowBackground"/>
 
                 </LinearLayout>
 

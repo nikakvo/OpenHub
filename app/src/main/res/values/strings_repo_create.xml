@@ -26,4 +26,15 @@
     <string name="repo_create_button">Create repository</string>
     <string name="repo_create_creating">Creating repository…</string>
     <string name="repo_create_done">%1$s created</string>
+    <string name="gitignore_search">Search templates</string>
+    <string name="gitignore_no_match">No template matches</string>
+    <string name="gitignore_none_selected">No template selected; tick one or more</string>
+    <string name="gitignore_selected">Selected: %1$s</string>
+    <string name="gitignore_custom">Your own lines (optional)</string>
+    <string name="gitignore_custom_hint">One pattern per line, e.g. *.apk or local.properties. They are added after the templates.</string>
+    <plurals name="gitignore_custom_count">
+        <item quantity="one">%d own line</item>
+        <item quantity="other">%d own lines</item>
+    </plurals>
+    <string name="gitignore_commit_failed">The repository was created, but adding .gitignore failed: %1$s</string>
 </resources>

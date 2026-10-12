@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -28,14 +29,17 @@ import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.RepoAdminService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
+import com.thirtydegreesray.openhub.mvp.model.GitignoreTemplate;
 import com.thirtydegreesray.openhub.mvp.model.LicenseTemplate;
 import com.thirtydegreesray.openhub.mvp.model.Repository;
 import com.thirtydegreesray.openhub.mvp.model.User;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.GitignorePickerDialog;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +75,8 @@ public class CreateRepositoryActivity extends BaseActivity<IBaseContract.Present
     /** null: the user's own account */
     @AutoAccess String org;
     @AutoAccess String orgAvatar;
-    @AutoAccess String gitignore;
+    @AutoAccess ArrayList<String> gitignoreTemplates;
+    @AutoAccess String gitignoreCustom;
     @AutoAccess String licenseKey;
     @AutoAccess String licenseName;
 
@@ -96,9 +101,10 @@ public class CreateRepositoryActivity extends BaseActivity<IBaseContract.Present
     /** normalized name that is known to be taken, or null */
     private String takenName;
     private ArrayList<User> orgs;
-    private ArrayList<String> gitignoreTemplates;
+    private ArrayList<String> allGitignoreTemplates;
     private ArrayList<LicenseTemplate> licenses;
     private boolean creating;
+    private volatile String gitignoreError;
 
     private final Runnable checkNameRunnable = this::checkNameAvailable;
 
@@ -117,7 +123,8 @@ public class CreateRepositoryActivity extends BaseActivity<IBaseContract.Present
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.repo_create_title));
         showOwner();
-        gitignoreText.setText(gitignore == null ? getString(R.string.repo_create_none) : gitignore);
+        if (gitignoreTemplates == null) gitignoreTemplates = new ArrayList<>();
+        showGitignore();
         licenseText.setText(licenseName == null ? getString(R.string.repo_create_none) : licenseName);
         loadOrgs();
     }
@@ -280,32 +287,75 @@ public class CreateRepositoryActivity extends BaseActivity<IBaseContract.Present
     // ---------------------------------------------------------------------------------
 
     private void chooseGitignore() {
-        if (gitignoreTemplates == null) {
+        if (allGitignoreTemplates == null) {
             showLoading();
             background(() -> GitHubApi.call(GitHubApi.service(RepoAdminService.class)
                     .getGitignoreTemplates(false)), (ArrayList<String> list) -> {
                 hideLoading();
-                gitignoreTemplates = list;
+                allGitignoreTemplates = list;
                 chooseGitignore();
             }, error -> hideLoading(), true);
             return;
         }
-        String[] items = new String[gitignoreTemplates.size() + 1];
-        items[0] = getString(R.string.repo_create_none);
-        int checked = 0;
-        for (int i = 0; i < gitignoreTemplates.size(); i++) {
-            items[i + 1] = gitignoreTemplates.get(i);
-            if (gitignoreTemplates.get(i).equals(gitignore)) checked = i + 1;
+        GitignorePickerDialog.show(this, allGitignoreTemplates, gitignoreTemplates, gitignoreCustom,
+                (templates, custom) -> {
+                    gitignoreTemplates = templates;
+                    gitignoreCustom = custom.isEmpty() ? null : custom;
+                    showGitignore();
+                });
+    }
+
+    private void showGitignore() {
+        int customCount = customGitignoreLines().size();
+        String text;
+        if (gitignoreTemplates.isEmpty() && customCount == 0) {
+            text = getString(R.string.repo_create_none);
+        } else {
+            text = String.join(", ", gitignoreTemplates);
+            if (customCount > 0) {
+                String custom = getResources().getQuantityString(R.plurals.gitignore_custom_count,
+                        customCount, customCount);
+                text = text.isEmpty() ? custom : text + " + " + custom;
+            }
         }
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.repo_create_gitignore)
-                .setSingleChoiceItems(items, checked, (dialog, which) -> {
-                    gitignore = which == 0 ? null : items[which];
-                    gitignoreText.setText(items[which]);
-                    dialog.dismiss();
-                })
-                .setNegativeButton(R.string.cancel, null)
-                .show();
+        gitignoreText.setText(text);
+    }
+
+    @NonNull
+    private List<String> customGitignoreLines() {
+        List<String> lines = new ArrayList<>();
+        if (gitignoreCustom == null) return lines;
+        for (String line : gitignoreCustom.split("\\r?\\n")) {
+            if (!line.trim().isEmpty()) lines.add(line.trim());
+        }
+        return lines;
+    }
+
+    /**
+     * One template alone is applied by GitHub while it creates the repository; several
+     * templates or own lines are combined into one .gitignore and committed after it.
+     */
+    private boolean gitignoreAsFile() {
+        return gitignoreTemplates.size() > 1 || !customGitignoreLines().isEmpty();
+    }
+
+    @NonNull
+    private static String buildGitignore(@NonNull RepoAdminService service, @NonNull List<String> templates,
+                                         @NonNull List<String> custom) throws java.io.IOException {
+        StringBuilder text = new StringBuilder();
+        for (String name : templates) {
+            GitignoreTemplate template = GitHubApi.call(service.getGitignoreTemplate(false, name));
+            if (template == null || template.getSource() == null) continue;
+            if (text.length() > 0) text.append("\n");
+            text.append("# ===== ").append(name).append(" =====\n");
+            text.append(template.getSource().trim()).append("\n");
+        }
+        if (!custom.isEmpty()) {
+            if (text.length() > 0) text.append("\n");
+            text.append("# ===== Custom =====\n");
+            for (String line : custom) text.append(line).append("\n");
+        }
+        return text.toString();
     }
 
     private void chooseLicense() {
@@ -357,19 +407,53 @@ public class CreateRepositoryActivity extends BaseActivity<IBaseContract.Present
         if (!description.isEmpty()) body.put("description", description);
         body.put("private", privateRadio.isChecked());
         body.put("auto_init", readmeCheck.isChecked());
-        if (gitignore != null) body.put("gitignore_template", gitignore);
+        final boolean gitignoreFile = gitignoreAsFile();
+        if (!gitignoreFile && gitignoreTemplates.size() == 1) {
+            body.put("gitignore_template", gitignoreTemplates.get(0));
+        }
         if (licenseKey != null) body.put("license_template", licenseKey);
+        final ArrayList<String> templates = new ArrayList<>(gitignoreTemplates);
+        final List<String> customLines = customGitignoreLines();
 
         final String owner = org;
+        gitignoreError = null;
         creating = true;
         updateSummary();
         showProgressDialog(getString(R.string.repo_create_creating));
         background(() -> {
             RepoAdminService service = GitHubApi.service(RepoAdminService.class);
-            return GitHubApi.call(owner == null ? service.createUserRepo(body)
+            Repository repository = GitHubApi.call(owner == null ? service.createUserRepo(body)
                     : service.createOrgRepo(owner, body));
+            if (repository == null) throw new java.io.IOException("Empty answer");
+            if (gitignoreFile) {
+                try {
+                    String text = buildGitignore(service, templates, customLines);
+                    Map<String, Object> file = new HashMap<>();
+                    file.put("message", "Add .gitignore");
+                    file.put("content", Base64.encodeToString(
+                            text.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP));
+                    // a repository that was created a moment ago can answer 404/409 briefly
+                    for (int attempt = 1; ; attempt++) {
+                        try {
+                            GitHubApi.call(service.putFile(repository.getOwner().getLogin(),
+                                    repository.getName(), ".gitignore", file));
+                            break;
+                        } catch (GitHubApi.ApiException e) {
+                            if (attempt >= 4 || (e.code != 404 && e.code != 409)) throw e;
+                            Thread.sleep(1500L * attempt);
+                        }
+                    }
+                } catch (Exception e) {
+                    // the repository exists; say what is missing instead of failing it
+                    gitignoreError = e.getMessage();
+                }
+            }
+            return repository;
         }, (Repository repository) -> {
             dismissProgressDialog();
+            if (gitignoreError != null) {
+                showWarningToast(getString(R.string.gitignore_commit_failed, gitignoreError));
+            }
             showSuccessToast(getString(R.string.repo_create_done, repository.getFullName()));
             RepositoryActivity.show(this, repository.getOwner().getLogin(), repository.getName());
             finish();

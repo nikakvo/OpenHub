@@ -98,8 +98,12 @@ other repositories you will see a note instead.
   GitHub allows letters, digits, `-`, `_` and `.`; other characters become `-`, and the
   form shows the final name.
 - **Description**, **Public** or **Private**.
-- **Initialize this repository with**: a README file, a **.gitignore template** and a
+- **Initialize this repository with**: a README file, a **.gitignore** and a
   **License**. Leave them all off to get an empty repository you can push to.
+- **.gitignore** lists files git should not track (build output, local settings).
+  Search the templates and tick one or more (for example *Android* and *Gradle*), and
+  add your own lines such as `*.apk` or `local.properties`. Several templates and own
+  lines are combined into one `.gitignore` file.
 
 After **Create repository** the new repository opens.
 
