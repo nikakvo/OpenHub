@@ -15,7 +15,11 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.http.GitHubApi;
+import com.thirtydegreesray.openhub.http.PullService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.inject.component.DaggerFragmentComponent;
 import com.thirtydegreesray.openhub.inject.module.FragmentModule;
@@ -25,14 +29,22 @@ import com.thirtydegreesray.openhub.mvp.model.Repository;
 import com.thirtydegreesray.openhub.mvp.presenter.RepoInfoPresenter;
 import com.thirtydegreesray.openhub.ui.activity.IssuesActivity;
 import com.thirtydegreesray.openhub.ui.activity.ProfileActivity;
+import com.thirtydegreesray.openhub.ui.activity.PullRequestsActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepoListActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepositoryActivity;
 import com.thirtydegreesray.openhub.ui.activity.UserListActivity;
 import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
 import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.Json;
+import com.thirtydegreesray.openhub.util.PullChanges;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 /**
@@ -57,6 +69,9 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
     TextView repoCreatedInfoText;
     TextView issuesNumText;
     View issueLay;
+    TextView pullsNumText;
+    private Disposable pullsCount;
+    private long pullsStamp;
     TextView stargazersNumText;
     TextView forksNumText;
     TextView watchersNumText;
@@ -97,6 +112,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
 
         issueLay.setVisibility(repository.isHasIssues() ? View.VISIBLE :View.GONE);
         issuesNumText.setText(String.valueOf(repository.getOpenIssuesCount()));
+        countPulls(repository);
         stargazersNumText.setText(String.valueOf(repository.getStargazersCount()));
         forksNumText.setText(String.valueOf(repository.getForksCount()));
         watchersNumText.setText(String.valueOf(repository.getSubscribersCount()));
@@ -171,9 +187,56 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         readmeLoader.setVisibility(View.GONE);
     }
 
+    /**
+     * GitHub counts open pull requests as open issues too, so the Issues tile shows
+     * open_issues_count minus the open pull requests, like the tabs on github.com.
+     */
+    private void countPulls(@NonNull Repository repository) {
+        if (pullsCount != null) pullsCount.dispose();
+        pullsStamp = PullChanges.stamp();
+        String fullName = repository.getFullName();
+        int openIssues = repository.getOpenIssuesCount();
+        if (pullsNumText.getText().length() == 0) pullsNumText.setText("-");
+        pullsCount = Single.fromCallable(() -> Json.integer(GitHubApi.call(GitHubApi.service(PullService.class)
+                        .searchCount("repo:" + fullName + " is:pr is:open")), "total_count"))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(count -> {
+                    if (pullsNumText == null) return;
+                    pullsNumText.setText(String.valueOf(count));
+                    issuesNumText.setText(String.valueOf(Math.max(0, openIssues - count)));
+                }, error -> {
+                });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (pullsStamp != 0 && PullChanges.changedSince(pullsStamp) && mPresenter != null
+                && mPresenter.getRepository() != null) {
+            countPulls(mPresenter.getRepository());
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (pullsCount != null) pullsCount.dispose();
+        super.onDestroyView();
+    }
+
+    private void openPulls() {
+        Repository repository = mPresenter.getRepository();
+        boolean canCreate = repository.getPermissions() != null
+                && (repository.getPermissions().isPush() || repository.getPermissions().isAdmin());
+        startActivity(PullRequestsActivity.createIntent(requireContext(), repository.getOwner().getLogin(),
+                repository.getName(), canCreate));
+    }
+
     public void onViewClicked(View view) {
         int viewId = view.getId();
-        if (viewId == R.id.issues_lay) {
+        if (viewId == R.id.pulls_lay) {
+            openPulls();
+        } else if (viewId == R.id.issues_lay) {
             IssuesActivity.showForRepo(getActivity(), mPresenter.getRepository().getOwner().getLogin(),
                     mPresenter.getRepository().getName());
 //                showInfoToast(getString(R.string.developing));
@@ -255,6 +318,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         repoCreatedInfoText = root.findViewById(R.id.repo_created_info_text);
         issuesNumText = root.findViewById(R.id.issues_num_text);
         issueLay = root.findViewById(R.id.issues_lay);
+        pullsNumText = root.findViewById(R.id.pulls_num_text);
         stargazersNumText = root.findViewById(R.id.stargazers_num_text);
         forksNumText = root.findViewById(R.id.forks_num_text);
         watchersNumText = root.findViewById(R.id.watchers_num_text);
@@ -262,6 +326,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         readmeLoader = root.findViewById(R.id.readme_loader);
         webView = root.findViewById(R.id.web_view);
         ViewUtils.setOnClick(root, R.id.issues_lay, v -> onViewClicked(v));
+        ViewUtils.setOnClick(root, R.id.pulls_lay, v -> onViewClicked(v));
         ViewUtils.setOnClick(root, R.id.stargazers_lay, v -> onViewClicked(v));
         ViewUtils.setOnClick(root, R.id.froks_lay, v -> onViewClicked(v));
         ViewUtils.setOnClick(root, R.id.watchers_lay, v -> onViewClicked(v));

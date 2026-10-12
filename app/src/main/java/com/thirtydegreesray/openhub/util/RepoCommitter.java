@@ -224,6 +224,7 @@ public final class RepoCommitter {
             JsonObject created = GitHubApi.call(git.createPull(owner, repo, pull));
             JsonElement url = created.get("html_url");
             pullUrl = url == null || url.isJsonNull() ? null : url.getAsString();
+            PullChanges.markChanged();
         }
         return new Result(target, pullUrl);
     }

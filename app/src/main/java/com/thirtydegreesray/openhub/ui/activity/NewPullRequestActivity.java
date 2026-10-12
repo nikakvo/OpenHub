@@ -29,6 +29,7 @@ import com.thirtydegreesray.openhub.ui.widget.MarkdownWritePreview;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.PullChanges;
+import com.thirtydegreesray.openhub.util.RepoChanges;
 import com.thirtydegreesray.openhub.util.RepoCommitter;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
@@ -86,6 +87,8 @@ public class NewPullRequestActivity extends BaseActivity<IBaseContract.Presenter
     @Nullable private String parentDefaultBranch;
     private String defaultBranch;
     private final List<String> headBranches = new ArrayList<>();
+    private Button branchesBn;
+    private long branchesStamp;
     private boolean canCreate;
 
     @Override
@@ -118,6 +121,15 @@ public class NewPullRequestActivity extends BaseActivity<IBaseContract.Presenter
         return owner + "/" + repo;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (branchesStamp != 0 && RepoChanges.changedSince(branchesStamp)) {
+            if (head != null && head.equals(base)) head = null;
+            load();
+        }
+    }
+
     private boolean isCrossRepository() {
         return targetFullName != null && !targetFullName.equalsIgnoreCase(self());
     }
@@ -127,6 +139,7 @@ public class NewPullRequestActivity extends BaseActivity<IBaseContract.Presenter
     // ---------------------------------------------------------------------------------
 
     private void load() {
+        branchesStamp = RepoChanges.stamp();
         loader.setVisibility(View.VISIBLE);
         background(() -> {
             RepoSettingsService service = GitHubApi.service(RepoSettingsService.class);
@@ -242,9 +255,12 @@ public class NewPullRequestActivity extends BaseActivity<IBaseContract.Presenter
         canCreate = false;
         createBn.setEnabled(false);
         if (comparing != null) comparing.dispose();
+        branchesBn.setVisibility(View.GONE);
         if (base == null || head == null) return;
         if (!isCrossRepository() && base.equals(head)) {
-            compareText.setText(R.string.new_pull_same_branch);
+            compareText.setText(headBranches.size() <= 1
+                    ? getString(R.string.new_pull_one_branch, base) : getString(R.string.new_pull_same_branch));
+            branchesBn.setVisibility(View.VISIBLE);
             return;
         }
         compareText.setText(R.string.new_pull_comparing);
@@ -261,6 +277,7 @@ public class NewPullRequestActivity extends BaseActivity<IBaseContract.Presenter
                             ? result.getAsJsonArray("files").size() : 0;
                     if (ahead == 0) {
                         compareText.setText(getString(R.string.new_pull_nothing, base, head));
+                        branchesBn.setVisibility(isCrossRepository() ? View.GONE : View.VISIBLE);
                         return;
                     }
                     compareText.setText(getResources().getQuantityString(R.plurals.new_pull_compare,
@@ -337,6 +354,8 @@ public class NewPullRequestActivity extends BaseActivity<IBaseContract.Presenter
         baseText = root.findViewById(R.id.base_text);
         headText = root.findViewById(R.id.head_text);
         compareText = root.findViewById(R.id.compare_text);
+        branchesBn = root.findViewById(R.id.branches_bn);
+        branchesBn.setOnClickListener(v -> startActivity(BranchesActivity.createIntent(this, owner, repo)));
         titleLayout = root.findViewById(R.id.title_layout);
         titleEdit = root.findViewById(R.id.title_edit);
         draftCheck = root.findViewById(R.id.draft_check);

@@ -84,4 +84,15 @@
     <string name="new_pull_draft">Create as draft</string>
     <string name="new_pull_create">Create pull request</string>
     <string name="new_pull_created">Pull request #%1$d created</string>
+    <string name="new_pull_one_branch">This repository has only one branch (%1$s). A pull request needs a second branch with the changes: edit a file and fill in New branch name when you commit, or create a branch under Branches.</string>
+    <string name="new_pull_manage_branches">Branches</string>
+    <string name="pull_restore_branch">Restore branch</string>
+    <string name="pull_branch_deleted">The branch %1$s was deleted.</string>
+    <string name="pull_branch_restored">Branch %1$s restored</string>
+    <string name="pulls_tile">Pulls</string>
+    <string name="open_links_title">Open GitHub links in OpenHub</string>
+    <string name="open_links_summary_on">On: github.com links from other apps open here</string>
+    <string name="open_links_summary_off">Off: github.com links from other apps open in the browser. Tap to allow</string>
+    <string name="open_links_summary_old">Android asks which app opens github.com links. Tap for the app settings</string>
+    <string name="open_links_hint">Turn on Open supported links, then Add link and tick github.com</string>
 </resources>

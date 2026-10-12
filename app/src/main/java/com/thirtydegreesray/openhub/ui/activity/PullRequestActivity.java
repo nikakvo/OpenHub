@@ -34,6 +34,7 @@ import com.google.gson.JsonObject;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.common.GlideApp;
+import com.thirtydegreesray.openhub.http.GitDataService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.PullService;
 import com.thirtydegreesray.openhub.http.RepoSettingsService;
@@ -297,10 +298,15 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         return String.join(", ", parts);
     }
 
+    /** The compare branch lives in this repository (not in a fork), so it can be deleted or restored here. */
+    private boolean isOwnHeadBranch(@NonNull JsonObject p) {
+        return Json.str(p, "head.repo.full_name").equalsIgnoreCase(owner + "/" + repo)
+                && !Json.str(p, "head.ref").isEmpty();
+    }
+
     private boolean headBranchExists(@NonNull JsonObject p) {
-        String headRepo = Json.str(p, "head.repo.full_name");
         String branch = Json.str(p, "head.ref");
-        if (!headRepo.equalsIgnoreCase(owner + "/" + repo) || branch.isEmpty()) return false;
+        if (!isOwnHeadBranch(p)) return false;
         try {
             return pulls().getBranch(owner, repo, RepoCommitter.encode(branch)).blockingFirst().isSuccessful();
         } catch (Exception e) {
@@ -413,14 +419,18 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         closeBn.setVisibility((write || author) && !isMerged() ? View.VISIBLE : View.GONE);
         closeBn.setText(isClosed() ? R.string.pull_reopen : R.string.pull_close);
 
-        if (isMerged()) {
-            mergeStatus.setText(getString(R.string.pull_merged_into, Json.str(pull, "base.ref")));
-            if (write && headBranchExists) deleteBranchBn.setVisibility(View.VISIBLE);
-            return;
-        }
-        if (isClosed()) {
-            mergeStatus.setText(R.string.pull_closed_unmerged);
-            if (write && headBranchExists) deleteBranchBn.setVisibility(View.VISIBLE);
+        if (isMerged() || isClosed()) {
+            String text = isMerged() ? getString(R.string.pull_merged_into, Json.str(pull, "base.ref"))
+                    : getString(R.string.pull_closed_unmerged);
+            boolean ownBranch = isOwnHeadBranch(pull);
+            if (ownBranch && !headBranchExists) {
+                text += "\n" + getString(R.string.pull_branch_deleted, Json.str(pull, "head.ref"));
+            }
+            mergeStatus.setText(text);
+            if (write && ownBranch) {
+                deleteBranchBn.setText(headBranchExists ? R.string.pull_delete_branch : R.string.pull_restore_branch);
+                deleteBranchBn.setVisibility(View.VISIBLE);
+            }
             return;
         }
         if (isDraft()) {
@@ -682,6 +692,21 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                 .show();
     }
 
+    /** Like "Restore branch" on github.com: recreate the branch at the last commit of the pull request. */
+    private void restoreBranch() {
+        String branch = Json.str(pull, "head.ref");
+        String sha = Json.str(pull, "head.sha");
+        if (sha.isEmpty()) return;
+        run(() -> {
+            Map<String, Object> body = new HashMap<>();
+            body.put("ref", "refs/heads/" + branch);
+            body.put("sha", sha);
+            GitHubApi.call(GitHubApi.service(GitDataService.class).createRef(owner, repo, body));
+            RepoChanges.markChanged();
+            return Boolean.TRUE;
+        }, getString(R.string.pull_branch_restored, branch));
+    }
+
     private void edit() {
         new ComposeDialog.Builder(this)
                 .title(getString(R.string.pull_edit))
@@ -803,7 +828,10 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         tabFiles.setOnClickListener(v -> showTab(2));
         mergeBn.setOnClickListener(v -> merge());
         readyBn.setOnClickListener(v -> toggleDraft());
-        deleteBranchBn.setOnClickListener(v -> deleteBranch());
+        deleteBranchBn.setOnClickListener(v -> {
+            if (headBranchExists) deleteBranch();
+            else restoreBranch();
+        });
         closeBn.setOnClickListener(v -> toggleClosed());
         root.findViewById(R.id.comment_bn).setOnClickListener(v -> comment());
         root.findViewById(R.id.review_bn).setOnClickListener(v -> review());

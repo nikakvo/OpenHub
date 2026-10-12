@@ -270,7 +270,8 @@ preview), edit, close and reopen issues, and manage labels in your own repositor
 ## Pull requests
 
 A pull request proposes merging the changes of one branch into another. Open
-**Pull requests** from a repository's menu. Links to pull requests (in
+**Pulls** on a repository's **Info** tab (it shows how many are open) or **Pull
+requests** from the repository's menu. Links to pull requests (in
 notifications, issues, READMEs) and pull requests you create while committing a
 file now open in the app instead of the browser.
 
@@ -289,7 +290,8 @@ the merge box lets you:
 - **Merge** with any method the repository allows (merge commit, squash, rebase),
   with your own title and message
 - **Ready for review** for a draft, or **Convert to draft**
-- **Delete the branch** after merging
+- **Delete branch** after merging or closing, and **Restore branch** if you change
+  your mind
 - **Close pull request** or **Reopen pull request**
 
 The menu has **Edit** (title, description, base branch), Share, Copy link and Open
@@ -301,6 +303,10 @@ Tap **+** in the list, pick the base branch (where the changes go) and the compa
 branch (where they come from), check the summary of commits and files, write a
 title and description and tap **Create pull request**. In a fork, the pull request goes to the
 original repository by default. Tick **Create as draft** if it is not ready yet.
+
+The changes must be in a second branch. If the repository has only one branch, the
+screen says so and offers **Branches**; the easiest way is to edit a file and fill in
+**New branch name** when you commit (tick **Start a pull request** to create it right away).
 
 ---
 
@@ -316,6 +322,7 @@ original repository by default. Tick **Create as draft** if it is not ready yet.
 | Cache Controller | Show saved data immediately and refresh it from the network in the background. Faster, and pages still open offline |
 | Use built-in downloader | On: OpenHub downloads files itself, over any network. Off: download links are handed to another app (browser, download manager) |
 | Use Custom Tabs | Open web links in a tab inside the app instead of a separate browser |
+| Open GitHub links in OpenHub | Shows whether github.com links from other apps (Telegram, mail, a browser) open in OpenHub. Since Android 12 you allow it once: tap it, turn on **Open supported links**, tap **Add link** and tick `github.com` |
 | Disable loading network image | Do not load pictures and avatars on mobile data, to save data |
 | Check for updates | On (default): when a new OpenHub version is released, the app says so at start (at most every 6 hours) |
 | Check for updates now | Check right away; shows the installed version |

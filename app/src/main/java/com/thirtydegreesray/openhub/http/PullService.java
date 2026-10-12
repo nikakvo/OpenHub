@@ -36,6 +36,13 @@ public interface PullService {
             @Query("page") int page
     );
 
+    /** Issue search; used with per_page=1 for total_count (e.g. "repo:o/r is:pr is:open"). */
+    @NonNull @GET("search/issues?per_page=1")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonObject>> searchCount(
+            @Query("q") String query
+    );
+
     /** Includes body_html, mergeable and mergeable_state. */
     @NonNull @GET("repos/{owner}/{repo}/pulls/{number}")
     @Headers({"Accept: application/vnd.github.full+json", "Cache-Control: no-cache, no-store"})

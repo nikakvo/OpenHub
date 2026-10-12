@@ -78,6 +78,14 @@
                     android:textSize="@dimen/text_small"
                     android:textColor="?android:textColorSecondary"/>
 
+                <Button
+                    android:id="@+id/branches_bn"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:text="@string/new_pull_manage_branches"/>
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/title_layout"
                     android:layout_width="match_parent"

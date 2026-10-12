@@ -49,6 +49,11 @@
         android:key="customTabsEnable"
         android:defaultValue="true"/>
 
+    <Preference
+        android:icon="@drawable/ic_link"
+        android:title="@string/open_links_title"
+        android:key="openGitHubLinks"/>
+
     <SwitchPreference
         android:icon="@drawable/ic_image"
         android:title="@string/disable_loading_image"

@@ -8,6 +8,12 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.verify.domain.DomainVerificationManager;
+import android.content.pm.verify.domain.DomainVerificationUserState;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
 import android.os.Bundle;
 import androidx.annotation.ColorInt;
 import androidx.appcompat.app.AlertDialog;
@@ -74,6 +80,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         findPreference(WATCHED_RELEASES).setOnPreferenceClickListener(this);
         findPreference(RELEASE_CHECK_INTERVAL).setOnPreferenceClickListener(this);
         findPreference(AppUpdater.PREF_CHECK_NOW).setOnPreferenceClickListener(this);
+        findPreference(OPEN_LINKS).setOnPreferenceClickListener(this);
         findPreference(AppUpdater.PREF_CHECK_NOW).setSummary(
                 getString(R.string.update_check_now_summary, AppUpdater.currentVersion()));
         updateWatchedReleasesSummary();
@@ -108,8 +115,60 @@ public class SettingsFragment extends PreferenceFragmentCompat
             case AppUpdater.PREF_CHECK_NOW:
                 if (getActivity() != null) AppUpdater.check(getActivity(), true);
                 return true;
+            case OPEN_LINKS:
+                openLinkSettings();
+                return true;
         }
         return false;
+    }
+
+    private static final String OPEN_LINKS = "openGitHubLinks";
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateOpenLinksSummary();
+    }
+
+    /**
+     * Since Android 12 an app only opens web links of sites it owns, unless the user
+     * allows it under "Open by default". github.com can never be verified for OpenHub,
+     * so the user has to add it there once; this shows whether that was done.
+     */
+    private void updateOpenLinksSummary() {
+        Preference pref = findPreference(OPEN_LINKS);
+        if (pref == null || getContext() == null) return;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            pref.setSummary(R.string.open_links_summary_old);
+            return;
+        }
+        boolean allowed = false;
+        try {
+            DomainVerificationManager manager = getContext().getSystemService(DomainVerificationManager.class);
+            DomainVerificationUserState state = manager.getDomainVerificationUserState(getContext().getPackageName());
+            if (state != null && state.isLinkHandlingAllowed()) {
+                Integer github = state.getHostToStateMap().get("github.com");
+                allowed = github != null && github != DomainVerificationUserState.DOMAIN_STATE_NONE;
+            }
+        } catch (Exception ignored) {
+        }
+        pref.setSummary(allowed ? R.string.open_links_summary_on : R.string.open_links_summary_off);
+    }
+
+    private void openLinkSettings() {
+        if (getContext() == null) return;
+        Uri app = Uri.parse("package:" + getContext().getPackageName());
+        Intent intent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                ? new Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, app)
+                : new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app);
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app));
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Toasty.info(getContext(), getString(R.string.open_links_hint), android.widget.Toast.LENGTH_LONG).show();
+        }
     }
 
     private static final String WATCHED_RELEASES = "watchedReleases";

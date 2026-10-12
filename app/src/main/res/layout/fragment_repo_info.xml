@@ -90,6 +90,30 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/pulls_lay"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_margin="@dimen/spacing_mini"
+                        android:layout_weight="1"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/pulls_num_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="@dimen/text_large"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/pulls_tile"
+                            android:textSize="@dimen/text_mini"/>
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:id="@+id/stargazers_lay"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
