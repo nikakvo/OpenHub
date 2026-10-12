@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Repository settings, branches and branch protection. -->
+<resources>
+    <string name="settings_general">General</string>
+    <string name="settings_description">Description</string>
+    <string name="settings_website">Website</string>
+    <string name="settings_topics">Topics</string>
+    <string name="settings_topics_hint">Separated by commas or spaces, e.g. android, kernel, root. Lowercase letters, digits and hyphens, at most 20.</string>
+    <string name="settings_topic_invalid">\"%1$s\" is not a valid topic</string>
+    <string name="settings_topics_too_many">At most 20 topics</string>
+    <string name="settings_saved">Saved</string>
+    <string name="settings_rename_title">Rename repository?</string>
+    <string name="settings_rename_message">Rename %1$s to %2$s? GitHub redirects the old address, but update your local clones and links.</string>
+
+    <string name="settings_repository">Repository</string>
+    <string name="settings_template">Template repository</string>
+    <string name="settings_template_summary">Others can create new repositories from this one</string>
+    <string name="settings_default_branch">Default branch</string>
+    <string name="settings_default_branch_confirm">Make %1$s the default branch? New pull requests and clones use it.</string>
+    <string name="settings_branches">Branches</string>
+    <string name="settings_branches_summary">Create, rename, delete and protect branches</string>
+
+    <string name="settings_features">Features</string>
+    <string name="settings_issues">Issues</string>
+    <string name="settings_issues_summary">Bug reports, questions and requests</string>
+    <string name="settings_wikis">Wikis</string>
+    <string name="settings_wikis_summary">Documentation pages for the repository</string>
+    <string name="settings_projects">Projects</string>
+    <string name="settings_projects_summary">The Projects tab of the repository</string>
+    <string name="settings_discussions">Discussions</string>
+    <string name="settings_discussions_summary">A forum for the community of the repository</string>
+
+    <string name="settings_pull_requests">Pull requests</string>
+    <string name="settings_allow_merge">Allow merge commits</string>
+    <string name="settings_allow_merge_summary">Add all commits of the branch with a merge commit</string>
+    <string name="settings_merge_message">Default merge commit message</string>
+    <string name="settings_allow_squash">Allow squash merging</string>
+    <string name="settings_allow_squash_summary">Combine all commits of the branch into one</string>
+    <string name="settings_squash_message">Default squash commit message</string>
+    <string name="settings_allow_rebase">Allow rebase merging</string>
+    <string name="settings_allow_rebase_summary">Add the commits of the branch one by one</string>
+    <string name="settings_update_branch">Always suggest updating pull request branches</string>
+    <string name="settings_update_branch_summary">Offer \"Update branch\" when the base branch has new commits</string>
+    <string name="settings_auto_merge">Allow auto-merge</string>
+    <string name="settings_auto_merge_summary">Merge by itself once the requirements are met</string>
+    <string name="settings_delete_head">Automatically delete head branches</string>
+    <string name="settings_delete_head_summary">Delete the branch after its pull request is merged</string>
+    <string name="settings_merge_method_required">At least one merge method must stay allowed</string>
+    <string name="settings_msg_default">Default message</string>
+    <string name="settings_msg_pr_title">Pull request title</string>
+    <string name="settings_msg_pr_title_commits">Pull request title and commit details</string>
+    <string name="settings_msg_pr_title_description">Pull request title and description</string>
+
+    <string name="settings_commits">Commits</string>
+    <string name="settings_signoff">Require sign-off on web-based commits</string>
+    <string name="settings_signoff_summary">Commits made on github.com must be signed off by their author</string>
+    <string name="settings_immutable">Enable release immutability</string>
+    <string name="settings_immutable_summary">Files and tags of a published release cannot be changed</string>
+
+    <string name="settings_danger_zone">Danger zone</string>
+    <string name="settings_visibility">Change visibility</string>
+    <string name="settings_visibility_public">This repository is public</string>
+    <string name="settings_visibility_private">This repository is private</string>
+    <string name="settings_make_private">Make private</string>
+    <string name="settings_make_public">Make public</string>
+    <string name="settings_make_private_message">Make %1$s private? Only you and people you invite will see it. Stars and watchers of other people are removed.</string>
+    <string name="settings_make_public_message">Make %1$s public? Everyone on the internet will see its code, history and releases.</string>
+    <string name="settings_archive">Archive this repository</string>
+    <string name="settings_archive_summary">Make it read-only</string>
+    <string name="settings_archive_message">Archive this repository? It becomes read-only: no pushes, issues or pull requests. You can unarchive it later.</string>
+    <string name="settings_unarchive">Unarchive this repository</string>
+    <string name="settings_unarchive_summary">It is archived (read-only); make it writable again</string>
+    <string name="settings_unarchive_message">Unarchive this repository and make it writable again?</string>
+    <string name="settings_transfer">Transfer ownership</string>
+    <string name="settings_transfer_summary">Move it to another user or an organization</string>
+    <string name="settings_transfer_new_owner">New owner (user or organization)</string>
+    <string name="settings_transfer_button">Transfer</string>
+    <string name="settings_transferred">Transfer to %1$s started</string>
+    <string name="settings_delete">Delete this repository</string>
+    <string name="settings_delete_summary">There is no going back</string>
+    <string name="settings_delete_message">This permanently deletes %1$s with its code, issues, pull requests, releases and wiki. Type its full name to confirm.</string>
+    <string name="settings_delete_button">Delete</string>
+    <string name="settings_deleted">%1$s deleted</string>
+    <string name="settings_delete_scope">Your token is not allowed to delete repositories. Create a new token with the delete_repo scope (Create token on the login screen asks for it).</string>
+    <string name="settings_type_to_confirm">Type %1$s to confirm:</string>
+    <string name="settings_confirm_mismatch">The name does not match</string>
+
+    <string name="branches_none">No branches</string>
+    <string name="branches_new">New branch</string>
+    <string name="branches_new_source">Create the branch from</string>
+    <string name="branches_default">default</string>
+    <string name="branches_protected">protected</string>
+    <string name="branches_protection">Branch protection</string>
+    <string name="branches_created">Branch %1$s created from %2$s</string>
+    <string name="branches_renamed">%1$s renamed to %2$s</string>
+    <string name="branches_delete_title">Delete branch?</string>
+    <string name="branches_delete_message">Delete the branch %1$s? Its commits stay reachable from pull requests and other branches.</string>
+    <string name="branches_deleted">Branch %1$s deleted</string>
+
+    <string name="protection_title">Protect %1$s</string>
+    <string name="protection_enabled">Protect this branch</string>
+    <string name="protection_require_pr">Require a pull request before merging</string>
+    <string name="protection_approvals">Required approvals (0 to 6)</string>
+    <string name="protection_dismiss_stale">Dismiss approvals when new commits are pushed</string>
+    <string name="protection_conversation">Require conversation resolution before merging</string>
+    <string name="protection_linear">Require linear history</string>
+    <string name="protection_force_push">Allow force pushes</string>
+    <string name="protection_deletions">Allow deletions</string>
+    <string name="protection_enforce_admins">Apply the rules to administrators too</string>
+    <string name="protection_saved">Protection of %1$s saved</string>
+    <string name="protection_removed">Protection of %1$s removed</string>
+</resources>

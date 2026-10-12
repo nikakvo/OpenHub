@@ -125,9 +125,30 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
             bookmark.setTitle(mPresenter.isBookmarked() ?
                     getString(R.string.remove_bookmark) : getString(R.string.bookmark));
             menu.findItem(R.id.action_wiki).setVisible(mPresenter.getRepository().isHasWiki());
+            Repository repository = mPresenter.getRepository();
+            menu.findItem(R.id.action_repo_settings).setVisible(repository.getPermissions() != null
+                    && repository.getPermissions().isAdmin());
         }
         return true;
     }
+
+    /** Reopens the repository after its settings changed; closes it when it is gone. */
+    private final androidx.activity.result.ActivityResultLauncher<Intent> settingsLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts
+                    .StartActivityForResult(), result -> {
+                int code = result.getResultCode();
+                if (code == RepoSettingsActivity.RESULT_GONE) {
+                    finish();
+                } else if (code == RepoSettingsActivity.RESULT_MOVED && result.getData() != null) {
+                    RepositoryActivity.show(this, result.getData().getStringExtra("owner"),
+                            result.getData().getStringExtra("repo"));
+                    finish();
+                } else if (code == RESULT_OK) {
+                    RepositoryActivity.show(this, mPresenter.getRepository().getOwner().getLogin(),
+                            mPresenter.getRepository().getName());
+                    finish();
+                }
+            });
 
     @Override
     protected void initView(Bundle savedInstanceState) {
@@ -185,6 +206,14 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
                     && (repository.getPermissions().isPush() || repository.getPermissions().isAdmin());
             ActionsActivity.show(getActivity(), repository.getOwner().getLogin(),
                     repository.getName(), repository.getDefaultBranch(), canRun);
+            return true;
+        } else if (itemId == R.id.action_branches) {
+            startActivity(BranchesActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),
+                    mPresenter.getRepository().getName()));
+            return true;
+        } else if (itemId == R.id.action_repo_settings) {
+            settingsLauncher.launch(RepoSettingsActivity.createIntent(this,
+                    mPresenter.getRepository().getOwner().getLogin(), mPresenter.getRepository().getName()));
             return true;
         } else if (itemId == R.id.action_wiki) {
             WikiActivity.show(getActivity(), mPresenter.getRepository().getOwner().getLogin(),

@@ -110,6 +110,31 @@ website:
   Tokens made with **Create token** in this version have it; for an older token,
   create a new one.
 
+### Repository settings and branches
+
+**Settings** in the menu of a repository you administer works like its Settings page
+on github.com:
+
+- **General**: name (renaming asks first), description, website and topics, then
+  **Save**. **Template repository** and the **Default branch**.
+- **Features**: Issues, Wikis, Projects, Discussions.
+- **Pull requests**: which merge methods are allowed (at least one), their default
+  commit messages, suggesting branch updates, auto-merge, deleting head branches
+  after a merge.
+- **Commits**: require sign-off on commits made on the website. **Releases**: release
+  immutability (when GitHub offers it for the repository).
+- **Danger zone**: change visibility, archive or unarchive, transfer ownership and
+  **delete** the repository (you type its full name to confirm). Deleting needs a
+  token with the `delete_repo` scope; **Create token** asks for it.
+
+**Branches** (in the repository menu, and in Settings) lists all branches with the
+default and protected ones marked. With write access: **+** creates a branch from
+another one, tap a branch to **rename** or **delete** it. Admins also get **Branch
+protection**: require a pull request (with a number of approvals), conversation
+resolution, linear history, allow or forbid force pushes and deletions, and apply
+the rules to admins too. Protecting branches of private repositories needs a paid
+GitHub plan.
+
 ### Creating a repository
 
 **New repository** in the side menu works like github.com/new:
@@ -268,6 +293,7 @@ reminder for that version (Check for updates now still shows it).
 | Watch | Get notifications about everything in a repository |
 | Fork | Your own copy of someone else's repository |
 | Branch | A separate line of work inside a repository (e.g. `main`, `dev`) |
+| Protected branch | A branch with rules, e.g. no force pushes, changes only through pull requests |
 | Tag | A name for a fixed point in history, usually a version like `v1.2` |
 | Commit | One saved change to the files |
 | Release | A published version, usually with files to download |
