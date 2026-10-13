@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenHub Help</title>
+<style>
+  /* Theme colors are filled in by the app (theme and accent color); these are the dark defaults. */
+  :root {
+    --bg: #22252A; --surface: #2D3035; --surface2: #26282C; --border: #3A3F46; --border2: #4A5058;
+    --text: #D7DCE1; --dim: #8B949E; --hi: #FFFFFF;
+    --acc: #03A9F4;
+    --green: #3FB950; --purple: #A371F7; --red: #F85149; --amber: #D29922; --grey: #8B949E; --blue: #58A6FF;
+    --mono: ui-monospace, 'Roboto Mono', 'Droid Sans Mono', monospace;
+    --sans: Roboto, 'Segoe UI', sans-serif;
+  }
+  {{THEME_VARS}}
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-padding-top: 64px; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14.5px; line-height: 1.65; padding-bottom: 48px; }
+  a { color: var(--acc); text-decoration: none; }
+
+  .search { position: sticky; top: 0; z-index: 10; background: var(--bg); padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .search input { width: 100%; background: var(--surface); color: var(--hi); border: 1px solid var(--border2); border-radius: 8px; padding: 9px 12px; font-size: 14px; outline: none; }
+  .search input:focus { border-color: var(--acc); }
+  .search input::placeholder { color: var(--dim); }
+  #noresult { display: none; text-align: center; color: var(--dim); padding: 30px 16px; }
+
+  .hero { margin: 14px 14px 4px; padding: 18px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--acc); }
+  .hero h1 { font-size: 20px; color: var(--hi); font-weight: 600; margin-bottom: 6px; }
+  .hero p { color: var(--text); }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .tile { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; line-height: 1.4; }
+  .tile b { display: block; color: var(--acc); font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+
+  .toc { margin: 12px 14px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .toc-title, .sec-title { font-family: var(--mono); text-transform: uppercase; letter-spacing: .14em; color: var(--dim); }
+  .toc-title { font-size: 10px; margin-bottom: 6px; }
+  .toc a { display: block; font-family: var(--mono); font-size: 13px; padding: 4px 0; border-bottom: 1px dashed var(--border); }
+  .toc a:last-child { border-bottom: none; }
+  .toc a span { color: var(--dim); display: inline-block; min-width: 26px; }
+
+  .sec-title { font-size: 11px; padding: 26px 16px 8px; }
+  .sec-title::before { content: '// '; color: var(--acc); }
+  .box { margin: 0 14px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .box p { margin-bottom: 10px; } .box p:last-child { margin-bottom: 0; }
+  .box h3 { font-family: var(--mono); font-size: 13.5px; color: var(--acc); font-weight: normal; letter-spacing: .3px; margin: 18px 0 6px; }
+  .box h3:first-child { margin-top: 0; }
+  .box ul, .box ol { margin: 6px 0 10px 20px; } .box li { margin-bottom: 5px; }
+  strong { color: var(--hi); font-weight: 600; }
+  code { font-family: var(--mono); font-size: 12.5px; color: var(--amber); background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; word-break: break-word; }
+  .ui { font-weight: 600; color: var(--hi); background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 0 5px; white-space: nowrap; }
+
+  .tw { overflow-x: auto; margin: 8px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 7px 8px 7px 0; color: var(--dim); font-weight: normal; font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em; font-size: 10px; border-bottom: 1px solid var(--border2); }
+  td { padding: 8px 8px 8px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--hi); font-weight: 600; padding-right: 12px; min-width: 110px; }
+
+  .pill { display: inline-block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px; padding: 1px 8px; border-radius: 10px; border: 1px solid; white-space: nowrap; vertical-align: 1px; }
+  .p-green { color: var(--green); border-color: var(--green); } .p-purple { color: var(--purple); border-color: var(--purple); }
+  .p-red { color: var(--red); border-color: var(--red); } .p-amber { color: var(--amber); border-color: var(--amber); }
+  .p-grey { color: var(--grey); border-color: var(--grey); } .p-blue { color: var(--blue); border-color: var(--blue); }
+  .p-acc { color: var(--acc); border-color: var(--acc); }
+
+  .note { border-left: 3px solid var(--acc); background: var(--surface2); padding: 10px 12px; border-radius: 0 8px 8px 0; margin: 10px 0; font-size: 13.5px; }
+  .note.tip { border-left-color: var(--green); } .note.warn { border-left-color: var(--amber); } .note.bad { border-left-color: var(--red); }
+  .note b.lbl { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; display: block; margin-bottom: 2px; }
+  .note.tip b.lbl { color: var(--green); } .note.warn b.lbl { color: var(--amber); } .note.bad b.lbl { color: var(--red); } .note b.lbl { color: var(--acc); }
+
+  .flow { font-family: var(--mono); font-size: 12.5px; text-align: center; line-height: 1.9; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin: 10px 0; }
+  .flow b { color: var(--acc); font-weight: normal; } .flow .g { color: var(--green); } .flow .p { color: var(--purple); }
+  .steps { counter-reset: s; list-style: none; margin-left: 0 !important; }
+  .steps li { counter-increment: s; position: relative; padding-left: 34px; margin-bottom: 9px; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 22px; height: 22px; border-radius: 11px; background: var(--acc); color: var(--bg); font-size: 12px; font-weight: 700; text-align: center; line-height: 22px; }
+  .top { position: fixed; right: 16px; bottom: 18px; width: 44px; height: 44px; border-radius: 22px; background: var(--acc); color: var(--bg); font-size: 22px; line-height: 44px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.4); display: none; }
+  .footer { text-align: center; padding: 26px 16px 8px; font-size: 11px; font-family: var(--mono); color: var(--dim); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="search"><input id="q" type="search" placeholder="Search the help, e.g. merge, token, upload" autocomplete="off"></div>
+<div id="noresult">Nothing found. Try another word.</div>
+
+<div class="hero" data-hero>
+  <h1>Welcome to OpenHub</h1>
+  <p>OpenHub is a GitHub client for Android. Read and write almost everything you would on github.com: browse code, edit files, publish releases, review and merge pull requests, follow builds, get notifications.</p>
+  <div class="tiles">
+    <div class="tile"><b>Browse</b>Repositories, code, READMEs, users</div>
+    <div class="tile"><b>Edit</b>Create, upload, edit files with commits</div>
+    <div class="tile"><b>Pull requests</b>Review, comment on lines, merge</div>
+    <div class="tile"><b>Releases</b>Publish, upload APKs and zips</div>
+    <div class="tile"><b>Actions</b>Runs, artifacts, start workflows</div>
+    <div class="tile"><b>Notifications</b>Inbox and phone notifications</div>
+  </div>
+</div>
+
+<div class="toc" data-toc>
+  <div class="toc-title">contents</div>
+  <a href="#start"><span>1</span>Getting started</a>
+  <a href="#menu"><span>2</span>The side menu</a>
+  <a href="#repo"><span>3</span>A repository</a>
+  <a href="#files"><span>4</span>Files: add, edit, upload</a>
+  <a href="#branches"><span>5</span>Branches and protection</a>
+  <a href="#reposettings"><span>6</span>Repository settings</a>
+  <a href="#newrepo"><span>7</span>New repository</a>
+  <a href="#pulls"><span>8</span>Pull requests</a>
+  <a href="#review"><span>9</span>Reviewing code line by line</a>
+  <a href="#issues"><span>10</span>Issues</a>
+  <a href="#releases"><span>11</span>Releases and downloads</a>
+  <a href="#publish"><span>12</span>Publishing releases</a>
+  <a href="#actions"><span>13</span>GitHub Actions</a>
+  <a href="#notifications"><span>14</span>Notifications</a>
+  <a href="#relnotify"><span>15</span>Release notifications</a>
+  <a href="#explore"><span>16</span>Search, trending, people</a>
+  <a href="#gists"><span>17</span>Gists</a>
+  <a href="#settings"><span>18</span>Settings</a>
+  <a href="#links"><span>19</span>GitHub links and updates</a>
+  <a href="#trouble"><span>20</span>Problems and answers</a>
+  <a href="#glossary"><span>21</span>Glossary</a>
+  <a href="#privacy"><span>22</span>Privacy</a>
+</div>
+
+<!-- 1 -->
+<div data-section>
+<div class="sec-title" id="start">1 · getting started</div>
+<div class="box">
+  <h3>Logging in</h3>
+  <p>The login screen offers two ways. Both give OpenHub the same permissions.</p>
+  <div class="tw"><table>
+    <tr><td>Login with browser</td><td>GitHub opens in your browser. Log in there and approve OpenHub; you come back to the app by yourself. Only shown when the build has its own GitHub OAuth App.</td></tr>
+    <tr><td>Sign in with token</td><td>Works everywhere. A <strong>personal access token</strong> is a password made only for apps. Tap <span class="ui">Create token</span>: GitHub opens with the right permissions already ticked. Press <em>Generate token</em>, copy it and paste it into OpenHub.</td></tr>
+  </table></div>
+  <div class="note"><b class="lbl">Your token</b>It is stored only on this phone and sent only to GitHub. You can revoke it any time on github.com.</div>
+  <h3>What the permissions are for</h3>
+  <div class="tw"><table>
+    <tr><th>permission</th><th>needed for</th></tr>
+    <tr><td><code>repo</code></td><td>Your repositories (also private ones): files, releases, pull requests, issues, settings</td></tr>
+    <tr><td><code>workflow</code></td><td>Changing files under <code>.github/workflows</code>, starting workflows</td></tr>
+    <tr><td><code>delete_repo</code></td><td>Deleting a repository</td></tr>
+    <tr><td><code>notifications</code></td><td>Your notification inbox</td></tr>
+    <tr><td><code>gist</code></td><td>Your gists, including secret ones</td></tr>
+    <tr><td><code>user</code></td><td>Your profile, following and followers</td></tr>
+  </table></div>
+  <h3>More than one account</h3>
+  <p>Open the side menu, tap the small arrow next to your name and choose <span class="ui">Add account</span>. Tap an account in the same list to switch to it. <span class="ui">Logout</span> removes the current account from the phone.</p>
+  <h3>First steps</h3>
+  <ol class="steps">
+    <li>Open the side menu (top left) and look around: your repositories, notifications, trending projects.</li>
+    <li>Open any repository. The <strong>Info</strong> tab shows its README, <strong>Files</strong> its code.</li>
+    <li>Tap the <strong>⋮</strong> menu of a repository: releases, Actions, pull requests and more are there.</li>
+    <li>Not sure what a word means? See the <a href="#glossary">Glossary</a>.</li>
+  </ol>
+</div>
+</div>
+
+<!-- 2 -->
+<div data-section>
+<div class="sec-title" id="menu">2 · the side menu</div>
+<div class="box">
+  <div class="tw"><table>
+    <tr><th>item</th><th>what it shows</th></tr>
+    <tr><td>Profile</td><td>Your profile: followers, repositories, gists, activity</td></tr>
+    <tr><td>Notifications</td><td>Your GitHub inbox (see <a href="#notifications">14</a>)</td></tr>
+    <tr><td>News</td><td>Activity of the people and repositories you follow</td></tr>
+    <tr><td>Issues</td><td>Issues you created, are assigned to or are mentioned in</td></tr>
+    <tr><td>Gists</td><td>Your gists</td></tr>
+    <tr><td>New repository</td><td>Create a repository (see <a href="#newrepo">7</a>)</td></tr>
+    <tr><td>My repos</td><td>Your repositories</td></tr>
+    <tr><td>Starred repos</td><td>Repositories you starred</td></tr>
+    <tr><td>Bookmarks</td><td>Repositories and users you bookmarked inside OpenHub</td></tr>
+    <tr><td>Search</td><td>Search repositories and users</td></tr>
+    <tr><td>Trace</td><td>What you looked at recently</td></tr>
+    <tr><td>Trending repos</td><td>What is popular today, this week or this month</td></tr>
+    <tr><td>Repo collections</td><td>Lists of repositories picked by GitHub around a theme</td></tr>
+    <tr><td>Featured topics</td><td>Popular topics; open one to see its repositories</td></tr>
+    <tr><td>Global news</td><td>Public activity on GitHub</td></tr>
+    <tr><td>Settings</td><td>See <a href="#settings">18</a></td></tr>
+    <tr><td>Help</td><td>This page</td></tr>
+    <tr><td>About</td><td>Version, license and credits</td></tr>
+  </table></div>
+  <div class="note tip"><b class="lbl">Tip</b>The icon at the top right of list pages sorts or filters the list. On long lists an arrow button appears at the bottom right: tap it to jump back to the top.</div>
+</div>
+</div>
+
+<!-- 3 -->
+<div data-section>
+<div class="sec-title" id="repo">3 · a repository</div>
+<div class="box">
+  <h3>The four tabs</h3>
+  <div class="tw"><table>
+    <tr><td>Info</td><td>Description, the numbers and the README. Wide tables and code blocks in the README scroll sideways.</td></tr>
+    <tr><td>Files</td><td>Browse folders and open files. Back goes up one folder. See <a href="#files">4</a> for editing.</td></tr>
+    <tr><td>Commits</td><td>The history of changes; tap one for its changed files and diff.</td></tr>
+    <tr><td>Activity</td><td>Recent events in the repository.</td></tr>
+  </table></div>
+  <h3>The numbers on Info</h3>
+  <p><span class="ui">Issues</span> and <span class="ui">Pulls</span> open the issue and pull request lists (they count only open ones). <span class="ui">Stargazers</span>, <span class="ui">Forks</span> and <span class="ui">Watchers</span> show who starred, forked or watches it.</p>
+  <div class="note"><b class="lbl">Note</b>Since July 2026 GitHub shows stargazers and watchers only to the repository's owners and collaborators. For other repositories you see a note instead of the list. Not a bug.</div>
+  <h3>Top buttons</h3>
+  <p><strong>Star</strong> (like or save it) and <strong>Branches or tags</strong> (switch the branch you look at; files, commits and README follow it).</p>
+  <h3>The ⋮ menu</h3>
+  <div class="tw"><table>
+    <tr><td>Share · Open in browser · Copy URL · Copy clone URL</td><td>The usual</td></tr>
+    <tr><td>Watch</td><td>Get GitHub notifications for everything in the repository</td></tr>
+    <tr><td>Fork</td><td>Make your own copy of the repository</td></tr>
+    <tr><td>Latest release</td><td>Open the newest stable release directly</td></tr>
+    <tr><td>Notify about new releases</td><td>A phone notification when a new release comes out (<a href="#relnotify">15</a>)</td></tr>
+    <tr><td>Releases</td><td>All releases (<a href="#releases">11</a>)</td></tr>
+    <tr><td>Actions</td><td>Builds and automations (<a href="#actions">13</a>)</td></tr>
+    <tr><td>Pull requests</td><td>Open and closed pull requests (<a href="#pulls">8</a>)</td></tr>
+    <tr><td>Branches</td><td>All branches; create, rename, delete, protect (<a href="#branches">5</a>)</td></tr>
+    <tr><td>Settings</td><td>Only in repositories you administer (<a href="#reposettings">6</a>)</td></tr>
+    <tr><td>Wiki</td><td>The repository's wiki pages</td></tr>
+    <tr><td>Download source</td><td>The code of the current branch as zip or tar.gz</td></tr>
+    <tr><td>Bookmark</td><td>Save it in Bookmarks</td></tr>
+  </table></div>
+</div>
+</div>
+
+<!-- 4 -->
+<div data-section>
+<div class="sec-title" id="files">4 · files: add, edit, upload</div>
+<div class="box">
+  <p>In repositories where you can write, the <strong>Files</strong> tab works like github.com. Every change is a real <strong>commit</strong> with your name.</p>
+  <h3>Adding</h3>
+  <ul>
+    <li>The <span class="ui">+</span> button: <strong>Create new file</strong> (type a <code>/</code> in the name to make folders, e.g. <code>docs/notes.md</code>) or <strong>Upload files</strong> from the phone into the folder you are in.</li>
+    <li>Several uploaded files become one commit. Files up to 25 MB; bigger files belong in a release.</li>
+  </ul>
+  <h3>Changing</h3>
+  <ul>
+    <li>Long-press a file: <strong>Edit file</strong>, <strong>Rename or move</strong>, <strong>Delete file</strong>, <strong>Download</strong>. An open file has the same actions in its toolbar (pencil) and menu.</li>
+    <li>The editor shows the file in a monospace font; Markdown files also get <span class="ui">Write</span> and <span class="ui">Preview</span>. Text files up to 512 KB can be edited.</li>
+    <li>At the bottom: <span class="ui">Branch: main ▾</span>. Tap it to commit to another branch; an open file is then loaded again from that branch.</li>
+  </ul>
+  <h3>Commit changes</h3>
+  <p>Asks for a short message (prefilled, e.g. <em>Update README.md</em>) and an optional longer description, then where the commit goes:</p>
+  <div class="tw"><table>
+    <tr><td>Commit directly to the branch</td><td>The change lands right away. On a branch that is not the default one, <span class="ui">Start a pull request into main</span> is offered too; if the branch already has an open pull request, the commit goes into it and it opens.</td></tr>
+    <tr><td>Create a new branch</td><td>The change goes into a new branch (name prefilled), and with <span class="ui">Start a pull request</span> ticked a pull request opens right after. The safe way for important changes.</td></tr>
+  </table></div>
+  <div class="flow">edit a file → <b>commit</b> to a new branch → <span class="g">pull request</span> → review → <span class="p">merge</span> into main</div>
+  <div class="note"><b class="lbl">Good to know</b>File permissions such as executable scripts are kept. Changing files under <code>.github/workflows</code> needs the <code>workflow</code> permission; tokens made with <span class="ui">Create token</span> in this version have it.</div>
+</div>
+</div>
+
+<!-- 5 -->
+<div data-section>
+<div class="sec-title" id="branches">5 · branches and protection</div>
+<div class="box">
+  <p>A <strong>branch</strong> is a separate line of work: you change things there without touching <code>main</code>, then merge them with a pull request.</p>
+  <p><strong>Branches</strong> (repository menu) lists all branches; the default and protected ones are marked.</p>
+  <ul>
+    <li><span class="ui">+</span> creates a branch. With one branch it asks for the name right away; with more, you pick the branch to start from first.</li>
+    <li>Tap a branch to <strong>rename</strong> or <strong>delete</strong> it.</li>
+    <li>Admins also get <strong>Branch protection</strong>: require a pull request (with a number of approvals), conversation resolution, linear history, allow or forbid force pushes and deletions, and apply the rules to admins too.</li>
+  </ul>
+  <div class="note warn"><b class="lbl">Watch out</b>Without <em>Apply the rules to administrators too</em> you, as the owner, can still commit directly to a protected branch. Protecting branches of private repositories needs a paid GitHub plan.</div>
+</div>
+</div>
+
+<!-- 6 -->
+<div data-section>
+<div class="sec-title" id="reposettings">6 · repository settings</div>
+<div class="box">
+  <p><strong>Settings</strong> in the menu of a repository you administer, like its Settings page on github.com:</p>
+  <div class="tw"><table>
+    <tr><td>General</td><td>Name (renaming asks first), description, website and topics, then <span class="ui">Save</span>. Template repository and the default branch.</td></tr>
+    <tr><td>Features</td><td>Issues, Wikis, Projects, Discussions on or off.</td></tr>
+    <tr><td>Pull requests</td><td>Which merge methods are allowed (at least one), their default commit messages, suggesting branch updates, auto-merge, deleting branches after a merge.</td></tr>
+    <tr><td>Commits</td><td>Require sign-off on commits made on the website.</td></tr>
+    <tr><td>Releases</td><td>Release immutability: published releases and their files can no longer change (when GitHub offers it).</td></tr>
+  </table></div>
+  <h3>Danger zone</h3>
+  <p><span class="pill p-red">careful</span> Change visibility (public / private), archive or unarchive, transfer ownership, and <strong>delete</strong> the repository: you type its full name to confirm.</p>
+  <div class="note bad"><b class="lbl">Delete needs a permission</b>Deleting needs <code>delete_repo</code>. If OpenHub says it is missing: with a token, open it on github.com (Settings → Developer settings → Personal access tokens), tick <code>delete_repo</code> and press <em>Update token</em>. Signed in with the browser? Log out and use <span class="ui">Login with browser</span> again; GitHub asks you to allow the new permission.</div>
+</div>
+</div>
+
+<!-- 7 -->
+<div data-section>
+<div class="sec-title" id="newrepo">7 · new repository</div>
+<div class="box">
+  <p><strong>New repository</strong> in the side menu works like github.com/new.</p>
+  <ol class="steps">
+    <li><strong>Owner</strong>: your account, or one of your organizations (tap to switch).</li>
+    <li><strong>Repository name</strong>: OpenHub checks while you type whether it is still free. Letters, digits, <code>-</code>, <code>_</code> and <code>.</code>; other characters become <code>-</code>.</li>
+    <li><strong>Description</strong>, then <strong>Public</strong> or <strong>Private</strong>.</li>
+    <li><strong>Initialize with</strong> a README, a <code>.gitignore</code> and a license, or leave them all off for an empty repository you can push to.</li>
+    <li><span class="ui">Create repository</span>: the new repository opens.</li>
+  </ol>
+  <h3>.gitignore</h3>
+  <p>Lists files git should not track (build output, local settings). Search the templates and tick one or more (e.g. <em>Android</em> and <em>Gradle</em>), and add your own lines such as <code>*.apk</code> or <code>local.properties</code>. Everything is combined into one file.</p>
+</div>
+</div>
+
+<!-- 8 -->
+<div data-section>
+<div class="sec-title" id="pulls">8 · pull requests</div>
+<div class="box">
+  <p>A <strong>pull request</strong> (PR) proposes merging the changes of one branch into another, so they can be discussed and checked first. Open <span class="ui">Pulls</span> on the Info tab or <span class="ui">Pull requests</span> in the repository menu. Links to pull requests (notifications, issues, READMEs, other apps) open here too.</p>
+  <h3>States</h3>
+  <p><span class="pill p-green">Open</span> waiting &nbsp; <span class="pill p-grey">Draft</span> not ready yet &nbsp; <span class="pill p-purple">Merged</span> done &nbsp; <span class="pill p-red">Closed</span> closed without merging</p>
+  <h3>Inside a pull request</h3>
+  <div class="tw"><table>
+    <tr><td>Conversation</td><td>The description, comments, reviews and line comments, and the status of the checks (GitHub Actions and other CI).</td></tr>
+    <tr><td>Commits</td><td>The commits it adds.</td></tr>
+    <tr><td>Files</td><td>The changed files with the number of comments; tap one for its diff (<a href="#review">9</a>).</td></tr>
+  </table></div>
+  <p>At the bottom: <span class="ui">Comment</span> and <span class="ui">Review changes</span> (<em>Comment</em>, <em>Approve</em> or <em>Request changes</em>), with Write and Preview like on the site.</p>
+  <h3>The merge box</h3>
+  <p>If you can write to the repository:</p>
+  <ul>
+    <li><span class="ui">Merge pull request</span> with any method the repository allows: <strong>merge commit</strong>, <strong>squash</strong> (all commits become one) or <strong>rebase</strong>, with your own title and message.</li>
+    <li><span class="ui">Ready for review</span> for a draft, or <span class="ui">Convert to draft</span>.</li>
+    <li><span class="ui">Delete branch</span> after merging or closing, and <span class="ui">Restore branch</span> if you change your mind.</li>
+    <li><span class="ui">Close pull request</span> / <span class="ui">Reopen pull request</span>.</li>
+  </ul>
+  <p>The ⋮ menu has <strong>Edit</strong> (title, description), Refresh, Share, Copy URL and Open in browser. Long-press a comment to edit or delete your own.</p>
+  <div class="note warn"><b class="lbl">No merge button?</b>The box says why: <em>conflicts</em> (both branches changed the same lines; solve it on github.com or with git), a draft, failing required checks or missing approvals.</div>
+  <h3>Opening a pull request</h3>
+  <ol class="steps">
+    <li>Tap <span class="ui">+</span> in the pull request list.</li>
+    <li><strong>Base</strong>: where the changes go (usually <code>main</code>). <strong>Compare</strong>: where they come from.</li>
+    <li>Check the summary (commits and files), write a title and a description.</li>
+    <li>Tick <span class="ui">Create as draft</span> if it is not ready, then <span class="ui">Create pull request</span>.</li>
+  </ol>
+  <p>In a fork, the pull request goes to the original repository by default. If the repository has only one branch, the screen says so and offers <span class="ui">Branches</span>; easier still, edit a file and commit to a new branch with <span class="ui">Start a pull request</span> (<a href="#files">4</a>).</p>
+</div>
+</div>
+
+<!-- 9 -->
+<div data-section>
+<div class="sec-title" id="review">9 · reviewing code line by line</div>
+<div class="box">
+  <p>In a pull request, <strong>Files</strong> → a file opens its diff:</p>
+  <p><span class="pill p-green">+ green</span> added lines &nbsp; <span class="pill p-red">- red</span> removed lines &nbsp; <span class="pill p-blue">@@</span> start of a changed block</p>
+  <ul>
+    <li><strong>Tap a line</strong> to comment on it.</li>
+    <li><strong>Several lines</strong>: long-press the first line (it turns yellow), then tap the last one. Tap the same line again to cancel.</li>
+    <li><span class="ui">Suggest a change</span> (on added or unchanged lines) puts the code into a suggestion block. Edit it, and the author can apply it on github.com with one tap (<em>Commit suggestion</em>).</li>
+    <li>Comments appear under their line, with <span class="ui">Reply…</span> to answer. Long-press one to edit, delete or copy its link.</li>
+    <li>Comments on code that changed since are listed at the top as outdated.</li>
+  </ul>
+  <div class="note"><b class="lbl">Your own pull request</b>GitHub does not let you <em>Approve</em> or <em>Request changes</em> on your own pull request; comments are fine. A review of type <em>Comment</em> needs some text.</div>
+</div>
+</div>
+
+<!-- 10 -->
+<div data-section>
+<div class="sec-title" id="issues">10 · issues</div>
+<div class="box">
+  <p>Issues are bug reports, questions and requests. Open them from the <span class="ui">Issues</span> number on a repository's Info tab or from <strong>Issues</strong> in the side menu (yours: created, assigned, mentioned).</p>
+  <ul>
+    <li>Create, edit, close and reopen issues.</li>
+    <li>Comment with a Markdown editor and preview.</li>
+    <li>Manage labels in your own repositories.</li>
+  </ul>
+</div>
+</div>
+
+<!-- 11 -->
+<div data-section>
+<div class="sec-title" id="releases">11 · releases and downloads</div>
+<div class="box">
+  <p>A <strong>release</strong> is a published version of a project, usually with files to download (APKs, zip modules, binaries).</p>
+  <p><span class="pill p-green">Latest</span> newest stable &nbsp; <span class="pill p-amber">Pre-release</span> test version &nbsp; <span class="pill p-grey">Draft</span> not published (only people with write access see it)</p>
+  <ul>
+    <li>Open a release for its notes and files (<strong>assets</strong>) with size and download count. Tap a file to download it, long-press to copy its link. The download button also offers the source code archives.</li>
+    <li>Downloads go to the phone's <strong>Download</strong> folder. The built-in downloader works on Wi-Fi, mobile data, roaming and VPN, and resumes after a lost connection.</li>
+    <li>When a download finishes, its notification has <span class="ui">Install</span> (APK files) or <span class="ui">Open</span>, and <span class="ui">Share</span>, e.g. to send a module zip to your root manager.</li>
+  </ul>
+</div>
+</div>
+
+<!-- 12 -->
+<div data-section>
+<div class="sec-title" id="publish">12 · publishing releases</div>
+<div class="box">
+  <p>In repositories where you can write, releases are managed like on github.com.</p>
+  <ol class="steps">
+    <li><span class="ui">+</span> in the releases list: <strong>New release</strong>.</li>
+    <li><strong>Tag</strong>: pick one with the tag button or type a new one such as <code>v1.2.0</code>; a new tag is created from the <strong>Target</strong> branch when the release is published.</li>
+    <li>Title and notes. <span class="ui">Generate release notes</span> lets GitHub write them from the merged pull requests. <span class="ui">Write</span> / <span class="ui">Preview</span> shows how they will look.</li>
+    <li><span class="ui">Add files</span>: an APK or a zip you built, e.g. in Termux (it appears in the file picker's side menu). The pencil renames a file, the cross removes it.</li>
+    <li><span class="ui">Save draft</span> keeps it private, <span class="ui">Publish release</span> makes it public.</li>
+  </ol>
+  <div class="note tip"><b class="lbl">Safe uploads</b>With new files the release stays a draft while they upload and is published only when every file arrived, so nobody downloads half a release. Uploads run in the background with a progress notification and <span class="ui">Cancel</span>; a lost connection is retried.</div>
+  <h3>From other apps</h3>
+  <p>Share files from a file manager, Termux (<code>termux-share</code>) or Telegram and choose <strong>Upload to GitHub release</strong>. Pick the repository (the last one is on top), then a release or <strong>New release</strong>. Files that already exist can be replaced.</p>
+  <h3>In an open release</h3>
+  <p>The menu has Edit, Publish release (drafts), Set as latest release, Upload files and Delete release (optionally with its tag). Each file has a pencil to rename it and a menu to copy its link or delete it.</p>
+</div>
+</div>
+
+<!-- 13 -->
+<div data-section>
+<div class="sec-title" id="actions">13 · github actions</div>
+<div class="box">
+  <p>Many projects build their apps automatically with <strong>GitHub Actions</strong>, and the newest test builds are often only there. Repository menu → <span class="ui">Actions</span>.</p>
+  <p><span class="pill p-green">Success</span> <span class="pill p-red">Failed</span> <span class="pill p-amber">In progress</span> <span class="pill p-amber">Queued</span> <span class="pill p-grey">Cancelled</span> <span class="pill p-grey">Skipped</span></p>
+  <ul>
+    <li>Each row is one <strong>run</strong>: what started it, the workflow, its number, the branch and the status.</li>
+    <li><strong>Tap a run</strong> for its <strong>artifacts</strong> (the files it built) and tap one to download it as a zip. GitHub deletes artifacts after a while (usually 90 days); old ones show <em>expired</em>.</li>
+    <li><strong>Long-press a run</strong> to open it in the browser (logs, details).</li>
+    <li>The filter icon shows one workflow; the menu has <span class="ui">Successful runs only</span>.</li>
+    <li>In your own repositories the play button starts a workflow by hand: pick it, check the branch, add inputs as <code>key=value</code> lines. Only workflows with a <code>workflow_dispatch</code> trigger can be started.</li>
+  </ul>
+</div>
+</div>
+
+<!-- 14 -->
+<div data-section>
+<div class="sec-title" id="notifications">14 · notifications</div>
+<div class="box">
+  <p><strong>Notifications</strong> in the side menu is your GitHub inbox, grouped by repository, with the tabs <span class="ui">Unread</span>, <span class="ui">Participating</span> (threads you take part in) and <span class="ui">All</span>. Each entry says why it came: <em>mentioned you</em>, <em>review requested</em>, <em>assigned to you</em>, <em>workflow run</em>…</p>
+  <ul>
+    <li><strong>Tap</strong> an entry to open it in the app (issues, pull requests, commits, workflow runs; releases and discussions open their page). It becomes read.</li>
+    <li><strong>Long-press</strong> for <span class="ui">Mark as read</span>, <span class="ui">Mark as done</span> (leaves the inbox, like on github.com), <span class="ui">Unsubscribe</span> (no more notifications for that issue or pull request) and <span class="ui">Open in browser</span>.</li>
+    <li>The check mark next to a repository marks all its notifications read; the menu of the Unread tab marks everything read.</li>
+  </ul>
+  <h3>On the phone</h3>
+  <p>Turn on <strong>Settings → GitHub notifications</strong>: OpenHub checks your inbox in the background and shows new notifications, also when the app is closed. Each has <span class="ui">Mark as read</span>; tap it to open the thread. <strong>GitHub notifications check</strong> sets how often (15 minutes to 8 hours; 30 minutes by default). Only what arrives after you turned it on is shown.</p>
+  <div class="note"><b class="lbl">Who notifies whom</b>GitHub notifies you about what <em>other people</em> do: a comment on your issue, a review request, a mention. Your own actions never notify yourself.</div>
+</div>
+</div>
+
+<!-- 15 -->
+<div data-section>
+<div class="sec-title" id="relnotify">15 · release notifications</div>
+<div class="box">
+  <p>Follow any repository's releases, even ones you do not watch: repository menu → <span class="ui">Notify about new releases</span>. OpenHub checks in the background and shows a notification when a new release is out. Tap it to open the release.</p>
+  <ul>
+    <li><strong>Settings → Release notifications</strong> lists the repositories you follow this way; uncheck one to stop, or use <span class="ui">Check now</span>.</li>
+    <li><strong>Settings → Release check interval</strong>: 15 minutes to 7 days, 6 hours by default.</li>
+  </ul>
+  <div class="note"><b class="lbl">Android 13 and newer</b>The first time, Android asks for permission to show notifications. Checks need internet, and Android may delay them a little to save battery.</div>
+</div>
+</div>
+
+<!-- 16 -->
+<div data-section>
+<div class="sec-title" id="explore">16 · search, trending, people</div>
+<div class="box">
+  <div class="tw"><table>
+    <tr><td>Search</td><td>Repositories and users, with sorting.</td></tr>
+    <tr><td>Trending</td><td>Popular repositories for any language, today, this week or this month.</td></tr>
+    <tr><td>Collections · Topics</td><td>Hand-picked lists and popular topics from GitHub Explore.</td></tr>
+    <tr><td>Profiles</td><td>Anyone's repositories, stars, gists, followers and activity; follow and unfollow. Organizations show their repositories, members and activity.</td></tr>
+    <tr><td>Bookmarks · Trace</td><td>Save repositories and users inside OpenHub; Trace remembers what you looked at.</td></tr>
+  </table></div>
+</div>
+</div>
+
+<!-- 17 -->
+<div data-section>
+<div class="sec-title" id="gists">17 · gists</div>
+<div class="box">
+  <p>A <strong>gist</strong> is a small set of files shared on GitHub: a script, a config, notes. Open them from <strong>Gists</strong> in the side menu (yours, including secret ones) or from anyone's profile. Tap a gist to see its files, tap a file to read it (Markdown is formatted, code highlighted) or its arrow to download it. Long-press a gist to open it in the browser.</p>
+</div>
+</div>
+
+<!-- 18 -->
+<div data-section>
+<div class="sec-title" id="settings">18 · settings</div>
+<div class="box">
+  <div class="tw"><table>
+    <tr><th>setting</th><th>what it does</th></tr>
+    <tr><td>Choose Theme</td><td>Dark (default), Light teal, Light indigo or AMOLED dark (pure black, saves battery on OLED screens)</td></tr>
+    <tr><td>Theme Accent Color</td><td>The color of buttons, links and highlights</td></tr>
+    <tr><td>Start Page</td><td>Which page opens when you start the app</td></tr>
+    <tr><td>Release notifications</td><td>Repositories you follow releases of (<a href="#relnotify">15</a>)</td></tr>
+    <tr><td>Release check interval</td><td>How often they are checked</td></tr>
+    <tr><td>GitHub notifications</td><td><span class="pill p-grey">off</span> by default. On: your GitHub inbox on the phone (<a href="#notifications">14</a>)</td></tr>
+    <tr><td>GitHub notifications check</td><td>How often the inbox is checked</td></tr>
+    <tr><td>Cache Controller</td><td>Show saved data at once and refresh it in the background. Faster, and pages open offline</td></tr>
+    <tr><td>Use built-in downloader</td><td>On: OpenHub downloads by itself over any network. Off: links go to another app</td></tr>
+    <tr><td>Use Custom Tabs</td><td>Web links open in a tab inside the app</td></tr>
+    <tr><td>Open GitHub links in OpenHub</td><td>Whether github.com links from other apps open here (<a href="#links">19</a>)</td></tr>
+    <tr><td>Disable loading network image</td><td>No pictures and avatars on mobile data</td></tr>
+    <tr><td>Check for updates</td><td><span class="pill p-green">on</span> by default: a new OpenHub version is announced at start</td></tr>
+    <tr><td>Check for updates now</td><td>Check right away; shows the installed version</td></tr>
+  </table></div>
+</div>
+</div>
+
+<!-- 19 -->
+<div data-section>
+<div class="sec-title" id="links">19 · github links and updates</div>
+<div class="box">
+  <h3>Open GitHub links in OpenHub</h3>
+  <p>Since Android 12 an app opens links of a website only when you allow it once. To open github.com links from Telegram, mail or a browser in OpenHub:</p>
+  <ol class="steps">
+    <li><strong>Settings → Open GitHub links in OpenHub</strong> (it shows <em>On</em> or <em>Off</em>).</li>
+    <li>Turn on <strong>Open supported links</strong>.</li>
+    <li><strong>Add link</strong> → tick <code>github.com</code>.</li>
+  </ol>
+  <p>Repositories, issues, pull requests, releases and profiles then open in the app. <span class="ui">Open in browser</span> in the app still opens your browser.</p>
+  <h3>Updates of OpenHub</h3>
+  <p>When a new version is released, OpenHub says so at start (at most every 6 hours). <span class="ui">Download</span> fetches the APK with the built-in downloader; tap <span class="ui">Install</span> in its notification. <span class="ui">Skip this version</span> stops the reminder for that version.</p>
+</div>
+</div>
+
+<!-- 20 -->
+<div data-section>
+<div class="sec-title" id="trouble">20 · problems and answers</div>
+<div class="box">
+  <h3>"Must have admin rights" when deleting a repository</h3>
+  <p>The <code>delete_repo</code> permission is missing; see <a href="#reposettings">6</a>.</p>
+  <h3>Changing a workflow file is refused</h3>
+  <p>The <code>workflow</code> permission is missing. Create a new token with <span class="ui">Create token</span>, or log in with the browser again.</p>
+  <h3>No Merge button</h3>
+  <p>Read the merge box: conflicts, a draft, missing approvals or failing checks. Conflicts are solved on github.com or with git.</p>
+  <h3>Create pull request stays grey</h3>
+  <p>Base and compare are the same branch, or the compare branch has no new commits. Commit something to that branch first.</p>
+  <h3>A github.com link opens the browser</h3>
+  <p>Allow github.com links once; see <a href="#links">19</a>.</p>
+  <h3>Phone notifications do not come</h3>
+  <p>Check that <strong>GitHub notifications</strong> is on and Android allows OpenHub's notifications. On some phones (Xiaomi, Samsung) set the battery setting of OpenHub to <em>No restrictions</em>, or background checks may be delayed.</p>
+  <h3>Stargazers or watchers are empty</h3>
+  <p>GitHub shows them only to owners and collaborators since July 2026.</p>
+  <h3>A page shows old data</h3>
+  <p>Pull down to refresh, or use Refresh in the menu. With Cache Controller on, saved data appears first and is then updated.</p>
+</div>
+</div>
+
+<!-- 21 -->
+<div data-section>
+<div class="sec-title" id="glossary">21 · glossary</div>
+<div class="box">
+  <div class="tw"><table>
+    <tr><td>Repository</td><td>A project: its files, history, issues and releases ("repo")</td></tr>
+    <tr><td>Star</td><td>Like or bookmark a repository on GitHub</td></tr>
+    <tr><td>Watch</td><td>Get notifications about everything in a repository</td></tr>
+    <tr><td>Fork</td><td>Your own copy of someone else's repository</td></tr>
+    <tr><td>Commit</td><td>One saved change to the files, with a message</td></tr>
+    <tr><td>Branch</td><td>A separate line of work, e.g. <code>main</code>, <code>dev</code></td></tr>
+    <tr><td>Default branch</td><td>The main branch people see first, usually <code>main</code></td></tr>
+    <tr><td>Protected branch</td><td>A branch with rules, e.g. changes only through pull requests</td></tr>
+    <tr><td>Pull request</td><td>A proposal to merge one branch into another, with discussion and review</td></tr>
+    <tr><td>Review</td><td>Comments on a pull request: approve, request changes, or just comment</td></tr>
+    <tr><td>Merge</td><td>Taking the changes of a branch into another</td></tr>
+    <tr><td>Squash</td><td>Merging all commits of a pull request as one</td></tr>
+    <tr><td>Conflict</td><td>Two branches changed the same lines; a person must decide</td></tr>
+    <tr><td>Diff</td><td>The difference between two versions: green added, red removed</td></tr>
+    <tr><td>Tag</td><td>A name for a fixed point in history, usually a version like <code>v1.2</code></td></tr>
+    <tr><td>Release</td><td>A published version, usually with files to download</td></tr>
+    <tr><td>Pre-release</td><td>A test version, not considered stable</td></tr>
+    <tr><td>Draft</td><td>A release or pull request that is not ready yet</td></tr>
+    <tr><td>Asset</td><td>A file attached to a release</td></tr>
+    <tr><td>Issue</td><td>A bug report, question or request</td></tr>
+    <tr><td>Workflow</td><td>An automation in GitHub Actions, e.g. "Build APK"</td></tr>
+    <tr><td>Run</td><td>One execution of a workflow</td></tr>
+    <tr><td>Artifact</td><td>A file built by a run, kept for a limited time</td></tr>
+    <tr><td>Gist</td><td>A small set of shared files or snippets</td></tr>
+    <tr><td>Token</td><td>A password for apps, made on GitHub, that can be revoked any time</td></tr>
+  </table></div>
+</div>
+</div>
+
+<!-- 22 -->
+<div data-section>
+<div class="sec-title" id="privacy">22 · privacy</div>
+<div class="box">
+  <p>OpenHub talks only to GitHub. Your login token stays on this phone and is sent only to GitHub's API. Logging out removes it. You can also revoke tokens and app access any time on github.com: Settings → Applications, and Developer settings → Personal access tokens.</p>
+  <p>This help page loads nothing from the internet.</p>
+</div>
+</div>
+
+<div class="footer">OpenHub {{VERSION}} · by <a href="https://github.com/nikakvo">Tears Burn</a> · <a href="https://github.com/nikakvo/OpenHub">source code</a><br>based on OpenHub by ThirtyDegreesRay · GPL-3.0</div>
+
+<a class="top" id="top" href="#">↑</a>
+
+<script>
+  // jump links scroll inside the page (the page is loaded from text, not a file)
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var id = a.getAttribute('href').substring(1);
+      var target = id ? document.getElementById(id) : null;
+      if (target) target.scrollIntoView({behavior: 'smooth'});
+      else window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+  });
+  var top = document.getElementById('top');
+  window.addEventListener('scroll', function () { top.style.display = window.scrollY > 600 ? 'block' : 'none'; });
+
+  // search: show only the sections that contain every word typed
+  var q = document.getElementById('q');
+  var sections = document.querySelectorAll('[data-section]');
+  var toc = document.querySelector('[data-toc]');
+  q.addEventListener('input', function () {
+    var words = q.value.toLowerCase().split(/\s+/).filter(function (w) { return w; });
+    var shown = 0;
+    sections.forEach(function (s) {
+      var text = s.textContent.toLowerCase();
+      var match = words.every(function (w) { return text.indexOf(w) >= 0; });
+      s.classList.toggle('hidden', !match);
+      if (match) shown++;
+    });
+    toc.classList.toggle('hidden', words.length > 0);
+    document.querySelector('[data-hero]').classList.toggle('hidden', words.length > 0);
+    document.getElementById('noresult').style.display = shown ? 'none' : 'block';
+  });
+</script>
+</body>
+</html>
