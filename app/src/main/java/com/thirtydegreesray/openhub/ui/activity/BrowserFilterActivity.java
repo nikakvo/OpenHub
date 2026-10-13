@@ -19,6 +19,9 @@ import com.thirtydegreesray.openhub.util.AppOpener;
 
 public class BrowserFilterActivity extends AppCompatActivity {
 
+    /** Opens the notifications inbox (from the background check's summary notification). */
+    public static final String NOTIFICATIONS = "notifications";
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +39,8 @@ public class BrowserFilterActivity extends AppCompatActivity {
         //handle shortcuts redirection
         if (uri.toString().equals("trending")){
             activity.startActivity(new Intent(activity, TrendingActivity.class));
+        } else if (uri.toString().equals(NOTIFICATIONS)){
+            activity.startActivity(new Intent(activity, NotificationsActivity.class));
         } else if (uri.toString().equals("search")){
             activity.startActivity(new Intent(activity, SearchActivity.class));
         } else {

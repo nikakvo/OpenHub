@@ -8,7 +8,11 @@ import androidx.fragment.app.Fragment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.net.Uri;
+import android.view.Gravity;
 import android.view.View;
+
+import androidx.appcompat.widget.PopupMenu;
 
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
@@ -20,12 +24,16 @@ import com.thirtydegreesray.openhub.mvp.model.NotificationSubject;
 import com.thirtydegreesray.openhub.mvp.model.Repository;
 import com.thirtydegreesray.openhub.mvp.presenter.NotificationsPresenter;
 import com.thirtydegreesray.openhub.ui.activity.CommitDetailActivity;
+import com.thirtydegreesray.openhub.ui.activity.ActionsActivity;
 import com.thirtydegreesray.openhub.ui.activity.IssueDetailActivity;
+import com.thirtydegreesray.openhub.ui.activity.PullRequestActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepositoryActivity;
 import com.thirtydegreesray.openhub.ui.adapter.NotificationsAdapter;
 import com.thirtydegreesray.openhub.ui.adapter.base.DoubleTypesModel;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
+import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.NotificationLinks;
 
 import java.util.ArrayList;
 
@@ -99,20 +107,7 @@ public class NotificationsFragment extends ListFragment<NotificationsPresenter, 
         if(adapter.getItemViewType(position) == 0){
             RepositoryActivity.show(getActivity(), repository.getOwner().getLogin(), repository.getName());
         }else{
-            String url = notification.getSubject().getUrl();
-            switch (notification.getSubject().getType()){
-                case Issue:
-                    IssueDetailActivity.show(getActivity(), url);
-                    break;
-                case Commit:
-                    CommitDetailActivity.show(getActivity(), url);
-                    break;
-                case PullRequest:
-                    android.content.Intent pull = com.thirtydegreesray.openhub.ui.activity
-                            .PullRequestActivity.createIntent(getActivity(), url);
-                    if (pull != null) startActivity(pull);
-                    break;
-            }
+            open(notification);
 
             if(notification.isUnread()){
                 mPresenter.markNotificationAsRead(notification.getId());
@@ -123,6 +118,60 @@ public class NotificationsFragment extends ListFragment<NotificationsPresenter, 
 
         }
 
+    }
+
+    /** Opens what the notification is about, in the app where possible. */
+    private void open(@NonNull Notification notification) {
+        NotificationSubject subject = notification.getSubject();
+        String url = subject == null ? null : subject.getUrl();
+        NotificationSubject.Type type = subject == null ? null : subject.getType();
+        if (type == NotificationSubject.Type.Issue && url != null) {
+            IssueDetailActivity.show(getActivity(), url);
+        } else if (type == NotificationSubject.Type.Commit && url != null) {
+            CommitDetailActivity.show(getActivity(), url);
+        } else if (type == NotificationSubject.Type.PullRequest && url != null
+                && PullRequestActivity.createIntent(requireContext(), url) != null) {
+            startActivity(PullRequestActivity.createIntent(requireContext(), url));
+        } else if (type == NotificationSubject.Type.CheckSuite) {
+            Repository repository = notification.getRepository();
+            ActionsActivity.show(requireActivity(), repository.getOwner().getLogin(), repository.getName(),
+                    null, false);
+        } else {
+            AppOpener.launchUrl(requireContext(), Uri.parse(NotificationLinks.htmlUrl(notification)));
+        }
+    }
+
+    @Override
+    public boolean onItemLongClick(int position, @NonNull View view) {
+        if (adapter.getItemViewType(position) == 0) return super.onItemLongClick(position, view);
+        Notification notification = adapter.getData().get(position).getM2();
+        PopupMenu menu = new PopupMenu(requireContext(), view, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        if (notification.isUnread()) menu.getMenu().add(0, 1, 0, R.string.notification_mark_read);
+        menu.getMenu().add(0, 2, 1, R.string.notification_mark_done);
+        menu.getMenu().add(0, 3, 2, R.string.notification_unsubscribe);
+        menu.getMenu().add(0, 4, 3, R.string.open_in_browser);
+        menu.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case 1:
+                    mPresenter.markNotificationAsRead(notification.getId());
+                    notification.setUnread(false);
+                    adapter.notifyItemChanged(position);
+                    requireActivity().invalidateOptionsMenu();
+                    break;
+                case 2:
+                    mPresenter.markNotificationAsDone(notification);
+                    break;
+                case 3:
+                    mPresenter.unsubscribe(notification);
+                    showInfoToast(getString(R.string.notification_unsubscribed));
+                    break;
+                default:
+                    AppOpener.openInCustomTabsOrBrowser(requireContext(), NotificationLinks.htmlUrl(notification));
+            }
+            return true;
+        });
+        menu.show();
+        return true;
     }
 
     @Override

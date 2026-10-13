@@ -53,6 +53,7 @@
         <receiver android:name=".service.NetBroadcastReceiver" android:exported="false"/>
         <receiver android:name=".service.ShareBroadcastReceiver" android:exported="false"/>
         <receiver android:name=".service.CopyBroadcastReceiver" android:exported="false"/>
+        <receiver android:name=".service.NotificationActionReceiver" android:exported="false"/>
         <service
             android:name=".service.DownloadService"
             android:exported="false"

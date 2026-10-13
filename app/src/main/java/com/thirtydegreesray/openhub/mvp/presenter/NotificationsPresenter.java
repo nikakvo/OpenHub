@@ -72,12 +72,10 @@ public class NotificationsPresenter extends BasePagerPresenter<INotificationsCon
                 } else {
                     notifications.addAll(response.body());
                 }
-                if (response.body().size() == 0 && notifications.size() != 0) {
-                    mView.setCanLoadMore(false);
-                } else {
-                    sortedNotifications = sortNotifications(notifications);
-                    mView.showNotifications(sortedNotifications);
-                }
+                // GitHub sends 50 per page; fewer means this was the last page
+                mView.setCanLoadMore(response.body().size() >= 50);
+                sortedNotifications = sortNotifications(notifications);
+                mView.showNotifications(sortedNotifications);
             }
         };
 
@@ -85,11 +83,11 @@ public class NotificationsPresenter extends BasePagerPresenter<INotificationsCon
             @Override
             public Observable<Response<ArrayList<Notification>>> createObservable(boolean forceNetWork) {
                 if (NotificationsFragment.NotificationsType.Unread.equals(type)) {
-                    return getNotificationsService().getMyNotifications(forceNetWork, false, false);
+                    return getNotificationsService().getMyNotifications(forceNetWork, false, false, page);
                 } else if (NotificationsFragment.NotificationsType.Participating.equals(type)) {
-                    return getNotificationsService().getMyNotifications(forceNetWork, true, true);
+                    return getNotificationsService().getMyNotifications(forceNetWork, true, true, page);
                 } else if (NotificationsFragment.NotificationsType.All.equals(type)) {
-                    return getNotificationsService().getMyNotifications(forceNetWork, true, false);
+                    return getNotificationsService().getMyNotifications(forceNetWork, true, false, page);
                 } else {
                     return null;
                 }
@@ -121,6 +119,7 @@ public class NotificationsPresenter extends BasePagerPresenter<INotificationsCon
         if(notifications == null){
             return true;
         }
+        if (sortedNotifications == null) return true;
         for(DoubleTypesModel<Repository, Notification> model : sortedNotifications){
             if(model.getM2() != null && model.getM2().isUnread()){
                 return false;
@@ -140,6 +139,29 @@ public class NotificationsPresenter extends BasePagerPresenter<INotificationsCon
                 model.getM2().setUnread(false);
             }
         }
+        mView.showNotifications(sortedNotifications);
+    }
+
+    @Override
+    public void markNotificationAsDone(@NonNull Notification notification) {
+        generalRxHttpExecute(getNotificationsService().markNotificationAsDone(notification.getId()), null);
+        remove(notification);
+    }
+
+    @Override
+    public void unsubscribe(@NonNull Notification notification) {
+        generalRxHttpExecute(getNotificationsService().unsubscribeThread(notification.getId()), null);
+        // like github.com: unsubscribing also marks the thread as done
+        generalRxHttpExecute(getNotificationsService().markNotificationAsDone(notification.getId()), null);
+        remove(notification);
+    }
+
+    private void remove(@NonNull Notification notification) {
+        if (notifications == null) return;
+        for (Iterator<Notification> it = notifications.iterator(); it.hasNext(); ) {
+            if (it.next().getId().equals(notification.getId())) it.remove();
+        }
+        sortedNotifications = sortNotifications(notifications);
         mView.showNotifications(sortedNotifications);
     }
 

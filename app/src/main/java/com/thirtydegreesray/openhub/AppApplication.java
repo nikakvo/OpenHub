@@ -60,6 +60,7 @@ public class AppApplication extends Application {
         RxJavaPlugins.setErrorHandler(error -> Logger.t(TAG).w("Rx error after dispose: " + error));
         // keep the release check scheduled (no-op when nothing is watched)
         ReleaseWatcher.schedule(this);
+        com.thirtydegreesray.openhub.util.GitHubNotifier.schedule(this);
         startTime = System.currentTimeMillis();
         Logger.t(TAG).i("application ok:" + (System.currentTimeMillis() - startTime));
 

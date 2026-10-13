@@ -29,6 +29,8 @@ public interface INotificationsContract {
         void markAllNotificationsAsRead();
         boolean isNotificationsAllRead();
         void markRepoNotificationsAsRead(@NonNull Repository repository);
+        void markNotificationAsDone(@NonNull Notification notification);
+        void unsubscribe(@NonNull Notification notification);
     }
 
 }

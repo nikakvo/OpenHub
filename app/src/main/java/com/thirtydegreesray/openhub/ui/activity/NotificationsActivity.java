@@ -53,6 +53,13 @@ public class NotificationsActivity extends PagerActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // the inbox is open: the Android notifications of its threads are no longer needed
+        com.thirtydegreesray.openhub.util.GitHubNotifier.clearPosted(this);
+    }
+
+    @Override
     protected int getContentView() {
         return R.layout.activity_view_pager;
     }

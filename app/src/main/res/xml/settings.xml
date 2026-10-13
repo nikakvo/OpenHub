@@ -29,6 +29,19 @@
         android:key="releaseCheckInterval"/>
 
     <SwitchPreference
+        android:icon="@drawable/ic_menu_notifications"
+        android:title="@string/github_notifications_pref"
+        android:summary="@string/github_notifications_pref_summary"
+        android:key="githubNotifications"
+        android:defaultValue="false"/>
+
+    <Preference
+        android:icon="@drawable/ic_menu_notifications"
+        android:title="@string/github_notifications_interval"
+        android:dependency="githubNotifications"
+        android:key="githubNotificationsInterval"/>
+
+    <SwitchPreference
         android:icon="@drawable/ic_http"
         android:title="@string/cache_controller"
         android:summary="@string/cache_controller_desc"

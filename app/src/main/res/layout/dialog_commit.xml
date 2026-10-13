@@ -49,19 +49,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="true"/>
+            <!-- belongs to "Commit directly to the branch" above, so it sits right under it -->
+            <CheckBox
+                android:id="@+id/pull_current_check"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:visibility="gone"/>
             <RadioButton
                 android:id="@+id/target_new"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/commit_to_new_branch"/>
         </RadioGroup>
-
-        <CheckBox
-            android:id="@+id/pull_current_check"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:visibility="gone"/>
 
         <LinearLayout
             android:id="@+id/new_branch_section"

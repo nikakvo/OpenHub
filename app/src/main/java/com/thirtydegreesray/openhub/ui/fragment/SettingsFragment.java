@@ -23,6 +23,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.ui.widget.colorChooser.ColorChooserPreference;
 import com.thirtydegreesray.openhub.util.AppUpdater;
+import com.thirtydegreesray.openhub.util.GitHubNotifier;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 
 import java.util.Arrays;
@@ -81,6 +82,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
         findPreference(RELEASE_CHECK_INTERVAL).setOnPreferenceClickListener(this);
         findPreference(AppUpdater.PREF_CHECK_NOW).setOnPreferenceClickListener(this);
         findPreference(OPEN_LINKS).setOnPreferenceClickListener(this);
+        findPreference(GitHubNotifier.PREF_ENABLED).setOnPreferenceChangeListener(this);
+        findPreference(GitHubNotifier.PREF_INTERVAL).setOnPreferenceClickListener(this);
+        updateGitHubNotificationsSummary();
         findPreference(AppUpdater.PREF_CHECK_NOW).setSummary(
                 getString(R.string.update_check_now_summary, AppUpdater.currentVersion()));
         updateWatchedReleasesSummary();
@@ -91,7 +95,49 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
+        if (GitHubNotifier.PREF_ENABLED.equals(preference.getKey()) && getContext() != null) {
+            boolean enabled = Boolean.TRUE.equals(newValue);
+            // the switch's value is saved after this returns; schedule once it is
+            preference.getPreferenceManager().getSharedPreferences().edit()
+                    .putBoolean(GitHubNotifier.PREF_ENABLED, enabled).apply();
+            GitHubNotifier.onEnabledChanged(getContext(), enabled);
+            if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && getActivity() != null
+                    && androidx.core.content.ContextCompat.checkSelfPermission(getContext(),
+                    android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                androidx.core.app.ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 0);
+            }
+        }
         return true;
+    }
+
+    private void updateGitHubNotificationsSummary() {
+        Preference interval = findPreference(GitHubNotifier.PREF_INTERVAL);
+        if (interval != null && getContext() != null) {
+            interval.setSummary(getString(R.string.github_notifications_interval_summary,
+                    GitHubNotifier.formatInterval(GitHubNotifier.getIntervalMinutes(getContext()))));
+        }
+    }
+
+    private void showGitHubNotificationsIntervalChooser() {
+        if (getContext() == null) return;
+        int[] presets = GitHubNotifier.PRESET_MINUTES;
+        int current = GitHubNotifier.getIntervalMinutes(getContext());
+        String[] items = new String[presets.length];
+        int checked = -1;
+        for (int i = 0; i < presets.length; i++) {
+            items[i] = GitHubNotifier.formatInterval(presets[i]);
+            if (presets[i] == current) checked = i;
+        }
+        new AlertDialog.Builder(getContext())
+                .setTitle(R.string.github_notifications_interval)
+                .setSingleChoiceItems(items, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    GitHubNotifier.setIntervalMinutes(getContext(), presets[which]);
+                    updateGitHubNotificationsSummary();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     @Override
@@ -117,6 +163,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 return true;
             case OPEN_LINKS:
                 openLinkSettings();
+                return true;
+            case GitHubNotifier.PREF_INTERVAL:
+                showGitHubNotificationsIntervalChooser();
                 return true;
         }
         return false;

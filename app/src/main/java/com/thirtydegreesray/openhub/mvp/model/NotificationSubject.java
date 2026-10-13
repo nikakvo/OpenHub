@@ -11,8 +11,10 @@ import android.os.Parcelable;
 
 public class NotificationSubject implements Parcelable {
 
+    /** Types GitHub sends; anything else arrives as null. */
     public enum Type{
-        Issue, PullRequest, Commit
+        Issue, PullRequest, Commit, Release, Discussion, CheckSuite, RepositoryVulnerabilityAlert,
+        RepositoryDependabotAlertsThread, RepositoryInvitation
     }
 
     private String title;

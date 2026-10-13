@@ -23,6 +23,7 @@ import com.thirtydegreesray.openhub.ui.adapter.base.BaseViewHolder;
 import com.thirtydegreesray.openhub.ui.adapter.base.DoubleTypesModel;
 import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
 import com.thirtydegreesray.openhub.ui.widget.ToastAbleImageButton;
+import com.thirtydegreesray.openhub.util.NotificationLinks;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
@@ -87,25 +88,48 @@ public class NotificationsAdapter extends BaseAdapter<BaseViewHolder,
         } else {
             NotificationViewHolder holder = (NotificationViewHolder) viewHolder;
             Notification model = data.get(position).getM2();
-            holder.title.setText(model.getSubject().getTitle());
+            holder.title.setText(model.getSubject() == null ? "" : model.getSubject().getTitle());
             if(model.isUnread()){
+                holder.status.setVisibility(View.VISIBLE);
                 holder.status.setImageResource(R.drawable.ic_mark_unread);
                 holder.status.setImageTintList(ColorStateList.valueOf(ViewUtils.getAccentColor(context)));
             } else {
                 holder.status.setVisibility(View.INVISIBLE);
-//                holder.status.setImageResource(R.drawable.ic_mark_readed);
-//                holder.status.setImageTintList(ColorStateList.valueOf(ViewUtils.getSecondaryTextColor(context)));
             }
-            holder.time.setText(StringUtils.getNewsTimeStr(context, model.getUpdateAt()));
+            String time = StringUtils.getNewsTimeStr(context, model.getUpdateAt());
+            String reason = NotificationLinks.reason(context, NotificationLinks.reasonKey(model.getReason()));
+            holder.time.setText(reason == null ? time : time + " · " + reason);
 
             int padding = WindowUtil.dipToPx(context, 2);
-            if(NotificationSubject.Type.Issue.equals(model.getSubject().getType())){
-                holder.typeIcon.setImageResource(R.drawable.ic_issues);
-                padding = 0;
-            } else if(NotificationSubject.Type.Commit.equals(model.getSubject().getType())){
-                holder.typeIcon.setImageResource(R.drawable.ic_commit);
-            } else {
-                holder.typeIcon.setImageResource(R.drawable.ic_pull);
+            NotificationSubject.Type type = model.getSubject() == null ? null : model.getSubject().getType();
+            if (type == null) {
+                holder.typeIcon.setImageResource(R.drawable.ic_menu_notifications);
+            } else switch (type) {
+                case Issue:
+                    holder.typeIcon.setImageResource(R.drawable.ic_issues);
+                    padding = 0;
+                    break;
+                case Commit:
+                    holder.typeIcon.setImageResource(R.drawable.ic_commit);
+                    break;
+                case PullRequest:
+                    holder.typeIcon.setImageResource(R.drawable.ic_pull);
+                    break;
+                case Release:
+                    holder.typeIcon.setImageResource(R.drawable.ic_tag);
+                    break;
+                case Discussion:
+                    holder.typeIcon.setImageResource(R.drawable.ic_comment);
+                    break;
+                case CheckSuite:
+                    holder.typeIcon.setImageResource(R.drawable.ic_play_arrow);
+                    break;
+                case RepositoryVulnerabilityAlert:
+                case RepositoryDependabotAlertsThread:
+                    holder.typeIcon.setImageResource(R.drawable.ic_lock);
+                    break;
+                default:
+                    holder.typeIcon.setImageResource(R.drawable.ic_mail);
             }
             holder.typeIcon.setPadding(padding, padding, padding, padding);
 

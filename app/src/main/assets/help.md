@@ -238,6 +238,28 @@ builds are often only there, not in releases. Open a repository's menu and choos
 
 ---
 
+## GitHub notifications
+
+**Notifications** in the side menu is your GitHub inbox, grouped by repository, with
+the tabs **Unread**, **Participating** (threads you take part in) and **All**. Each
+entry shows why you got it: *mentioned you*, *review requested*, *assigned to you*...
+
+- Tap an entry to open it in the app (issues, pull requests, commits, workflow runs;
+  releases and discussions open their page). It is marked as read.
+- Long-press an entry for **Mark as read**, **Mark as done** (removes it from the
+  inbox, like on github.com), **Unsubscribe** (no more notifications for that issue or
+  pull request) and **Open in browser**.
+- The check mark next to a repository marks all its notifications as read; the menu of
+  the Unread tab marks everything as read.
+
+**Notifications on the phone:** turn on **Settings > GitHub notifications** and OpenHub
+checks your inbox in the background and shows new unread notifications, also when the
+app is closed. Each has **Mark as read**; tap it to open the thread. **Settings > GitHub
+notifications check** sets how often (15 minutes to 8 hours; 30 minutes by default).
+Only what arrives after you turned it on is shown.
+
+---
+
 ## Release notifications
 
 Choose **Notify about new releases** in any repository's menu. OpenHub then checks
@@ -338,6 +360,8 @@ screen says so and offers **Branches**; the easiest way is to edit a file and fi
 | Start Page | Which page opens when you start the app |
 | Release notifications | Repositories you get release notifications for |
 | Release check interval | How often those repositories are checked |
+| GitHub notifications | Off (default). On: new notifications from your GitHub inbox appear on the phone, also when the app is closed |
+| GitHub notifications check | How often the inbox is checked (15 minutes to 8 hours) |
 | Cache Controller | Show saved data immediately and refresh it from the network in the background. Faster, and pages still open offline |
 | Use built-in downloader | On: OpenHub downloads files itself, over any network. Off: download links are handed to another app (browser, download manager) |
 | Use Custom Tabs | Open web links in a tab inside the app instead of a separate browser |

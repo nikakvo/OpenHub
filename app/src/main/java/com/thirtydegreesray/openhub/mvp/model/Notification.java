@@ -15,16 +15,21 @@ import java.util.Date;
 
 public class Notification implements Parcelable {
 
+    /** Why the notification was sent; unknown reasons arrive as null. */
     public enum Type{
-        @SerializedName("updated_at") Assign, //You were assigned to the Issue.
+        @SerializedName("assign") Assign, //You were assigned to the Issue.
         @SerializedName("author") Author, //You created the thread.
         @SerializedName("comment") Comment, //You commented on the thread.
         @SerializedName("invitation") Invitation, //You accepted an invitation to contribute to the repository.
         @SerializedName("manual") Manual, //You subscribed to the thread (via an Issue or Pull Request).
         @SerializedName("mention") Mention, //You were specifically @mentioned in the content.
+        @SerializedName("review_requested") ReviewRequested, //Your review was requested.
         @SerializedName("state_change") StateChange, //You changed the thread state (for example, closing an Issue or merging a Pull Request).
         @SerializedName("subscribed") Subscribed, //You're watching the repository.
-        @SerializedName("team_mention") TeamMention //You were on a team that was mentioned.
+        @SerializedName("team_mention") TeamMention, //You were on a team that was mentioned.
+        @SerializedName("ci_activity") CiActivity, //A GitHub Actions workflow run you triggered was completed.
+        @SerializedName("security_alert") SecurityAlert, //A security vulnerability alert for the repository.
+        @SerializedName("approval_requested") ApprovalRequested //A deployment waits for your review.
     }
 
     private String id;

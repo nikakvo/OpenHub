@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_reason_assign">assigned to you</string>
+    <string name="notification_reason_mention">mentioned you</string>
+    <string name="notification_reason_team_mention">team mentioned</string>
+    <string name="notification_reason_review_requested">review requested</string>
+    <string name="notification_reason_author">your thread</string>
+    <string name="notification_reason_comment">you commented</string>
+    <string name="notification_reason_state_change">state changed</string>
+    <string name="notification_reason_ci_activity">workflow run</string>
+    <string name="notification_reason_security_alert">security alert</string>
+    <string name="notification_reason_invitation">invitation</string>
+    <string name="notification_reason_approval_requested">approval requested</string>
+
+    <string name="notification_mark_read">Mark as read</string>
+    <string name="notification_mark_done">Mark as done</string>
+    <string name="notification_unsubscribe">Unsubscribe</string>
+    <string name="notification_unsubscribed">Unsubscribed. You get no more notifications for this thread.</string>
+
+    <string name="github_notifications_channel">GitHub notifications</string>
+    <plurals name="github_notifications_unread">
+        <item quantity="one">%d unread notification</item>
+        <item quantity="other">%d unread notifications</item>
+    </plurals>
+    <string name="github_notifications_pref">GitHub notifications</string>
+    <string name="github_notifications_pref_summary">Show new notifications from your GitHub inbox (mentions, reviews, replies) even when the app is closed</string>
+    <string name="github_notifications_interval">GitHub notifications check</string>
+    <string name="github_notifications_interval_summary">Every %1$s</string>
+</resources>
