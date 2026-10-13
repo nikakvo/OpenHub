@@ -34,7 +34,7 @@ public final class TextInputDialog {
      */
     public static void show(@NonNull Context context, @StringRes int title, @StringRes int hint,
                             @Nullable String initial, boolean fileName, @NonNull Callback callback) {
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_text_input, null);
+        View view = LayoutInflater.from(new AlertDialog.Builder(context).getContext()).inflate(R.layout.dialog_text_input, null);
         TextInputLayout layout = view.findViewById(R.id.input_layout);
         TextInputEditText edit = view.findViewById(R.id.input_edit);
         layout.setHint(context.getString(hint));

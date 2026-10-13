@@ -37,7 +37,7 @@ public final class GitignorePickerDialog {
     public static void show(@NonNull Context context, @NonNull List<String> templates,
                             @Nullable List<String> selectedTemplates, @Nullable String customLines,
                             @NonNull Callback callback) {
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_gitignore_picker, null);
+        View view = LayoutInflater.from(new AlertDialog.Builder(context).getContext()).inflate(R.layout.dialog_gitignore_picker, null);
         TextInputEditText searchEdit = view.findViewById(R.id.search_edit);
         TextView selectedText = view.findViewById(R.id.selected_text);
         ListView listView = view.findViewById(R.id.template_list);

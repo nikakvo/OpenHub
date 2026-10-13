@@ -88,7 +88,7 @@ public final class ComposeDialog {
         }
 
         public void show() {
-            View view = LayoutInflater.from(context).inflate(R.layout.dialog_pr_compose, null);
+            View view = LayoutInflater.from(new AlertDialog.Builder(context).getContext()).inflate(R.layout.dialog_pr_compose, null);
             RadioGroup group = view.findViewById(R.id.choice_group);
             TextInputLayout titleLayout = view.findViewById(R.id.title_layout);
             TextInputEditText titleEdit = view.findViewById(R.id.title_edit);
@@ -99,7 +99,7 @@ public final class ComposeDialog {
             if (choices != null) {
                 group.setVisibility(View.VISIBLE);
                 for (int i = 0; i < choices.length; i++) {
-                    RadioButton button = new RadioButton(context);
+                    RadioButton button = new RadioButton(view.getContext());
                     button.setId(View.generateViewId());
                     button.setText(choices[i]);
                     button.setTag(i);

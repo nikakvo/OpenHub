@@ -394,7 +394,7 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
         builder.setMessage(getString(R.string.release_delete_message, title));
         final CheckBox deleteTag;
         if (!release.isDraft() && !StringUtils.isBlank(release.getTagName())) {
-            deleteTag = new CheckBox(this);
+            deleteTag = new CheckBox(builder.getContext());
             deleteTag.setText(getString(R.string.release_delete_tag_too, release.getTagName()));
             FrameLayout frame = new FrameLayout(this);
             int pad = getResources().getDimensionPixelSize(R.dimen.spacing_large);

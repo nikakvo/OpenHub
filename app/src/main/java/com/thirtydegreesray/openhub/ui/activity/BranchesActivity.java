@@ -298,7 +298,7 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void showProtectionDialog(@NonNull String branch, @NonNull JsonObject current) {
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_branch_protection, null);
+        View view = LayoutInflater.from(new AlertDialog.Builder(this).getContext()).inflate(R.layout.dialog_branch_protection, null);
         SwitchCompat protect = view.findViewById(R.id.protect_switch);
         View options = view.findViewById(R.id.protection_options);
         CheckBox requirePr = view.findViewById(R.id.require_pr_check);
