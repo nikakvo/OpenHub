@@ -14,6 +14,11 @@
         android:key="accentColor"/>
 
     <Preference
+        android:icon="@drawable/ic_menu_settings"
+        android:title="@string/menu_icons_title"
+        android:key="menuIconStyle"/>
+
+    <Preference
         android:icon="@drawable/ic_one"
         android:title="@string/start_page"
         android:key="startPage"/>

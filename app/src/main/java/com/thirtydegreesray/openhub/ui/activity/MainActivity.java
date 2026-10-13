@@ -162,6 +162,7 @@ public class MainActivity extends BaseDrawerActivity<MainPresenter>
             }
         }
         navViewStart.setCheckedItem(selectedPage);
+        com.thirtydegreesray.openhub.util.DrawerIcons.apply(navViewStart);
 
         ImageView avatar = navViewStart.getHeaderView(0).findViewById(R.id.avatar);
         TextView name = navViewStart.getHeaderView(0).findViewById(R.id.name);

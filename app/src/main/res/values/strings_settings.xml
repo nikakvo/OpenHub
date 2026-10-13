@@ -112,4 +112,8 @@
     <string name="protection_enforce_admins">Apply the rules to administrators too</string>
     <string name="protection_saved">Protection of %1$s saved</string>
     <string name="protection_removed">Protection of %1$s removed</string>
+    <string name="menu_icons_title">Menu icons</string>
+    <string name="menu_icons_glow">Colored with glow (dark themes)</string>
+    <string name="menu_icons_colored">Colored</string>
+    <string name="menu_icons_plain">Plain</string>
 </resources>

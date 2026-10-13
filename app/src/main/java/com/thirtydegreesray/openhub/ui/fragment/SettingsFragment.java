@@ -23,6 +23,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.ui.widget.colorChooser.ColorChooserPreference;
 import com.thirtydegreesray.openhub.util.AppUpdater;
+import com.thirtydegreesray.openhub.util.DrawerIcons;
 import com.thirtydegreesray.openhub.util.GitHubNotifier;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 
@@ -82,6 +83,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
         findPreference(RELEASE_CHECK_INTERVAL).setOnPreferenceClickListener(this);
         findPreference(AppUpdater.PREF_CHECK_NOW).setOnPreferenceClickListener(this);
         findPreference(OPEN_LINKS).setOnPreferenceClickListener(this);
+        findPreference(DrawerIcons.PREF).setOnPreferenceClickListener(this);
+        updateMenuIconsSummary();
         findPreference(GitHubNotifier.PREF_ENABLED).setOnPreferenceChangeListener(this);
         findPreference(GitHubNotifier.PREF_INTERVAL).setOnPreferenceClickListener(this);
         updateGitHubNotificationsSummary();
@@ -163,6 +166,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 return true;
             case OPEN_LINKS:
                 openLinkSettings();
+                return true;
+            case DrawerIcons.PREF:
+                showMenuIconsChooser();
                 return true;
             case GitHubNotifier.PREF_INTERVAL:
                 showGitHubNotificationsIntervalChooser();
@@ -331,6 +337,35 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     PrefUtils.set(PrefUtils.THEME, valueList.get(which));
                     recreateMain();
                 })
+                .show();
+    }
+
+    private void updateMenuIconsSummary() {
+        Preference pref = findPreference(DrawerIcons.PREF);
+        if (pref != null && getContext() != null) {
+            pref.setSummary(DrawerIcons.label(DrawerIcons.getStyle(getContext())));
+        }
+    }
+
+    private void showMenuIconsChooser() {
+        if (getContext() == null) return;
+        String current = DrawerIcons.getStyle(getContext());
+        String[] items = new String[DrawerIcons.STYLES.length];
+        int checked = 0;
+        for (int i = 0; i < items.length; i++) {
+            items[i] = getString(DrawerIcons.label(DrawerIcons.STYLES[i]));
+            if (DrawerIcons.STYLES[i].equals(current)) checked = i;
+        }
+        new AlertDialog.Builder(getContext())
+                .setTitle(R.string.menu_icons_title)
+                .setSingleChoiceItems(items, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    androidx.preference.PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
+                            .putString(DrawerIcons.PREF, DrawerIcons.STYLES[which]).apply();
+                    updateMenuIconsSummary();
+                    recreateMain();
+                })
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 

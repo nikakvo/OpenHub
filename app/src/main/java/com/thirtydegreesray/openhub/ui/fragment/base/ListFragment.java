@@ -44,7 +44,7 @@ public abstract class ListFragment <P extends IBaseContract.Presenter, A extends
     protected SwipeRefreshLayout refreshLayout;
     protected RecyclerView recyclerView;
     @Nullable private FloatingActionButton scrollTopBn;
-    private static final int SCROLL_TOP_THRESHOLD = 8;
+    private static final int SCROLL_TOP_THRESHOLD = 4;
     @Inject protected A adapter;
     private RecyclerView.AdapterDataObserver observer;
 
