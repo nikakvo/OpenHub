@@ -259,11 +259,28 @@ public class AppOpener {
         return false;
     }
 
+    private static boolean onlyOurs(@NonNull List<ResolveInfo> activities, @NonNull String ourPackage) {
+        for (ResolveInfo info : activities) {
+            if (!ourPackage.equals(info.activityInfo.packageName)) return false;
+        }
+        return true;
+    }
+
     private static Intent createActivityChooserIntent(Context context, Intent intent,
                                                       Uri uri, List<String> ignorPackageList) {
         final PackageManager pm = context.getPackageManager();
-        final List<ResolveInfo> activities = pm.queryIntentActivities(intent,
-                PackageManager.MATCH_DEFAULT_ONLY);
+        // MATCH_ALL: when OpenHub may open github.com links (Android 12+ "Open by default"),
+        // Android otherwise answers with OpenHub alone and hides the browsers
+        List<ResolveInfo> activities = pm.queryIntentActivities(intent,
+                PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_ALL);
+        if (onlyOurs(activities, context.getPackageName()) && uri != null
+                && ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme()))) {
+            // still nothing else: ask which apps open any web page, then give them this link
+            Intent anyPage = new Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com"))
+                    .addCategory(Intent.CATEGORY_BROWSABLE);
+            activities = pm.queryIntentActivities(anyPage,
+                    PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_ALL);
+        }
         final ArrayList<Intent> chooserIntents = new ArrayList<>();
         final String ourPackageName = context.getPackageName();
 
