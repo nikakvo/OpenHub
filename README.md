@@ -4,13 +4,35 @@
 [![Android](https://img.shields.io/badge/Android-8.0%2B-brightgreen.svg)](#requirements)
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 
-An open-source GitHub client for Android: browse repositories and code, follow releases,
-download builds, look at GitHub Actions, manage issues and gists.
+An open-source GitHub client for Android that reads and writes: browse repositories and
+code, edit files with real commits, publish releases, review and merge pull requests,
+follow builds and get your notifications on the phone.
 
 This is a modernized fork of [OpenHub](https://github.com/ThirtyDegreesRay/OpenHub) by
 **ThirtyDegreesRay**, based on the maintained fork by
 [**yxj-github-437**](https://github.com/yxj-github-437/OpenHub). All credit for the original
 app goes to them; see [Credits](#credits).
+
+## What is new in 3.4.0
+
+OpenHub can now **write** to GitHub, as close to github.com as makes sense on a phone:
+
+* **Files**: create, upload, edit, rename and delete files as real commits, to the
+  branch you choose or a new branch with a pull request.
+* **Pull requests in the app**: list, conversation, commits, files; comment, review,
+  merge (merge, squash, rebase), draft and ready, close and reopen, delete and restore
+  the branch, and open new pull requests (also from forks).
+* **Line-by-line review**: comment on one or several lines of a diff, suggest changes,
+  reply to threads, edit or delete your comments.
+* **Releases**: create, edit, publish and delete releases, upload APKs and zips (also by
+  sharing from other apps such as Termux), rename and delete files.
+* **Repositories**: create repositories (README, several .gitignore templates and your
+  own lines, license), repository settings, branches and branch protection, transfer,
+  archive and delete.
+* **Notifications**: optional phone notifications for your GitHub inbox, Mark as done,
+  Unsubscribe, and why each notification came.
+* **Built-in updater** with an on/off switch, GitHub links that open in the app, colored
+  side menu icons, and a new searchable help that explains every screen.
 
 ## What is new in this fork
 
@@ -39,6 +61,8 @@ app goes to them; see [Credits](#credits).
 
 ### App
 * Login with a personal access token or with the browser (OAuth)
+* GitHub notifications on the phone (optional), built-in updater
+* Searchable in-app help for beginners
 * Multiple accounts
 * Light, dark and AMOLED dark themes, many accent colors
 * Markdown rendering and code highlighting
@@ -51,6 +75,10 @@ app goes to them; see [Credits](#credits).
 * Option to skip loading images on mobile data
 
 ### Repositories
+* Create repositories; settings, branches and branch protection
+* Create, upload, edit, rename and delete files with commits
+* Pull requests: review, comment on lines, suggest changes, merge
+* Publish releases and upload files to them
 * Repository info, README, branches and tags
 * Star, watch and fork
 * Files, commits and activity
