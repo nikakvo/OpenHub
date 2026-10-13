@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One line of a pull request diff: old and new line numbers and the code. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:minHeight="22dp">
+
+    <TextView
+        android:id="@+id/diff_old_no"
+        android:layout_width="34dp"
+        android:layout_height="match_parent"
+        android:gravity="end|center_vertical"
+        android:paddingEnd="4dp"
+        android:fontFamily="monospace"
+        android:textSize="11sp"
+        android:textColor="?android:textColorSecondary"/>
+
+    <TextView
+        android:id="@+id/diff_new_no"
+        android:layout_width="34dp"
+        android:layout_height="match_parent"
+        android:gravity="end|center_vertical"
+        android:paddingEnd="4dp"
+        android:fontFamily="monospace"
+        android:textSize="11sp"
+        android:textColor="?android:textColorSecondary"/>
+
+    <TextView
+        android:id="@+id/diff_code"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:paddingStart="4dp"
+        android:paddingEnd="@dimen/spacing_small"
+        android:paddingTop="1dp"
+        android:paddingBottom="1dp"
+        android:fontFamily="monospace"
+        android:textSize="12sp"
+        android:textColor="?android:textColorPrimary"/>
+</LinearLayout>

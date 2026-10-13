@@ -275,4 +275,8 @@
     <color name="pull_closed">#F85149</color>
     <color name="pull_draft">#8B949E</color>
     <color name="box_border">#4030363D</color>
+    <color name="diff_add_bg">#333FB950</color>
+    <color name="diff_del_bg">#33F85149</color>
+    <color name="diff_hunk_bg">#2258A6FF</color>
+    <color name="diff_selected_bg">#66D29922</color>
 </resources>

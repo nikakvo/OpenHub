@@ -281,7 +281,7 @@ pull request to see:
 - **Conversation** - the description, comments and reviews, and the status of the
   checks (GitHub Actions and other CI)
 - **Commits** - the commits it adds
-- **Files** - the changed files with their diffs
+- **Files** - the changed files (with the number of comments); tap one for its diff
 
 At the bottom you can **Comment** or **Review changes** (Approve, Request changes or just
 comment; Write and Preview like on the site). If you can write to the repository,
@@ -296,6 +296,21 @@ the merge box lets you:
 
 The menu has **Edit** (title, description, base branch), Share, Copy link and Open
 in browser.
+
+### Commenting on lines
+
+In the diff of a file, tap a line to comment on it, like on the site. To comment on
+several lines, long-press the first line (it turns yellow), then tap the last one;
+tap the same line again to cancel. On added or unchanged lines **Suggest a change**
+inserts a suggestion block with the code: edit it, and the author can apply it on
+github.com with one tap.
+
+Comments appear under their line, with **Reply…** to answer the thread. Comments on
+code that has changed since are listed at the top. Line comments also appear in
+**Conversation** with the file and line; tap one to open the diff there.
+
+Long-press a comment (in the diff or in Conversation) to **Edit comment** or **Delete
+comment** (your own) or to copy its link.
 
 ### Opening a pull request
 

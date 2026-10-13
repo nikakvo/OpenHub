@@ -27,7 +27,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.widget.NestedScrollView;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -40,7 +39,6 @@ import com.thirtydegreesray.openhub.http.PullService;
 import com.thirtydegreesray.openhub.http.RepoSettingsService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
-import com.thirtydegreesray.openhub.mvp.model.CommitFile;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.ComposeDialog;
 import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
@@ -150,6 +148,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     private boolean filesLoaded;
     private boolean mergeableRetried;
     private boolean headBranchExists;
+    private final Map<String, Integer> commentsPerFile = new HashMap<>();
+    private long loadedStamp;
 
     @Override
     protected void setupActivityComponent(AppComponent appComponent) {
@@ -174,6 +174,13 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                 .build();
         showTab(tab);
         load();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // a line comment was written on the diff screen
+        if (loadedStamp != 0 && PullChanges.changedSince(loadedStamp)) load();
     }
 
     @Override
@@ -239,10 +246,22 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                     items.add(review);
                 }
             }
+            List<JsonObject> lineComments = new ArrayList<>();
+            for (int page = 1; page <= 30; page++) {
+                JsonArray array = GitHubApi.call(pulls().getReviewComments(owner, repo, number, page));
+                if (array == null || array.size() == 0) break;
+                for (JsonElement e : array) {
+                    JsonObject c = e.getAsJsonObject();
+                    c.addProperty("_line", true);
+                    lineComments.add(c);
+                }
+                if (array.size() < 100) break;
+            }
+            items.addAll(lineComments);
             items.sort((a, b) -> Json.str(a, "created_at").compareTo(Json.str(b, "created_at")));
             String checks = checksSummary(Json.str(p, "head.sha"));
             boolean branchExists = headBranchExists(p);
-            return new Object[]{p, r, items, checks, branchExists};
+            return new Object[]{p, r, items, checks, branchExists, lineComments};
         }, (Object[] result) -> {
             loader.setVisibility(View.GONE);
             pull = (JsonObject) result[0];
@@ -250,6 +269,16 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             //noinspection unchecked
             showConversation((List<JsonObject>) result[2], (String) result[3]);
             headBranchExists = (Boolean) result[4];
+            commentsPerFile.clear();
+            //noinspection unchecked
+            for (JsonObject c : (List<JsonObject>) result[5]) {
+                String file = Json.str(c, "path");
+                Integer count = commentsPerFile.get(file);
+                commentsPerFile.put(file, count == null ? 1 : count + 1);
+            }
+            loadedStamp = PullChanges.stamp();
+            filesLoaded = false;
+            if (tab == 2) loadFiles();
             updateMergeBox((String) result[3]);
             showTab(tab);
             invalidateOptionsMenu();
@@ -387,8 +416,26 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                     .into((ImageView) view.findViewById(R.id.comment_avatar));
             Date date = Json.date(item, "created_at");
             String when = date == null ? "" : StringUtils.getNewsTimeStr(this, date);
-            ((TextView) view.findViewById(R.id.comment_header)).setText(
-                    Json.str(item, "user.login") + " · " + when);
+            TextView header = view.findViewById(R.id.comment_header);
+            if (Json.bool(item, "_line")) {
+                String file = Json.str(item, "path");
+                String line = Json.str(item, "line");
+                header.setText(line.isEmpty()
+                        ? getString(R.string.pull_line_comment_header_outdated, Json.str(item, "user.login"), when, file)
+                        : getString(R.string.pull_line_comment_header, Json.str(item, "user.login"), when, file,
+                        Integer.parseInt(line)));
+                view.setOnClickListener(v -> openDiff(file));
+            } else {
+                header.setText(Json.str(item, "user.login") + " · " + when);
+            }
+            if (!Json.bool(item, "_review")) {
+                View.OnLongClickListener menu = v -> {
+                    commentMenu(v, item);
+                    return true;
+                };
+                view.setOnLongClickListener(menu);
+                view.findViewById(R.id.comment_body).setOnLongClickListener(menu);
+            }
             TextView badge = view.findViewById(R.id.comment_badge);
             if (Json.bool(item, "_review")) {
                 String state = Json.str(item, "state");
@@ -528,23 +575,20 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             filesList.removeAllViews();
             int additions = 0, deletions = 0;
             LayoutInflater inflater = LayoutInflater.from(this);
-            Gson gson = new Gson();
             for (JsonElement e : array) {
                 JsonObject file = e.getAsJsonObject();
                 additions += Json.integer(file, "additions");
                 deletions += Json.integer(file, "deletions");
                 View row = inflater.inflate(R.layout.layout_setting_row, filesList, false);
                 ((TextView) row.findViewById(R.id.setting_title)).setText(Json.str(file, "filename"));
-                ((TextView) row.findViewById(R.id.setting_summary)).setText(getString(R.string.pull_file_meta,
-                        Json.str(file, "status"), Json.integer(file, "additions"), Json.integer(file, "deletions")));
-                row.setOnClickListener(v -> {
-                    try {
-                        CommitFile commitFile = gson.fromJson(file, CommitFile.class);
-                        ViewerActivity.showForDiff(this, commitFile);
-                    } catch (Exception ex) {
-                        AppOpener.openInCustomTabsOrBrowser(this, Json.str(file, "blob_url"));
-                    }
-                });
+                String meta = getString(R.string.pull_file_meta,
+                        Json.str(file, "status"), Json.integer(file, "additions"), Json.integer(file, "deletions"));
+                Integer comments = commentsPerFile.get(Json.str(file, "filename"));
+                if (comments != null) {
+                    meta += " · " + getResources().getQuantityString(R.plurals.pull_file_comments, comments, comments);
+                }
+                ((TextView) row.findViewById(R.id.setting_summary)).setText(meta);
+                row.setOnClickListener(v -> openDiff(Json.str(file, "filename")));
                 filesList.addView(row);
             }
             filesSummary.setText(getString(R.string.pull_files_summary, array.size(), additions, deletions));
@@ -690,6 +734,58 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                 }, getString(R.string.branches_deleted, branch)))
                 .setNegativeButton(R.string.cancel, null)
                 .show();
+    }
+
+    private void openDiff(@NonNull String file) {
+        if (pull == null || file.isEmpty()) return;
+        startActivity(PullDiffActivity.createIntent(this, owner, repo, number, file, Json.str(pull, "head.sha")));
+    }
+
+    /** Edit or delete your own comment, or copy its link. Line comments and conversation comments. */
+    private void commentMenu(@NonNull View anchor, @NonNull JsonObject comment) {
+        boolean line = Json.bool(comment, "_line");
+        boolean mine = AppData.INSTANCE.getLoggedUser() != null && AppData.INSTANCE.getLoggedUser().getLogin()
+                .equalsIgnoreCase(Json.str(comment, "user.login"));
+        androidx.appcompat.widget.PopupMenu menu = new androidx.appcompat.widget.PopupMenu(this, anchor,
+                android.view.Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        if (mine) {
+            menu.getMenu().add(0, 1, 0, R.string.comment_edit);
+            menu.getMenu().add(0, 2, 1, R.string.comment_delete);
+        }
+        menu.getMenu().add(0, 3, 2, R.string.copy_url);
+        menu.setOnMenuItemClickListener(item -> {
+            long id = comment.get("id").getAsLong();
+            if (item.getItemId() == 1) {
+                new ComposeDialog.Builder(this)
+                        .title(getString(R.string.comment_edit))
+                        .repo(owner + "/" + repo)
+                        .body(getString(R.string.pull_comment_hint), Json.str(comment, "body"))
+                        .bodyRequired(true, null)
+                        .positive(getString(R.string.save))
+                        .callback((choice, title, body) -> {
+                            Map<String, Object> data = new HashMap<>();
+                            data.put("body", body);
+                            run(() -> GitHubApi.call(line ? pulls().updateReviewComment(owner, repo, id, data)
+                                    : pulls().updateComment(owner, repo, id, data)), null);
+                        })
+                        .show();
+            } else if (item.getItemId() == 2) {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.comment_delete)
+                        .setMessage(R.string.comment_delete_message)
+                        .setPositiveButton(R.string.delete, (d, w) -> run(() -> {
+                            GitHubApi.call(line ? pulls().deleteReviewComment(owner, repo, id)
+                                    : pulls().deleteComment(owner, repo, id));
+                            return Boolean.TRUE;
+                        }, getString(R.string.comment_deleted)))
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
+            } else {
+                AppUtils.copyToClipboard(this, Json.str(comment, "html_url"));
+            }
+            return true;
+        });
+        menu.show();
     }
 
     /** Like "Restore branch" on github.com: recreate the branch at the last commit of the pull request. */

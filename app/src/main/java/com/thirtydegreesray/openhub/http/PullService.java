@@ -11,6 +11,7 @@ import io.reactivex.rxjava3.core.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.PATCH;
@@ -128,6 +129,67 @@ public interface PullService {
             @Path("repo") String repo,
             @Path("number") int number,
             @Body Map<String, Object> body
+    );
+
+    /** Review comments: comments on lines of the diff (path, line, side, in_reply_to_id). */
+    @NonNull @GET("repos/{owner}/{repo}/pulls/{number}/comments?per_page=100")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonArray>> getReviewComments(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Query("page") int page
+    );
+
+    /** Body: body, commit_id, path, line, side, optional start_line and start_side. */
+    @NonNull @POST("repos/{owner}/{repo}/pulls/{number}/comments")
+    Observable<Response<JsonObject>> createReviewComment(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Body Map<String, Object> body
+    );
+
+    /** Body: body. Answers a line comment thread. */
+    @NonNull @POST("repos/{owner}/{repo}/pulls/{number}/comments/{id}/replies")
+    Observable<Response<JsonObject>> replyReviewComment(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Path("id") long id,
+            @Body Map<String, Object> body
+    );
+
+    /** Body: body. */
+    @NonNull @PATCH("repos/{owner}/{repo}/pulls/comments/{id}")
+    Observable<Response<JsonObject>> updateReviewComment(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("id") long id,
+            @Body Map<String, Object> body
+    );
+
+    @NonNull @DELETE("repos/{owner}/{repo}/pulls/comments/{id}")
+    Observable<Response<ResponseBody>> deleteReviewComment(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("id") long id
+    );
+
+    /** Body: body. */
+    @NonNull @PATCH("repos/{owner}/{repo}/issues/comments/{id}")
+    Observable<Response<JsonObject>> updateComment(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("id") long id,
+            @Body Map<String, Object> body
+    );
+
+    @NonNull @DELETE("repos/{owner}/{repo}/issues/comments/{id}")
+    Observable<Response<ResponseBody>> deleteComment(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("id") long id
     );
 
     /** Combined commit status (older CI integrations): state success / pending / failure. */

@@ -95,4 +95,28 @@
     <string name="open_links_summary_off">Off: github.com links from other apps open in the browser. Tap to allow</string>
     <string name="open_links_summary_old">Android asks which app opens github.com links. Tap for the app settings</string>
     <string name="open_links_hint">Turn on Open supported links, then Add link and tick github.com</string>
+    <string name="diff_tip">Tap a line to comment on it. To comment on several lines, long-press the first line, then tap the last one.</string>
+    <string name="diff_too_large">GitHub does not show this diff (binary file or too large).</string>
+    <string name="diff_not_found">The file is no longer part of this pull request.</string>
+    <string name="diff_outdated">Comments on code that has changed since</string>
+    <string name="diff_comment_line">Comment on line %1$d</string>
+    <string name="diff_comment_lines">Comment on lines %1$d to %2$d</string>
+    <string name="diff_comment_hint">Leave a comment (Markdown)</string>
+    <string name="diff_suggest">Suggest a change</string>
+    <string name="diff_reply">Reply…</string>
+    <string name="diff_reply_title">Reply</string>
+    <string name="diff_range_started">Now tap the last line of the range (or the same line to cancel)</string>
+    <string name="diff_range_other_hunk">Choose a line in the same block, after the first one</string>
+    <string name="diff_comment_sent">Comment added</string>
+    <string name="comment_edit">Edit comment</string>
+    <string name="comment_delete">Delete comment</string>
+    <string name="comment_delete_message">Delete this comment? This cannot be undone.</string>
+    <string name="comment_deleted">Comment deleted</string>
+    <string name="pull_line_comment_header">%1$s · %2$s · %3$s line %4$d</string>
+    <string name="pull_line_comment_header_outdated">%1$s · %2$s · %3$s (outdated)</string>
+    <plurals name="pull_file_comments">
+        <item quantity="one">%d comment</item>
+        <item quantity="other">%d comments</item>
+    </plurals>
+    <string name="copy_path">Copy path</string>
 </resources>

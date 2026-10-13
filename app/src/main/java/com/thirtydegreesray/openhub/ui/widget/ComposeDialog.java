@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,6 +45,9 @@ public final class ComposeDialog {
         /** choices whose body may stay empty although the body is required otherwise */
         @Nullable private boolean[] bodyOptional;
         @Nullable private Callback callback;
+        @Nullable private CharSequence header;
+        @Nullable private CharSequence insertLabel;
+        @Nullable private String insertText;
 
         public Builder(@NonNull Context context) {
             this.context = context;
@@ -74,6 +78,14 @@ public final class ComposeDialog {
         }
         public Builder positive(@NonNull CharSequence label) { this.positive = label; return this; }
         public Builder callback(@NonNull Callback callback) { this.callback = callback; return this; }
+        /** Monospace text above the editor, e.g. the lines of code being commented. */
+        public Builder header(@Nullable CharSequence text) { this.header = text; return this; }
+        /** A third button that inserts text at the cursor without closing the dialog. */
+        public Builder insertAction(@NonNull CharSequence label, @NonNull String text) {
+            this.insertLabel = label;
+            this.insertText = text;
+            return this;
+        }
 
         public void show() {
             View view = LayoutInflater.from(context).inflate(R.layout.dialog_pr_compose, null);
@@ -95,39 +107,59 @@ public final class ComposeDialog {
                     if (i == choice) button.setChecked(true);
                 }
             }
+            if (header != null) {
+                TextView headerView = view.findViewById(R.id.compose_header);
+                headerView.setText(header);
+                headerView.setVisibility(View.VISIBLE);
+            }
             if (titleHint != null) {
                 titleLayout.setVisibility(View.VISIBLE);
                 titleLayout.setHint(titleHint);
                 if (titleText != null) titleEdit.setText(titleText);
             }
 
-            AlertDialog dialog = new AlertDialog.Builder(context)
+            AlertDialog.Builder builder = new AlertDialog.Builder(context)
                     .setTitle(dialogTitle)
                     .setView(view)
                     .setPositiveButton(positive, null)
-                    .setNegativeButton(R.string.cancel, null)
-                    .create();
-            dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-                int selected = 0;
-                if (choices != null) {
-                    View checked = group.findViewById(group.getCheckedRadioButtonId());
-                    selected = checked == null ? 0 : (int) checked.getTag();
+                    .setNegativeButton(R.string.cancel, null);
+            if (insertLabel != null) builder.setNeutralButton(insertLabel, null);
+            AlertDialog dialog = builder.create();
+            dialog.setOnShowListener(d -> {
+                if (insertLabel != null) {
+                    dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
+                        editor.showWrite();
+                        android.text.Editable text = editor.getEditText().getText();
+                        if (text == null) return;
+                        int at = Math.max(0, editor.getEditText().getSelectionStart());
+                        String insert = insertText;
+                        if (at > 0 && text.charAt(at - 1) != '\n') insert = "\n" + insert;
+                        text.insert(at, insert);
+                        editor.getEditText().requestFocus();
+                    });
                 }
-                String title = titleEdit.getText() == null ? "" : titleEdit.getText().toString().trim();
-                String body = editor.getText().trim();
-                if (titleHint != null && title.isEmpty()) {
-                    titleLayout.setError(context.getString(R.string.field_required));
-                    return;
-                }
-                boolean optional = bodyOptional != null && selected < bodyOptional.length && bodyOptional[selected];
-                if (bodyRequired && !optional && body.isEmpty()) {
-                    editor.showWrite();
-                    editor.getEditText().setError(context.getString(R.string.field_required));
-                    return;
-                }
-                dialog.dismiss();
-                if (callback != null) callback.onDone(selected, title, body);
-            }));
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                    int selected = 0;
+                    if (choices != null) {
+                        View checked = group.findViewById(group.getCheckedRadioButtonId());
+                        selected = checked == null ? 0 : (int) checked.getTag();
+                    }
+                    String title = titleEdit.getText() == null ? "" : titleEdit.getText().toString().trim();
+                    String body = editor.getText().trim();
+                    if (titleHint != null && title.isEmpty()) {
+                        titleLayout.setError(context.getString(R.string.field_required));
+                        return;
+                    }
+                    boolean optional = bodyOptional != null && selected < bodyOptional.length && bodyOptional[selected];
+                    if (bodyRequired && !optional && body.isEmpty()) {
+                        editor.showWrite();
+                        editor.getEditText().setError(context.getString(R.string.field_required));
+                        return;
+                    }
+                    dialog.dismiss();
+                    if (callback != null) callback.onDone(selected, title, body);
+                });
+            });
             dialog.setOnDismissListener(d -> editor.dispose());
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);

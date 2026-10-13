@@ -12,6 +12,20 @@
         android:paddingEnd="@dimen/spacing_x_large"
         android:paddingTop="@dimen/spacing_small">
 
+        <TextView
+            android:id="@+id/compose_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_small"
+            android:padding="@dimen/spacing_small"
+            android:background="@drawable/bg_box"
+            android:fontFamily="monospace"
+            android:textSize="@dimen/text_small"
+            android:textColor="?android:textColorPrimary"
+            android:maxLines="6"
+            android:ellipsize="end"
+            android:visibility="gone"/>
+
         <RadioGroup
             android:id="@+id/choice_group"
             android:layout_width="match_parent"
