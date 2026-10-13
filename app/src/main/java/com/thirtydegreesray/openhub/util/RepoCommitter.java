@@ -225,13 +225,13 @@ public final class RepoCommitter {
 
         String pullUrl = null;
         if (options.openPullRequest) {
-            String head = options.newBranch != null ? options.newBranch : branch;
-            String base = options.newBranch != null ? branch : options.pullBase;
+            String pullHead = options.newBranch != null ? options.newBranch : branch;
+            String pullBase = options.newBranch != null ? branch : options.pullBase;
             Map<String, Object> pull = new HashMap<>();
             pull.put("title", options.message);
             if (!StringUtils.isBlank(options.description)) pull.put("body", options.description.trim());
-            pull.put("head", head);
-            pull.put("base", base);
+            pull.put("head", pullHead);
+            pull.put("base", pullBase);
             try {
                 JsonObject created = GitHubApi.call(git.createPull(owner, repo, pull));
                 JsonElement url = created.get("html_url");
@@ -240,7 +240,7 @@ public final class RepoCommitter {
                 // the branch already has an open pull request: the commit is in it, open that one
                 if (e.code != 422) throw e;
                 JsonArray open = GitHubApi.call(GitHubApi.service(PullService.class)
-                        .findPulls(owner, repo, owner + ":" + head, base, "open"));
+                        .findPulls(owner, repo, owner + ":" + pullHead, pullBase, "open"));
                 if (open == null || open.size() == 0) throw e;
                 JsonElement url = open.get(0).getAsJsonObject().get("html_url");
                 pullUrl = url == null || url.isJsonNull() ? null : url.getAsString();
