@@ -102,10 +102,14 @@ website:
   An open file has the same actions in its toolbar and menu.
 - The editor shows the file in a monospace font; Markdown files also get **Write** and
   **Preview**. Text files up to 512 KB can be edited.
+- The editor commits to the branch shown at the bottom (**Branch: main ▾**). Tap it to
+  pick another branch; an open file is then loaded again from that branch.
 - **Commit changes** asks for a commit message (and an optional description), then
-  either commits directly to the branch shown at the bottom, or creates a **new
-  branch** and, if you like, starts a **pull request** from it. File permissions such
-  as executable scripts are kept.
+  either commits directly to that branch, or creates a **new branch** and, if you like,
+  starts a **pull request** from it. When the branch is not the default one, **Start a
+  pull request into main** (the default branch) is offered too; if that branch already
+  has an open pull request, the commit is added to it and it opens. File permissions
+  such as executable scripts are kept.
 - Changing files under `.github/workflows` needs a token with the `workflow` scope.
   Tokens made with **Create token** in this version have it; for an older token,
   create a new one.

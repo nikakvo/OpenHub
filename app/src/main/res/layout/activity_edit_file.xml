@@ -85,10 +85,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginEnd="@dimen/spacing_small"
+            android:paddingTop="@dimen/spacing_small"
+            android:paddingBottom="@dimen/spacing_small"
+            android:background="?attr/selectableItemBackground"
             android:maxLines="1"
             android:ellipsize="middle"
-            android:textSize="@dimen/text_small"
-            android:textColor="?android:textColorSecondary"/>
+            android:textSize="@dimen/text_normal"
+            android:textColor="?attr/colorAccent"/>
         <Button
             android:id="@+id/commit_bn"
             style="@style/Widget.AppCompat.Button.Colored"

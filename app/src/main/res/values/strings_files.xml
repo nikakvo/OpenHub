@@ -46,4 +46,11 @@
         <item quantity="one">Add file via upload</item>
         <item quantity="other">Add files via upload</item>
     </plurals>
+    <string name="file_on_branch_choose">Branch: %1$s ▾</string>
+    <string name="file_choose_branch">Commit to branch</string>
+    <string name="file_not_on_branch">%1$s does not exist on %2$s</string>
+    <string name="file_switch_branch_title">Switch branch?</string>
+    <string name="file_switch_branch_message">The file is loaded again from %1$s. Your changes are lost.</string>
+    <string name="file_switch_branch">Switch</string>
+    <string name="commit_pull_into">Start a pull request into %1$s</string>
 </resources>

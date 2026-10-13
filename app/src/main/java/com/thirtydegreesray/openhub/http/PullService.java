@@ -37,6 +37,17 @@ public interface PullService {
             @Query("page") int page
     );
 
+    /** Pull requests from one branch ("owner:branch") into base. */
+    @NonNull @GET("repos/{owner}/{repo}/pulls")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonArray>> findPulls(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Query("head") String head,
+            @Query("base") String base,
+            @Query("state") String state
+    );
+
     /** Issue search; used with per_page=1 for total_count (e.g. "repo:o/r is:pr is:open"). */
     @NonNull @GET("search/issues?per_page=1")
     @Headers("Cache-Control: no-cache, no-store")

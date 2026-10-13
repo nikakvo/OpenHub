@@ -20,10 +20,13 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.http.GitDataService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
+import com.thirtydegreesray.openhub.http.RepoSettingsService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
@@ -88,6 +91,8 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
     @AutoAccess int originalLength;
     @AutoAccess boolean loaded;
     @AutoAccess boolean dirty;
+    /** the repository's default branch, for "Start a pull request" when committing elsewhere */
+    @AutoAccess String defaultBranch;
 
     private TextInputLayout pathLayout;
     private TextInputEditText pathEdit;
@@ -118,7 +123,8 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
         super.initView(savedInstanceState);
         setToolbarBackEnable();
         setToolbarTitle(getString(isNew() ? R.string.file_new : R.string.file_edit), owner + "/" + repo);
-        branchText.setText(getString(R.string.file_on_branch, branch));
+        showBranch();
+        if (defaultBranch == null) loadDefaultBranch();
         contentEdit.setTypeface(Typeface.MONOSPACE);
         contentEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
                 | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
@@ -194,30 +200,12 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
     private void loadContent() {
         loader.setVisibility(View.VISIBLE);
         commitBn.setEnabled(false);
-        disposables.add(Single.fromCallable(() -> {
-            JsonObject file = GitHubApi.call(GitHubApi.service(GitDataService.class)
-                    .getContent(owner, repo, RepoCommitter.encode(path), branch));
-            if (file == null || !"file".equals(string(file, "type"))) {
-                throw new java.io.IOException(getString(R.string.file_not_a_file));
-            }
-            if (file.get("size").getAsLong() > MAX_EDIT_BYTES || !"base64".equals(string(file, "encoding"))) {
-                throw new java.io.IOException(getString(R.string.file_too_large));
-            }
-            byte[] bytes = Base64.decode(string(file, "content"), Base64.DEFAULT);
-            for (byte b : bytes) {
-                if (b == 0) throw new java.io.IOException(getString(R.string.file_binary));
-            }
-            return new String(bytes, StandardCharsets.UTF_8);
-        }).subscribeOn(Schedulers.io())
+        disposables.add(Single.fromCallable(() -> fetchText(branch))
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(text -> {
                     loader.setVisibility(View.GONE);
-                    originalHash = text.hashCode();
-                    originalLength = text.length();
-                    contentEdit.setSaveEnabled(text.length() <= MAX_SAVED_CHARS);
-                    contentEdit.setText(text);
-                    loaded = true;
-                    commitBn.setEnabled(true);
+                    showText(text);
                 }, error -> {
                     loader.setVisibility(View.GONE);
                     new AlertDialog.Builder(this)
@@ -228,6 +216,134 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
                             .setOnCancelListener(d -> finish())
                             .show();
                 }));
+    }
+
+    /** The file's text on {@code from}; throws with a readable message when it cannot be edited. */
+    @NonNull
+    private String fetchText(@NonNull String from) throws java.io.IOException {
+        JsonObject file = GitHubApi.call(GitHubApi.service(GitDataService.class)
+                .getContent(owner, repo, RepoCommitter.encode(path), from));
+        if (file == null || !"file".equals(string(file, "type"))) {
+            throw new java.io.IOException(getString(R.string.file_not_a_file));
+        }
+        if (file.get("size").getAsLong() > MAX_EDIT_BYTES || !"base64".equals(string(file, "encoding"))) {
+            throw new java.io.IOException(getString(R.string.file_too_large));
+        }
+        byte[] bytes = Base64.decode(string(file, "content"), Base64.DEFAULT);
+        for (byte b : bytes) {
+            if (b == 0) throw new java.io.IOException(getString(R.string.file_binary));
+        }
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    private void showText(@NonNull String text) {
+        loaded = false;
+        originalHash = text.hashCode();
+        originalLength = text.length();
+        contentEdit.setSaveEnabled(text.length() <= MAX_SAVED_CHARS);
+        contentEdit.setText(text);
+        loaded = true;
+        dirty = false;
+        invalidateBack();
+        commitBn.setEnabled(true);
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Branch
+    // ---------------------------------------------------------------------------------
+
+    private void showBranch() {
+        branchText.setText(getString(R.string.file_on_branch_choose, branch));
+    }
+
+    private void loadDefaultBranch() {
+        disposables.add(Single.fromCallable(() -> GitHubApi.call(GitHubApi.service(RepoSettingsService.class)
+                        .getRepo(owner, repo)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(json -> {
+                    String name = string(json, "default_branch");
+                    if (name != null) defaultBranch = name;
+                }, error -> {
+                }));
+    }
+
+    private void chooseBranch() {
+        if (committing) return;
+        loader.setVisibility(View.VISIBLE);
+        disposables.add(Single.fromCallable(() -> {
+            List<String> names = new ArrayList<>();
+            RepoSettingsService service = GitHubApi.service(RepoSettingsService.class);
+            for (int page = 1; page <= 5; page++) {
+                JsonArray array = GitHubApi.call(service.getBranches(owner, repo, page));
+                if (array == null || array.size() == 0) break;
+                for (JsonElement e : array) {
+                    String name = string(e.getAsJsonObject(), "name");
+                    if (name != null) names.add(name);
+                }
+                if (array.size() < 100) break;
+            }
+            return names;
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(names -> {
+                    loader.setVisibility(View.GONE);
+                    String[] items = names.toArray(new String[0]);
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.file_choose_branch)
+                            .setSingleChoiceItems(items, names.indexOf(branch), (dialog, which) -> {
+                                dialog.dismiss();
+                                if (!items[which].equals(branch)) switchBranch(items[which]);
+                            })
+                            .setNegativeButton(R.string.cancel, null)
+                            .show();
+                }, error -> {
+                    loader.setVisibility(View.GONE);
+                    showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                }));
+    }
+
+    /**
+     * A new file just changes its target. An existing file is loaded again from the other
+     * branch, like switching branches on github.com; unsaved changes are lost, so ask first.
+     */
+    private void switchBranch(@NonNull String target) {
+        if (isNew()) {
+            branch = target;
+            showBranch();
+            return;
+        }
+        Runnable load = () -> {
+            loader.setVisibility(View.VISIBLE);
+            commitBn.setEnabled(false);
+            disposables.add(Single.fromCallable(() -> fetchText(target))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(text -> {
+                        loader.setVisibility(View.GONE);
+                        branch = target;
+                        showBranch();
+                        showText(text);
+                    }, error -> {
+                        loader.setVisibility(View.GONE);
+                        commitBn.setEnabled(true);
+                        String reason = error instanceof GitHubApi.ApiException
+                                && ((GitHubApi.ApiException) error).code == 404
+                                ? getString(R.string.file_not_on_branch, path, target)
+                                : StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+                        showErrorToast(reason);
+                    }));
+        };
+        if (!dirty) {
+            load.run();
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.file_switch_branch_title)
+                .setMessage(getString(R.string.file_switch_branch_message, target))
+                .setPositiveButton(R.string.file_switch_branch, (d, w) -> load.run())
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     @Nullable
@@ -271,7 +387,7 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
         } else {
             changes.add(RepoCommitter.Change.text(newPath, text));
         }
-        CommitDialog.show(this, branch, message, options -> commit(changes, options));
+        CommitDialog.show(this, branch, defaultBranch, message, options -> commit(changes, options));
     }
 
     private void commit(@NonNull List<RepoCommitter.Change> changes, @NonNull RepoCommitter.Options options) {
@@ -339,5 +455,6 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
         editor = new MarkdownWritePreview(root, owner + "/" + repo);
         contentEdit = editor.getEditText();
         ViewUtils.setOnClick(root, R.id.commit_bn, v -> onCommitClick());
+        branchText.setOnClickListener(v -> chooseBranch());
     }
 }

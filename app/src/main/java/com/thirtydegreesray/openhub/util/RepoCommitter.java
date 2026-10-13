@@ -15,6 +15,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.thirtydegreesray.openhub.http.GitDataService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
+import com.thirtydegreesray.openhub.http.PullService;
 import com.thirtydegreesray.openhub.http.RepoAdminService;
 
 import java.io.ByteArrayOutputStream;
@@ -100,13 +101,21 @@ public final class RepoCommitter {
         /** null: commit to the current branch */
         @Nullable public final String newBranch;
         public final boolean openPullRequest;
+        /** with no new branch: the branch a pull request from the current branch goes into */
+        @Nullable public final String pullBase;
 
         public Options(@NonNull String message, @Nullable String description,
                        @Nullable String newBranch, boolean openPullRequest) {
+            this(message, description, newBranch, openPullRequest, null);
+        }
+
+        public Options(@NonNull String message, @Nullable String description,
+                       @Nullable String newBranch, boolean openPullRequest, @Nullable String pullBase) {
             this.message = message;
             this.description = description;
             this.newBranch = newBranch;
-            this.openPullRequest = openPullRequest && newBranch != null;
+            this.pullBase = newBranch == null ? pullBase : null;
+            this.openPullRequest = openPullRequest && (newBranch != null || this.pullBase != null);
         }
 
         @NonNull
@@ -216,14 +225,26 @@ public final class RepoCommitter {
 
         String pullUrl = null;
         if (options.openPullRequest) {
+            String head = options.newBranch != null ? options.newBranch : branch;
+            String base = options.newBranch != null ? branch : options.pullBase;
             Map<String, Object> pull = new HashMap<>();
             pull.put("title", options.message);
             if (!StringUtils.isBlank(options.description)) pull.put("body", options.description.trim());
-            pull.put("head", options.newBranch);
-            pull.put("base", branch);
-            JsonObject created = GitHubApi.call(git.createPull(owner, repo, pull));
-            JsonElement url = created.get("html_url");
-            pullUrl = url == null || url.isJsonNull() ? null : url.getAsString();
+            pull.put("head", head);
+            pull.put("base", base);
+            try {
+                JsonObject created = GitHubApi.call(git.createPull(owner, repo, pull));
+                JsonElement url = created.get("html_url");
+                pullUrl = url == null || url.isJsonNull() ? null : url.getAsString();
+            } catch (GitHubApi.ApiException e) {
+                // the branch already has an open pull request: the commit is in it, open that one
+                if (e.code != 422) throw e;
+                JsonArray open = GitHubApi.call(GitHubApi.service(PullService.class)
+                        .findPulls(owner, repo, owner + ":" + head, base, "open"));
+                if (open == null || open.size() == 0) throw e;
+                JsonElement url = open.get(0).getAsJsonObject().get("html_url");
+                pullUrl = url == null || url.isJsonNull() ? null : url.getAsString();
+            }
             PullChanges.markChanged();
         }
         return new Result(target, pullUrl);

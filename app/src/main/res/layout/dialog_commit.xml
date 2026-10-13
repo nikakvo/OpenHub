@@ -56,6 +56,13 @@
                 android:text="@string/commit_to_new_branch"/>
         </RadioGroup>
 
+        <CheckBox
+            android:id="@+id/pull_current_check"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:visibility="gone"/>
+
         <LinearLayout
             android:id="@+id/new_branch_section"
             android:layout_width="match_parent"

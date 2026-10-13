@@ -8,6 +8,7 @@ import android.widget.CheckBox;
 import android.widget.RadioButton;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.textfield.TextInputEditText;
@@ -32,6 +33,15 @@ public final class CommitDialog {
 
     public static void show(@NonNull Context context, @NonNull String branch,
                             @NonNull String defaultMessage, @NonNull Callback callback) {
+        show(context, branch, null, defaultMessage, callback);
+    }
+
+    /**
+     * @param defaultBranch the repository's default branch; when committing directly to
+     *                      another branch, offers a pull request into it
+     */
+    public static void show(@NonNull Context context, @NonNull String branch, @Nullable String defaultBranch,
+                            @NonNull String defaultMessage, @NonNull Callback callback) {
         View view = LayoutInflater.from(context).inflate(R.layout.dialog_commit, null);
         TextInputLayout messageLayout = view.findViewById(R.id.message_layout);
         TextInputEditText messageEdit = view.findViewById(R.id.message_edit);
@@ -42,6 +52,12 @@ public final class CommitDialog {
         TextInputLayout branchLayout = view.findViewById(R.id.branch_layout);
         TextInputEditText branchEdit = view.findViewById(R.id.branch_edit);
         CheckBox pullCheck = view.findViewById(R.id.pull_check);
+        CheckBox pullCurrentCheck = view.findViewById(R.id.pull_current_check);
+        boolean offerPull = defaultBranch != null && !defaultBranch.equals(branch);
+        if (offerPull) {
+            pullCurrentCheck.setText(context.getString(R.string.commit_pull_into, defaultBranch));
+            pullCurrentCheck.setVisibility(View.VISIBLE);
+        }
 
         // prefilled like on github.com; typing replaces it
         messageEdit.setText(defaultMessage);
@@ -51,8 +67,10 @@ public final class CommitDialog {
         String login = AppData.INSTANCE.getLoggedUser() == null ? "patch"
                 : AppData.INSTANCE.getLoggedUser().getLogin();
         branchEdit.setText(login + "-patch-" + (System.currentTimeMillis() / 1000 % 100000));
-        newBranch.setOnCheckedChangeListener((v, checked) ->
-                newBranchSection.setVisibility(checked ? View.VISIBLE : View.GONE));
+        newBranch.setOnCheckedChangeListener((v, checked) -> {
+            newBranchSection.setVisibility(checked ? View.VISIBLE : View.GONE);
+            pullCurrentCheck.setVisibility(offerPull && !checked ? View.VISIBLE : View.GONE);
+        });
 
         AlertDialog dialog = new AlertDialog.Builder(context)
                 .setTitle(R.string.commit_title)
@@ -79,9 +97,13 @@ public final class CommitDialog {
             }
             messageLayout.setErrorEnabled(false);
             dialog.dismiss();
-            callback.onCommit(new RepoCommitter.Options(message,
-                    StringUtils.isBlank(description) ? null : description, branchName,
-                    branchName != null && pullCheck.isChecked()));
+            String cleanDescription = StringUtils.isBlank(description) ? null : description;
+            if (branchName == null && offerPull && pullCurrentCheck.isChecked()) {
+                callback.onCommit(new RepoCommitter.Options(message, cleanDescription, null, true, defaultBranch));
+            } else {
+                callback.onCommit(new RepoCommitter.Options(message, cleanDescription, branchName,
+                        branchName != null && pullCheck.isChecked()));
+            }
         }));
         dialog.show();
     }
