@@ -21,8 +21,24 @@ import java.util.ArrayList;
 public class DownloadSourceDialog {
 
     public static void show(Context context, String repoName, String tagName, Release release){
+        show(context, repoName, tagName, getDownloadSources(context, release));
+    }
+
+    /** Release files plus the source code archives of a tag (the release feed has no Release). */
+    public static void show(Context context, String fullName, String tagName,
+                            java.util.List<DownloadSource> assets){
+        ArrayList<DownloadSource> sources = new ArrayList<>(assets);
+        String base = "https://github.com/" + fullName + "/archive/refs/tags/" + tagName;
+        sources.add(new DownloadSource(base + ".zip", true, context.getString(R.string.source_code_zip)));
+        sources.add(new DownloadSource(base + ".tar.gz", true, context.getString(R.string.source_code_tar)));
+        String repoName = fullName.substring(fullName.indexOf('/') + 1);
+        show(context, repoName, tagName, sources);
+    }
+
+    private static void show(Context context, String repoName, String tagName,
+                             ArrayList<DownloadSource> sources){
         DownloadSourcesAdapter adapter = new DownloadSourcesAdapter(context, repoName, tagName);
-        adapter.setData(getDownloadSources(context, release));
+        adapter.setData(sources);
 
         final RecyclerView recyclerView = new RecyclerView(context);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));

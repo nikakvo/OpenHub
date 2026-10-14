@@ -276,6 +276,8 @@ public class MainActivity extends BaseDrawerActivity<MainPresenter>
                     AppData.INSTANCE.getLoggedUser().getAvatarUrl());
         } else if (id == R.id.nav_new_repo) {
             CreateRepositoryActivity.show(getActivity());
+        } else if (id == R.id.nav_releases) {
+            ReleaseFeedActivity.show(getActivity());
         } else if (id == R.id.nav_issues) {
             IssuesActivity.showForUser(getActivity());
         } else if (id == R.id.nav_gists) {

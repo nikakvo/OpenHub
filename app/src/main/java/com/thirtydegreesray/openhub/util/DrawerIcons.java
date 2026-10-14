@@ -39,6 +39,7 @@ public final class DrawerIcons {
         put(R.id.nav_new_repo, 0xFF03A9F4, 0xFF0288D1);
         put(R.id.nav_owned, 0xFF58A6FF, 0xFF0969DA);
         put(R.id.nav_starred, 0xFFE3B341, 0xFF9A6700);
+        put(R.id.nav_releases, 0xFF3FB950, 0xFF1A7F37);
         put(R.id.nav_bookmarks, 0xFFDB61A2, 0xFFBF3989);
         put(R.id.nav_search, 0xFF79C0FF, 0xFF0969DA);
         put(R.id.nav_trace, 0xFF8B949E, 0xFF57606A);

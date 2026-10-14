@@ -561,4 +561,29 @@
     </plurals>
 
     <string name="scroll_to_top">Scroll to top</string>
+
+    <!-- Release feed of starred repositories -->
+    <string name="release_feed_title">Releases</string>
+    <string name="release_feed_new">New</string>
+    <string name="release_feed_prerelease">Pre-release</string>
+    <string name="release_feed_filter_hint">Filter repositories</string>
+    <string name="release_feed_show_prereleases">Show pre-releases</string>
+    <string name="release_feed_mark_seen">Mark all as seen</string>
+    <string name="release_feed_today">Today</string>
+    <string name="release_feed_week">This week</string>
+    <string name="release_feed_month">This month</string>
+    <string name="release_feed_older">Older</string>
+    <string name="release_feed_updated">Updated %s</string>
+    <string name="release_feed_meta">%1$s · %2$s</string>
+    <string name="release_feed_empty">None of your starred repositories has a release yet.</string>
+    <string name="release_feed_empty_filter">No repository matches the filter.</string>
+    <string name="release_feed_open_repo">Open repository</string>
+    <plurals name="release_feed_new_count">
+        <item quantity="one">%d new release</item>
+        <item quantity="other">%d new releases</item>
+    </plurals>
+    <plurals name="release_feed_files">
+        <item quantity="one">%d file</item>
+        <item quantity="other">%d files</item>
+    </plurals>
 </resources>
