@@ -275,8 +275,8 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         if (!voted) vote.setTextColor(secondaryText());
         if (Json.bool(item, "viewerCanUpvote") || voted) {
             vote.setOnClickListener(v -> mutate(voted
-                    ? "mutation($id:ID!){removeUpvote(input:{subjectId:$id}){subject{id}}}"
-                    : "mutation($id:ID!){addUpvote(input:{subjectId:$id}){subject{id}}}",
+                    ? "mutation($id:ID!){removeUpvote(input:{subjectId:$id}){subject{upvoteCount}}}"
+                    : "mutation($id:ID!){addUpvote(input:{subjectId:$id}){subject{upvoteCount}}}",
                     GraphQl.vars("id", Json.str(item, "id")), null));
         }
         bar.addView(vote);
