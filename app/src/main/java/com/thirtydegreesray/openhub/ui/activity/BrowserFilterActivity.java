@@ -21,6 +21,16 @@ public class BrowserFilterActivity extends AppCompatActivity {
 
     /** Opens the notifications inbox (from the background check's summary notification). */
     public static final String NOTIFICATIONS = "notifications";
+    /**
+     * Opens the Actions screen of a repository (from a workflow run notification):
+     * "actions:owner/repo" or "actions:owner/repo:run" when the user may start workflows.
+     */
+    public static final String ACTIONS = "actions:";
+
+    @NonNull
+    public static String actionsUri(@NonNull String fullName, boolean canRun) {
+        return ACTIONS + fullName + (canRun ? ":run" : "");
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,6 +51,15 @@ public class BrowserFilterActivity extends AppCompatActivity {
             activity.startActivity(new Intent(activity, TrendingActivity.class));
         } else if (uri.toString().equals(NOTIFICATIONS)){
             activity.startActivity(new Intent(activity, NotificationsActivity.class));
+        } else if (uri.toString().startsWith(ACTIONS)){
+            String target = uri.toString().substring(ACTIONS.length());
+            boolean canRun = target.endsWith(":run");
+            if (canRun) target = target.substring(0, target.length() - ":run".length());
+            int slash = target.indexOf('/');
+            if (slash > 0) {
+                ActionsActivity.show(activity, target.substring(0, slash), target.substring(slash + 1),
+                        null, canRun);
+            }
         } else if (uri.toString().equals("search")){
             activity.startActivity(new Intent(activity, SearchActivity.class));
         } else {

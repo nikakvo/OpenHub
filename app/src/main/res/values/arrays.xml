@@ -112,6 +112,7 @@
 
         <item>my_repos</item>
         <item>starred_repos</item>
+        <item>releases</item>
         <item>bookmarks</item>
 
         <item>search</item>
@@ -130,6 +131,7 @@
 
         <item>@id/nav_owned</item>
         <item>@id/nav_starred</item>
+        <item>@id/nav_releases</item>
         <item>@id/nav_bookmarks</item>
 
         <item>@id/nav_search</item>
@@ -148,6 +150,7 @@
 
         <item>@string/my_repos</item>
         <item>@string/starred_repos</item>
+        <item>@string/release_feed_title</item>
         <item>@string/bookmarks</item>
 
         <item>@string/search</item>

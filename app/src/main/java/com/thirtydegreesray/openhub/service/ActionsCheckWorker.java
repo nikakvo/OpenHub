@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
@@ -22,9 +23,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.R;
-import com.thirtydegreesray.openhub.ui.activity.ActionsActivity;
+import com.thirtydegreesray.openhub.ui.activity.BrowserFilterActivity;
 import com.thirtydegreesray.openhub.util.ActionsWatcher;
-import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
@@ -210,10 +210,10 @@ public class ActionsCheckWorker extends Worker {
         int slash = fullName.indexOf('/');
         String owner = fullName.substring(0, slash);
         String repo = fullName.substring(slash + 1);
-        Intent open = new Intent(context, ActionsActivity.class)
-                .putExtras(BundleHelper.builder().put("owner", owner).put("repo", repo)
-                        .put("canRun", false).build())
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        // through BrowserFilterActivity: it loads the account first when the app was closed
+        Intent open = new Intent(context, BrowserFilterActivity.class)
+                .setData(Uri.parse(BrowserFilterActivity.actionsUri(fullName, canPush(fullName))))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         int notificationId = Long.hashCode(id);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
@@ -272,6 +272,16 @@ public class ActionsCheckWorker extends Worker {
             builder.addAction(0, context.getString(R.string.actions_notify_download, name, size),
                     PendingIntent.getBroadcast(context, notificationId * 4 + i + 2, download,
                             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+        }
+    }
+
+    /** Whether the user may start workflows here (push access), so the play button shows. */
+    private boolean canPush(@NonNull String fullName) {
+        try {
+            JsonObject repository = get("repos/" + fullName);
+            return repository != null && Json.bool(repository, "permissions.push");
+        } catch (Exception e) {
+            return false;
         }
     }
 
