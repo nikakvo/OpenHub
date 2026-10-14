@@ -109,7 +109,7 @@
     <string name="public_repositories">Public repositories</string>
     <string name="starred_repositories">Starred repositories</string>
 
-    <string name="no_cache_and_network">Network and cache is unavailable.</string>
+    <string name="no_cache_and_network">No network, and this page is not saved on the phone yet.</string>
     <string name="page_no_found">Page not found.</string>
     <string name="unauthorized">Unauthorized.</string>
     <string name="no_network_tip">Loading data from GitHub failed. Please check your network connection and retry.</string>
