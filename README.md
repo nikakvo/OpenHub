@@ -102,6 +102,30 @@ app goes to them; see [Credits](#credits).
 * Follow and unfollow
 * Organization repositories, activity and members
 
+## Security and privacy
+
+OpenHub talks only to GitHub: no ads, no analytics, no servers of its own.
+
+* **Your token stays on the phone, encrypted.** It is stored with AES-256-GCM using a key
+  of the Android Keystore, which never leaves the phone. A copied database is useless
+  without that key.
+* **The token goes only to `api.github.com`.** File links, images and web pages never get
+  it, whatever address they point to; each account's token is bound to its own HTTP client.
+* **Not in backups.** Accounts and tokens are excluded from Android backups and from
+  phone-to-phone transfers; settings are kept.
+* **Browser sign-in** uses a one-time `state` that must come back unchanged and PKCE
+  (S256), so another app cannot push its own sign-in into OpenHub; the client secret and
+  the code travel in the request body, never in a URL.
+* **Log out** deletes the token and the cached GitHub pages; a browser sign-in token is
+  also revoked at GitHub. Personal access tokens are revoked by you on github.com.
+* **Least privilege:** *Create token* ticks every permission OpenHub can use; untick
+  `delete_repo` or `workflow` if you do not need them, or use a fine-grained token limited
+  to some repositories.
+* Web views cannot read files or other apps' content; exported screens accept only what
+  they need.
+
+Found a security problem? Please report it privately, see [SECURITY.md](SECURITY.md).
+
 ## Requirements
 
 Android 8.0 (API 26) or newer.
@@ -119,6 +143,8 @@ You need JDK 17 and the Android SDK (platform 36). Then:
 ./gradlew assembleNormalDebug
 ```
 
+Unit tests: `./gradlew testNormalDebugUnitTest`.
+
 The APK ends up in `app/build/outputs/apk/normal/debug/`. There are two flavors that only
 differ in the app name: `normal` ("OpenHub") and `fullName` ("OpenHub for GitHub").
 
@@ -135,8 +161,10 @@ openhub_client_secret=your_client_secret
 
 ### Signed release builds (optional)
 
-Release builds are signed with the debug key unless a keystore is configured, so they
-always install. To sign with your own key, either add `sign_path`, `store_password`,
+The APKs on the Releases page are signed with the project's own key, and Android only
+installs an update that carries the same signature. Your own release builds are signed
+with the debug key unless a keystore is configured, so they always install (as a
+different app signature: uninstall the official APK first). To sign with your own key, either add `sign_path`, `store_password`,
 `key_alias` and `key_password` to `local.properties`, or use `build.sh`:
 
 ```bash
