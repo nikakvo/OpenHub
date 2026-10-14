@@ -18,7 +18,9 @@
     <string name="run_force_cancel_message">Stops the run without waiting for "always()" steps. Use it when a normal cancel does not end the run.</string>
     <string name="run_rerun_started">Re-run started</string>
     <string name="run_cancel_requested">Cancel requested</string>
-    <string name="run_no_jobs">No jobs yet</string>
+    <string name="run_no_jobs">Waiting for a runner…</string>
+    <string name="run_job_waiting">Waiting for a runner…</string>
+    <string name="run_now">%1$s · %2$s</string>
     <string name="log_title">Log: %1$s</string>
     <string name="log_find">Find</string>
     <string name="log_find_next">Find next</string>

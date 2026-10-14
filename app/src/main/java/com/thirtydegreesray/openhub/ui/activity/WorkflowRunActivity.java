@@ -2,6 +2,8 @@ package com.thirtydegreesray.openhub.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.animation.ValueAnimator;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -92,6 +95,22 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
     private boolean resumed;
     private boolean loading;
 
+    // live view while the run is going: pulsing dots of running items, ticking durations
+    private ProgressBar runProgress;
+    private final List<View> pulsing = new ArrayList<>();
+    private final List<TextView> tickingViews = new ArrayList<>();
+    private final List<Date> tickingStarts = new ArrayList<>();
+    @Nullable private ValueAnimator pulse;
+    private final Runnable tick = new Runnable() {
+        @Override
+        public void run() {
+            for (int i = 0; i < tickingViews.size(); i++) {
+                tickingViews.get(i).setText(RunStatus.duration(tickingStarts.get(i), null));
+            }
+            if (!tickingViews.isEmpty() && resumed) handler.postDelayed(this, 1000);
+        }
+    };
+
     @Nullable private JsonObject run;
     private final List<JsonObject> jobs = new ArrayList<>();
     private final List<Artifact> artifacts = new ArrayList<>();
@@ -120,18 +139,21 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
         super.onResume();
         resumed = true;
         if (run != null && !isCompleted()) schedulePoll();
+        startLive();
     }
 
     @Override
     protected void onPause() {
         resumed = false;
         handler.removeCallbacks(poll);
+        stopLive();
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
         handler.removeCallbacks(poll);
+        stopLive();
         disposables.clear();
         super.onDestroy();
     }
@@ -197,11 +219,22 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
         String title = Json.str(run, "display_title");
         titleText.setText(StringUtils.isBlank(title) ? name : title);
 
+        pulsing.clear();
+        tickingViews.clear();
+        tickingStarts.clear();
+        boolean running = !isCompleted();
+        runProgress.setVisibility(running ? View.VISIBLE : View.GONE);
+
         RunStatus status = RunStatus.of(Json.str(run, "status"), Json.str(run, "conclusion"));
         status.paintDot(statusDot);
         status.paintLabel(statusText);
+        String now = runningStepName();
+        if (running && now != null) statusText.setText(getString(R.string.run_now, getString(status.label), now));
+        statusDot.setAlpha(1f);
+        if (running) pulsing.add(statusDot);
         Date started = Json.date(run, "run_started_at");
-        durationText.setText(RunStatus.duration(started, isCompleted() ? Json.date(run, "updated_at") : null));
+        durationText.setText(RunStatus.duration(started, running ? null : Json.date(run, "updated_at")));
+        if (running && started != null) ticking(durationText, started);
 
         List<String> meta = new ArrayList<>();
         meta.add((StringUtils.isBlank(name) ? "" : name + " ") + "#" + Json.integer(run, "run_number"));
@@ -218,6 +251,55 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
 
         renderJobs();
         renderArtifacts();
+        startLive();
+    }
+
+    /** "Build kernel" while that step runs (of the first running job), else null. */
+    @Nullable
+    private String runningStepName() {
+        for (JsonObject job : jobs) {
+            if (!"in_progress".equals(Json.str(job, "status"))) continue;
+            JsonElement steps = Json.get(job, "steps");
+            if (steps == null || !steps.isJsonArray()) return Json.str(job, "name");
+            for (JsonElement element : steps.getAsJsonArray()) {
+                if (element.isJsonObject() && "in_progress".equals(Json.str(element.getAsJsonObject(), "status"))) {
+                    return Json.str(element.getAsJsonObject(), "name");
+                }
+            }
+            return Json.str(job, "name");
+        }
+        return null;
+    }
+
+    private void ticking(@NonNull TextView view, @NonNull Date start) {
+        tickingViews.add(view);
+        tickingStarts.add(start);
+    }
+
+    private void startLive() {
+        handler.removeCallbacks(tick);
+        if (!resumed) return;
+        if (!tickingViews.isEmpty()) handler.postDelayed(tick, 1000);
+        if (pulsing.isEmpty()) {
+            if (pulse != null) pulse.cancel();
+            return;
+        }
+        if (pulse == null) {
+            pulse = ValueAnimator.ofFloat(1f, 0.25f);
+            pulse.setDuration(700);
+            pulse.setRepeatMode(ValueAnimator.REVERSE);
+            pulse.setRepeatCount(ValueAnimator.INFINITE);
+            pulse.addUpdateListener(animation -> {
+                float alpha = (float) animation.getAnimatedValue();
+                for (View view : pulsing) view.setAlpha(alpha);
+            });
+        }
+        if (!pulse.isStarted()) pulse.start();
+    }
+
+    private void stopLive() {
+        handler.removeCallbacks(tick);
+        if (pulse != null) pulse.cancel();
     }
 
     private void renderJobs() {
@@ -234,11 +316,15 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
         for (JsonObject job : jobs) {
             View row = inflater.inflate(R.layout.layout_item_run_job, jobsList, false);
             RunStatus status = RunStatus.of(Json.str(job, "status"), Json.str(job, "conclusion"));
-            status.paintDot(row.findViewById(R.id.job_status_dot));
+            View jobDot = row.findViewById(R.id.job_status_dot);
+            status.paintDot(jobDot);
             ((TextView) row.findViewById(R.id.job_name)).setText(Json.str(job, "name"));
             boolean done = "completed".equals(Json.str(job, "status"));
-            ((TextView) row.findViewById(R.id.job_duration)).setText(
-                    RunStatus.duration(Json.date(job, "started_at"), done ? Json.date(job, "completed_at") : null));
+            if (!done) pulsing.add(jobDot);
+            TextView jobDuration = row.findViewById(R.id.job_duration);
+            Date jobStart = Json.date(job, "started_at");
+            jobDuration.setText(RunStatus.duration(jobStart, done ? Json.date(job, "completed_at") : null));
+            if (!done && jobStart != null) ticking(jobDuration, jobStart);
             View header = row.findViewById(R.id.job_header);
             header.setOnClickListener(v -> openLog(job));
             header.setOnLongClickListener(v -> {
@@ -248,21 +334,38 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
 
             LinearLayout steps = row.findViewById(R.id.job_steps);
             JsonElement stepList = Json.get(job, "steps");
+            if (!done && (stepList == null || !stepList.isJsonArray() || stepList.getAsJsonArray().size() == 0)) {
+                TextView waiting = new TextView(this);
+                waiting.setText(R.string.run_job_waiting);
+                waiting.setTextColor(RunStatus.AMBER);
+                steps.addView(waiting);
+            }
             if (stepList != null && stepList.isJsonArray()) {
                 for (JsonElement element : stepList.getAsJsonArray()) {
                     if (!element.isJsonObject()) continue;
                     JsonObject step = element.getAsJsonObject();
                     View stepRow = inflater.inflate(R.layout.layout_item_run_step, steps, false);
                     RunStatus stepStatus = RunStatus.of(Json.str(step, "status"), Json.str(step, "conclusion"));
-                    stepStatus.paintDot(stepRow.findViewById(R.id.step_status_dot));
+                    View stepDot = stepRow.findViewById(R.id.step_status_dot);
+                    stepStatus.paintDot(stepDot);
                     TextView stepName = stepRow.findViewById(R.id.step_name);
                     stepName.setText(Json.integer(step, "number") + ". " + Json.str(step, "name"));
                     if (stepStatus.failed()) stepName.setTextColor(RunStatus.RED);
+                    boolean stepRunning = "in_progress".equals(Json.str(step, "status"));
+                    if (stepRunning) {
+                        // the step that runs now: bold, amber, pulsing, its time ticking
+                        stepName.setTypeface(stepName.getTypeface(), Typeface.BOLD);
+                        stepName.setTextColor(RunStatus.AMBER);
+                        pulsing.add(stepDot);
+                    } else if (!"completed".equals(Json.str(step, "status"))) {
+                        stepDot.setAlpha(0.4f); // waiting
+                    }
                     boolean stepDone = "completed".equals(Json.str(step, "status"));
-                    ((TextView) stepRow.findViewById(R.id.step_duration)).setText(
-                            "skipped".equals(Json.str(step, "conclusion")) ? "" : RunStatus.duration(
-                                    Json.date(step, "started_at"),
-                                    stepDone ? Json.date(step, "completed_at") : null));
+                    TextView stepDuration = stepRow.findViewById(R.id.step_duration);
+                    Date stepStart = Json.date(step, "started_at");
+                    stepDuration.setText("skipped".equals(Json.str(step, "conclusion")) ? ""
+                            : RunStatus.duration(stepStart, stepDone ? Json.date(step, "completed_at") : null));
+                    if (stepRunning && stepStart != null) ticking(stepDuration, stepStart);
                     stepRow.setOnClickListener(v -> openLog(job));
                     steps.addView(stepRow);
                 }
@@ -463,6 +566,7 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
     protected void bindViews(View root) {
         super.bindViews(root);
         refreshLayout = root.findViewById(R.id.refresh_layout);
+        runProgress = root.findViewById(R.id.run_progress);
         titleText = root.findViewById(R.id.run_title);
         statusDot = root.findViewById(R.id.run_status_dot);
         statusText = root.findViewById(R.id.run_status);

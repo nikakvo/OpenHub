@@ -446,7 +446,7 @@
   <p><span class="pill p-green">Success</span> <span class="pill p-red">Failed</span> <span class="pill p-amber">In progress</span> <span class="pill p-amber">Queued</span> <span class="pill p-grey">Cancelled</span> <span class="pill p-grey">Skipped</span></p>
   <ul>
     <li>Each row is one <strong>run</strong>: what started it, the workflow, its number, the branch and the status.</li>
-    <li><strong>Tap a run</strong> to open it: status and duration, every <strong>job</strong> with its <strong>steps</strong> (the failed step in red) and the <strong>artifacts</strong> (the files it built; tap one to download it as a zip). GitHub deletes artifacts after a while (usually 90 days); old ones show <em>expired</em>. A run that is still going updates itself every few seconds.</li>
+    <li><strong>Tap a run</strong> to open it: status and duration, every <strong>job</strong> with its <strong>steps</strong> (the failed step in red) and the <strong>artifacts</strong> (the files it built; tap one to download it as a zip). GitHub deletes artifacts after a while (usually 90 days); old ones show <em>expired</em>. A run that is still going updates itself every few seconds: a moving bar at the top, pulsing dots and running timers show what is going on, and the step that runs now is bold (also in the status line).</li>
     <li><strong>Long-press a run</strong> to open it in the browser.</li>
     <li>The filter icon shows one workflow; the menu has <span class="ui">Successful runs only</span>.</li>
     <li>In your own repositories the play button starts a workflow by hand: pick it, check the branch, add inputs as <code>key=value</code> lines. Only workflows with a <code>workflow_dispatch</code> trigger can be started.</li>
