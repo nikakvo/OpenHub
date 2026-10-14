@@ -41,11 +41,14 @@ import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.ComposeDialog;
+import com.thirtydegreesray.openhub.ui.widget.ReviewDialog;
 import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
+import com.thirtydegreesray.openhub.util.ReviewDrafts;
+import com.thirtydegreesray.openhub.util.ReviewThreads;
 import com.thirtydegreesray.openhub.util.MarkdownHtml;
 import com.thirtydegreesray.openhub.util.PullChanges;
 import com.thirtydegreesray.openhub.util.RepoChanges;
@@ -149,6 +152,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     private boolean mergeableRetried;
     private boolean headBranchExists;
     private final Map<String, Integer> commentsPerFile = new HashMap<>();
+    /** Review threads by the id of their first comment (resolved or not). */
+    private Map<Long, ReviewThreads.Thread> reviewThreads = new HashMap<>();
     private long loadedStamp;
 
     @Override
@@ -181,6 +186,17 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         super.onResume();
         // a line comment was written on the diff screen
         if (loadedStamp != 0 && PullChanges.changedSince(loadedStamp)) load();
+        updateReviewButton();
+    }
+
+    /** "Finish review (3)" while line comments wait in a pending review. */
+    private void updateReviewButton() {
+        TextView button = findViewById(R.id.review_bn);
+        if (button == null) return;
+        int pending = ReviewDrafts.count(this, owner, repo, number);
+        button.setText(pending > 0 ? getString(R.string.review_finish_count, pending)
+                : getString(R.string.pull_review));
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -261,11 +277,16 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             items.sort((a, b) -> Json.str(a, "created_at").compareTo(Json.str(b, "created_at")));
             String checks = checksSummary(Json.str(p, "head.sha"));
             boolean branchExists = headBranchExists(p);
-            return new Object[]{p, r, items, checks, branchExists, lineComments};
+            Map<Long, ReviewThreads.Thread> threads = lineComments.isEmpty()
+                    ? new HashMap<>() : ReviewThreads.fetch(owner, repo, number);
+            return new Object[]{p, r, items, checks, branchExists, lineComments, threads};
         }, (Object[] result) -> {
             loader.setVisibility(View.GONE);
             pull = (JsonObject) result[0];
             repoJson = (JsonObject) result[1];
+            //noinspection unchecked
+            reviewThreads = (Map<Long, ReviewThreads.Thread>) result[6];
+            updateReviewButton();
             //noinspection unchecked
             showConversation((List<JsonObject>) result[2], (String) result[3]);
             headBranchExists = (Boolean) result[4];
@@ -445,6 +466,12 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                         : R.string.pull_review_commented;
                 badge.setText(text);
                 badge.setVisibility(View.VISIBLE);
+            } else if (Json.bool(item, "_line")) {
+                ReviewThreads.Thread thread = reviewThreads.get(ReviewThreads.rootOf(item));
+                if (thread != null && thread.resolved) {
+                    badge.setText(R.string.review_thread_resolved_badge);
+                    badge.setVisibility(View.VISIBLE);
+                }
             }
             TextView bodyView = view.findViewById(R.id.comment_body);
             String text = Json.str(item, "body");
@@ -618,24 +645,12 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void review() {
-        CharSequence[] choices = {getString(R.string.pull_review_comment),
-                getString(R.string.pull_review_approve), getString(R.string.pull_review_request_changes)};
-        String[] events = {"COMMENT", "APPROVE", "REQUEST_CHANGES"};
-        new ComposeDialog.Builder(this)
-                .title(getString(R.string.pull_review))
-                .repo(owner + "/" + repo)
-                .choices(choices, 0)
-                .body(getString(R.string.pull_review_hint), null)
-                // an approval may come without words; a comment or change request needs them
-                .bodyRequired(true, new boolean[]{false, true, false})
-                .positive(getString(R.string.pull_review_submit))
-                .callback((choice, title, body) -> {
-                    Map<String, Object> data = new HashMap<>();
-                    data.put("event", events[choice]);
-                    if (!body.isEmpty()) data.put("body", body);
-                    run(() -> GitHubApi.call(pulls().createReview(owner, repo, number, data)), null);
-                })
-                .show();
+        ReviewDialog.show(this, owner, repo, number, pull == null ? "" : Json.str(pull, "head.sha"),
+                (data, hasDrafts) -> run(() -> {
+                    GitHubApi.call(pulls().createReview(owner, repo, number, data));
+                    if (hasDrafts) ReviewDrafts.clear(getApplicationContext(), owner, repo, number);
+                    return Boolean.TRUE;
+                }, getString(R.string.review_sent)));
     }
 
     private void merge() {
@@ -844,6 +859,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         menu.add(0, 3, 2, R.string.share);
         menu.add(0, 4, 3, R.string.copy_url);
         menu.add(0, 5, 4, R.string.open_in_browser);
+        menu.add(0, 6, 5, R.string.review_discard);
         return true;
     }
 
@@ -851,6 +867,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem edit = menu.findItem(1);
         if (edit != null) edit.setVisible(pull != null && (canWrite() || isAuthor()));
+        MenuItem discard = menu.findItem(6);
+        if (discard != null) discard.setVisible(ReviewDrafts.count(this, owner, repo, number) > 0);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -875,6 +893,12 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                 return true;
             case 5:
                 AppOpener.openInCustomTabsOrBrowser(this, url);
+                return true;
+            case 6:
+                ReviewDialog.confirmDiscard(this, owner, repo, number, () -> {
+                    updateReviewButton();
+                    showInfoToast(getString(R.string.review_discarded));
+                });
                 return true;
         }
         return super.onOptionsItemSelected(item);

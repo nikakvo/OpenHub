@@ -562,6 +562,42 @@
 
     <string name="scroll_to_top">Scroll to top</string>
 
+    <!-- Pending review and review threads -->
+    <string name="review_single">Add single comment</string>
+    <string name="review_start">Start a review</string>
+    <string name="review_add">Add review comment</string>
+    <string name="review_pending_badge">Pending</string>
+    <string name="review_finish">Finish review</string>
+    <string name="review_finish_count">Finish review (%d)</string>
+    <string name="review_sent">Review sent</string>
+    <string name="review_discard">Discard pending review</string>
+    <string name="review_discarded">Pending review discarded</string>
+    <string name="review_thread_resolve">Resolve conversation</string>
+    <string name="review_thread_unresolve">Unresolve conversation</string>
+    <string name="review_thread_resolved">Resolved conversation · %s</string>
+    <string name="review_thread_resolved_by">Resolved by %1$s · %2$s</string>
+    <string name="review_thread_show">Show</string>
+    <string name="review_thread_hide">Hide</string>
+    <string name="review_thread_resolved_badge">Resolved</string>
+    <string name="review_thread_resolved_toast">Conversation resolved</string>
+    <string name="review_thread_unresolved_toast">Conversation unresolved</string>
+    <plurals name="review_added">
+        <item quantity="one">Added to your review (%d pending comment)</item>
+        <item quantity="other">Added to your review (%d pending comments)</item>
+    </plurals>
+    <plurals name="review_bar_text">
+        <item quantity="one">%d pending comment in your review</item>
+        <item quantity="other">%d pending comments in your review</item>
+    </plurals>
+    <plurals name="review_finish_title">
+        <item quantity="one">Finish your review (%d comment)</item>
+        <item quantity="other">Finish your review (%d comments)</item>
+    </plurals>
+    <plurals name="review_discard_message">
+        <item quantity="one">Delete %d pending comment? It was never sent.</item>
+        <item quantity="other">Delete %d pending comments? They were never sent.</item>
+    </plurals>
+
     <!-- Workflow run notifications -->
     <string name="actions_notify_runs">Notify when runs finish</string>
     <string name="actions_notify_on">You will be notified when workflow runs of %s finish</string>

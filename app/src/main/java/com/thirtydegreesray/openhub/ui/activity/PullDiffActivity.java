@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -32,10 +33,13 @@ import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.ComposeDialog;
+import com.thirtydegreesray.openhub.ui.widget.ReviewDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
+import com.thirtydegreesray.openhub.util.ReviewDrafts;
+import com.thirtydegreesray.openhub.util.ReviewThreads;
 import com.thirtydegreesray.openhub.util.PullChanges;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
@@ -85,6 +89,8 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private RecyclerView list;
     private ProgressBar loader;
+    private View reviewBar;
+    private TextView reviewBarText;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
     private final List<Row> rows = new ArrayList<>();
@@ -93,6 +99,12 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
     @Nullable private JsonObject file;
     /** row index of the first line of a range comment, -1 when none */
     private int rangeStart = -1;
+    /** review comments of this file as last loaded, to rebuild after a local change */
+    private List<JsonObject> lastComments = new ArrayList<>();
+    /** review threads by the id of their first comment */
+    private Map<Long, ReviewThreads.Thread> threads = new HashMap<>();
+    /** resolved threads the user opened */
+    private final java.util.Set<Long> expanded = new java.util.HashSet<>();
 
     private static final Pattern HUNK = Pattern.compile("^@@ -(\\d+)(?:,\\d+)? \\+(\\d+)(?:,\\d+)? @@");
 
@@ -101,7 +113,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
     // ---------------------------------------------------------------------------------
 
     private static final int HUNK_ROW = 0, ADD = 1, DEL = 2, CTX = 3, META = 4,
-            COMMENT = 5, REPLY = 6, NOTE = 7;
+            COMMENT = 5, REPLY = 6, NOTE = 7, RESOLVED = 8;
 
     private static final class Row {
         final int type;
@@ -203,13 +215,18 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                 }
                 if (array.size() < 100) break;
             }
-            return new Object[]{found == null ? new JsonObject() : found, comments};
+            Map<Long, ReviewThreads.Thread> found2 = comments.isEmpty()
+                    ? new HashMap<>() : ReviewThreads.fetch(owner, repo, number);
+            return new Object[]{found == null ? new JsonObject() : found, comments, found2};
         }, (Object[] result) -> {
             loader.setVisibility(View.GONE);
             JsonObject found = (JsonObject) result[0];
             file = found.size() == 0 ? null : found;
             //noinspection unchecked
-            build((List<JsonObject>) result[1]);
+            threads = (Map<Long, ReviewThreads.Thread>) result[2];
+            //noinspection unchecked
+            lastComments = (List<JsonObject>) result[1];
+            build(lastComments);
             invalidateOptionsMenu();
         }, error -> loader.setVisibility(View.GONE));
     }
@@ -232,9 +249,16 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
             else threads.put(longOf(c, "id"), listOf(c));
         }
 
+        List<JsonObject> drafts = new ArrayList<>();
+        for (JsonObject draft : ReviewDrafts.list(this, owner, repo, number)) {
+            if (path.equals(Json.str(draft, "path"))) drafts.add(draftComment(draft));
+        }
+        updateReviewBar();
+
         if (file == null) {
             note(getString(R.string.diff_not_found));
             addThreads(threads);
+            addDrafts(drafts);
             adapter.notifyDataSetChanged();
             return;
         }
@@ -242,6 +266,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         if (patch.isEmpty()) {
             note(getString(R.string.diff_too_large));
             addThreads(threads);
+            addDrafts(drafts);
             adapter.notifyDataSetChanged();
             return;
         }
@@ -274,15 +299,34 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
             placed.computeIfAbsent(key, k -> new ArrayList<>()).add(entry.getKey());
         }
 
-        if (!outdated.isEmpty()) {
+        // pending review comments go to their line too
+        Map<String, List<JsonObject>> draftsAt = new HashMap<>();
+        List<JsonObject> draftsElsewhere = new ArrayList<>();
+        for (JsonObject draft : drafts) {
+            String key = Json.str(draft, "side") + ":" + Json.str(draft, "line");
+            boolean exists = false;
+            for (Row r : lines) {
+                if (r.isLine() && key.equals(r.side() + ":" + r.line())) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (exists) draftsAt.computeIfAbsent(key, k -> new ArrayList<>()).add(draft);
+            else draftsElsewhere.add(draft);
+        }
+
+        if (!outdated.isEmpty() || !draftsElsewhere.isEmpty()) {
             note(getString(R.string.diff_outdated));
             for (long id : outdated) addThread(id, threads.get(id));
+            addDrafts(draftsElsewhere);
         }
         for (Row r : lines) {
             rows.add(r);
             if (!r.isLine()) continue;
             List<Long> here = placed.remove(r.side() + ":" + r.line());
             if (here != null) for (long id : here) addThread(id, threads.get(id));
+            List<JsonObject> pending = draftsAt.remove(r.side() + ":" + r.line());
+            if (pending != null) addDrafts(pending);
         }
         adapter.notifyDataSetChanged();
     }
@@ -300,6 +344,18 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void addThread(long id, @Nullable List<JsonObject> thread) {
         if (thread == null) return;
+        ReviewThreads.Thread info = this.threads.get(id);
+        if (info != null && info.resolved) {
+            // resolved conversations are folded, like on github.com
+            Row header = new Row(RESOLVED);
+            header.threadId = id;
+            String toggle = getString(expanded.contains(id) ? R.string.review_thread_hide : R.string.review_thread_show);
+            header.text = info.resolvedBy.isEmpty()
+                    ? getString(R.string.review_thread_resolved, toggle)
+                    : getString(R.string.review_thread_resolved_by, info.resolvedBy, toggle);
+            rows.add(header);
+            if (!expanded.contains(id)) return;
+        }
         for (JsonObject c : thread) {
             Row row = new Row(COMMENT);
             row.comment = c;
@@ -309,6 +365,56 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         Row reply = new Row(REPLY);
         reply.threadId = id;
         rows.add(reply);
+    }
+
+    private void addDrafts(@NonNull List<JsonObject> drafts) {
+        for (JsonObject draft : drafts) {
+            Row row = new Row(COMMENT);
+            row.comment = draft;
+            rows.add(row);
+        }
+    }
+
+    /** A pending review comment shaped like a REST review comment, so it binds the same way. */
+    @NonNull
+    private JsonObject draftComment(@NonNull JsonObject draft) {
+        JsonObject c = draft.deepCopy();
+        c.addProperty("_draft", true);
+        JsonObject user = new JsonObject();
+        if (AppData.INSTANCE.getLoggedUser() != null) {
+            user.addProperty("login", AppData.INSTANCE.getLoggedUser().getLogin());
+            user.addProperty("avatar_url", AppData.INSTANCE.getLoggedUser().getAvatarUrl());
+        }
+        c.add("user", user);
+        long created = draft.has("created") ? draft.get("created").getAsLong() : System.currentTimeMillis();
+        c.addProperty("created_at", java.time.Instant.ofEpochMilli(created).toString());
+        return c;
+    }
+
+    private void updateReviewBar() {
+        int pending = ReviewDrafts.count(this, owner, repo, number);
+        reviewBar.setVisibility(pending > 0 ? View.VISIBLE : View.GONE);
+        reviewBarText.setText(getResources().getQuantityString(R.plurals.review_bar_text, pending, pending));
+        invalidateOptionsMenu();
+    }
+
+    private void finishReview() {
+        ReviewDialog.show(this, owner, repo, number, headSha, (data, hasDrafts) -> run(() -> {
+            GitHubApi.call(pulls().createReview(owner, repo, number, data));
+            if (hasDrafts) ReviewDrafts.clear(getApplicationContext(), owner, repo, number);
+            return Boolean.TRUE;
+        }, getString(R.string.review_sent)));
+    }
+
+    private void toggleResolved(long threadId) {
+        ReviewThreads.Thread info = threads.get(threadId);
+        if (info == null) return;
+        boolean resolve = !info.resolved;
+        if (resolve) expanded.remove(threadId);
+        run(() -> {
+            ReviewThreads.setResolved(info.id, resolve);
+            return Boolean.TRUE;
+        }, getString(resolve ? R.string.review_thread_resolved_toast : R.string.review_thread_unresolved_toast));
     }
 
     private void note(@NonNull String text) {
@@ -416,14 +522,27 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         }
         String title = from == to ? getString(R.string.diff_comment_line, last.line())
                 : getString(R.string.diff_comment_lines, first.line(), last.line());
+        boolean reviewing = ReviewDrafts.count(this, owner, repo, number) > 0;
+        CharSequence[] choices = {getString(R.string.review_single),
+                getString(reviewing ? R.string.review_add : R.string.review_start)};
         ComposeDialog.Builder dialog = new ComposeDialog.Builder(this)
                 .title(title)
                 .repo(owner + "/" + repo)
                 .header(code)
+                .choices(choices, reviewing ? 1 : 0)
                 .body(getString(R.string.diff_comment_hint), null)
                 .bodyRequired(true, null)
                 .positive(getString(R.string.pull_comment))
                 .callback((choice, unusedTitle, body) -> {
+                    if (choice == 1) {
+                        ReviewDrafts.add(this, owner, repo, number, path, last.line(), last.side(),
+                                from != to ? first.line() : 0, from != to ? first.side() : null, body);
+                        int pending = ReviewDrafts.count(this, owner, repo, number);
+                        showSuccessToast(getResources().getQuantityString(R.plurals.review_added, pending, pending));
+                        PullChanges.markChanged();
+                        build(lastComments);
+                        return;
+                    }
                     Map<String, Object> data = new HashMap<>();
                     data.put("body", body);
                     data.put("commit_id", headSha);
@@ -464,7 +583,39 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                 && AppData.INSTANCE.getLoggedUser().getLogin().equalsIgnoreCase(Json.str(comment, "user.login"));
     }
 
+    private void draftMenu(@NonNull View anchor, @NonNull JsonObject draft) {
+        long id = longOf(draft, "id");
+        PopupMenu menu = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        menu.getMenu().add(0, 1, 0, R.string.comment_edit);
+        menu.getMenu().add(0, 2, 1, R.string.comment_delete);
+        menu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 1) {
+                new ComposeDialog.Builder(this)
+                        .title(getString(R.string.comment_edit))
+                        .repo(owner + "/" + repo)
+                        .body(getString(R.string.diff_comment_hint), Json.str(draft, "body"))
+                        .bodyRequired(true, null)
+                        .positive(getString(R.string.save))
+                        .callback((choice, unusedTitle, body) -> {
+                            ReviewDrafts.update(this, owner, repo, number, id, body);
+                            build(lastComments);
+                        })
+                        .show();
+            } else {
+                ReviewDrafts.remove(this, owner, repo, number, id);
+                PullChanges.markChanged();
+                build(lastComments);
+            }
+            return true;
+        });
+        menu.show();
+    }
+
     private void commentMenu(@NonNull View anchor, @NonNull JsonObject comment) {
+        if (Json.bool(comment, "_draft")) {
+            draftMenu(anchor, comment);
+            return;
+        }
         PopupMenu menu = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         if (isMine(comment)) {
             menu.getMenu().add(0, 1, 0, R.string.comment_edit);
@@ -513,7 +664,15 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         menu.add(0, 1, 0, R.string.refresh);
         menu.add(0, 2, 1, R.string.copy_path);
         menu.add(0, 3, 2, R.string.open_in_browser);
+        menu.add(0, 4, 3, R.string.review_discard);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem discard = menu.findItem(4);
+        if (discard != null) discard.setVisible(ReviewDrafts.count(this, owner, repo, number) > 0);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -528,6 +687,13 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
             String url = file != null && !Json.str(file, "blob_url").isEmpty() ? Json.str(file, "blob_url")
                     : "https://github.com/" + owner + "/" + repo + "/pull/" + number + "/files";
             AppOpener.openInCustomTabsOrBrowser(this, url);
+            return true;
+        } else if (item.getItemId() == 4) {
+            ReviewDialog.confirmDiscard(this, owner, repo, number, () -> {
+                PullChanges.markChanged();
+                showInfoToast(getString(R.string.review_discarded));
+                build(lastComments);
+            });
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -564,6 +730,9 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         super.bindViews(root);
         list = root.findViewById(R.id.diff_list);
         loader = root.findViewById(R.id.loader);
+        reviewBar = root.findViewById(R.id.review_bar);
+        reviewBarText = root.findViewById(R.id.review_bar_text);
+        root.findViewById(R.id.review_bar_bn).setOnClickListener(v -> finishReview());
     }
 
     // ---------------------------------------------------------------------------------
@@ -582,7 +751,8 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         public int getItemViewType(int position) {
             int type = rows.get(position).type;
             if (type == COMMENT) return 1;
-            if (type == REPLY || type == NOTE) return 2;
+            if (type == NOTE || type == RESOLVED) return 2;
+            if (type == REPLY) return 3;
             return 0;
         }
 
@@ -604,6 +774,22 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                 params.rightMargin = dp(12);
                 return new Holder(view);
             }
+            if (viewType == 3) {
+                // Reply · Resolve conversation
+                LinearLayout bar = new LinearLayout(parent.getContext());
+                bar.setOrientation(LinearLayout.HORIZONTAL);
+                bar.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+                for (int i = 0; i < 2; i++) {
+                    TextView action = new TextView(parent.getContext());
+                    action.setTextColor(ViewUtils.getAccentColor(PullDiffActivity.this));
+                    action.setPadding(dp(16), dp(8), dp(16), dp(12));
+                    action.setTextSize(14);
+                    action.setBackgroundResource(selectable());
+                    bar.addView(action);
+                }
+                return new Holder(bar);
+            }
             if (viewType == 2) {
                 TextView text = new TextView(parent.getContext());
                 text.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -621,15 +807,33 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                 bindComment(view, row);
                 return;
             }
-            if (row.type == REPLY || row.type == NOTE) {
+            if (row.type == REPLY) {
+                LinearLayout bar = (LinearLayout) view;
+                TextView replyBn = (TextView) bar.getChildAt(0);
+                TextView resolveBn = (TextView) bar.getChildAt(1);
+                replyBn.setText(R.string.diff_reply);
+                replyBn.setOnClickListener(v -> reply(row.threadId));
+                ReviewThreads.Thread info = threads.get(row.threadId);
+                boolean can = info != null && (info.resolved ? info.canUnresolve : info.canResolve);
+                resolveBn.setVisibility(can ? View.VISIBLE : View.GONE);
+                if (can) {
+                    resolveBn.setText(info.resolved ? R.string.review_thread_unresolve : R.string.review_thread_resolve);
+                    resolveBn.setOnClickListener(v -> toggleResolved(row.threadId));
+                }
+                return;
+            }
+            if (row.type == NOTE || row.type == RESOLVED) {
                 TextView text = (TextView) view;
-                if (row.type == REPLY) {
-                    text.setText(R.string.diff_reply);
-                    text.setTextColor(ViewUtils.getAccentColor(PullDiffActivity.this));
-                    text.setPadding(dp(16), dp(8), dp(16), dp(12));
-                    text.setTextSize(14);
+                if (row.type == RESOLVED) {
+                    text.setText(row.text);
+                    text.setTextColor(secondaryText());
+                    text.setPadding(dp(16), dp(8), dp(16), dp(8));
+                    text.setTextSize(13);
                     text.setBackgroundResource(selectable());
-                    text.setOnClickListener(v -> reply(row.threadId));
+                    text.setOnClickListener(v -> {
+                        if (!expanded.remove(row.threadId)) expanded.add(row.threadId);
+                        build(lastComments);
+                    });
                 } else {
                     text.setText(row.text);
                     text.setTextColor(secondaryText());
@@ -689,7 +893,13 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
             Date date = Json.date(c, "created_at");
             String when = date == null ? "" : StringUtils.getNewsTimeStr(PullDiffActivity.this, date);
             ((TextView) view.findViewById(R.id.comment_header)).setText(Json.str(c, "user.login") + " · " + when);
-            view.findViewById(R.id.comment_badge).setVisibility(View.GONE);
+            TextView badge = view.findViewById(R.id.comment_badge);
+            if (Json.bool(c, "_draft")) {
+                badge.setText(R.string.review_pending_badge);
+                badge.setVisibility(View.VISIBLE);
+            } else {
+                badge.setVisibility(View.GONE);
+            }
             TextView body = view.findViewById(R.id.comment_body);
             markwon.setMarkdown(body, Json.str(c, "body"));
             body.setOnLongClickListener(v -> {

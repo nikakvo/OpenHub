@@ -9,7 +9,8 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/diff_list"
@@ -26,4 +27,33 @@
             android:layout_gravity="center"
             android:visibility="gone"/>
     </FrameLayout>
+
+    <!-- pending review: comments collected with "Start a review" -->
+    <LinearLayout
+        android:id="@+id/review_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="?card_background"
+        android:elevation="8dp"
+        android:paddingStart="@dimen/spacing_large"
+        android:paddingEnd="@dimen/spacing_small"
+        android:paddingTop="@dimen/spacing_mini"
+        android:paddingBottom="@dimen/spacing_mini"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/review_bar_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="@dimen/text_small"
+            android:textColor="?android:textColorPrimary"/>
+        <Button
+            android:id="@+id/review_bar_bn"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/review_finish"/>
+    </LinearLayout>
 </LinearLayout>
