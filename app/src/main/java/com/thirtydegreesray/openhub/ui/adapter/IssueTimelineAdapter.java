@@ -104,6 +104,7 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
 
     class HeadCommentViewHolder extends CommentViewHolder{
         TextView issueLabels;
+        TextView issueMeta;
         public HeadCommentViewHolder(@NonNull View itemView) {
             super(itemView);
         }
@@ -111,8 +112,9 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
         @Override
         void setData(IssueEvent model) {
             super.setData(model);
+            showMeta(model.getParentIssue());
             ArrayList<Label> labels = model.getParentIssue().getLabels();
-            if(labels.size() == 0){
+            if(labels == null || labels.size() == 0){
                 issueLabels.setVisibility(View.GONE);
                 return;
             } else {
@@ -125,6 +127,26 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
         protected void bindViews(View root) {
             super.bindViews(root);
             issueLabels = root.findViewById(R.id.issue_labels);
+            issueMeta = root.findViewById(R.id.issue_meta);
+        }
+
+        /** "Assignees: a, b · Milestone: v1.0" */
+        private void showMeta(@NonNull com.thirtydegreesray.openhub.mvp.model.Issue issue) {
+            StringBuilder text = new StringBuilder();
+            if (issue.getAssignees() != null && !issue.getAssignees().isEmpty()) {
+                StringBuilder names = new StringBuilder();
+                for (com.thirtydegreesray.openhub.mvp.model.User user : issue.getAssignees()) {
+                    if (names.length() > 0) names.append(", ");
+                    names.append(user.getLogin());
+                }
+                text.append(context.getString(R.string.issue_meta_assignees, names));
+            }
+            if (issue.getMilestone() != null && issue.getMilestone().getTitle() != null) {
+                if (text.length() > 0) text.append(" · ");
+                text.append(context.getString(R.string.issue_meta_milestone, issue.getMilestone().getTitle()));
+            }
+            issueMeta.setText(text);
+            issueMeta.setVisibility(text.length() == 0 ? View.GONE : View.VISIBLE);
         }
     }
 

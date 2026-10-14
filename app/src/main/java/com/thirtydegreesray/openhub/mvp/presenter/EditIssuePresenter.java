@@ -34,6 +34,16 @@ public class EditIssuePresenter extends BasePresenter<IEditIssueContract.View>
     @AutoAccess boolean addMode;
 
     private ArrayList<Label> allLabels;
+    /** the user may set labels, assignees and the milestone (triage, write or admin) */
+    @AutoAccess boolean canEditMeta;
+
+    public boolean isCanEditMeta() {
+        return canEditMeta;
+    }
+
+    public void setCanEditMeta(boolean canEditMeta) {
+        this.canEditMeta = canEditMeta;
+    }
 
     @Inject
     public EditIssuePresenter(DaoSession daoSession) {
@@ -70,12 +80,33 @@ public class EditIssuePresenter extends BasePresenter<IEditIssueContract.View>
         issue.setTitle(title);
         issue.setBody(comment);
 
+        // labels and assignees by name, the milestone by number; null removes it
+        com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+        json.addProperty("title", title);
+        json.addProperty("body", comment);
+        if (canEditMeta) {
+            com.google.gson.JsonArray labels = new com.google.gson.JsonArray();
+            if (issue.getLabels() != null) for (Label label : issue.getLabels()) labels.add(label.getName());
+            json.add("labels", labels);
+            com.google.gson.JsonArray assignees = new com.google.gson.JsonArray();
+            if (issue.getAssignees() != null) {
+                for (com.thirtydegreesray.openhub.mvp.model.User user : issue.getAssignees()) {
+                    assignees.add(user.getLogin());
+                }
+            }
+            json.add("assignees", assignees);
+            if (issue.getMilestone() != null) json.addProperty("milestone", issue.getMilestone().getNumber());
+            else if (!addMode) json.add("milestone", com.google.gson.JsonNull.INSTANCE);
+        }
+        String text = new com.google.gson.GsonBuilder().serializeNulls().create().toJson(json);
+        okhttp3.RequestBody body = okhttp3.RequestBody.create(text,
+                okhttp3.MediaType.get("application/json; charset=utf-8"));
+
         generalRxHttpExecute(new IObservableCreator<Issue>() {
             @Override
             public Observable<Response<Issue>> createObservable(boolean forceNetWork) {
-                return addMode ? getIssueService().createIssue(userId, repoName, issue) :
-                        getIssueService().editIssue(getRepoOwner(), getRepoName(), issue.getNumber(),
-                                IssueRequestModel.generateFromIssue(issue));
+                return addMode ? getIssueService().createIssueJson(userId, repoName, body) :
+                        getIssueService().editIssueJson(getRepoOwner(), getRepoName(), issue.getNumber(), body);
             }
         }, httpObserver, false, mView.getProgressDialog(getLoadTip()));
 

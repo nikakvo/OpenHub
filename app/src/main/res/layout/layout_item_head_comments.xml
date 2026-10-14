@@ -68,6 +68,16 @@
             android:textColor="?android:textColorPrimary"
             android:gravity="center"/>
 
+        <TextView
+            android:id="@+id/issue_meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_small"
+            android:paddingTop="@dimen/spacing_mini"
+            android:textColor="?android:textColorSecondary"
+            android:gravity="center"
+            android:visibility="gone"/>
+
     </LinearLayout>
 
 </LinearLayout>

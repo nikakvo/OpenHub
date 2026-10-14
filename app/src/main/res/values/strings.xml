@@ -562,6 +562,20 @@
 
     <string name="scroll_to_top">Scroll to top</string>
 
+    <!-- Issues: assignees, milestone, templates -->
+    <string name="issue_labels_none">No labels</string>
+    <string name="issue_assignees">Assignees</string>
+    <string name="issue_assignees_none">No one assigned</string>
+    <string name="issue_assignees_empty">Nobody can be assigned in this repository</string>
+    <string name="issue_assignees_max">An issue can have at most 10 assignees</string>
+    <string name="issue_milestone">Milestone</string>
+    <string name="issue_milestone_none">No milestone</string>
+    <string name="issue_milestone_empty">This repository has no open milestones</string>
+    <string name="issue_template_choose">Choose a template</string>
+    <string name="issue_template_blank">Blank issue</string>
+    <string name="issue_meta_assignees">Assignees: %s</string>
+    <string name="issue_meta_milestone">Milestone: %s</string>
+
     <!-- Pending review and review threads -->
     <string name="review_single">Add single comment</string>
     <string name="review_start">Start a review</string>

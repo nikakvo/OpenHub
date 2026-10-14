@@ -10,9 +10,14 @@
 
     <include layout="@layout/layout_appbar" />
 
-    <RelativeLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:padding="@dimen/spacing_normal">
 
         <com.google.android.material.textfield.TextInputLayout
@@ -59,11 +64,17 @@
             android:tint="?android:textColorSecondary"/>
 
         <LinearLayout
+            android:id="@+id/meta_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@id/markdown_editor_bn">
+
+        <LinearLayout
             android:id="@+id/edit_labels"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_below="@id/markdown_editor_bn"
             android:background="?android:selectableItemBackground"
             android:paddingTop="@dimen/spacing_mini"
             android:paddingBottom="@dimen/spacing_mini">
@@ -96,17 +107,113 @@
                     android:id="@+id/labels_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/labels"
+                    android:text=""
                     android:textColor="?android:textColorSecondary"
                     android:textSize="@dimen/text_small"
-                    android:hint="@string/labels"
+                    android:hint="@string/issue_labels_none"
                     android:layout_marginTop="@dimen/spacing_mini"/>
             </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/edit_assignees"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="?android:selectableItemBackground"
+            android:paddingTop="@dimen/spacing_mini"
+            android:paddingBottom="@dimen/spacing_mini">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_menu_person"
+                app:tint="?android:textColorSecondary"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:layout_marginBottom="@dimen/spacing_normal"
+                android:layout_marginStart="@dimen/spacing_small"
+                android:layout_marginEnd="@dimen/spacing_small"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingEnd="@dimen/spacing_mini"
+                android:paddingBottom="@dimen/spacing_mini"
+                android:paddingTop="@dimen/spacing_mini">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/issue_assignees"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="@dimen/text_normal"/>
+
+                <TextView
+                    android:id="@+id/assignees_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="?android:textColorSecondary"
+                    android:textSize="@dimen/text_small"
+                    android:hint="@string/issue_assignees_none"
+                    android:layout_marginTop="@dimen/spacing_mini"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/edit_milestone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="?android:selectableItemBackground"
+            android:paddingTop="@dimen/spacing_mini"
+            android:paddingBottom="@dimen/spacing_mini">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_tag"
+                app:tint="?android:textColorSecondary"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:layout_marginBottom="@dimen/spacing_normal"
+                android:layout_marginStart="@dimen/spacing_small"
+                android:layout_marginEnd="@dimen/spacing_small"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingEnd="@dimen/spacing_mini"
+                android:paddingBottom="@dimen/spacing_mini"
+                android:paddingTop="@dimen/spacing_mini">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/issue_milestone"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="@dimen/text_normal"/>
+
+                <TextView
+                    android:id="@+id/milestone_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="?android:textColorSecondary"
+                    android:textSize="@dimen/text_small"
+                    android:hint="@string/issue_milestone_none"
+                    android:layout_marginTop="@dimen/spacing_mini"/>
+            </LinearLayout>
+
+        </LinearLayout>
 
         </LinearLayout>
 
 
 
     </RelativeLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

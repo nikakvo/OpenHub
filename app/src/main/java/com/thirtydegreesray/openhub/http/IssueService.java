@@ -188,4 +188,62 @@ public interface IssueService {
             @Path("repo") String repo
     );
 
+    /** Create with a hand-built JSON body (labels and assignees as names, milestone number). */
+    @NonNull @POST("repos/{owner}/{repo}/issues")
+    @Headers("Accept: application/vnd.github.html,application/vnd.github.VERSION.raw," +
+            "application/vnd.github.squirrel-girl-preview")
+    Observable<Response<Issue>> createIssueJson(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Body okhttp3.RequestBody body
+    );
+
+    /** Edit with a hand-built JSON body; "milestone": null removes the milestone. */
+    @NonNull @PATCH("repos/{owner}/{repo}/issues/{issueNumber}")
+    @Headers("Accept: application/vnd.github.html,application/vnd.github.VERSION.raw," +
+            "application/vnd.github.squirrel-girl-preview")
+    Observable<Response<Issue>> editIssueJson(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("issueNumber") int issueNumber,
+            @Body okhttp3.RequestBody body
+    );
+
+    @NonNull @GET("repos/{owner}/{repo}/assignees?per_page=100")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<com.google.gson.JsonArray>> getAssignees(
+            @Path("owner") String owner,
+            @Path("repo") String repo
+    );
+
+    @NonNull @GET("repos/{owner}/{repo}/milestones?state=open&per_page=100")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<com.google.gson.JsonArray>> getOpenMilestones(
+            @Path("owner") String owner,
+            @Path("repo") String repo
+    );
+
+    @NonNull @GET("repos/{owner}/{repo}/labels?per_page=100")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<com.google.gson.JsonArray>> getAllLabels(
+            @Path("owner") String owner,
+            @Path("repo") String repo
+    );
+
+    /** A file (base64 "content") or a folder (array) of the default branch. */
+    @NonNull @GET("repos/{owner}/{repo}/contents/{path}")
+    Observable<Response<com.google.gson.JsonElement>> getContents(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path(value = "path", encoded = true) String path
+    );
+
+    /** The user's permissions in "permissions" (triage, push, admin...). */
+    @NonNull @GET("repos/{owner}/{repo}")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<com.google.gson.JsonObject>> getRepoJson(
+            @Path("owner") String owner,
+            @Path("repo") String repo
+    );
+
 }
