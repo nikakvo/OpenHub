@@ -103,6 +103,15 @@ public interface GitDataService {
             @Query("ref") String ref
     );
 
+    /** The README of a branch: path, sha, content. */
+    @NonNull @GET("repos/{owner}/{repo}/readme")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonObject>> getReadme(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Query("ref") String ref
+    );
+
     /** Body: title, body, head, base. */
     @NonNull @POST("repos/{owner}/{repo}/pulls")
     Observable<Response<JsonObject>> createPull(

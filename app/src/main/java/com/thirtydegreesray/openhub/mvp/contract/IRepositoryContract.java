@@ -29,6 +29,9 @@ public interface IRepositoryContract {
         boolean isForkEnable();
         boolean isBookmarked();
         void bookmark(boolean bookmark);
+
+        /** Loads the repository again from GitHub (after a commit on another screen). */
+        void refreshRepository();
     }
 
 }

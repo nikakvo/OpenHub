@@ -12,12 +12,14 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.http.GitDataService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.PullService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
@@ -27,6 +29,7 @@ import com.thirtydegreesray.openhub.mvp.contract.IRepoInfoContract;
 import com.thirtydegreesray.openhub.mvp.model.Branch;
 import com.thirtydegreesray.openhub.mvp.model.Repository;
 import com.thirtydegreesray.openhub.mvp.presenter.RepoInfoPresenter;
+import com.thirtydegreesray.openhub.ui.activity.EditFileActivity;
 import com.thirtydegreesray.openhub.ui.activity.IssuesActivity;
 import com.thirtydegreesray.openhub.ui.activity.ProfileActivity;
 import com.thirtydegreesray.openhub.ui.activity.PullRequestsActivity;
@@ -38,6 +41,7 @@ import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.PullChanges;
+import com.thirtydegreesray.openhub.util.RepoChanges;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 
@@ -77,6 +81,10 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
     TextView watchersNumText;
 
     TextView readmeTitle;
+    ImageView readmeEdit;
+    private Disposable readmeLookup;
+    /** RepoChanges when the README was loaded; a commit since then reloads it. */
+    private long readmeStamp;
     ProgressBar readmeLoader;
     CodeWebView webView;
 
@@ -113,6 +121,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         issueLay.setVisibility(repository.isHasIssues() ? View.VISIBLE :View.GONE);
         issuesNumText.setText(String.valueOf(repository.getOpenIssuesCount()));
         countPulls(repository);
+        updateReadmeEdit(isReadmeSetted);
         stargazersNumText.setText(String.valueOf(repository.getStargazersCount()));
         forksNumText.setText(String.valueOf(repository.getForksCount()));
         watchersNumText.setText(String.valueOf(repository.getSubscribersCount()));
@@ -171,11 +180,51 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
             readmeLoader.setIndeterminate(false);
             webView.setVisibility(View.VISIBLE);
         }
+        updateReadmeEdit(true);
+    }
+
+    /** The pencil next to README, for users who can push to the repository. */
+    private void updateReadmeEdit(boolean hasReadme) {
+        if (readmeEdit == null) return;
+        Repository repository = mPresenter == null ? null : mPresenter.getRepository();
+        boolean canPush = repository != null && repository.getPermissions() != null
+                && (repository.getPermissions().isPush() || repository.getPermissions().isAdmin());
+        readmeEdit.setVisibility(hasReadme && canPush ? View.VISIBLE : View.GONE);
+    }
+
+    /** Asks GitHub where the README is (README.md, docs/README, ...) and opens the editor. */
+    private void editReadme() {
+        Repository repository = mPresenter.getRepository();
+        if (repository == null) return;
+        String owner = repository.getOwner().getLogin();
+        String name = repository.getName();
+        String branch = mPresenter.getBranch();
+        if (readmeLookup != null) readmeLookup.dispose();
+        readmeEdit.setEnabled(false);
+        readmeLookup = Single.fromCallable(() -> {
+                    String path = Json.str(GitHubApi.call(GitHubApi.service(GitDataService.class)
+                            .getReadme(owner, name, branch)), "path");
+                    return path == null ? "" : path;
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(path -> {
+                    if (readmeEdit == null) return;
+                    readmeEdit.setEnabled(true);
+                    if (StringUtils.isBlank(path)) return;
+                    startActivity(EditFileActivity.editIntent(requireContext(), owner, name, branch, path));
+                }, error -> {
+                    if (readmeEdit == null) return;
+                    readmeEdit.setEnabled(true);
+                    showErrorToast(StringUtils.isBlank(error.getMessage())
+                            ? error.toString() : error.getMessage());
+                });
     }
 
     @Override
     public void showReadMeLoader() {
         isReadmeSetted = false;
+        readmeStamp = RepoChanges.stamp();
         readmeLoader.setVisibility(View.VISIBLE);
         readmeLoader.setIndeterminate(true);
         webView.setVisibility(View.GONE);
@@ -185,6 +234,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
     public void showNoReadMe() {
         readmeTitle.setText(R.string.no_readme);
         readmeLoader.setVisibility(View.GONE);
+        updateReadmeEdit(false);
     }
 
     /**
@@ -212,6 +262,11 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
     @Override
     public void onResume() {
         super.onResume();
+        // a commit on another screen (e.g. the README edited in Files): show the new README
+        if (readmeStamp != 0 && RepoChanges.changedSince(readmeStamp) && mPresenter != null
+                && mPresenter.getRepository() != null) {
+            mPresenter.reloadReadMe();
+        }
         if (pullsStamp != 0 && PullChanges.changedSince(pullsStamp) && mPresenter != null
                 && mPresenter.getRepository() != null) {
             countPulls(mPresenter.getRepository());
@@ -221,6 +276,8 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
     @Override
     public void onDestroyView() {
         if (pullsCount != null) pullsCount.dispose();
+        if (readmeLookup != null) readmeLookup.dispose();
+        readmeEdit = null;
         super.onDestroyView();
     }
 
@@ -323,6 +380,8 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         forksNumText = root.findViewById(R.id.forks_num_text);
         watchersNumText = root.findViewById(R.id.watchers_num_text);
         readmeTitle = root.findViewById(R.id.readme_title);
+        readmeEdit = root.findViewById(R.id.readme_edit);
+        readmeEdit.setOnClickListener(v -> editReadme());
         readmeLoader = root.findViewById(R.id.readme_loader);
         webView = root.findViewById(R.id.web_view);
         ViewUtils.setOnClick(root, R.id.issues_lay, v -> onViewClicked(v));

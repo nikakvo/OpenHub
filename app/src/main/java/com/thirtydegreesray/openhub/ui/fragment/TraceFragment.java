@@ -4,7 +4,12 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.recyclerview.widget.ItemTouchHelper;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+
+import androidx.appcompat.app.AlertDialog;
 
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
@@ -40,6 +45,34 @@ public class TraceFragment extends ListFragment<TracePresenter, TraceAdapter>
     public void showTraceList(ArrayList<TraceExt> traceList) {
         adapter.setData(traceList);
         postNotifyDataSetChanged();
+        if (getActivity() != null) getActivity().invalidateOptionsMenu();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_trace, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem clear = menu.findItem(R.id.action_clear_trace);
+        if (clear != null) clear.setVisible(adapter != null && adapter.getItemCount() > 0);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_clear_trace) {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.trace_clear_title)
+                    .setMessage(R.string.trace_clear_message)
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.trace_clear_all, (d, w) -> mPresenter.clearAll())
+                    .show();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -59,6 +92,7 @@ public class TraceFragment extends ListFragment<TracePresenter, TraceAdapter>
     @Override
     protected void initFragment(Bundle savedInstanceState) {
         super.initFragment(savedInstanceState);
+        setHasOptionsMenu(true);
         setLoadMoreEnable(true);
         ItemTouchHelperCallback callback = new ItemTouchHelperCallback(0,
                 ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, this);
@@ -128,6 +162,7 @@ public class TraceFragment extends ListFragment<TracePresenter, TraceAdapter>
         mPresenter.removeTrace(position);
         if(adapter.getData().size() == 0){
             postNotifyDataSetChanged();
+            if (getActivity() != null) getActivity().invalidateOptionsMenu();
         } else {
             adapter.notifyItemRemoved(position);
         }

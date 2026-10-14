@@ -21,6 +21,9 @@ public interface IRepoInfoContract {
 
     interface Presenter extends IBasePagerContract.Presenter<IRepoInfoContract.View>{
         void loadReadMe();
+
+        /** Loads the README again from GitHub, not from the cache. */
+        void reloadReadMe();
     }
 
 }

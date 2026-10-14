@@ -8,6 +8,7 @@ import android.os.Build;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.thirtydegreesray.openhub.util.ReleaseWatcher;
+import com.thirtydegreesray.openhub.util.RepoChanges;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -429,6 +430,20 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
     public interface RepositoryListener{
         void onRepositoryInfoUpdated(Repository repository);
         void onBranchChanged(Branch branch);
+    }
+
+    /** RepoChanges when this screen last showed the repository. */
+    private long repoStamp = RepoChanges.stamp();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // a commit on another screen (file edited, uploaded, deleted, PR merged): the header
+        // ("Latest commit", size, language) and the Info tab show the new state
+        if (RepoChanges.changedSince(repoStamp) && mPresenter != null) {
+            repoStamp = RepoChanges.stamp();
+            mPresenter.refreshRepository();
+        }
     }
 
     @Override

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trace_clear_all">Clear all</string>
+    <string name="trace_clear_title">Clear Trace?</string>
+    <string name="trace_clear_message">All entries are removed from Trace. Your bookmarks stay.</string>
+    <string name="trace_cleared">Trace cleared</string>
+    <string name="readme_edit">Edit README</string>
+</resources>

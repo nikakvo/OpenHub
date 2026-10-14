@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.mvp.presenter;
 
+import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.dao.LocalRepo;
 import com.thirtydegreesray.openhub.dao.LocalUser;
@@ -96,6 +97,26 @@ public class TracePresenter extends BasePresenter<ITraceContract.View>
         mView.notifyItemAdded(removedPosition);
         rxDBExecute(() -> db.traceDao().insert(removedTrace));
     }
+    @Override
+    public void clearAll() {
+        Completable.fromAction(() -> db.runInTransaction(() -> {
+                    db.traceDao().deleteAll();
+                    db.localRepoDao().deleteUnused();
+                    db.localUserDao().deleteUnused();
+                }))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> {
+                    if (mView == null) return;
+                    removedTrace = null;
+                    traceList = new ArrayList<>();
+                    mView.showTraceList(traceList);
+                    mView.showSuccessToast(getString(R.string.trace_cleared));
+                }, error -> {
+                    if (mView != null) mView.showErrorToast(getErrorTip(error));
+                });
+    }
+
     @Override
     public int getFirstItemByDate(long dateTime) {
         for (TraceExt trace : traceList) {

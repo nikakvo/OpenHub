@@ -31,6 +31,7 @@ public class RepoInfoPresenter extends BasePagerPresenter<IRepoInfoContract.View
     @AutoAccess Repository repository;
     @AutoAccess String curBranch = "";
     private String readmeSource;
+    private boolean readmeLoading;
 
     @Inject
     public RepoInfoPresenter(AppDatabase db) {
@@ -45,13 +46,23 @@ public class RepoInfoPresenter extends BasePagerPresenter<IRepoInfoContract.View
     @Override
     protected void loadData() {
         mView.showRepoInfo(repository);
-        if(readmeSource == null){
+        if(readmeSource == null && !readmeLoading){
             loadReadMe();
         }
     }
 
     @Override
     public void loadReadMe() {
+        loadReadMe(true);
+    }
+
+    @Override
+    public void reloadReadMe() {
+        readmeSource = null;
+        loadReadMe(false);
+    }
+
+    private void loadReadMe(final boolean readCacheFirst) {
         final String readmeFileUrl = AppConfig.GITHUB_API_BASE_URL + "repos/" + repository.getFullName()
                 + "/" + "readme" + (StringUtils.isBlank(curBranch) ? "" : "?ref=" + curBranch);
 
@@ -65,9 +76,11 @@ public class RepoInfoPresenter extends BasePagerPresenter<IRepoInfoContract.View
 //        }
 
         mView.showReadMeLoader();
+        readmeLoading = true;
         HttpObserver<ResponseBody> httpObserver = new HttpObserver<ResponseBody>() {
             @Override
             public void onError(Throwable error) {
+                readmeLoading = false;
                 if(error instanceof HttpPageNoFoundError){
                     mView.showNoReadMe();
                 } else {
@@ -77,6 +90,7 @@ public class RepoInfoPresenter extends BasePagerPresenter<IRepoInfoContract.View
 
             @Override
             public void onSuccess(HttpResponse<ResponseBody> response) {
+                readmeLoading = false;
                 try {
                     readmeSource = response.body().string();
                     mView.showReadMe(readmeSource, baseUrl);
@@ -90,12 +104,17 @@ public class RepoInfoPresenter extends BasePagerPresenter<IRepoInfoContract.View
             public Observable<Response<ResponseBody>> createObservable(boolean forceNetWork) {
                 return getRepoService().getFileAsHtmlStream(forceNetWork, readmeFileUrl);
             }
-        }, httpObserver, true);
+        }, httpObserver, readCacheFirst);
 
     }
 
     public Repository getRepository() {
         return repository;
+    }
+
+    /** The branch the README is shown for. */
+    public String getBranch() {
+        return StringUtils.isBlank(curBranch) ? repository.getDefaultBranch() : curBranch;
     }
 
     /**

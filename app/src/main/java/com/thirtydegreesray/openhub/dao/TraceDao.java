@@ -30,4 +30,7 @@ public interface TraceDao {
 
     @Query("DELETE FROM TRACE WHERE ID = :id")
     void deleteById(String id);
+
+    @Query("DELETE FROM TRACE")
+    void deleteAll();
 }

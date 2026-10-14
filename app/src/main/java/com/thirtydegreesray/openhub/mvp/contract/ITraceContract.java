@@ -21,6 +21,9 @@ public interface ITraceContract {
         void loadTraceList(int page);
         void removeTrace(int position);
         void undoRemoveTrace();
+
+        /** Removes every entry (and local copies nothing else uses). */
+        void clearAll();
         int getFirstItemByDate(long dateTime);
     }
 

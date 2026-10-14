@@ -214,6 +214,21 @@
                     android:textSize="@dimen/text_large"
                     android:layout_marginBottom="@dimen/spacing_mini"
                     android:layout_marginStart="@dimen/spacing_normal"/>
+                <ImageView
+                    android:id="@+id/readme_edit"
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignTop="@id/readme_title"
+                    android:layout_alignBottom="@id/readme_title"
+                    android:layout_marginEnd="@dimen/spacing_mini"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:scaleType="centerInside"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/readme_edit"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_edit"/>
                 <com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView
                     android:id="@+id/web_view"
                     android:layout_width="match_parent"

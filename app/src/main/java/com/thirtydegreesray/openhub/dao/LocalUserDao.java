@@ -15,4 +15,9 @@ public interface LocalUserDao {
     /** Inserts or replaces the copy. */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void save(LocalUser user);
+
+    /** Deletes the copies that no bookmark and no history entry uses any more. */
+    @Query("DELETE FROM LOCAL_USER WHERE LOGIN NOT IN (SELECT USER_ID FROM BOOKMARK "
+            + "WHERE USER_ID IS NOT NULL UNION SELECT USER_ID FROM TRACE WHERE USER_ID IS NOT NULL)")
+    int deleteUnused();
 }

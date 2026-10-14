@@ -185,7 +185,16 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
         }
     }
 
+    @Override
+    public void refreshRepository() {
+        if (repository != null) getRepoInfo(false, false);
+    }
+
     private void getRepoInfo(final boolean isShowLoading) {
+        getRepoInfo(isShowLoading, true);
+    }
+
+    private void getRepoInfo(final boolean isShowLoading, final boolean readCacheFirst) {
         if (isShowLoading) mView.showLoading();
         HttpObserver<Repository> httpObserver =
                 new HttpObserver<Repository>() {
@@ -211,7 +220,7 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
             public Observable<Response<Repository>> createObservable(boolean forceNetWork) {
                 return getRepoService().getRepoInfo(forceNetWork, owner, repoName);
             }
-        }, httpObserver, true);
+        }, httpObserver, readCacheFirst);
     }
 
     private void checkStatus(){
