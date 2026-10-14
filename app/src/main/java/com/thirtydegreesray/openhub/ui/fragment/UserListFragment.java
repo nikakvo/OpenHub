@@ -29,7 +29,7 @@ public class UserListFragment extends ListFragment<UserListPresenter, UsersAdapt
         implements IUserListContract.View{
 
     public enum UserListType{
-        STARGAZERS, WATCHERS, FOLLOWERS, FOLLOWING, SEARCH, ORG_MEMBERS, TRACE, BOOKMARK
+        STARGAZERS, WATCHERS, FOLLOWERS, FOLLOWING, SEARCH, ORG_MEMBERS
     }
 
     public static UserListFragment create(@NonNull UserListType type, @NonNull String user,
@@ -53,18 +53,6 @@ public class UserListFragment extends ListFragment<UserListPresenter, UsersAdapt
                         .put("searchModel", searchModel)
                         .build()
         );
-        return fragment;
-    }
-
-    public static UserListFragment createForTrace(){
-        UserListFragment fragment = new UserListFragment();
-        fragment.setArguments(BundleHelper.builder().put("type", UserListType.TRACE).build());
-        return fragment;
-    }
-
-    public static UserListFragment createForBookmark(){
-        UserListFragment fragment = new UserListFragment();
-        fragment.setArguments(BundleHelper.builder().put("type", UserListType.BOOKMARK).build());
         return fragment;
     }
 

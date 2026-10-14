@@ -5,7 +5,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.model.IssueRequestModel;
@@ -46,8 +46,8 @@ public class EditIssuePresenter extends BasePresenter<IEditIssueContract.View>
     }
 
     @Inject
-    public EditIssuePresenter(DaoSession daoSession) {
-        super(daoSession);
+    public EditIssuePresenter(AppDatabase db) {
+        super(db);
         issue = new Issue();
     }
 

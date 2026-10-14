@@ -34,7 +34,6 @@ import com.thirtydegreesray.openhub.util.state.DataAutoAccess;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppApplication;
 import com.thirtydegreesray.openhub.AppData;
-import com.thirtydegreesray.openhub.dao.DaoSession;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.LoginActivity;
@@ -411,10 +410,6 @@ BaseActivity<P extends IBaseContract.Presenter>
 
     protected AppComponent getAppComponent(){
         return getAppApplication().getAppComponent();
-    }
-
-    protected DaoSession getDaoSession(){
-        return getAppComponent().getDaoSession();
     }
 
     public void onRefreshWebPage(){

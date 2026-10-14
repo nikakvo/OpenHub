@@ -23,8 +23,6 @@ public interface ISplashContract{
 
         void getUser();
 
-        void saveAccessToken(String accessToken, String scope, int expireIn);
-
     }
 
 }

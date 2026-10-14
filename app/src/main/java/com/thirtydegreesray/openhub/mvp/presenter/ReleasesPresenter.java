@@ -1,7 +1,7 @@
 package com.thirtydegreesray.openhub.mvp.presenter;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.mvp.contract.IReleasesContract;
@@ -31,8 +31,8 @@ public class ReleasesPresenter extends BasePresenter<IReleasesContract.View>
     private long loadedStamp;
 
     @Inject
-    public ReleasesPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public ReleasesPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

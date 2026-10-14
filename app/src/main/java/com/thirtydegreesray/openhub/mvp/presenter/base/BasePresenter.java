@@ -17,7 +17,7 @@ import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.common.AppEventBus;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.CommitService;
 import com.thirtydegreesray.openhub.http.GitHubWebPageService;
 import com.thirtydegreesray.openhub.http.IssueService;
@@ -67,8 +67,8 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
 
     //View
     protected V mView;
-    //db Dao
-    protected DaoSession daoSession;
+    // the app database (Room)
+    protected AppDatabase db;
 
     private ArrayList<Disposable> subscribers;
     private boolean isEventSubscriber = false;
@@ -76,8 +76,8 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
 
     private boolean isAttached = false;
 
-    public BasePresenter(DaoSession daoSession) {
-        this.daoSession = daoSession;
+    public BasePresenter(AppDatabase db) {
+        this.db = db;
         subscribers = new ArrayList<>();
     }
 
@@ -318,7 +318,7 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
     private boolean checkIsUnauthorized(Throwable error){
         if(error instanceof UnauthorizedError){
             mView.showErrorToast(error.getMessage());
-            daoSession.getAuthUserDao().delete(AppData.INSTANCE.getAuthUser());
+            db.authUserDao().delete(AppData.INSTANCE.getAuthUser());
             AppData.INSTANCE.setAuthUser(null);
             AppData.INSTANCE.setLoggedUser(null);
             AppRetrofit.INSTANCE.clearClients();
@@ -329,7 +329,7 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
     }
 
     public void rxDBExecute(@NonNull Runnable runnable){
-        Completable.fromAction(() -> daoSession.runInTx(runnable))
+        Completable.fromAction(() -> db.runInTransaction(runnable))
                 .subscribeOn(Schedulers.io())
                 .subscribe(() -> { }, error -> Logger.e(error, "rxDBExecute"));
     }

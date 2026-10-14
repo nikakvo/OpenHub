@@ -1,21 +1,16 @@
 package com.thirtydegreesray.openhub.util;
 
-import android.database.Cursor;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.thirtydegreesray.openhub.dao.AuthUser;
-import com.thirtydegreesray.openhub.dao.AuthUserDao;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -136,39 +131,13 @@ public final class TokenCrypto {
 
     /**
      * Encrypts the tokens that are still stored in plain text (accounts from before this
-     * version). Runs once at start; does nothing when everything is encrypted already.
+     * version). Runs at start; does nothing when everything is encrypted already.
      */
-    public static void migrate(@NonNull DaoSession session) {
-        AuthUserDao dao = session.getAuthUserDao();
-        List<String> plain = new ArrayList<>();
-        try (Cursor cursor = dao.getDatabase().rawQuery("SELECT "
-                + AuthUserDao.Properties.AccessToken.columnName + " FROM " + AuthUserDao.TABLENAME, null)) {
-            while (cursor.moveToNext()) {
-                String stored = cursor.getString(0);
-                if (stored != null && !isSealed(stored)) plain.add(stored);
-            }
-        } catch (Exception e) {
-            return;
-        }
-        if (plain.isEmpty() || seal(plain.get(0)).equals(plain.get(0))) return; // nothing to do, or no Keystore
-        dao.detachAll();
-        List<AuthUser> users = dao.loadAll(); // tokens come back as plain text either way
-        session.getDatabase().beginTransaction();
+    public static void migrate(@NonNull AppDatabase database) {
         try {
-            for (AuthUser user : users) {
-                String token = user.getAccessToken();
-                if (token == null || !plain.contains(token)) continue;
-                // the key changes, so the row is replaced: delete the plain one, insert sealed
-                dao.getDatabase().execSQL("DELETE FROM " + AuthUserDao.TABLENAME + " WHERE "
-                        + AuthUserDao.Properties.AccessToken.columnName + " = ?", new Object[]{token});
-                dao.insert(user);
-            }
-            session.getDatabase().setTransactionSuccessful();
+            database.authUserDao().sealPlainTokens();
         } catch (Exception ignored) {
-            // the transaction rolls back: the plain rows stay and still work
-        } finally {
-            session.getDatabase().endTransaction();
-            dao.detachAll();
+            // rolled back: the plain rows stay and still work
         }
     }
 }

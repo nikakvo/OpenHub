@@ -2,7 +2,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.R;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.mvp.contract.ICollectionsContract;
 import com.thirtydegreesray.openhub.mvp.model.Collection;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
@@ -29,8 +29,8 @@ public class CollectionsPresenter extends BasePresenter<ICollectionsContract.Vie
     private ArrayList<Collection> collections;
 
     @Inject
-    public CollectionsPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public CollectionsPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

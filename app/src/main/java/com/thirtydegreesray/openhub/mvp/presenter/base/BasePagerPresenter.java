@@ -1,6 +1,6 @@
 package com.thirtydegreesray.openhub.mvp.presenter.base;
 
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBasePagerContract;
 
 /**
@@ -12,8 +12,8 @@ public abstract class BasePagerPresenter<V extends IBasePagerContract.View> exte
 
     private boolean isLoaded = false;
 
-    public BasePagerPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public BasePagerPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

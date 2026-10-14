@@ -3,7 +3,7 @@
 package com.thirtydegreesray.openhub.mvp.presenter;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.mvp.contract.IProfileInfoContract;
@@ -28,8 +28,8 @@ public class ProfileInfoPresenter extends BasePagerPresenter<IProfileInfoContrac
     private ArrayList<User> orgs;
 
     @Inject
-    public ProfileInfoPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public ProfileInfoPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

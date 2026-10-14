@@ -12,8 +12,7 @@ import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.dao.AuthUser;
-import com.thirtydegreesray.openhub.dao.AuthUserDao;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.core.HttpSubscriber;
@@ -44,8 +43,8 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
         implements ILoginContract.Presenter {
 
     @Inject
-    public LoginPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public LoginPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override
@@ -192,15 +191,9 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
     }
 
     private void saveAuthUser(BasicToken basicToken, User userInfo) {
-        String updateSql = "UPDATE " + daoSession.getAuthUserDao().getTablename()
-                + " SET " + AuthUserDao.Properties.Selected.columnName + " = 0";
-        daoSession.getAuthUserDao().getDatabase().execSQL(updateSql);
-
-        // values are bound, never pasted into the SQL text
-        String deleteExistsSql = "DELETE FROM " + daoSession.getAuthUserDao().getTablename()
-                + " WHERE " + AuthUserDao.Properties.LoginId.columnName + " = ?";
-        daoSession.getAuthUserDao().getDatabase().execSQL(deleteExistsSql, new Object[]{userInfo.getLogin()});
-        daoSession.getAuthUserDao().detachAll();
+        // the new account becomes the selected one; an older row of this login is replaced
+        db.authUserDao().unselectAll();
+        db.authUserDao().deleteByLogin(userInfo.getLogin());
         AppRetrofit.INSTANCE.clearClients();
 
         AuthUser authUser = new AuthUser();
@@ -214,7 +207,7 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
         authUser.setLoginId(userInfo.getLogin());
         authUser.setName(userInfo.getName());
         authUser.setAvatar(userInfo.getAvatarUrl());
-        daoSession.getAuthUserDao().insert(authUser);
+        db.authUserDao().insert(authUser);
 
         AppData.INSTANCE.setAuthUser(authUser);
         AppData.INSTANCE.setLoggedUser(userInfo);

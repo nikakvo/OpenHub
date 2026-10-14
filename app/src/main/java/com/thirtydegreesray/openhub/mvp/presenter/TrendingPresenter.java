@@ -2,9 +2,8 @@
 
 package com.thirtydegreesray.openhub.mvp.presenter;
 
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.dao.MyTrendingLanguage;
-import com.thirtydegreesray.openhub.dao.MyTrendingLanguageDao;
 import com.thirtydegreesray.openhub.mvp.contract.ITrendingContract;
 import com.thirtydegreesray.openhub.mvp.model.TrendingLanguage;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
@@ -29,15 +28,13 @@ public class TrendingPresenter extends BasePresenter<ITrendingContract.View>
     private ArrayList<TrendingLanguage> languages ;
 
     @Inject
-    public TrendingPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public TrendingPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override
     public ArrayList<TrendingLanguage> getLanguagesFromLocal() {
-        List<MyTrendingLanguage> myLanguages = daoSession.getMyTrendingLanguageDao().queryBuilder()
-                .orderAsc(MyTrendingLanguageDao.Properties.Order)
-                .list();
+        List<MyTrendingLanguage> myLanguages = db.myTrendingLanguageDao().loadAll();
         if(StringUtils.isBlankList(myLanguages)){
             languages = JSONUtils.jsonToArrayList(getString(R.string.trending_languages), TrendingLanguage.class);
             languages.addAll(0, getFixedLanguages());

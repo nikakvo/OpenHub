@@ -2,7 +2,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppData;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
@@ -34,8 +34,8 @@ public class IssuePresenter extends BasePagerPresenter<IIssuesContract.View>
     private ArrayList<Issue> issues;
 
     @Inject
-    public IssuePresenter(DaoSession daoSession) {
-        super(daoSession);
+    public IssuePresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

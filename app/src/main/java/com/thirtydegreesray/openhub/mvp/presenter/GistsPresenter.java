@@ -3,7 +3,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.AppData;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
@@ -29,8 +29,8 @@ public class GistsPresenter extends BasePresenter<IGistsContract.View>
     private ArrayList<Gist> gists;
 
     @Inject
-    public GistsPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public GistsPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

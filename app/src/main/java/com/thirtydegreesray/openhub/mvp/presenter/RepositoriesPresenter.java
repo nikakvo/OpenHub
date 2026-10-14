@@ -10,11 +10,7 @@ import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.common.Event;
-import com.thirtydegreesray.openhub.dao.BookMarkRepo;
-import com.thirtydegreesray.openhub.dao.BookMarkRepoDao;
-import com.thirtydegreesray.openhub.dao.DaoSession;
-import com.thirtydegreesray.openhub.dao.TraceRepo;
-import com.thirtydegreesray.openhub.dao.TraceRepoDao;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
@@ -80,8 +76,8 @@ public class RepositoriesPresenter extends BasePagerPresenter<IRepositoriesContr
     @AutoAccess Topic topic;
 
     @Inject
-    public RepositoriesPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public RepositoriesPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override
@@ -96,14 +92,6 @@ public class RepositoriesPresenter extends BasePagerPresenter<IRepositoriesContr
     protected void loadData() {
         if (RepositoriesFragment.RepositoriesType.SEARCH.equals(type)) {
             if (searchModel != null) searchRepos(1);
-            return;
-        }
-        if (RepositoriesFragment.RepositoriesType.TRACE.equals(type)) {
-            loadTrace(1);
-            return;
-        }
-        if (RepositoriesFragment.RepositoriesType.BOOKMARK.equals(type)) {
-            loadBookmarks(1);
             return;
         }
         if (RepositoriesFragment.RepositoriesType.COLLECTION.equals(type)) {
@@ -127,14 +115,6 @@ public class RepositoriesPresenter extends BasePagerPresenter<IRepositoriesContr
         filter = getFilter();
         if (type.equals(RepositoriesFragment.RepositoriesType.SEARCH)) {
             searchRepos(page);
-            return;
-        }
-        if (RepositoriesFragment.RepositoriesType.TRACE.equals(type)) {
-            loadTrace(page);
-            return;
-        }
-        if (RepositoriesFragment.RepositoriesType.BOOKMARK.equals(type)) {
-            loadBookmarks(page);
             return;
         }
         if (RepositoriesFragment.RepositoriesType.COLLECTION.equals(type)) {
@@ -278,37 +258,6 @@ public class RepositoriesPresenter extends BasePagerPresenter<IRepositoriesContr
                     RepositoriesFilter.DEFAULT_STARRED_REPO : RepositoriesFilter.DEFAULT;
         }
         return filter;
-    }
-
-    private void loadTrace(int page) {
-        long start = System.currentTimeMillis();
-
-        List<TraceRepo> traceRepos = daoSession.getTraceRepoDao().queryBuilder()
-                .orderDesc(TraceRepoDao.Properties.LatestTime)
-                .offset((page - 1) * 30)
-                .limit(page * 30)
-                .list();
-
-        ArrayList<Repository> queryRepos = new ArrayList<>();
-        for (TraceRepo traceRepo : traceRepos) {
-            queryRepos.add(Repository.generateFromTrace(traceRepo));
-        }
-        Logger.t("loadTrace").d(System.currentTimeMillis() - start);
-        showQueryRepos(queryRepos, page);
-    }
-
-    private void loadBookmarks(int page) {
-        List<BookMarkRepo> bookMarkRepos = daoSession.getBookMarkRepoDao().queryBuilder()
-                .orderDesc(BookMarkRepoDao.Properties.MarkTime)
-                .offset((page - 1) * 30)
-                .limit(page * 30)
-                .list();
-
-        ArrayList<Repository> queryRepos = new ArrayList<>();
-        for (BookMarkRepo bookMarkRepo : bookMarkRepos) {
-            queryRepos.add(Repository.generateFromBookmark(bookMarkRepo));
-        }
-        showQueryRepos(queryRepos, page);
     }
 
     private void showQueryRepos(ArrayList<Repository> queryRepos, int page){

@@ -4,7 +4,6 @@ package com.thirtydegreesray.openhub.inject.component;
 
 import com.thirtydegreesray.openhub.AppApplication;
 import com.thirtydegreesray.openhub.dao.AppDatabase;
-import com.thirtydegreesray.openhub.dao.DaoSession;
 import com.thirtydegreesray.openhub.inject.module.AppModule;
 
 import javax.inject.Singleton;
@@ -23,12 +22,6 @@ public interface AppComponent {
      * @return
      */
     AppApplication getApplication();
-
-    /**
-     * 获取数据库Dao
-     * @return
-     */
-    DaoSession getDaoSession();
 
     /** The Room database. */
     AppDatabase getDatabase();

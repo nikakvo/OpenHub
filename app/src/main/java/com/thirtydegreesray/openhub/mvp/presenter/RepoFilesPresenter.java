@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.common.SizedMap;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
@@ -42,8 +42,8 @@ public class RepoFilesPresenter extends BasePagerPresenter<IRepoFilesContract.Vi
     private FilePath homePath ;
 
     @Inject
-    public RepoFilesPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public RepoFilesPresenter(AppDatabase db) {
+        super(db);
         cacheMap = new SizedMap<>();
         filePath = new ArrayList<>();
         homePath = new FilePath("", "");

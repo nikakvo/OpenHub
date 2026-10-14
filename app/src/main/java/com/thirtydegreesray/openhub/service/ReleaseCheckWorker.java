@@ -23,7 +23,6 @@ import com.thirtydegreesray.openhub.AppApplication;
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.dao.AuthUser;
-import com.thirtydegreesray.openhub.dao.AuthUserDao;
 import com.thirtydegreesray.openhub.ui.activity.BrowserFilterActivity;
 import com.thirtydegreesray.openhub.util.ReleaseWatcher;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -98,11 +97,9 @@ public class ReleaseCheckWorker extends Worker {
     @Nullable
     static String loadToken() {
         try {
-            AuthUserDao dao = AppApplication.get().getAppComponent().getDaoSession().getAuthUserDao();
-            List<AuthUser> users = dao.queryBuilder()
-                    .where(AuthUserDao.Properties.Selected.eq(true)).limit(1).list();
-            if (users.isEmpty()) users = dao.queryBuilder().limit(1).list();
-            return users.isEmpty() ? null : users.get(0).getAccessToken();
+            AuthUser user = AppApplication.get().getAppComponent().getDatabase()
+                    .authUserDao().loadSelectedOrFirst();
+            return user == null ? null : user.getAccessToken();
         } catch (Exception e) {
             return null;
         }

@@ -3,7 +3,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.mvp.contract.ILabelManageContract;
@@ -27,8 +27,8 @@ public class LabelManagePresenter extends BasePresenter<ILabelManageContract.Vie
     private ArrayList<Label> labels;
 
     @Inject
-    public LabelManagePresenter(DaoSession daoSession) {
-        super(daoSession);
+    public LabelManagePresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

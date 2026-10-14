@@ -7,11 +7,9 @@ import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.dao.Bookmark;
-import com.thirtydegreesray.openhub.dao.BookmarkDao;
-import com.thirtydegreesray.openhub.dao.DaoSession;
-import com.thirtydegreesray.openhub.dao.LocalRepo;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
+import com.thirtydegreesray.openhub.util.LocalChanges;
 import com.thirtydegreesray.openhub.dao.Trace;
-import com.thirtydegreesray.openhub.dao.TraceDao;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpProgressSubscriber;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
@@ -56,8 +54,8 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
     private boolean bookmarked = false;
 
     @Inject
-    public RepositoryPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public RepositoryPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override
@@ -304,9 +302,7 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
     @Override
     public boolean isBookmarked() {
         if(!isBookmarkQueried && repository != null){
-            bookmarked = daoSession.getBookmarkDao().queryBuilder()
-                    .where(BookmarkDao.Properties.RepoId.eq(repository.getId()))
-                    .unique() != null;
+            bookmarked = db.bookmarkDao().findByRepo(repository.getId()) != null;
             isBookmarkQueried = true;
         }
         return bookmarked;
@@ -316,26 +312,24 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
     public void bookmark(boolean bookmark) {
         if(repository == null) return;
         bookmarked = bookmark;
-        Bookmark bookmarkModel = daoSession.getBookmarkDao().queryBuilder()
-                .where(BookmarkDao.Properties.RepoId.eq(repository.getId()))
-                .unique();
+        Bookmark bookmarkModel = db.bookmarkDao().findByRepo(repository.getId());
         if(bookmark && bookmarkModel == null){
             bookmarkModel = new Bookmark(UUID.randomUUID().toString());
             bookmarkModel.setType("repo");
             bookmarkModel.setRepoId((long) repository.getId());
             bookmarkModel.setMarkTime(new Date());
-            daoSession.getBookmarkDao().insert(bookmarkModel);
+            db.bookmarkDao().insert(bookmarkModel);
+            LocalChanges.markBookmarks();
         } else if(!bookmark && bookmarkModel != null){
-            daoSession.getBookmarkDao().delete(bookmarkModel);
+            db.bookmarkDao().delete(bookmarkModel);
+            LocalChanges.markBookmarks();
         }
     }
 
     private void saveTrace(){
-        daoSession.runInTx(() ->{
+        db.runInTransaction(() ->{
             if(!isTraceSaved){
-                Trace trace = daoSession.getTraceDao().queryBuilder()
-                        .where(TraceDao.Properties.RepoId.eq(repository.getId()))
-                        .unique();
+                Trace trace = db.traceDao().findByRepo(repository.getId());
 
                 if(trace == null){
                     trace = new Trace(UUID.randomUUID().toString());
@@ -345,23 +339,18 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
                     trace.setStartTime(curDate);
                     trace.setLatestTime(curDate);
                     trace.setTraceNum(1);
-                    daoSession.getTraceDao().insert(trace);
+                    db.traceDao().insert(trace);
                 } else {
-                    trace.setTraceNum(trace.getTraceNum() + 1);
+                    trace.setTraceNum((trace.getTraceNum() == null ? 0 : trace.getTraceNum()) + 1);
                     trace.setLatestTime(new Date());
-                    daoSession.getTraceDao().update(trace);
+                    db.traceDao().update(trace);
                 }
             }
 
-            LocalRepo localRepo = daoSession.getLocalRepoDao().load((long) repository.getId());
-            LocalRepo updateRepo = repository.toLocalRepo();
-            if(localRepo == null){
-                daoSession.getLocalRepoDao().insert(updateRepo);
-            } else {
-                daoSession.getLocalRepoDao().update(updateRepo);
-            }
+            db.localRepoDao().save(repository.toLocalRepo());
         });
         isTraceSaved = true;
+        LocalChanges.markHistory();
     }
 
 }

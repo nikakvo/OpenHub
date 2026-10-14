@@ -45,11 +45,6 @@
 -keep @interface com.thirtydegreesray.openhub.util.state.AutoAccess
 -keepclassmembers class * { @com.thirtydegreesray.openhub.util.state.AutoAccess <fields>; }
 
-# greenDAO 3
--keepclassmembers class * extends org.greenrobot.greendao.AbstractDao {
-public static java.lang.String TABLENAME;
-}
--keep class **$Properties
 
 #EventBus
 -keepattributes *Annotation*

@@ -1,15 +1,15 @@
 package com.thirtydegreesray.openhub.mvp.presenter;
 
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.dao.LocalRepo;
 import com.thirtydegreesray.openhub.dao.LocalUser;
 import com.thirtydegreesray.openhub.dao.Trace;
-import com.thirtydegreesray.openhub.dao.TraceDao;
 import com.thirtydegreesray.openhub.mvp.contract.ITraceContract;
 import com.thirtydegreesray.openhub.mvp.model.Repository;
 import com.thirtydegreesray.openhub.mvp.model.TraceExt;
 import com.thirtydegreesray.openhub.mvp.model.User;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
+import com.thirtydegreesray.openhub.util.LocalChanges;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,13 @@ public class TracePresenter extends BasePresenter<ITraceContract.View>
     private ArrayList<TraceExt> traceList;
     private TraceExt removedTrace;
     private int removedPosition;
+    private long seenStamp;
+
+    private static final int PAGE_SIZE = 30;
 
     @Inject
-    public TracePresenter(DaoSession daoSession) {
-        super(daoSession);
+    public TracePresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override
@@ -45,20 +48,21 @@ public class TracePresenter extends BasePresenter<ITraceContract.View>
     @Override
     public void loadTraceList(int page) {
         mView.showLoading();
+        if (page == 1) seenStamp = LocalChanges.historyStamp();
         final ArrayList<TraceExt> tempTraceList = new ArrayList<>();
-        Completable.fromAction(() -> daoSession.runInTx(() -> {
-                    List<Trace> traceListDb = daoSession.getTraceDao().queryBuilder()
-                            .orderDesc(TraceDao.Properties.LatestTime)
-                            .offset((page - 1) * 30)
-                            .limit(page * 30)
-                            .list();
+        Completable.fromAction(() -> db.runInTransaction(() -> {
+                    List<Trace> traceListDb =
+                            db.traceDao().page((page - 1) * PAGE_SIZE, PAGE_SIZE);
                     for (Trace trace : traceListDb) {
                         TraceExt ext = TraceExt.generate(trace);
                         if ("user".equals(trace.getType())) {
-                            LocalUser localUser = daoSession.getLocalUserDao().load(ext.getUserId());
+                            LocalUser localUser = db.localUserDao().load(ext.getUserId());
+                            if (localUser == null) continue; // no local copy: cannot be shown
                             ext.setUser(User.generateFromLocalUser(localUser));
                         } else {
-                            LocalRepo localRepo = daoSession.getLocalRepoDao().load(ext.getRepoId());
+                            LocalRepo localRepo = ext.getRepoId() == null ? null
+                                    : db.localRepoDao().load(ext.getRepoId());
+                            if (localRepo == null) continue;
                             ext.setRepository(Repository.generateFromLocalRepo(localRepo));
                         }
                         tempTraceList.add(ext);
@@ -86,14 +90,19 @@ public class TracePresenter extends BasePresenter<ITraceContract.View>
     public void removeTrace(int position) {
         removedTrace = traceList.remove(position);
         removedPosition = position;
-        rxDBExecute(() -> daoSession.getTraceDao().deleteByKey(removedTrace.getId()));
+        rxDBExecute(() -> db.traceDao().deleteById(removedTrace.getId()));
     }
 
     @Override
     public void undoRemoveTrace() {
         traceList.add(removedPosition, removedTrace);
         mView.notifyItemAdded(removedPosition);
-        rxDBExecute(() -> daoSession.getTraceDao().insert(removedTrace));
+        rxDBExecute(() -> db.traceDao().insert(removedTrace));
+    }
+
+    @Override
+    public void reloadIfChanged() {
+        if (LocalChanges.changedSince(seenStamp, LocalChanges.historyStamp())) loadTraceList(1);
     }
 
     @Override

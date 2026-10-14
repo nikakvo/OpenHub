@@ -7,8 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.dao.AuthUser;
-import com.thirtydegreesray.openhub.dao.AuthUserDao;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.mvp.contract.IMainContract;
 import com.thirtydegreesray.openhub.mvp.model.User;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
@@ -28,8 +27,8 @@ public class MainPresenter extends BasePresenter<IMainContract.View>
         implements IMainContract.Presenter{
 
     @Inject
-    public MainPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public MainPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override
@@ -46,7 +45,7 @@ public class MainPresenter extends BasePresenter<IMainContract.View>
 
     @Override
     public List<AuthUser> getLoggedUserList() {
-        List<AuthUser> users = daoSession.getAuthUserDao().loadAll();
+        List<AuthUser> users = db.authUserDao().loadAll();
         if(users != null){
             for(AuthUser user : users){
                 if(AppData.INSTANCE.getLoggedUser().getLogin().equals(user.getLoginId())){
@@ -60,14 +59,7 @@ public class MainPresenter extends BasePresenter<IMainContract.View>
 
     @Override
     public void toggleAccount(@NonNull String loginId) {
-        // values are bound, never pasted into the SQL text
-        String selectSql = "UPDATE " + daoSession.getAuthUserDao().getTablename()
-                + " SET " + AuthUserDao.Properties.Selected.columnName + " = ?"
-                + " WHERE " + AuthUserDao.Properties.LoginId.columnName + " = ?";
-        daoSession.getAuthUserDao().getDatabase().execSQL(selectSql,
-                new Object[]{0, AppData.INSTANCE.getLoggedUser().getLogin()});
-        daoSession.getAuthUserDao().getDatabase().execSQL(selectSql, new Object[]{1, loginId});
-        daoSession.getAuthUserDao().detachAll();
+        db.authUserDao().select(loginId);
         com.thirtydegreesray.openhub.http.core.AppRetrofit.INSTANCE.clearClients();
         AppData.INSTANCE.setAuthUser(null);
         AppData.INSTANCE.setLoggedUser(null);
@@ -78,15 +70,9 @@ public class MainPresenter extends BasePresenter<IMainContract.View>
     public void logout() {
         String token = AppData.INSTANCE.getAccessToken();
         String login = AppData.INSTANCE.getAuthUser() == null ? null : AppData.INSTANCE.getAuthUser().getLoginId();
-        daoSession.getAuthUserDao().delete(AppData.INSTANCE.getAuthUser());
-        if (login != null) {
-            // also by login name, so no row can stay behind whatever form its token has
-            daoSession.getAuthUserDao().getDatabase().execSQL("DELETE FROM "
-                    + com.thirtydegreesray.openhub.dao.AuthUserDao.TABLENAME + " WHERE "
-                    + com.thirtydegreesray.openhub.dao.AuthUserDao.Properties.LoginId.columnName + " = ?",
-                    new Object[]{login});
-            daoSession.getAuthUserDao().detachAll();
-        }
+        db.authUserDao().delete(AppData.INSTANCE.getAuthUser());
+        // also by login name, so no row can stay behind whatever form its token has
+        if (login != null) db.authUserDao().deleteByLogin(login);
         SignOut.cleanUp(token);
         AppData.INSTANCE.setAuthUser(null);
         AppData.INSTANCE.setLoggedUser(null);

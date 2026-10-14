@@ -5,7 +5,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.mvp.contract.INotificationsContract;
@@ -39,8 +39,8 @@ public class NotificationsPresenter extends BasePagerPresenter<INotificationsCon
     private ArrayList<DoubleTypesModel<Repository, Notification>> sortedNotifications;
 
     @Inject
-    public NotificationsPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public NotificationsPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

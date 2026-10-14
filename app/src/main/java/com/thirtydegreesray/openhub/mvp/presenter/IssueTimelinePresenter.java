@@ -3,7 +3,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
@@ -33,8 +33,8 @@ public class IssueTimelinePresenter extends BasePresenter<IIssueTimelineContract
     private ArrayList<IssueEvent> events;
 
     @Inject
-    public IssueTimelinePresenter(DaoSession daoSession) {
-        super(daoSession);
+    public IssueTimelinePresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

@@ -199,7 +199,7 @@ Never commit keys or passwords: `public.properties` is in git and must stay empt
 
 ## Libraries
 
-* [GreenDao](https://github.com/greenrobot/greenDAO) A light & fast ORM solution for Android that maps objects to SQLite databases.
+* [Room](https://developer.android.com/training/data-storage/room) The SQLite object mapping library of Android Jetpack.
 * [EventBus](https://github.com/greenrobot/EventBus) Android optimized event bus that simplifies communication between Activities, Fragments, Threads, Services, etc.
 * [RxJava](https://github.com/ReactiveX/RxJava) A library for composing asynchronous and event-based programs using observable sequences for the Java VM.
 * [RxAndroid](https://github.com/ReactiveX/RxAndroid) RxJava bindings for Android.

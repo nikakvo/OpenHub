@@ -2,7 +2,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.R;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.mvp.contract.ITopicsContract;
 import com.thirtydegreesray.openhub.mvp.model.Topic;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
@@ -29,8 +29,8 @@ public class TopicsPresenter extends BasePresenter<ITopicsContract.View>
     private ArrayList<Topic> topics;
 
     @Inject
-    public TopicsPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public TopicsPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

@@ -60,6 +60,19 @@ public class BookmarksFragment extends ListFragment<BookmarkPresenter, Bookmarks
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // bookmarked, unbookmarked or opened on another screen: show it without a pull
+        if (mPresenter != null && !isHidden()) mPresenter.reloadIfChanged();
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden && mPresenter != null) mPresenter.reloadIfChanged();
+    }
+
+    @Override
     protected void onReLoadData() {
         mPresenter.loadBookmarks(1);
     }

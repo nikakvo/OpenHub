@@ -4,7 +4,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.R;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.mvp.contract.IViewerContract;
@@ -42,8 +42,8 @@ public class ViewerPresenter extends BasePresenter<IViewerContract.View>
     @AutoAccess CommitFile commitFile;
 
     @Inject
-    public ViewerPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public ViewerPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

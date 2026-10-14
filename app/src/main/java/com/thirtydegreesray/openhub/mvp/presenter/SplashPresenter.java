@@ -9,8 +9,7 @@ import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.dao.AuthUser;
-import com.thirtydegreesray.openhub.dao.AuthUserDao;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.mvp.contract.ISplashContract;
@@ -36,45 +35,29 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
 
     private final String TAG = "SplashPresenter";
 
-    private AuthUser authUser;
     private boolean isMainPageShowwed = false;
 
     @Inject
-    public SplashPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public SplashPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override
     public void getUser() {
-        AuthUserDao authUserDao = daoSession.getAuthUserDao();
         // accounts saved by older versions: encrypt their tokens now (once)
-        TokenCrypto.migrate(daoSession);
+        TokenCrypto.migrate(db);
 
-        List<AuthUser> users = authUserDao.queryBuilder()
-                .where(AuthUserDao.Properties.Selected.eq(true))
-                .limit(1)
-                .list();
-
-        AuthUser selectedUser = users != null && users.size() > 0 ? users.get(0) : null;
-
-        //if none selected, choose first account
-        if(selectedUser == null){
-            List<AuthUser> firstAccount = authUserDao.queryBuilder()
-                    .limit(1)
-                    .list();
-            selectedUser = firstAccount != null && firstAccount.size() > 0 ? firstAccount.get(0) : null;
-        }
+        // the selected account; if none is selected, the first one
+        AuthUser selectedUser = db.authUserDao().loadSelectedOrFirst();
 
         if (selectedUser != null && StringUtils.isBlank(selectedUser.getAccessToken())) {
             // the token cannot be decrypted any more (Keystore keys gone): sign in again
-            authUserDao.getDatabase().execSQL("DELETE FROM " + AuthUserDao.TABLENAME + " WHERE "
-                    + AuthUserDao.Properties.LoginId.columnName + " = ?", new Object[]{selectedUser.getLoginId()});
-            authUserDao.detachAll();
+            db.authUserDao().deleteByLogin(selectedUser.getLoginId());
             selectedUser = null;
         }
 
         if (selectedUser != null && isExpired(selectedUser)) {
-            authUserDao.delete(selectedUser);
+            db.authUserDao().delete(selectedUser);
             selectedUser = null;
         }
 
@@ -87,18 +70,6 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
 
     }
 
-    @Override
-    public void saveAccessToken(String accessToken, String scope, int expireIn) {
-        AuthUser authUser = new AuthUser();
-        authUser.setSelected(true);
-        authUser.setScope(scope);
-        authUser.setExpireIn(expireIn);
-        authUser.setAuthTime(new Date());
-        authUser.setAccessToken(accessToken);
-        daoSession.getAuthUserDao().insert(authUser);
-        this.authUser = authUser;
-    }
-
     private void getUserInfo(final String accessToken) {
 
         HttpObserver<User> httpObserver = new HttpObserver<User>() {
@@ -106,7 +77,7 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
             public void onError(@NonNull Throwable error) {
                 if (error instanceof UnauthorizedError) {
                     // GitHub rejected the token (revoked or expired): sign in again
-                    daoSession.getAuthUserDao().delete(AppData.INSTANCE.getAuthUser());
+                    db.authUserDao().delete(AppData.INSTANCE.getAuthUser());
                     AppData.INSTANCE.setAuthUser(null);
                     mView.showErrorToast(getErrorTip(error));
                     mView.showLoginPage();
@@ -120,10 +91,6 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
             @Override
             public void onSuccess(@NonNull HttpResponse<User> response) {
                 AppData.INSTANCE.setLoggedUser(response.body());
-                if (authUser != null) {
-                    authUser.setLoginId(response.body().getLogin());
-                    daoSession.getAuthUserDao().update(authUser);
-                }
                 if(!isMainPageShowwed) {
                     isMainPageShowwed = true;
                     mView.showMainPage();

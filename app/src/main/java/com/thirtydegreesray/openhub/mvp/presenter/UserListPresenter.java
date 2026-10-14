@@ -5,11 +5,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.common.Event;
-import com.thirtydegreesray.openhub.dao.BookMarkUser;
-import com.thirtydegreesray.openhub.dao.BookMarkUserDao;
-import com.thirtydegreesray.openhub.dao.DaoSession;
-import com.thirtydegreesray.openhub.dao.TraceUser;
-import com.thirtydegreesray.openhub.dao.TraceUserDao;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
@@ -47,8 +43,8 @@ public class UserListPresenter extends BasePagerPresenter<IUserListContract.View
     private ArrayList<User> users;
 
     @Inject
-    public UserListPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public UserListPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override
@@ -63,10 +59,6 @@ public class UserListPresenter extends BasePagerPresenter<IUserListContract.View
     protected void loadData() {
         if(UserListFragment.UserListType.SEARCH.equals(type)){
             if(searchModel != null) searchUsers(1);
-        } else if(UserListFragment.UserListType.TRACE.equals(type)){
-            loadTrace(1);
-        } else if(UserListFragment.UserListType.BOOKMARK.equals(type)){
-            loadBookmarks(1);
         } else {
             loadUsers(1, false);
         }
@@ -76,14 +68,6 @@ public class UserListPresenter extends BasePagerPresenter<IUserListContract.View
     public void loadUsers(final int page, final boolean isReload) {
         if (type.equals(UserListFragment.UserListType.SEARCH)) {
             searchUsers(page);
-            return;
-        }
-        if(UserListFragment.UserListType.TRACE.equals(type)){
-            loadTrace(page);
-            return;
-        }
-        if(UserListFragment.UserListType.BOOKMARK.equals(type)){
-            loadBookmarks(page);
             return;
         }
         mView.showLoading();
@@ -190,32 +174,6 @@ public class UserListPresenter extends BasePagerPresenter<IUserListContract.View
     private boolean isRestrictedList() {
         return UserListFragment.UserListType.STARGAZERS.equals(type)
                 || UserListFragment.UserListType.WATCHERS.equals(type);
-    }
-
-    private void loadTrace(int page){
-        List<TraceUser> traceUsers = daoSession.getTraceUserDao().queryBuilder()
-                .orderDesc(TraceUserDao.Properties.LatestTime)
-                .offset((page - 1) * 30)
-                .limit(page * 30)
-                .list();
-        ArrayList<User> queryUsers = new ArrayList<>();
-        for(TraceUser traceUser : traceUsers){
-            queryUsers.add(User.generateFromTrace(traceUser));
-        }
-        showQueryUsers(queryUsers, page);
-    }
-
-    private void loadBookmarks(int page){
-        List<BookMarkUser> bookMarkUsers = daoSession.getBookMarkUserDao().queryBuilder()
-                .orderDesc(BookMarkUserDao.Properties.MarkTime)
-                .offset((page - 1) * 30)
-                .limit(page * 30)
-                .list();
-        ArrayList<User> queryUsers = new ArrayList<>();
-        for(BookMarkUser bookMarkUser : bookMarkUsers){
-            queryUsers.add(User.generateFromBookmark(bookMarkUser));
-        }
-        showQueryUsers(queryUsers, page);
     }
 
     private void showQueryUsers(ArrayList<User> queryUsers, int page){

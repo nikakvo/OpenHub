@@ -3,9 +3,8 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.R;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.dao.MyTrendingLanguage;
-import com.thirtydegreesray.openhub.dao.MyTrendingLanguageDao;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.mvp.contract.ILanguagesEditorContract;
@@ -45,8 +44,8 @@ public class LanguagesEditorPresenter extends BasePresenter<ILanguagesEditorCont
     private int removedPosition;
 
     @Inject
-    public LanguagesEditorPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public LanguagesEditorPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override
@@ -106,8 +105,7 @@ public class LanguagesEditorPresenter extends BasePresenter<ILanguagesEditorCont
             myLanguages.add(TrendingLanguage.generateDB(trendingLanguage, ++order));
         }
 
-        daoSession.getMyTrendingLanguageDao().deleteAll();
-        daoSession.getMyTrendingLanguageDao().insertInTx(myLanguages);
+        db.myTrendingLanguageDao().replaceAll(myLanguages);
     }
 
     @Override
@@ -167,9 +165,7 @@ public class LanguagesEditorPresenter extends BasePresenter<ILanguagesEditorCont
 
     private ArrayList<TrendingLanguage> getSelectedLanguages() {
         ArrayList<TrendingLanguage> selectedLanguages;
-        List<MyTrendingLanguage> myLanguages = daoSession.getMyTrendingLanguageDao().queryBuilder()
-                .orderAsc(MyTrendingLanguageDao.Properties.Order)
-                .list();
+        List<MyTrendingLanguage> myLanguages = db.myTrendingLanguageDao().loadAll();
         if (StringUtils.isBlankList(myLanguages)) {
             selectedLanguages = JSONUtils.jsonToArrayList(getString(R.string.trending_languages), TrendingLanguage.class);
             selectedLanguages.addAll(0, getFixedLanguages());

@@ -6,7 +6,7 @@ import androidx.annotation.Nullable;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.core.HttpSubscriber;
@@ -49,8 +49,8 @@ public class ActionsPresenter extends BasePresenter<IActionsContract.View>
     private ArrayList<Workflow> workflows;
 
     @Inject
-    public ActionsPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public ActionsPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.R;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpProgressSubscriber;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
@@ -37,8 +37,8 @@ public class IssueDetailPresenter extends BasePresenter<IIssueDetailContract.Vie
     @AutoAccess int issueNumber;
 
     @Inject
-    public IssueDetailPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public IssueDetailPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

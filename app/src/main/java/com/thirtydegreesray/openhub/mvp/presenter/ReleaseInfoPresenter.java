@@ -7,7 +7,7 @@ import androidx.annotation.Nullable;
 
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.R;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.ReleaseService;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
@@ -63,8 +63,8 @@ public class ReleaseInfoPresenter extends BasePresenter<IReleaseInfoContract.Vie
     private final CompositeDisposable actions = new CompositeDisposable();
 
     @Inject
-    public ReleaseInfoPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public ReleaseInfoPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

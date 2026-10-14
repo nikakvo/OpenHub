@@ -4,7 +4,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppConfig;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
@@ -33,8 +33,8 @@ public class RepoInfoPresenter extends BasePagerPresenter<IRepoInfoContract.View
     private String readmeSource;
 
     @Inject
-    public RepoInfoPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public RepoInfoPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

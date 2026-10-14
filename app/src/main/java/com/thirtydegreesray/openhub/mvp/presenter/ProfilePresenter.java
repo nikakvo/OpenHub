@@ -7,11 +7,9 @@ import android.os.Handler;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.dao.Bookmark;
-import com.thirtydegreesray.openhub.dao.BookmarkDao;
-import com.thirtydegreesray.openhub.dao.DaoSession;
-import com.thirtydegreesray.openhub.dao.LocalUser;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
+import com.thirtydegreesray.openhub.util.LocalChanges;
 import com.thirtydegreesray.openhub.dao.Trace;
-import com.thirtydegreesray.openhub.dao.TraceDao;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.mvp.contract.IProfileContract;
@@ -48,8 +46,8 @@ public class ProfilePresenter extends BasePresenter<IProfileContract.View>
     private boolean bookmarked = false;
 
     @Inject
-    public ProfilePresenter(DaoSession daoSession) {
-        super(daoSession);
+    public ProfilePresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override
@@ -144,9 +142,7 @@ public class ProfilePresenter extends BasePresenter<IProfileContract.View>
     @Override
     public boolean isBookmarked() {
         if(!isBookmarkQueried){
-            bookmarked = daoSession.getBookmarkDao().queryBuilder()
-                    .where(BookmarkDao.Properties.UserId.eq(user.getLogin()))
-                    .unique() != null;
+            bookmarked = db.bookmarkDao().findByUser(user.getLogin()) != null;
             isBookmarkQueried = true;
         }
         return bookmarked;
@@ -155,27 +151,25 @@ public class ProfilePresenter extends BasePresenter<IProfileContract.View>
     @Override
     public void bookmark(boolean bookmark) {
         bookmarked = bookmark;
-        Bookmark bookmarkModel = daoSession.getBookmarkDao().queryBuilder()
-                .where(BookmarkDao.Properties.UserId.eq(user.getLogin()))
-                .unique();
+        Bookmark bookmarkModel = db.bookmarkDao().findByUser(user.getLogin());
         if(bookmark && bookmarkModel == null){
             bookmarkModel = new Bookmark(UUID.randomUUID().toString());
             bookmarkModel.setType("user");
             bookmarkModel.setUserId(user.getLogin());
             bookmarkModel.setMarkTime(new Date());
-            daoSession.getBookmarkDao().insert(bookmarkModel);
+            db.bookmarkDao().insert(bookmarkModel);
+            LocalChanges.markBookmarks();
         } else if(!bookmark && bookmarkModel != null){
-            daoSession.getBookmarkDao().delete(bookmarkModel);
+            db.bookmarkDao().delete(bookmarkModel);
+            LocalChanges.markBookmarks();
         }
     }
 
     private void saveTrace(){
-        daoSession.runInTx(() -> {
+        db.runInTransaction(() -> {
 
             if(!isTraceSaved){
-                Trace trace = daoSession.getTraceDao().queryBuilder()
-                        .where(TraceDao.Properties.UserId.eq(user.getLogin()))
-                        .unique();
+                Trace trace = db.traceDao().findByUser(user.getLogin());
 
                 if(trace == null){
                     trace = new Trace(UUID.randomUUID().toString());
@@ -185,24 +179,19 @@ public class ProfilePresenter extends BasePresenter<IProfileContract.View>
                     trace.setStartTime(curDate);
                     trace.setLatestTime(curDate);
                     trace.setTraceNum(1);
-                    daoSession.getTraceDao().insert(trace);
+                    db.traceDao().insert(trace);
                 } else {
-                    trace.setTraceNum(trace.getTraceNum() + 1);
+                    trace.setTraceNum((trace.getTraceNum() == null ? 0 : trace.getTraceNum()) + 1);
                     trace.setLatestTime(new Date());
-                    daoSession.getTraceDao().update(trace);
+                    db.traceDao().update(trace);
                 }
             }
 
-            LocalUser localUser = daoSession.getLocalUserDao().load(user.getLogin());
-            LocalUser updateUser = user.toLocalUser();
-            if(localUser == null){
-                daoSession.getLocalUserDao().insert(updateUser);
-            } else {
-                daoSession.getLocalUserDao().update(updateUser);
-            }
+            db.localUserDao().save(user.toLocalUser());
 
         });
         isTraceSaved = true;
+        LocalChanges.markHistory();
     }
 
 }

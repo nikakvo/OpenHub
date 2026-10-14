@@ -1,7 +1,7 @@
 package com.thirtydegreesray.openhub.mvp.presenter;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.mvp.contract.IWikiContract;
@@ -27,8 +27,8 @@ public class WikiPresenter extends BasePresenter<IWikiContract.View>
     private ArrayList<WikiModel> wikiList;
 
     @Inject
-    public WikiPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public WikiPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

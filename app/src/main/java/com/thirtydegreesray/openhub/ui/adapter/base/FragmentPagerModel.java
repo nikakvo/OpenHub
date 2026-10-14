@@ -148,26 +148,6 @@ public class FragmentPagerModel {
         ));
     }
 
-    public static List<FragmentPagerModel> createTracePagerList(
-            @NonNull Context context, @NonNull ArrayList<Fragment> fragments) {
-        return setPagerFragmentFlag(Arrays.asList(
-                new FragmentPagerModel(context.getString(R.string.repositories),
-                        getFragment(fragments, 0, () -> RepositoriesFragment.createForTrace())),
-                new FragmentPagerModel(context.getString(R.string.users),
-                        getFragment(fragments, 1, () -> UserListFragment.createForTrace()))
-        ));
-    }
-
-    public static List<FragmentPagerModel> createBookmarksPagerList(
-            @NonNull Context context, @NonNull ArrayList<Fragment> fragments) {
-        return setPagerFragmentFlag(Arrays.asList(
-                new FragmentPagerModel(context.getString(R.string.repositories),
-                        getFragment(fragments, 0, () -> RepositoriesFragment.createForBookmark())),
-                new FragmentPagerModel(context.getString(R.string.users),
-                        getFragment(fragments, 1, () -> UserListFragment.createForBookmark()))
-        ));
-    }
-
     private static List<FragmentPagerModel> setPagerFragmentFlag(List<FragmentPagerModel> list) {
         for (FragmentPagerModel model : list) {
             model.getFragment().setPagerFragment(true);

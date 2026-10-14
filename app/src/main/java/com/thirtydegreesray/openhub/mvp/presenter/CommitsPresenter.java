@@ -5,7 +5,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
@@ -41,8 +41,8 @@ public class CommitsPresenter extends BasePagerPresenter<ICommitsContract.View>
     private ArrayList<RepoCommit> commits;
 
     @Inject
-    public CommitsPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public CommitsPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

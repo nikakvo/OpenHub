@@ -5,7 +5,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.mvp.contract.ISearchContract;
 import com.thirtydegreesray.openhub.mvp.model.SearchModel;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
@@ -27,8 +27,8 @@ public class SearchPresenter extends BasePresenter<ISearchContract.View>
     @AutoAccess ArrayList<SearchModel> searchModels;
 
     @Inject
-    public SearchPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public SearchPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

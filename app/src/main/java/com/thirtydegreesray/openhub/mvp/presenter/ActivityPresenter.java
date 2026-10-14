@@ -5,7 +5,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
@@ -42,8 +42,8 @@ public class ActivityPresenter extends BasePagerPresenter<IActivityContract.View
     ArrayList<Event> events;
 
     @Inject
-    public ActivityPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public ActivityPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

@@ -2,7 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.presenter;
 
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.mvp.contract.ICommitFilesContract;
 import com.thirtydegreesray.openhub.mvp.model.CommitFile;
 import com.thirtydegreesray.openhub.mvp.model.CommitFilesPathModel;
@@ -21,8 +21,8 @@ public class CommitFilesPresenter extends BasePresenter<ICommitFilesContract.Vie
         implements ICommitFilesContract.Presenter {
 
     @Inject
-    public CommitFilesPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public CommitFilesPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

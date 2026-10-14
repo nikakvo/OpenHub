@@ -28,6 +28,18 @@ import com.thirtydegreesray.openhub.AppConfig;
 @TypeConverters(DbConverters.class)
 public abstract class AppDatabase extends RoomDatabase {
 
+    public abstract AuthUserDao authUserDao();
+
+    public abstract BookmarkDao bookmarkDao();
+
+    public abstract TraceDao traceDao();
+
+    public abstract LocalRepoDao localRepoDao();
+
+    public abstract LocalUserDao localUserDao();
+
+    public abstract MyTrendingLanguageDao myTrendingLanguageDao();
+
     @NonNull
     public static AppDatabase open(@NonNull Context context) {
         return Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class,

@@ -6,7 +6,7 @@ import android.os.Handler;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.R;
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
 import com.thirtydegreesray.openhub.http.core.HttpResponse;
 import com.thirtydegreesray.openhub.mvp.contract.ICommitDetailContract;
@@ -39,8 +39,8 @@ public class CommitDetailPresenter extends BasePresenter<ICommitDetailContract.V
 
 
     @Inject
-    public CommitDetailPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public CommitDetailPresenter(AppDatabase db) {
+        super(db);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.thirtydegreesray.openhub.mvp.presenter;
 
-import com.thirtydegreesray.openhub.dao.DaoSession;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.mvp.contract.IIssuesActContract;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
 
@@ -14,8 +14,8 @@ public class IssuesActPresenter extends BasePresenter<IIssuesActContract.View>
         implements IIssuesActContract.Presenter{
 
     @Inject
-    public IssuesActPresenter(DaoSession daoSession) {
-        super(daoSession);
+    public IssuesActPresenter(AppDatabase db) {
+        super(db);
     }
 
 }
