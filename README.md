@@ -135,6 +135,15 @@ Android 8.0 (API 26) or newer.
 APKs are on the [Releases](https://github.com/nikakvo/OpenHub/releases) page. The app id is
 `io.github.nikakvo.openhub`, so it installs next to the original OpenHub.
 
+Official APKs are signed with this certificate (SHA-256):
+
+```
+5e:99:44:a9:e7:ed:01:1d:83:5b:9a:6f:10:ce:e1:49:6d:88:26:f3:e5:7d:9a:b5:38:6d:ef:d6:d4:d9:98:7e
+```
+
+Check a downloaded APK with `apksigner verify --print-certs OpenHub-<version>.apk`
+(Android SDK build-tools): the "SHA-256 digest" must be the same, without the colons.
+
 ## Building
 
 You need JDK 17 and the Android SDK (platform 36). Then:
