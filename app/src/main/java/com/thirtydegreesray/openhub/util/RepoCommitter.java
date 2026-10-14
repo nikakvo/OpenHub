@@ -147,12 +147,17 @@ public final class RepoCommitter {
         GitDataService git = GitHubApi.service(GitDataService.class);
         String head;
         try {
-            JsonObject ref = GitHubApi.call(git.getBranchRef(owner, repo, encode(branch)));
-            head = ref.getAsJsonObject("object").get("sha").getAsString();
+            head = branchHead(git, owner, repo, branch);
         } catch (GitHubApi.ApiException e) {
-            // 409 "Git Repository is empty"; 404 when the branch does not exist yet
-            if (e.code == 409 || e.code == 404) {
+            // 409 "Git Repository is empty": the Git Data API cannot commit there yet
+            if (e.code == 409) {
                 return commitToEmptyRepository(context, owner, repo, branch, changes, options, progress);
+            }
+            // never fall back to the contents API here: without the branch and the file's
+            // sha it would write to the default branch or fail with "sha wasn't supplied"
+            if (e.code == 404) {
+                throw new GitHubApi.ApiException(404, "GitHub does not show the branch " + branch
+                        + " yet. If it was just created, wait a few seconds and try again.");
             }
             throw e;
         }
@@ -248,6 +253,34 @@ public final class RepoCommitter {
             PullChanges.markChanged();
         }
         return new Result(target, pullUrl);
+    }
+
+    /**
+     * The commit a branch points to. GitHub answers 404 / 409 for a few seconds after a
+     * branch or repository was created (its replicas are not in sync yet), so ask again.
+     */
+    @NonNull
+    private static String branchHead(@NonNull GitDataService git, @NonNull String owner,
+                                     @NonNull String repo, @NonNull String branch) throws IOException {
+        GitHubApi.ApiException last = null;
+        for (int attempt = 0; attempt < 3; attempt++) {
+            if (attempt > 0) {
+                try {
+                    Thread.sleep(1500L * attempt);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+            try {
+                JsonObject ref = GitHubApi.call(git.getBranchRef(owner, repo, encode(branch)));
+                return ref.getAsJsonObject("object").get("sha").getAsString();
+            } catch (GitHubApi.ApiException e) {
+                if (e.code != 404 && e.code != 409) throw e;
+                last = e;
+            }
+        }
+        throw last != null ? last : new IOException("Interrupted");
     }
 
     /** First commits of a repository without history: one Contents API call per file. */

@@ -95,6 +95,30 @@ public abstract class ListFragment <P extends IBaseContract.Presenter, A extends
                     }
                 }
             }
+
+            // a single item added to or removed from the list (a new issue on an empty
+            // list, the last item deleted) must switch between the list and the empty tip too
+            @Override
+            public void onItemRangeInserted(int positionStart, int count) {
+                updateEmptyTip();
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int count) {
+                updateEmptyTip();
+            }
+
+            private void updateEmptyTip() {
+                if (adapter.getItemCount() == 0) {
+                    refreshLayout.setVisibility(View.GONE);
+                    layTip.setVisibility(View.VISIBLE);
+                    tvTip.setText(getEmptyTip());
+                    errorImage.setVisibility(View.GONE);
+                } else {
+                    refreshLayout.setVisibility(View.VISIBLE);
+                    layTip.setVisibility(View.GONE);
+                }
+            }
         };
         adapter.registerAdapterDataObserver(observer);
         recyclerView.setOnScrollListener(new ScrollListener());
