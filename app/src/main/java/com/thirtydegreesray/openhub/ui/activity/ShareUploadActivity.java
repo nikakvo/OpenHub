@@ -1,6 +1,7 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,7 +19,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.dao.AppDatabase;
+import com.thirtydegreesray.openhub.dao.AuthUser;
+import com.thirtydegreesray.openhub.http.UserService;
+import com.thirtydegreesray.openhub.mvp.model.User;
+import com.thirtydegreesray.openhub.util.TokenCrypto;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.ReleaseService;
 import com.thirtydegreesray.openhub.http.RepoAdminService;
@@ -125,7 +132,49 @@ public class ShareUploadActivity extends BaseActivity<IBaseContract.Presenter> {
                 filter();
             }
         });
-        loadRepos();
+        ensureSignedIn(this::loadRepos);
+    }
+
+    @Override
+    protected boolean restoresAccountItself() {
+        return true;
+    }
+
+    /**
+     * A share can start OpenHub when it is not running: load the signed-in account here
+     * (as the start screen does) instead of going to the start screen, which would drop
+     * the shared files and open the main page.
+     */
+    private void ensureSignedIn(@NonNull Runnable next) {
+        if (AppData.INSTANCE.getAuthUser() != null && AppData.INSTANCE.getLoggedUser() != null) {
+            next.run();
+            return;
+        }
+        AuthUser account = null;
+        try {
+            AppDatabase database = getAppComponent().getDatabase();
+            TokenCrypto.migrate(database);
+            account = database.authUserDao().loadSelectedOrFirst();
+        } catch (Exception ignored) {
+        }
+        if (account == null || StringUtils.isBlank(account.getAccessToken())) {
+            // nobody signed in (or the token cannot be read): the normal sign-in
+            showErrorToast(getString(R.string.share_upload_sign_in));
+            startActivity(new Intent(this, SplashActivity.class));
+            finish();
+            return;
+        }
+        AppData.INSTANCE.setAuthUser(account);
+        showLoading();
+        background(() -> GitHubApi.call(GitHubApi.service(UserService.class).getPersonInfo(true)),
+                (User user) -> {
+                    AppData.INSTANCE.setLoggedUser(user);
+                    next.run();
+                }, error -> {
+                    hideLoading();
+                    AppData.INSTANCE.setAuthUser(null);
+                    finish();
+                });
     }
 
     @Override

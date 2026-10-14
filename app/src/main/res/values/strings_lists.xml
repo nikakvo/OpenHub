@@ -13,4 +13,5 @@
     <string name="share_files_folder_title">Folder for the files</string>
     <string name="share_files_folder_hint">Folder, e.g. docs/images (empty: top folder)</string>
     <string name="share_files_folder_invalid">A folder cannot contain "." or ".." parts</string>
+    <string name="share_upload_sign_in">Sign in to OpenHub first, then share again</string>
 </resources>

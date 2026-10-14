@@ -65,6 +65,15 @@ BaseActivity<P extends IBaseContract.Presenter>
     private ProgressDialog mProgressDialog;
     private static BaseActivity curActivity;
 
+    /**
+     * True for screens other apps start directly (e.g. a share) that load the signed-in
+     * account themselves instead of being sent to the start screen, which would lose
+     * what they were started with.
+     */
+    protected boolean restoresAccountItself() {
+        return false;
+    }
+
     protected boolean isAlive = true;
     @Nullable protected Toolbar toolbar;
     @Nullable protected CollapsingToolbarLayout toolbarLayout;
@@ -73,7 +82,8 @@ BaseActivity<P extends IBaseContract.Presenter>
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if((AppData.INSTANCE.getAuthUser() == null || AppData.INSTANCE.getLoggedUser() == null)
                 && !this.getClass().equals(SplashActivity.class)
-                && !this.getClass().equals(LoginActivity.class)){
+                && !this.getClass().equals(LoginActivity.class)
+                && !restoresAccountItself()){
             super.onCreate(savedInstanceState);
             finishAffinity();
             startActivity(new Intent(getActivity(), SplashActivity.class));
