@@ -562,6 +562,37 @@
 
     <string name="scroll_to_top">Scroll to top</string>
 
+    <!-- Discussions -->
+    <string name="discussions">Discussions</string>
+    <string name="discussions_disabled">Discussions are not turned on in this repository.</string>
+    <string name="discussions_none_open">No open discussions.</string>
+    <string name="discussions_none_closed">No closed discussions.</string>
+    <string name="discussion_meta">#%1$d · %2$s · %3$s · %4$s</string>
+    <string name="discussion_answered">Answered</string>
+    <string name="discussion_new">New discussion</string>
+    <string name="discussion_start">Start discussion</string>
+    <string name="discussion_body_hint">Write your post (Markdown)</string>
+    <string name="discussion_category">Category</string>
+    <string name="discussion_all_categories">All categories</string>
+    <string name="discussion_number">Discussion #%d</string>
+    <string name="discussion_not_found">Discussion not found</string>
+    <string name="discussion_closed">Closed</string>
+    <string name="discussion_locked">Locked</string>
+    <string name="discussion_ghost">ghost</string>
+    <string name="discussion_answer_badge">Answer</string>
+    <string name="discussion_reply_to">Reply to %s</string>
+    <string name="discussion_mark_answer">Mark as answer</string>
+    <string name="discussion_unmark_answer">Unmark as answer</string>
+    <string name="discussion_marked">Marked as the answer</string>
+    <string name="discussion_unmarked">No longer the answer</string>
+    <string name="discussion_comment_title">Comment</string>
+    <string name="discussion_reply_title">Reply</string>
+    <string name="copy_text">Copy text</string>
+    <plurals name="discussion_comments">
+        <item quantity="one">%d comment</item>
+        <item quantity="other">%d comments</item>
+    </plurals>
+
     <!-- Issues: assignees, milestone, templates -->
     <string name="issue_labels_none">No labels</string>
     <string name="issue_assignees">Assignees</string>

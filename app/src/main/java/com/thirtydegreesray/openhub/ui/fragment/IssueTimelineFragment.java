@@ -180,6 +180,13 @@ public class IssueTimelineFragment extends ListFragment<IssueTimelinePresenter, 
         adapter.getData().get(0).setBodyHtml(issue.getBodyHtml());
         adapter.getData().get(0).setParentIssue(issue);
         adapter.notifyItemChanged(0);
+        // the edit adds events (labels, assignees, milestone): load them from the network;
+        // GitHub lists them a moment after the change
+        if (getView() != null) {
+            getView().postDelayed(() -> {
+                if (isAdded() && mPresenter != null) mPresenter.loadTimeline(1, true);
+            }, 1500);
+        }
     }
 
     public ArrayList<String> getIssueUsersExceptMe(){

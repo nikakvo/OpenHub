@@ -125,6 +125,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
             bookmark.setTitle(mPresenter.isBookmarked() ?
                     getString(R.string.remove_bookmark) : getString(R.string.bookmark));
             menu.findItem(R.id.action_wiki).setVisible(mPresenter.getRepository().isHasWiki());
+            menu.findItem(R.id.action_discussions).setVisible(mPresenter.getRepository().isHasDiscussions());
             Repository repository = mPresenter.getRepository();
             menu.findItem(R.id.action_repo_settings).setVisible(repository.getPermissions() != null
                     && repository.getPermissions().isAdmin());
@@ -213,6 +214,10 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
                     && (repository.getPermissions().isPush() || repository.getPermissions().isAdmin());
             startActivity(PullRequestsActivity.createIntent(this, repository.getOwner().getLogin(),
                     repository.getName(), canCreate));
+            return true;
+        } else if (itemId == R.id.action_discussions) {
+            startActivity(DiscussionsActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),
+                    mPresenter.getRepository().getName()));
             return true;
         } else if (itemId == R.id.action_branches) {
             startActivity(BranchesActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),

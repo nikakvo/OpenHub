@@ -169,6 +169,8 @@
             android:windowSoftInputMode="stateHidden|adjustResize"/>
         <activity android:name=".ui.activity.PullRequestsActivity"/>
         <activity android:name=".ui.activity.ReleaseFeedActivity"/>
+        <activity android:name=".ui.activity.DiscussionsActivity"/>
+        <activity android:name=".ui.activity.DiscussionActivity"/>
         <activity android:name=".ui.activity.PullRequestActivity" android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".ui.activity.HelpActivity"/>
         <activity android:name=".ui.activity.PullDiffActivity" android:windowSoftInputMode="adjustResize"/>

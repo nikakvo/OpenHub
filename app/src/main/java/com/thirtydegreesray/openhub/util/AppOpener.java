@@ -213,6 +213,13 @@ public class AppOpener {
             context.startActivity(pullIntent);
             return;
         }
+        // discussions too (github.com/o/r/discussions and /discussions/12)
+        Intent discussionIntent = com.thirtydegreesray.openhub.ui.activity.DiscussionActivity.createIntent(context, url);
+        if (discussionIntent != null) {
+            if (!(context instanceof android.app.Activity)) discussionIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(discussionIntent);
+            return;
+        }
         GitHubName gitHubName = GitHubName.fromUrl(url);
         String userName ;
         String repoName ;
