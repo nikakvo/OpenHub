@@ -54,8 +54,7 @@ public final class EdgeToEdge {
 
         int statusColor = resolveColor(activity, androidx.appcompat.R.attr.colorPrimaryDark,
                 android.R.attr.colorBackground);
-        int navColor = resolveColor(activity, android.R.attr.colorBackground,
-                android.R.attr.colorBackground);
+        int navColor = navigationBarColor(activity);
         final BarsDrawable bars = new BarsDrawable(statusColor, navColor);
         content.setBackground(bars);
 
@@ -95,8 +94,7 @@ public final class EdgeToEdge {
         if (activity.findViewById(android.R.id.content) == null) return;
         int statusColor = resolveColor(activity, androidx.appcompat.R.attr.colorPrimaryDark,
                 android.R.attr.colorBackground);
-        int navColor = resolveColor(activity, android.R.attr.colorBackground,
-                android.R.attr.colorBackground);
+        int navColor = navigationBarColor(activity);
         applyBarAppearance(activity, statusColor, navColor);
     }
 
@@ -129,6 +127,23 @@ public final class EdgeToEdge {
         } else {
             controller.show(WindowInsetsCompat.Type.statusBars());
         }
+    }
+
+    /**
+     * The navigation bar strip uses the window background of the theme. The dark themes
+     * are built on a light parent and do not override android:colorBackground, so that
+     * attribute is light there and is only a fallback.
+     */
+    @ColorInt
+    private static int navigationBarColor(@NonNull Context context) {
+        TypedValue value = new TypedValue();
+        if (context.getTheme().resolveAttribute(android.R.attr.windowBackground, value, true)
+                && value.type >= TypedValue.TYPE_FIRST_COLOR_INT
+                && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+            return value.data;
+        }
+        return resolveColor(context, android.R.attr.colorBackground,
+                android.R.attr.colorBackground);
     }
 
     @ColorInt
