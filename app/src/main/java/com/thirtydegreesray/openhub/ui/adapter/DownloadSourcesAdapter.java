@@ -76,7 +76,7 @@ public class DownloadSourcesAdapter extends BaseAdapter<DownloadSourcesAdapter.V
             DownloadSource source = data.get(getAdapterPosition());
             String fileName = repoName.concat("-").concat(tagName)
                     .concat("-").concat(source.getName());
-            AppOpener.startDownload(context, source.getUrl(), fileName);
+            AppOpener.startDownload(context, source.getUrl(), fileName, source.getDigest());
         }
 
 

@@ -44,6 +44,7 @@ import com.thirtydegreesray.openhub.ui.widget.TextInputDialog;
 import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
+import com.thirtydegreesray.openhub.util.Checksums;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ContentFiles;
 import com.thirtydegreesray.openhub.util.MarkdownHtml;
@@ -191,7 +192,7 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
             row.findViewById(R.id.asset_download_bn).setOnClickListener(v -> download(asset));
             row.setOnClickListener(v -> download(asset));
             row.setOnLongClickListener(v -> {
-                AppUtils.copyToClipboard(this, asset.getDownloadUrl());
+                showCopyMenu(v, asset);
                 return true;
             });
             assetsList.addView(row);
@@ -209,14 +210,34 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
             meta.append(" · ").append(getString(R.string.release_asset_incomplete));
         }
         if (!StringUtils.isBlank(asset.getLabel())) meta.append(" · ").append(asset.getLabel());
+        String sha = Checksums.sha256Of(asset.getDigest());
+        if (sha != null) meta.append(" · SHA-256 ").append(Checksums.shortForm(sha)).append('…');
         return meta.toString();
+    }
+
+    /** Long-press on a file: copy its link or its SHA-256 (to compare it elsewhere). */
+    private void showCopyMenu(@NonNull View anchor, @NonNull ReleaseAsset asset) {
+        String sha = Checksums.sha256Of(asset.getDigest());
+        if (sha == null) {
+            AppUtils.copyToClipboard(this, asset.getDownloadUrl());
+            return;
+        }
+        PopupMenu popup = new PopupMenu(this, anchor, android.view.Gravity.NO_GRAVITY,
+                R.attr.popup_menu_theme, 0);
+        popup.getMenu().add(0, 1, 0, R.string.copy_link);
+        popup.getMenu().add(0, 2, 1, R.string.copy_sha256);
+        popup.setOnMenuItemClickListener(item -> {
+            AppUtils.copyToClipboard(this, item.getItemId() == 2 ? sha : asset.getDownloadUrl());
+            return true;
+        });
+        popup.show();
     }
 
     private void download(@NonNull ReleaseAsset asset) {
         // A draft's assets are not public yet; the API address serves them with the token.
         String url = mPresenter.getRelease().isDraft() && !StringUtils.isBlank(asset.getApiUrl())
                 ? asset.getApiUrl() : asset.getDownloadUrl();
-        AppOpener.startDownload(this, url, asset.getName());
+        AppOpener.startDownload(this, url, asset.getName(), asset.getDigest());
     }
 
     private void renameAsset(@NonNull ReleaseAsset asset) {
@@ -232,10 +253,14 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
                 R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.rename);
         popup.getMenu().add(0, 2, 1, R.string.copy_link);
-        popup.getMenu().add(0, 3, 2, R.string.delete);
+        String sha = Checksums.sha256Of(asset.getDigest());
+        if (sha != null) popup.getMenu().add(0, 4, 2, R.string.copy_sha256);
+        popup.getMenu().add(0, 3, 3, R.string.delete);
         popup.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == 1) {
                 renameAsset(asset);
+            } else if (item.getItemId() == 4) {
+                AppUtils.copyToClipboard(this, sha);
             } else if (item.getItemId() == 2) {
                 AppUtils.copyToClipboard(this, asset.getDownloadUrl());
             } else if (item.getItemId() == 3) {

@@ -11,6 +11,8 @@ public class DownloadSource {
     private String name;
     private long size;
     private int downloadCount = -1;
+    /** GitHub's checksum ("sha256:..."), null when unknown */
+    private String digest;
 
     public DownloadSource(String url, boolean isSourceCode, String name) {
         this.url = url;
@@ -28,6 +30,15 @@ public class DownloadSource {
     public DownloadSource(String url, String name, long size, int downloadCount) {
         this(url, false, name, size);
         this.downloadCount = downloadCount;
+    }
+
+    public String getDigest() {
+        return digest;
+    }
+
+    public DownloadSource setDigest(String digest) {
+        this.digest = digest;
+        return this;
     }
 
     /** -1 for source code archives, which have no counter. */

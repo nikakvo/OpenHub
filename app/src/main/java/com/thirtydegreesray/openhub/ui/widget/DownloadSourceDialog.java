@@ -62,7 +62,7 @@ public class DownloadSourceDialog {
         if (release.getAssets() != null) {
             for(ReleaseAsset asset : release.getAssets()){
                 sources.add(new DownloadSource(asset.getDownloadUrl(), asset.getName(), asset.getSize(),
-                        asset.getDownloadCount()));
+                        asset.getDownloadCount()).setDigest(asset.getDigest()));
             }
         }
         // a draft has no tag yet, so there is no source archive

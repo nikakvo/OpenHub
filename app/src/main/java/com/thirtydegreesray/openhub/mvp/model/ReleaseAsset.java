@@ -24,6 +24,8 @@ public class ReleaseAsset implements Parcelable {
     @SerializedName("created_at") private Date createdAt;
     @SerializedName("updated_at") private Date updatedAt;
     @SerializedName("browser_download_url") private String downloadUrl;
+    /** "sha256:" + hex, computed by GitHub (null for files uploaded before June 2025) */
+    private String digest;
     /** API address of the asset; with Accept: application/octet-stream it serves the file, drafts included. */
     @SerializedName("url") private String apiUrl;
 
@@ -109,6 +111,10 @@ public class ReleaseAsset implements Parcelable {
 
     public String getDownloadUrl() {
         return downloadUrl;
+    }
+
+    public String getDigest() {
+        return digest;
     }
 
     public void setDownloadUrl(String downloadUrl) {

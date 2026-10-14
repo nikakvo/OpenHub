@@ -12,6 +12,7 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsIntent;
 
 import android.os.Build;
@@ -114,6 +115,12 @@ public class AppOpener {
      * VPN), or hands the link to another app when the built-in downloader is turned off.
      */
     public static void startDownload(@NonNull Context context, @NonNull String url, String fileName) {
+        startDownload(context, url, fileName, null);
+    }
+
+    /** @param digest GitHub's checksum of the file ("sha256:..."): checked after the download */
+    public static void startDownload(@NonNull Context context, @NonNull String url, String fileName,
+                                     @Nullable String digest) {
         if(!PrefUtils.isSystemDownloader()){
             openDownloader(context, url);
             return;
@@ -142,7 +149,7 @@ public class AppOpener {
             ActivityCompat.requestPermissions(activity,
                     new String[]{Manifest.permission.POST_NOTIFICATIONS}, 0);
         }
-        DownloadService.start(appContext, url, fileName);
+        DownloadService.start(appContext, url, fileName, digest);
     }
 
     public static void openDownloader(@NonNull Context context, @NonNull String url) {

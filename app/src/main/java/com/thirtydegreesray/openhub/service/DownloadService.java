@@ -33,6 +33,7 @@ import androidx.core.content.FileProvider;
 
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.util.Checksums;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
 import java.io.File;
@@ -71,6 +72,7 @@ public class DownloadService extends Service {
     private static final String ACTION_CANCEL = "openhub.download.CANCEL";
     private static final String EXTRA_URL = "url";
     private static final String EXTRA_FILE_NAME = "fileName";
+    private static final String EXTRA_SHA256 = "sha256";
     private static final String EXTRA_ID = "id";
 
     private static final String CHANNEL_ID = "downloads";
@@ -91,10 +93,20 @@ public class DownloadService extends Service {
     private Handler mainHandler;
 
     public static void start(@NonNull Context context, @NonNull String url, @NonNull String fileName) {
+        start(context, url, fileName, null);
+    }
+
+    /**
+     * @param digest GitHub's checksum of the file ("sha256:..."), or null. With it, the
+     *               finished download is checked and deleted when it does not match.
+     */
+    public static void start(@NonNull Context context, @NonNull String url, @NonNull String fileName,
+                             @Nullable String digest) {
         Intent intent = new Intent(context, DownloadService.class)
                 .setAction(ACTION_START)
                 .putExtra(EXTRA_URL, url)
-                .putExtra(EXTRA_FILE_NAME, fileName);
+                .putExtra(EXTRA_FILE_NAME, fileName)
+                .putExtra(EXTRA_SHA256, Checksums.sha256Of(digest));
         ContextCompat.startForegroundService(context, intent);
     }
 
@@ -134,7 +146,8 @@ public class DownloadService extends Service {
                 toast(getString(R.string.download_empty_tip), false);
                 stopIfIdle();
             } else {
-                Task task = new Task(NEXT_ID.getAndIncrement(), url, sanitizeFileName(fileName));
+                Task task = new Task(NEXT_ID.getAndIncrement(), url, sanitizeFileName(fileName),
+                        Checksums.sha256Of(intent.getStringExtra(EXTRA_SHA256)));
                 tasks.put(task.id, task);
                 updateForeground();
                 toast(getString(R.string.download_start), true);
@@ -327,6 +340,8 @@ public class DownloadService extends Service {
 
     private interface Target {
         OutputStream open(boolean append) throws IOException;
+        /** The written file, to check its checksum. */
+        InputStream read() throws IOException;
         void commit();
         void discard();
         Uri openUri();
@@ -365,6 +380,13 @@ public class DownloadService extends Service {
             OutputStream out = getContentResolver().openOutputStream(uri, append ? "wa" : "wt");
             if (out == null) throw new IOException("Cannot open output stream");
             return out;
+        }
+
+        @Override
+        public InputStream read() throws IOException {
+            InputStream in = getContentResolver().openInputStream(uri);
+            if (in == null) throw new IOException("Cannot read the downloaded file");
+            return in;
         }
 
         @Override
@@ -417,6 +439,11 @@ public class DownloadService extends Service {
         }
 
         @Override
+        public InputStream read() throws IOException {
+            return new java.io.FileInputStream(file);
+        }
+
+        @Override
         public void commit() {
             MediaScannerConnection.scanFile(getApplicationContext(),
                     new String[]{file.getAbsolutePath()}, null, null);
@@ -452,6 +479,8 @@ public class DownloadService extends Service {
         final int id;
         final String url;
         final String mimeType;
+        /** expected SHA-256 (64 hex digits) or null */
+        @Nullable final String sha256;
         volatile String displayName;
         volatile boolean cancelled;
         volatile Call call;
@@ -459,9 +488,10 @@ public class DownloadService extends Service {
         long total = -1;
         private long lastNotify;
 
-        Task(int id, String url, String fileName) {
+        Task(int id, String url, String fileName, @Nullable String sha256) {
             this.id = id;
             this.url = url;
+            this.sha256 = sha256;
             this.displayName = fileName;
             this.mimeType = mimeTypeOf(fileName);
         }
@@ -482,10 +512,14 @@ public class DownloadService extends Service {
                 displayName = target.name();
                 notifyProgress(this, getString(R.string.downloading));
                 download(target);
+                boolean verified = verify(target);
                 target.commit();
-                notifyFinished(this, true, getString(R.string.download_complete_size,
-                        Formatter.formatFileSize(DownloadService.this, written)), target.openUri());
-                toast(getString(R.string.download_complete) + "\nDownload/" + displayName, true);
+                String done = getString(R.string.download_complete_size,
+                        Formatter.formatFileSize(DownloadService.this, written));
+                if (verified) done = getString(R.string.download_verified) + ". " + done;
+                notifyFinished(this, true, done, target.openUri());
+                toast(getString(R.string.download_complete) + "\nDownload/" + displayName
+                        + (verified ? "\n" + getString(R.string.download_verified) : ""), true);
             } catch (Exception e) {
                 if (target != null) target.discard();
                 if (cancelled) {
@@ -499,6 +533,23 @@ public class DownloadService extends Service {
             } finally {
                 finishTask(this);
             }
+        }
+
+        /**
+         * Compares the file with GitHub's checksum. False when there is none to compare;
+         * a mismatch throws, so the file is deleted and the download reported as failed.
+         */
+        private boolean verify(Target target) throws IOException {
+            if (sha256 == null) return false;
+            notifyProgress(this, getString(R.string.download_checking));
+            String actual;
+            try (InputStream in = target.read()) {
+                actual = Checksums.sha256(in);
+            }
+            if (!sha256.equals(actual)) {
+                throw new FatalDownloadException(getString(R.string.download_sha_mismatch));
+            }
+            return true;
         }
 
         private void download(Target target) throws IOException, InterruptedException {

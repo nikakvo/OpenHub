@@ -5,4 +5,8 @@
     <string name="trace_clear_message">All entries are removed from Trace. Your bookmarks stay.</string>
     <string name="trace_cleared">Trace cleared</string>
     <string name="readme_edit">Edit README</string>
+    <string name="download_checking">Checking SHA-256…</string>
+    <string name="download_verified">SHA-256 verified</string>
+    <string name="download_sha_mismatch">SHA-256 does not match GitHub\'s checksum: the file is damaged or was replaced, so it was deleted</string>
+    <string name="copy_sha256">Copy SHA-256</string>
 </resources>

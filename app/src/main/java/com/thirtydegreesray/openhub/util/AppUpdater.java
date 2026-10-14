@@ -130,7 +130,7 @@ public final class AppUpdater {
                 .setPositiveButton(apk != null ? R.string.update_download : R.string.update_open_release,
                         (d, w) -> {
                             if (apk != null) {
-                                AppOpener.startDownload(activity, apk.getDownloadUrl(), apk.getName());
+                                AppOpener.startDownload(activity, apk.getDownloadUrl(), apk.getName(), apk.getDigest());
                                 Toasty.info(activity, activity.getString(R.string.update_downloading)).show();
                             } else {
                                 AppOpener.openInCustomTabsOrBrowser(activity, releaseUrl(release));

@@ -44,7 +44,7 @@ public final class ReleaseFeed {
     private static final int MAX_PAGES = 20;
 
     private static final String RELEASE_FIELDS = "tagName name publishedAt isPrerelease isDraft url"
-            + " releaseAssets(first:30){nodes{name size downloadCount downloadUrl}}";
+            + " releaseAssets(first:30){nodes{name size downloadCount downloadUrl digest}}";
     private static final String QUERY = "query($after:String){viewer{starredRepositories(first:"
             + PAGE_SIZE + ",after:$after,orderBy:{field:STARRED_AT,direction:DESC}){"
             + "pageInfo{hasNextPage endCursor}"
@@ -202,6 +202,7 @@ public final class ReleaseFeed {
                 out.addProperty("size", size == null ? 0 : size.getAsLong());
                 out.addProperty("count", Json.integer(asset, "downloadCount"));
                 out.addProperty("url", Json.str(asset, "downloadUrl"));
+                out.addProperty("digest", Json.str(asset, "digest"));
                 assets.add(out);
             }
         }

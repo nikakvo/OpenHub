@@ -281,7 +281,8 @@ public class ReleaseFeedActivity extends BaseActivity<IBaseContract.Presenter> {
                 JsonObject asset = element.getAsJsonObject();
                 JsonElement size = asset.get("size");
                 sources.add(new DownloadSource(Json.str(asset, "url"), Json.str(asset, "name"),
-                        size == null ? 0 : size.getAsLong(), Json.integer(asset, "count")));
+                        size == null ? 0 : size.getAsLong(), Json.integer(asset, "count"))
+                        .setDigest(Json.str(asset, "digest")));
             }
         }
         DownloadSourceDialog.show(this, Json.str(row.item, "repo"), Json.str(row.release, "tag"), sources);
