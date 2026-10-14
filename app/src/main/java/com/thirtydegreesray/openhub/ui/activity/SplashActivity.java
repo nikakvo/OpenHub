@@ -37,6 +37,17 @@ public class SplashActivity extends BaseActivity<SplashPresenter> implements ISp
     }
 
     @Override
+    public void showRetry(String message) {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(R.string.splash_offline_title)
+                .setMessage(getString(R.string.splash_offline_message, message))
+                .setCancelable(false)
+                .setPositiveButton(R.string.splash_try_again, (d, w) -> mPresenter.getUser())
+                .setNegativeButton(R.string.close, (d, w) -> finish())
+                .show();
+    }
+
+    @Override
     public void showLoginPage() {
         delayFinish();
         startActivity(new Intent(getActivity(), LoginActivity.class));

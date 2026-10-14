@@ -27,7 +27,8 @@ public interface ILoginContract {
 
     interface Presenter extends IBaseContract.Presenter<ILoginContract.View>{
 
-        void getToken(String code, String state);
+        /** @param codeVerifier the PKCE verifier of the sign-in that was started here */
+        void getToken(String code, String codeVerifier);
 
         String getOAuth2Url();
 

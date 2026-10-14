@@ -115,6 +115,12 @@ public class LoginActivity extends BaseActivity<LoginPresenter>
         if (StringUtils.isBlank(AppConfig.OPENHUB_CLIENT_ID)) {
             loginBn.setVisibility(View.GONE);
         }
+        // the browser answered after Android had closed OpenHub: the sign-in it belongs to
+        // was saved (OAuthSession), so it can still be finished here
+        if (savedInstanceState == null && getIntent() != null && getIntent().getData() != null
+                && "openhub".equals(getIntent().getData().getScheme())) {
+            mPresenter.handleOauth(getIntent());
+        }
 //        loginBn.setOnResultEndListener(new SubmitButton.OnResultEndListener() {
 //            @Override
 //            public void onResultEnd() {

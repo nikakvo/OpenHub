@@ -35,6 +35,11 @@ public class BrowserFilterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // exported: other apps may start it with anything, or with nothing
+        if (getIntent() == null || getIntent().getData() == null) {
+            finish();
+            return;
+        }
         if(AppData.INSTANCE.getLoggedUser() != null){
             handleBrowserUri(this, getIntent().getData());
         } else {

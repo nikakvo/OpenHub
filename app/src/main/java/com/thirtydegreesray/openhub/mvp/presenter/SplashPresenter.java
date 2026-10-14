@@ -2,6 +2,9 @@
 
 package com.thirtydegreesray.openhub.mvp.presenter;
 
+import com.thirtydegreesray.openhub.util.TokenCrypto;
+import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.http.error.UnauthorizedError;
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.AppData;
@@ -44,6 +47,8 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
     @Override
     public void getUser() {
         AuthUserDao authUserDao = daoSession.getAuthUserDao();
+        // accounts saved by older versions: encrypt their tokens now (once)
+        TokenCrypto.migrate(daoSession);
 
         List<AuthUser> users = authUserDao.queryBuilder()
                 .where(AuthUserDao.Properties.Selected.eq(true))
@@ -58,6 +63,14 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
                     .limit(1)
                     .list();
             selectedUser = firstAccount != null && firstAccount.size() > 0 ? firstAccount.get(0) : null;
+        }
+
+        if (selectedUser != null && StringUtils.isBlank(selectedUser.getAccessToken())) {
+            // the token cannot be decrypted any more (Keystore keys gone): sign in again
+            authUserDao.getDatabase().execSQL("DELETE FROM " + AuthUserDao.TABLENAME + " WHERE "
+                    + AuthUserDao.Properties.LoginId.columnName + " = ?", new Object[]{selectedUser.getLoginId()});
+            authUserDao.detachAll();
+            selectedUser = null;
         }
 
         if (selectedUser != null && isExpired(selectedUser)) {
@@ -91,10 +104,17 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
         HttpObserver<User> httpObserver = new HttpObserver<User>() {
             @Override
             public void onError(@NonNull Throwable error) {
-                daoSession.getAuthUserDao().delete(AppData.INSTANCE.getAuthUser());
+                if (error instanceof UnauthorizedError) {
+                    // GitHub rejected the token (revoked or expired): sign in again
+                    daoSession.getAuthUserDao().delete(AppData.INSTANCE.getAuthUser());
+                    AppData.INSTANCE.setAuthUser(null);
+                    mView.showErrorToast(getErrorTip(error));
+                    mView.showLoginPage();
+                    return;
+                }
+                // no network, roaming, GitHub down: the account stays, try again
                 AppData.INSTANCE.setAuthUser(null);
-                mView.showErrorToast(getErrorTip(error));
-                mView.showLoginPage();
+                mView.showRetry(getErrorTip(error));
             }
 
             @Override

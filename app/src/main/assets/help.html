@@ -122,7 +122,7 @@
   <a href="#links"><span>19</span>GitHub links and updates</a>
   <a href="#trouble"><span>20</span>Problems and answers</a>
   <a href="#glossary"><span>21</span>Glossary</a>
-  <a href="#privacy"><span>22</span>Privacy</a>
+  <a href="#privacy"><span>22</span>Privacy and security</a>
 </div>
 
 <!-- 1 -->
@@ -135,7 +135,7 @@
     <tr><td>Login with browser</td><td>GitHub opens in your browser. Log in there and approve OpenHub; you come back to the app by yourself. Only shown when the build has its own GitHub OAuth App.</td></tr>
     <tr><td>Sign in with token</td><td>Works everywhere. A <strong>personal access token</strong> is a password made only for apps. Tap <span class="ui">Create token</span>: GitHub opens with the right permissions already ticked. Press <em>Generate token</em>, copy it and paste it into OpenHub.</td></tr>
   </table></div>
-  <div class="note"><b class="lbl">Your token</b>It is stored only on this phone and sent only to GitHub. You can revoke it any time on github.com.</div>
+  <div class="note"><b class="lbl">Your token</b>It is stored only on this phone, encrypted, and sent only to GitHub's API. You can revoke it any time on github.com. More in <a href="#privacy">Privacy</a>.</div>
   <h3>What the permissions are for</h3>
   <div class="tw"><table>
     <tr><th>permission</th><th>needed for</th></tr>
@@ -607,10 +607,18 @@
 
 <!-- 22 -->
 <div data-section>
-<div class="sec-title" id="privacy">22 · privacy</div>
+<div class="sec-title" id="privacy">22 · privacy and security</div>
 <div class="box">
-  <p>OpenHub talks only to GitHub. Your login token stays on this phone and is sent only to GitHub's API. Logging out removes it. You can also revoke tokens and app access any time on github.com: Settings → Applications, and Developer settings → Personal access tokens.</p>
-  <p>This help page loads nothing from the internet.</p>
+  <p>OpenHub talks only to GitHub. There are no ads, no analytics and no servers of its own.</p>
+  <ul>
+    <li><strong>Your token</strong> is stored only on this phone, <strong>encrypted</strong> with a key of the Android Keystore that never leaves the phone. It is sent only to GitHub's API (<code>api.github.com</code>), never to other addresses, file links or web pages.</li>
+    <li><strong>Backups</strong>: your accounts and tokens are never part of a phone backup or a transfer to a new phone; settings are. On a new phone you sign in again.</li>
+    <li><strong>Browser sign-in</strong> is protected against other apps: it only accepts the answer to a sign-in started in OpenHub (state check and PKCE).</li>
+    <li><strong>Log out</strong> removes the token and the saved GitHub pages from the phone. A browser sign-in is also revoked at GitHub. A personal access token keeps working until you delete it on github.com: Settings → Developer settings → Personal access tokens.</li>
+    <li><strong>Fewer rights</strong>: <span class="ui">Create token</span> ticks everything OpenHub can use. Untick <code>delete_repo</code> if you never delete repositories in the app, or <code>workflow</code> if you never edit workflow files; the rest keeps working.</li>
+    <li>No connection at start? Your account stays; OpenHub offers to try again.</li>
+  </ul>
+  <p>You can see and revoke app access any time on github.com: Settings → Applications. This help page loads nothing from the internet.</p>
 </div>
 </div>
 

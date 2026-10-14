@@ -2,6 +2,8 @@
 
 package com.thirtydegreesray.openhub.mvp.presenter;
 
+import com.thirtydegreesray.openhub.util.OAuthSession;
+import com.thirtydegreesray.openhub.http.core.AppRetrofit;
 import android.content.Intent;
 import android.net.Uri;
 import androidx.annotation.NonNull;
@@ -25,7 +27,6 @@ import com.thirtydegreesray.openhub.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -48,10 +49,10 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
     }
 
     @Override
-    public void getToken(String code, String state) {
+    public void getToken(String code, String codeVerifier) {
         Observable<Response<OauthToken>> observable =
                 getLoginService().getAccessToken(AppConfig.OPENHUB_CLIENT_ID,
-                        AppConfig.OPENHUB_CLIENT_SECRET, code, state);
+                        AppConfig.OPENHUB_CLIENT_SECRET, code, codeVerifier);
 
         HttpSubscriber<OauthToken> subscriber =
                 new HttpSubscriber<>(
@@ -80,11 +81,14 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
     @NonNull
     @Override
     public String getOAuth2Url() {
-        String randomState = UUID.randomUUID().toString();
+        // a new random state and PKCE pair for every sign-in (checked in handleOauth)
+        OAuthSession.Start start = OAuthSession.begin(getContext());
         return AppConfig.OAUTH2_URL +
                 "?client_id=" + AppConfig.OPENHUB_CLIENT_ID +
-                "&scope=" + AppConfig.OAUTH2_SCOPE +
-                "&state=" + randomState;
+                "&scope=" + Uri.encode(AppConfig.OAUTH2_SCOPE) +
+                "&state=" + start.state +
+                "&code_challenge=" + start.codeChallenge +
+                "&code_challenge_method=S256";
     }
 
     @Override
@@ -121,11 +125,23 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
     @Override
     public void handleOauth(Intent intent) {
         Uri uri = intent.getData();
-        if (uri != null) {
-            String code = uri.getQueryParameter("code");
-            String state = uri.getQueryParameter("state");
-            getToken(code, state);
+        if (uri == null) return;
+        String error = uri.getQueryParameter("error");
+        if (!StringUtils.isBlank(error)) {
+            // e.g. access_denied when "Cancel" was tapped on GitHub
+            OAuthSession.finish(getContext(), null);
+            mView.onGetTokenError(StringUtils.isBlank(uri.getQueryParameter("error_description"))
+                    ? error : uri.getQueryParameter("error_description"));
+            return;
         }
+        String code = uri.getQueryParameter("code");
+        // only a sign-in started in OpenHub, with the same state, is accepted
+        String verifier = OAuthSession.finish(getContext(), uri.getQueryParameter("state"));
+        if (StringUtils.isBlank(code) || verifier == null) {
+            mView.onGetTokenError(getString(R.string.oauth_state_mismatch));
+            return;
+        }
+        getToken(code, verifier);
     }
 
     @Override
@@ -180,10 +196,12 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
                 + " SET " + AuthUserDao.Properties.Selected.columnName + " = 0";
         daoSession.getAuthUserDao().getDatabase().execSQL(updateSql);
 
+        // values are bound, never pasted into the SQL text
         String deleteExistsSql = "DELETE FROM " + daoSession.getAuthUserDao().getTablename()
-                + " WHERE " + AuthUserDao.Properties.LoginId.columnName
-                + " = '" + userInfo.getLogin() + "'";
-        daoSession.getAuthUserDao().getDatabase().execSQL(deleteExistsSql);
+                + " WHERE " + AuthUserDao.Properties.LoginId.columnName + " = ?";
+        daoSession.getAuthUserDao().getDatabase().execSQL(deleteExistsSql, new Object[]{userInfo.getLogin()});
+        daoSession.getAuthUserDao().detachAll();
+        AppRetrofit.INSTANCE.clearClients();
 
         AuthUser authUser = new AuthUser();
         String scope = StringUtils.listToString(basicToken.getScopes(), ",");

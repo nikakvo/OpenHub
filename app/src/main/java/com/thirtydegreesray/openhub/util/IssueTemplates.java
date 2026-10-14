@@ -216,10 +216,14 @@ public final class IssueTemplates {
                     options.addAll(split(inline));
                 } else {
                     int j = i + 1;
+                    int optionIndent = -1;
                     for (; j < lines.length; j++) {
                         String next = lines[j].trim();
                         if (next.isEmpty()) continue;
-                        if (!next.startsWith("- ")) break;
+                        int nextIndent = lines[j].length() - lines[j].replaceAll("^\\s+", "").length();
+                        if (optionIndent < 0) optionIndent = nextIndent;
+                        // the options end where the indentation goes back (the next field)
+                        if (!next.startsWith("- ") || nextIndent < optionIndent) break;
                         String option = next.substring(2).trim();
                         if (option.startsWith("label:")) option = option.substring("label:".length()).trim();
                         options.add(unquote(option));

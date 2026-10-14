@@ -10,6 +10,8 @@ import com.thirtydegreesray.openhub.mvp.model.OauthToken;
 
 import retrofit2.Response;
 import retrofit2.http.Body;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
@@ -29,13 +31,18 @@ public interface LoginService {
             @NonNull @Body AuthRequestModel authRequestModel
     );
 
+    /**
+     * Code exchange of the browser sign-in. Everything goes in the POST body, never in the
+     * URL (URLs end up in logs); code_verifier is the PKCE secret of this sign-in.
+     */
+    @FormUrlEncoded
     @POST("login/oauth/access_token")
     @Headers("Accept: application/json")
     Observable<Response<OauthToken>> getAccessToken(
-            @Query("client_id") String clientId,
-            @Query("client_secret") String clientSecret,
-            @Query("code") String code,
-            @Query("state") String state
+            @Field("client_id") String clientId,
+            @Field("client_secret") String clientSecret,
+            @Field("code") String code,
+            @Field("code_verifier") String codeVerifier
     );
 
 }

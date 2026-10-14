@@ -174,7 +174,7 @@ public class CodeSearchActivity extends BaseActivity<IBaseContract.Presenter> {
                             JsonObject entry = e.getAsJsonObject();
                             if (!"blob".equals(Json.str(entry, "type"))) continue;
                             String path = Json.str(entry, "path");
-                            if (pathMatches(path, words)) found.add(path);
+                            if (com.thirtydegreesray.openhub.util.PathSearch.matches(path, words)) found.add(path);
                             if (found.size() >= 300) break;
                         }
                     }
@@ -209,27 +209,6 @@ public class CodeSearchActivity extends BaseActivity<IBaseContract.Presenter> {
                     emptyText.setText(getString(R.string.code_search_none, query));
                     emptyText.setVisibility(View.VISIBLE);
                 }));
-    }
-
-    /** All words in the path; path:, extension: and filename: narrow it like on GitHub. */
-    private static boolean pathMatches(@NonNull String path, @NonNull String query) {
-        String lower = path.toLowerCase(java.util.Locale.ROOT);
-        String name = lower.substring(lower.lastIndexOf('/') + 1);
-        for (String token : query.toLowerCase(java.util.Locale.ROOT).split("\\s+")) {
-            if (token.isEmpty()) continue;
-            if (token.startsWith("extension:")) {
-                if (!name.endsWith("." + token.substring("extension:".length()))) return false;
-            } else if (token.startsWith("path:")) {
-                if (!lower.contains(token.substring("path:".length()))) return false;
-            } else if (token.startsWith("filename:")) {
-                if (!name.contains(token.substring("filename:".length()))) return false;
-            } else if (token.contains(":")) {
-                // other qualifiers (language:, size:...) cannot be applied to a path
-            } else if (!lower.contains(token)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @NonNull

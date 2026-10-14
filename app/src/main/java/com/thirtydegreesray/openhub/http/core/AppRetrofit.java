@@ -9,6 +9,7 @@ import android.util.Log;
 import com.thirtydegreesray.openhub.AppApplication;
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.AppData;
+import com.thirtydegreesray.openhub.BuildConfig;
 import com.thirtydegreesray.openhub.util.FileUtil;
 import com.thirtydegreesray.openhub.util.NetHelper;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -43,59 +44,108 @@ public enum  AppRetrofit {
 
     private final String TAG = "AppRetrofit";
 
-    private HashMap<String, Retrofit> retrofitMap = new HashMap<>();
-    private String token;
+    /**
+     * One Retrofit per base URL, response type and account token. Each one owns its token:
+     * the old shared, changing token field could send a request without the token, or with
+     * another account's token, when two requests ran at the same time.
+     */
+    private final HashMap<String, Retrofit> retrofitMap = new HashMap<>();
+    /** One connection pool and one disk cache for all of them. */
+    @Nullable private OkHttpClient baseClient;
 
-    private void createRetrofit(@NonNull String baseUrl, boolean isJson) {
-        int timeOut = AppConfig.HTTP_TIME_OUT;
-        Cache cache = new Cache(FileUtil.getHttpImageCacheDir(AppApplication.get()),
-                AppConfig.HTTP_MAX_CACHE_SIZE);
+    @NonNull
+    private synchronized OkHttpClient baseClient() {
+        if (baseClient == null) {
+            int timeOut = AppConfig.HTTP_TIME_OUT;
+            Cache cache = new Cache(FileUtil.getHttpImageCacheDir(AppApplication.get()),
+                    AppConfig.HTTP_MAX_CACHE_SIZE);
+            baseClient = new OkHttpClient.Builder()
+                    .connectTimeout(timeOut, TimeUnit.MILLISECONDS)
+                    .addNetworkInterceptor(new NetworkBaseInterceptor())
+                    .cache(cache)
+                    .build();
+        }
+        return baseClient;
+    }
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(timeOut, TimeUnit.MILLISECONDS)
-                .addInterceptor(new BaseInterceptor())
-                .addNetworkInterceptor(new NetworkBaseInterceptor())
-                .cache(cache)
+    @NonNull
+    private Retrofit createRetrofit(@NonNull String baseUrl, @Nullable String token, boolean isJson) {
+        OkHttpClient client = baseClient().newBuilder()
+                // first, so the network interceptor and the cache see the final request
+                .addInterceptor(new BaseInterceptor(token))
                 .build();
-
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
-                .client(okHttpClient);
-
-        if(isJson){
+                .client(client);
+        if (isJson) {
             builder.addConverterFactory(GsonConverterFactory.create());
         } else {
             builder.addConverterFactory(SimpleXmlConverterFactory.createNonStrict());
         }
-
-        retrofitMap.put(baseUrl + "-" + isJson, builder.build());
+        return builder.build();
     }
 
-    public Retrofit getRetrofit(@NonNull String baseUrl, @Nullable String token, boolean isJson) {
-        this.token = token;
-        String key = baseUrl + "-" + isJson;
-        if (!retrofitMap.containsKey(key)) {
-            createRetrofit(baseUrl, isJson);
+    public synchronized Retrofit getRetrofit(@NonNull String baseUrl, @Nullable String token, boolean isJson) {
+        // the token itself is part of the key (in memory only): no two accounts share a client
+        String key = baseUrl + "-" + isJson + "-" + (StringUtils.isBlank(token) ? "" : token);
+        Retrofit retrofit = retrofitMap.get(key);
+        if (retrofit == null) {
+            retrofit = createRetrofit(baseUrl, token, isJson);
+            retrofitMap.put(key, retrofit);
         }
-        return retrofitMap.get(key);
+        return retrofit;
     }
 
     public Retrofit getRetrofit(@NonNull String baseUrl, @Nullable String token) {
         return getRetrofit(baseUrl, token, true);
     }
 
+    /** After logout or an account switch: no client keeps an old token. */
+    public synchronized void clearClients() {
+        retrofitMap.clear();
+    }
+
+    /** Deletes the cached GitHub pages (private ones too), e.g. after logout. */
+    public synchronized void clearCache() {
+        try {
+            Cache cache = baseClient().cache();
+            if (cache != null) cache.evictAll();
+        } catch (IOException ignored) {
+        }
+    }
+
     /**
-     * 拦截器
+     * Whether a request to this host may carry the GitHub token. Only the API gets it:
+     * file and image addresses can point anywhere, and github.com pages do not need it.
      */
-    private class BaseInterceptor implements Interceptor {
+    public static boolean isTokenHost(@Nullable String host) {
+        return host != null && host.equalsIgnoreCase("api.github.com");
+    }
+
+    /** github.com and its API, where the login name may be added to keep accounts' caches apart. */
+    static boolean isGitHubHost(@Nullable String host) {
+        return host != null && (host.equalsIgnoreCase("api.github.com") || host.equalsIgnoreCase("github.com"));
+    }
+
+    /**
+     * Adds the token of its own client (only for the GitHub API) and the cache rules.
+     */
+    private static class BaseInterceptor implements Interceptor {
+        @Nullable private final String token;
+
+        BaseInterceptor(@Nullable String token) {
+            this.token = token;
+        }
+
         @Override
         public Response intercept(@NonNull Chain chain) throws IOException {
             Request request = chain.request();
+            String host = request.url().host();
 
-            //add unique login id in url to differentiate caches
-            if(AppData.INSTANCE.getLoggedUser() != null
-                    && !AppConfig.isCommonPageUrl(request.url().toString())){
+            // the login name in the URL keeps the caches of several accounts apart
+            if (isGitHubHost(host) && AppData.INSTANCE.getLoggedUser() != null
+                    && !AppConfig.isCommonPageUrl(request.url().toString())) {
                 HttpUrl url = request.url().newBuilder()
                         .addQueryParameter("uniqueLoginId",
                                 AppData.INSTANCE.getLoggedUser().getLogin())
@@ -105,18 +155,17 @@ public enum  AppRetrofit {
                         .build();
             }
 
-            //add access token
-            if(!StringUtils.isBlank(token)){
+            if (!StringUtils.isBlank(token) && isTokenHost(host)) {
                 String auth = token.startsWith("Basic") ? token : "token " + token;
                 request = request.newBuilder()
-                        .addHeader("Authorization", auth)
+                        .header("Authorization", auth)
                         .build();
             }
-            Log.d(TAG, request.url().toString());
+            if (BuildConfig.DEBUG) Log.d("AppRetrofit", request.url().toString());
 
-            //第二次请求，强制使用网络请求
+            // second request: force the network
             String forceNetWork = request.header("forceNetWork");
-            //有forceNetWork且无网络状态下取从缓存中取
+            // with forceNetWork and no network: read from the cache
             if (!StringUtils.isBlank(forceNetWork) &&
                     !NetHelper.INSTANCE.getNetEnabled()) {
                 request = request.newBuilder()

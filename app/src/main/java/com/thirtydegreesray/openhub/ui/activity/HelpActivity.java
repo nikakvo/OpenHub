@@ -67,6 +67,8 @@ public class HelpActivity extends BaseActivity<IBaseContract.Presenter> {
                 .replace("{{VERSION}}", AppUpdater.currentVersion());
         web.setBackgroundColor(Color.parseColor(palette[1]));
         web.getSettings().setJavaScriptEnabled(true);
+        web.getSettings().setAllowFileAccess(false);
+        web.getSettings().setAllowContentAccess(false);
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {

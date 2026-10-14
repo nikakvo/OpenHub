@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.presenter;
 
+import com.thirtydegreesray.openhub.util.SignOut;
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.AppData;
@@ -59,16 +60,15 @@ public class MainPresenter extends BasePresenter<IMainContract.View>
 
     @Override
     public void toggleAccount(@NonNull String loginId) {
-        String removeSelectSql = "UPDATE " + daoSession.getAuthUserDao().getTablename()
-                + " SET " + AuthUserDao.Properties.Selected.columnName + " = 0 "
-                + " WHERE " + AuthUserDao.Properties.LoginId.columnName
-                + " ='" + AppData.INSTANCE.getLoggedUser().getLogin() + "'";
+        // values are bound, never pasted into the SQL text
         String selectSql = "UPDATE " + daoSession.getAuthUserDao().getTablename()
-                + " SET " + AuthUserDao.Properties.Selected.columnName + " = 1"
-                + " WHERE " + AuthUserDao.Properties.LoginId.columnName
-                + " ='" + loginId + "'";
-        daoSession.getAuthUserDao().getDatabase().execSQL(removeSelectSql);
-        daoSession.getAuthUserDao().getDatabase().execSQL(selectSql);
+                + " SET " + AuthUserDao.Properties.Selected.columnName + " = ?"
+                + " WHERE " + AuthUserDao.Properties.LoginId.columnName + " = ?";
+        daoSession.getAuthUserDao().getDatabase().execSQL(selectSql,
+                new Object[]{0, AppData.INSTANCE.getLoggedUser().getLogin()});
+        daoSession.getAuthUserDao().getDatabase().execSQL(selectSql, new Object[]{1, loginId});
+        daoSession.getAuthUserDao().detachAll();
+        com.thirtydegreesray.openhub.http.core.AppRetrofit.INSTANCE.clearClients();
         AppData.INSTANCE.setAuthUser(null);
         AppData.INSTANCE.setLoggedUser(null);
         mView.restartApp();
@@ -76,7 +76,18 @@ public class MainPresenter extends BasePresenter<IMainContract.View>
 
     @Override
     public void logout() {
+        String token = AppData.INSTANCE.getAccessToken();
+        String login = AppData.INSTANCE.getAuthUser() == null ? null : AppData.INSTANCE.getAuthUser().getLoginId();
         daoSession.getAuthUserDao().delete(AppData.INSTANCE.getAuthUser());
+        if (login != null) {
+            // also by login name, so no row can stay behind whatever form its token has
+            daoSession.getAuthUserDao().getDatabase().execSQL("DELETE FROM "
+                    + com.thirtydegreesray.openhub.dao.AuthUserDao.TABLENAME + " WHERE "
+                    + com.thirtydegreesray.openhub.dao.AuthUserDao.Properties.LoginId.columnName + " = ?",
+                    new Object[]{login});
+            daoSession.getAuthUserDao().detachAll();
+        }
+        SignOut.cleanUp(token);
         AppData.INSTANCE.setAuthUser(null);
         AppData.INSTANCE.setLoggedUser(null);
         mView.restartApp();

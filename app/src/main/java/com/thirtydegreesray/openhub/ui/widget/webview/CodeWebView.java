@@ -85,8 +85,11 @@ public class CodeWebView extends WebView {
         }
         WebSettings settings = getSettings();
         settings.setJavaScriptEnabled(true);
-        settings.setGeolocationDatabasePath(getContext().getCacheDir().getPath());
-        settings.setGeolocationEnabled(true);
+        // pages from GitHub never need the phone's files, other apps' content or the location
+        // (assets under file:///android_asset/ still load)
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
+        settings.setGeolocationEnabled(false);
         settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         settings.setDefaultTextEncodingName("utf-8");
         boolean isLoadImageEnable = PrefUtils.isLoadImageEnable();

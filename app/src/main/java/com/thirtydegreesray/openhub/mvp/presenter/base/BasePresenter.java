@@ -321,6 +321,7 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
             daoSession.getAuthUserDao().delete(AppData.INSTANCE.getAuthUser());
             AppData.INSTANCE.setAuthUser(null);
             AppData.INSTANCE.setLoggedUser(null);
+            AppRetrofit.INSTANCE.clearClients();
             mView.showLoginPage();
             return true;
         }
