@@ -13,33 +13,7 @@ This is a modernized fork of [OpenHub](https://github.com/ThirtyDegreesRay/OpenH
 [**yxj-github-437**](https://github.com/yxj-github-437/OpenHub). All credit for the original
 app goes to them; see [Credits](#credits).
 
-## What is new in 3.4.1
-
-* Dark and AMOLED dark themes: the navigation bar at the bottom is dark again, with
-  light buttons (it could turn light, or the buttons dark, on some phones).
-
-## What is new in 3.4.0
-
-OpenHub can now **write** to GitHub, as close to github.com as makes sense on a phone:
-
-* **Files**: create, upload, edit, rename and delete files as real commits, to the
-  branch you choose or a new branch with a pull request.
-* **Pull requests in the app**: list, conversation, commits, files; comment, review,
-  merge (merge, squash, rebase), draft and ready, close and reopen, delete and restore
-  the branch, and open new pull requests (also from forks).
-* **Line-by-line review**: comment on one or several lines of a diff, suggest changes,
-  reply to threads, edit or delete your comments.
-* **Releases**: create, edit, publish and delete releases, upload APKs and zips (also by
-  sharing from other apps such as Termux), rename and delete files.
-* **Repositories**: create repositories (README, several .gitignore templates and your
-  own lines, license), repository settings, branches and branch protection, transfer,
-  archive and delete.
-* **Notifications**: optional phone notifications for your GitHub inbox, Mark as done,
-  Unsubscribe, and why each notification came.
-* **Built-in updater** with an on/off switch, GitHub links that open in the app, colored
-  side menu icons, and a new searchable help that explains every screen.
-
-## What is new in this fork
+## Compared with the original OpenHub
 
 * **Android 16 ready**: targets API 36, edge-to-edge, predictive back gesture.
 * **Sign in with a personal access token**, so the app works without its own OAuth App.
@@ -65,46 +39,68 @@ OpenHub can now **write** to GitHub, as close to github.com as makes sense on a 
 ## Features
 
 ### App
-* Login with a personal access token or with the browser (OAuth)
-* GitHub notifications on the phone (optional), built-in updater
-* Searchable in-app help for beginners
-* Multiple accounts
-* Light, dark and AMOLED dark themes, many accent colors
+* Login with a personal access token or with the browser (OAuth); multiple accounts
+* GitHub notifications on the phone (optional): Mark as read, Mark as done, Unsubscribe,
+  and why each notification came
+* **Releases** of all your starred repositories in one list, newest first, with New
+  badges and download buttons; it can be the start page
+* Built-in updater with an on/off switch; GitHub links from other apps open in the app
+* Searchable in-app help that explains every screen, written for people new to GitHub
+* Light, dark and AMOLED dark themes, many accent colors, colored or plain side menu icons
 * Markdown rendering and code highlighting
 * Offline mode (cached pages)
 * Trending repositories for all languages, by day, week or month
 * GitHub collections and featured topics
 * Search repositories and users
-* Notifications, bookmarks and a trace of what you viewed
+* Bookmarks and a trace of what you viewed
 * Launcher shortcuts
 * Option to skip loading images on mobile data
 
 ### Repositories
-* Create repositories; settings, branches and branch protection
-* Create, upload, edit, rename and delete files with commits
-* Pull requests: review, comment on lines, suggest changes, merge
-* Publish releases and upload files to them
-* Repository info, README, branches and tags
+* Create repositories (README, .gitignore templates and your own lines, license);
+  repository settings, transfer, archive and delete
+* Branches: create, rename, delete, restore, and branch protection
+* Create, upload, edit, rename and delete files as real commits, to the branch you
+  choose or a new branch with a pull request
+* **Search code** in a repository, with the matches marked; file name search where
+  GitHub's code search has nothing
+* Repository info, README, files, commits, activity, branches and tags
 * Star, watch and fork
-* Files, commits and activity
-* Releases with downloadable files, release notifications
-* GitHub Actions runs and artifacts
+* Releases: create, edit, publish and delete, upload APKs and zips (also by sharing from
+  other apps such as Termux), rename and delete files, Latest and Pre-release badges,
+  file sizes and download counts
+* Release notifications for any repository
+* GitHub Actions: workflow runs, artifacts, starting workflows by hand, and a
+  notification when a run finishes, with buttons to download its artifacts
+* **Discussions**: read, comment and reply, upvote, mark the answer, start discussions
 * Download source code
 * Your private, public, forked and starred repositories
 * Wiki
+
+### Pull requests
+* List, conversation with reviews and checks, commits and files
+* Open pull requests (also from forks), edit, close and reopen, draft and ready
+* Merge, squash or rebase; delete and restore the branch
+* Line-by-line review of the diff: comment on one or several lines, suggest changes,
+  reply, edit and delete your comments
+* **Pending reviews**: collect line comments and send them as one review (Comment,
+  Approve or Request changes)
+* Resolve and unresolve conversations
+
+### Issues and commits
+* Issues with comments and events; create, edit, close and reopen
+* **Issue templates** (Markdown templates and issue forms) when creating an issue
+* Labels, assignees and milestone for people with triage or write access
+* Comments with a Markdown editor and preview
+* Manage labels in your own repositories
+* Your created, assigned and mentioned issues
+* Commit details, changed files and diffs
 
 ### Users and organizations
 * Profile, followers, following and organizations
 * Public repositories, starred repositories, gists and activity
 * Follow and unfollow
 * Organization repositories, activity and members
-
-### Issues and commits
-* Issues with comments and events; create, edit, close and reopen
-* Comments with a Markdown editor and preview
-* Manage labels in your own repositories
-* Your created, assigned and mentioned issues
-* Commit details, changed files and diffs
 
 ## Requirements
 
