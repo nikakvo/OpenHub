@@ -455,7 +455,7 @@
   <ul>
     <li><strong>Tap a job</strong> (or <span class="ui">Log</span>) for its log. Groups are folded like on github.com (tap to open; groups with an error are open), errors are red and warnings amber. The menu has <span class="ui">Find</span> / <span class="ui">Find next</span>, <span class="ui">Next error</span>, <span class="ui">Expand all</span>, <span class="ui">Go to the end</span> and <span class="ui">Download log</span> (the whole file, also for very long logs, of which the screen shows the last 100,000 lines). While a job runs, the log shows what GitHub has so far (or a note, if it has nothing yet) and loads again when the job has finished.</li>
     <li>Menu of a finished run: <span class="ui">Re-run all jobs</span> or <span class="ui">Re-run failed jobs</span>; long-press a job for <span class="ui">Re-run this job</span>. Tick <span class="ui">Enable debug logging</span> for more detailed logs. You get a notification when the re-run finishes.</li>
-    <li>Menu of a running run: <span class="ui">Cancel run</span>, and <span class="ui">Force cancel</span> when a normal cancel does not end it.</li>
+    <li>Menu of a running run: <span class="ui">Cancel run</span>, and <span class="ui">Force cancel</span> when a normal cancel does not end it. GitHub needs a minute or two to stop the jobs; until then the run shows <em>Cancelling…</em>.</li>
     <li>Links to runs and jobs (from notifications, Telegram, issues) open here too.</li>
   </ul>
   <h3>Notifications when a run finishes</h3>

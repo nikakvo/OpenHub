@@ -94,6 +94,8 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
     private final Runnable poll = () -> load(false);
     private boolean resumed;
     private boolean loading;
+    /** a cancel was sent; GitHub takes a while (up to minutes) to stop the jobs */
+    private boolean cancelRequested;
 
     // live view while the run is going: pulsing dots of running items, ticking durations
     private ProgressBar runProgress;
@@ -230,6 +232,8 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
         status.paintLabel(statusText);
         String now = runningStepName();
         if (running && now != null) statusText.setText(getString(R.string.run_now, getString(status.label), now));
+        if (running && cancelRequested) statusText.setText(R.string.run_cancelling);
+        if (!running) cancelRequested = false;
         statusDot.setAlpha(1f);
         if (running) pulsing.add(statusDot);
         Date started = Json.date(run, "run_started_at");
@@ -460,7 +464,7 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
                         else if (failedOnly) GitHubApi.call(service().rerunFailed(owner, repo, runId, body));
                         else GitHubApi.call(service().rerun(owner, repo, runId, body));
                         return Boolean.TRUE;
-                    }, R.string.run_rerun_started, true);
+                    }, R.string.run_rerun_started, true, false);
                 })
                 .show();
     }
@@ -475,15 +479,16 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
                             GitHubApi.call(force ? service().forceCancel(owner, repo, runId)
                                     : service().cancel(owner, repo, runId));
                             return Boolean.TRUE;
-                        }, R.string.run_cancel_requested, false))
+                        }, R.string.run_cancel_requested, false, true))
                 .show();
     }
 
-    private void act(@NonNull Callable<Boolean> work, int doneText, boolean rerun) {
+    private void act(@NonNull Callable<Boolean> work, int doneText, boolean rerun, boolean cancel) {
         showProgressDialog(getString(R.string.please_wait));
         background(work, done -> {
             dismissProgressDialog();
             showSuccessToast(getString(doneText));
+            if (cancel) cancelRequested = true;
             RunChanges.markChanged();
             if (rerun) ActionsWatcher.followOnce(this, owner + "/" + repo);
             // GitHub needs a moment before the run shows the new state

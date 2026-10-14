@@ -159,7 +159,7 @@ public class JobLogActivity extends BaseActivity<IBaseContract.Presenter> {
                     ActionsService service = GitHubApi.service(ActionsService.class);
                     JsonObject job = GitHubApi.call(service.getJob(owner, repo, jobId));
                     boolean done = "completed".equals(Json.str(job, "status"));
-                    Response<ResponseBody> response = service.getJobLog(owner, repo, jobId).blockingFirst();
+                    Response<ResponseBody> response = service.getJobLog(owner, repo, jobId).execute();
                     if (!response.isSuccessful()) {
                         if (!done && (response.code() == 404 || response.code() == 410)) {
                             return new Object[]{job, null};

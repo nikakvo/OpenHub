@@ -47,10 +47,14 @@ public interface ActionsService {
             @Path("jobId") long jobId
     );
 
-    /** Plain text log of a job (GitHub redirects to a storage address; the token is not sent there). */
+    /**
+     * Plain text log of a job (GitHub redirects to a storage address; the token is not sent
+     * there). A plain Call, not Rx: Rx cancels the call after the first item, which closes
+     * the socket while the body is still being read ("Socket is closed").
+     */
     @NonNull @Streaming @GET("repos/{owner}/{repo}/actions/jobs/{jobId}/logs")
     @Headers("Cache-Control: no-cache, no-store")
-    Observable<Response<ResponseBody>> getJobLog(
+    retrofit2.Call<ResponseBody> getJobLog(
             @Path("owner") String owner,
             @Path("repo") String repo,
             @Path("jobId") long jobId

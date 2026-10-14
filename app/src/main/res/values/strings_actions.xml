@@ -17,7 +17,8 @@
     <string name="run_cancel_message">Running jobs are stopped; steps with "if: always()" still run.</string>
     <string name="run_force_cancel_message">Stops the run without waiting for "always()" steps. Use it when a normal cancel does not end the run.</string>
     <string name="run_rerun_started">Re-run started</string>
-    <string name="run_cancel_requested">Cancel requested</string>
+    <string name="run_cancel_requested">Cancel requested. GitHub can take a minute or two to stop the jobs.</string>
+    <string name="run_cancelling">Cancelling… (GitHub stops the jobs in a minute or two)</string>
     <string name="run_no_jobs">Waiting for a runner…</string>
     <string name="run_job_waiting">Waiting for a runner…</string>
     <string name="run_now">%1$s · %2$s</string>
