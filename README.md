@@ -75,8 +75,10 @@ app goes to them; see [Credits](#credits).
   other apps such as Termux), rename and delete files, Latest and Pre-release badges,
   file sizes and download counts; downloads are checked against GitHub's SHA-256
 * Release notifications for any repository
-* GitHub Actions: workflow runs, artifacts, starting workflows by hand, and a
-  notification when a run finishes, with buttons to download its artifacts
+* GitHub Actions: workflow runs with their jobs and steps, **job logs** (folded groups,
+  errors marked, find, next error, download), re-run (all, failed or one job, with
+  debug logging) and cancel, artifacts, starting workflows by hand, and a notification
+  when a run finishes, with buttons to download its artifacts
 * **Discussions**: read, comment and reply, upvote, mark the answer, start discussions
 * Download source code
 * Your private, public, forked and starred repositories

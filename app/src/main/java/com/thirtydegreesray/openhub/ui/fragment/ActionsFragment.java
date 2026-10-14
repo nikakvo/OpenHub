@@ -25,10 +25,12 @@ import com.thirtydegreesray.openhub.mvp.model.Workflow;
 import com.thirtydegreesray.openhub.mvp.model.WorkflowRun;
 import com.thirtydegreesray.openhub.mvp.presenter.ActionsPresenter;
 import com.thirtydegreesray.openhub.ui.activity.ActionsActivity;
+import com.thirtydegreesray.openhub.ui.activity.WorkflowRunActivity;
 import com.thirtydegreesray.openhub.ui.adapter.ActionsAdapter;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.RunChanges;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.WindowUtil;
 
@@ -96,7 +98,20 @@ public class ActionsFragment extends ListFragment<ActionsPresenter, ActionsAdapt
     @Override
     public void onItemClick(int position, @NonNull View view) {
         super.onItemClick(position, view);
-        mPresenter.loadArtifacts(adapter.getData().get(position));
+        WorkflowRun run = adapter.getData().get(position);
+        startActivity(WorkflowRunActivity.createIntent(requireContext(), mPresenter.getOwner(),
+                mPresenter.getRepoName(), run.getId()));
+    }
+
+    @Override
+    protected long changeStamp() {
+        // re-run or cancelled on the run screen
+        return RunChanges.stamp();
+    }
+
+    @Override
+    protected long autoRefreshAfterMs() {
+        return 60 * 1000L;
     }
 
     @Override

@@ -446,16 +446,23 @@
   <p><span class="pill p-green">Success</span> <span class="pill p-red">Failed</span> <span class="pill p-amber">In progress</span> <span class="pill p-amber">Queued</span> <span class="pill p-grey">Cancelled</span> <span class="pill p-grey">Skipped</span></p>
   <ul>
     <li>Each row is one <strong>run</strong>: what started it, the workflow, its number, the branch and the status.</li>
-    <li><strong>Tap a run</strong> for its <strong>artifacts</strong> (the files it built) and tap one to download it as a zip. GitHub deletes artifacts after a while (usually 90 days); old ones show <em>expired</em>.</li>
-    <li><strong>Long-press a run</strong> to open it in the browser (logs, details).</li>
+    <li><strong>Tap a run</strong> to open it: status and duration, every <strong>job</strong> with its <strong>steps</strong> (the failed step in red) and the <strong>artifacts</strong> (the files it built; tap one to download it as a zip). GitHub deletes artifacts after a while (usually 90 days); old ones show <em>expired</em>. A run that is still going updates itself every few seconds.</li>
+    <li><strong>Long-press a run</strong> to open it in the browser.</li>
     <li>The filter icon shows one workflow; the menu has <span class="ui">Successful runs only</span>.</li>
     <li>In your own repositories the play button starts a workflow by hand: pick it, check the branch, add inputs as <code>key=value</code> lines. Only workflows with a <code>workflow_dispatch</code> trigger can be started.</li>
+  </ul>
+  <h3>Logs, re-run and cancel</h3>
+  <ul>
+    <li><strong>Tap a job</strong> (or <span class="ui">Log</span>) for its log. Groups are folded like on github.com (tap to open; groups with an error are open), errors are red and warnings amber. The menu has <span class="ui">Find</span> / <span class="ui">Find next</span>, <span class="ui">Next error</span>, <span class="ui">Expand all</span>, <span class="ui">Go to the end</span> and <span class="ui">Download log</span> (the whole file, also for very long logs, of which the screen shows the last 100,000 lines). While a job runs, the log shows what GitHub has so far (or a note, if it has nothing yet) and loads again when the job has finished.</li>
+    <li>Menu of a finished run: <span class="ui">Re-run all jobs</span> or <span class="ui">Re-run failed jobs</span>; long-press a job for <span class="ui">Re-run this job</span>. Tick <span class="ui">Enable debug logging</span> for more detailed logs. You get a notification when the re-run finishes.</li>
+    <li>Menu of a running run: <span class="ui">Cancel run</span>, and <span class="ui">Force cancel</span> when a normal cancel does not end it.</li>
+    <li>Links to runs and jobs (from notifications, Telegram, issues) open here too.</li>
   </ul>
   <h3>Notifications when a run finishes</h3>
   <ul>
     <li>Start a workflow with the play button and leave the app: when the run ends you get a notification (succeeded, failed or cancelled), with the branch and how long it took.</li>
     <li>Menu → <span class="ui">Notify when runs finish</span>: the same for every run of this repository, also runs started by a push, a pull request or a schedule. Tap it again to switch it off.</li>
-    <li>A successful run with one or two artifacts gets <span class="ui">Download</span> buttons right in the notification; with more, the button opens the Actions screen. Tapping the notification opens the Actions screen too.</li>
+    <li>A successful run with one or two artifacts gets <span class="ui">Download</span> buttons right in the notification; with more, the button opens the run. Tapping the notification opens the run (jobs, logs, artifacts).</li>
   </ul>
   <div class="note tip"><b class="lbl">How fast</b>The repositories are checked every 15 minutes. While a run is going (or one you started has not finished yet), OpenHub checks every 90 seconds, so the notification comes about a minute after the end.</div>
 </div>

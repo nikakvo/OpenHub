@@ -25,6 +25,7 @@ import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.ui.activity.BrowserFilterActivity;
 import com.thirtydegreesray.openhub.util.ActionsWatcher;
+import com.thirtydegreesray.openhub.util.ActionsLinks;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
@@ -211,8 +212,11 @@ public class ActionsCheckWorker extends Worker {
         String owner = fullName.substring(0, slash);
         String repo = fullName.substring(slash + 1);
         // through BrowserFilterActivity: it loads the account first when the app was closed
+        // the run itself (jobs, logs, artifacts); the Actions list when GitHub gave no link
+        String runUrl = Json.str(run, "html_url");
         Intent open = new Intent(context, BrowserFilterActivity.class)
-                .setData(Uri.parse(BrowserFilterActivity.actionsUri(fullName, canPush(fullName))))
+                .setData(Uri.parse(ActionsLinks.parse(runUrl) != null ? runUrl
+                        : BrowserFilterActivity.actionsUri(fullName, canPush(fullName))))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         int notificationId = Long.hashCode(id);
 

@@ -220,6 +220,18 @@ public class AppOpener {
             context.startActivity(pullIntent);
             return;
         }
+        // workflow runs and their jobs
+        ActionsLinks runLink = ActionsLinks.parse(url);
+        if (runLink != null) {
+            Intent runIntent = runLink.jobId != 0
+                    ? com.thirtydegreesray.openhub.ui.activity.JobLogActivity.createIntent(context,
+                            runLink.owner, runLink.repo, runLink.jobId, null, url)
+                    : com.thirtydegreesray.openhub.ui.activity.WorkflowRunActivity.createIntent(context,
+                            runLink.owner, runLink.repo, runLink.runId);
+            if (!(context instanceof android.app.Activity)) runIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(runIntent);
+            return;
+        }
         // discussions too (github.com/o/r/discussions and /discussions/12)
         Intent discussionIntent = com.thirtydegreesray.openhub.ui.activity.DiscussionActivity.createIntent(context, url);
         if (discussionIntent != null) {

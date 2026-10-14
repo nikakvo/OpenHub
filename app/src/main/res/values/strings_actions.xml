@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="run_jobs">Jobs</string>
+    <string name="run_artifacts">Artifacts</string>
+    <string name="run_log">Log</string>
+    <string name="run_attempt">attempt %1$d</string>
+    <string name="run_by">by %1$s</string>
+    <string name="run_rerun_all">Re-run all jobs</string>
+    <string name="run_rerun_failed">Re-run failed jobs</string>
+    <string name="run_rerun_job">Re-run this job</string>
+    <string name="run_cancel">Cancel run</string>
+    <string name="run_force_cancel">Force cancel</string>
+    <string name="run_rerun_title">Re-run?</string>
+    <string name="run_rerun_message">The jobs run again with the same commit and inputs. You get a notification when the run finishes.</string>
+    <string name="run_debug_logging">Enable debug logging</string>
+    <string name="run_cancel_title">Cancel this run?</string>
+    <string name="run_cancel_message">Running jobs are stopped; steps with "if: always()" still run.</string>
+    <string name="run_force_cancel_message">Stops the run without waiting for "always()" steps. Use it when a normal cancel does not end the run.</string>
+    <string name="run_rerun_started">Re-run started</string>
+    <string name="run_cancel_requested">Cancel requested</string>
+    <string name="run_no_jobs">No jobs yet</string>
+    <string name="log_title">Log: %1$s</string>
+    <string name="log_find">Find</string>
+    <string name="log_find_next">Find next</string>
+    <string name="log_find_hint">Text to find</string>
+    <string name="log_not_found">"%1$s" not found</string>
+    <string name="log_next_error">Next error</string>
+    <string name="log_no_errors">No error lines</string>
+    <string name="log_expand_all">Expand all</string>
+    <string name="log_collapse_all">Collapse all</string>
+    <string name="log_to_top">Go to the top</string>
+    <string name="log_to_end">Go to the end</string>
+    <string name="log_download">Download log</string>
+    <string name="log_not_ready">GitHub has no log for this job yet. It loads by itself when the job has finished.</string>
+    <string name="log_empty">The log is empty</string>
+    <string name="log_skipped">… %1$d earlier lines not shown (Download log has them all)</string>
+</resources>

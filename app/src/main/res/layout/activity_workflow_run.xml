@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One workflow run: status, jobs with their steps, artifacts. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/layout_appbar"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/refresh_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/spacing_xx_large">
+
+                    <TextView
+                        android:id="@+id/run_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="@dimen/spacing_large"
+                        android:paddingEnd="@dimen/spacing_large"
+                        android:paddingTop="@dimen/spacing_large"
+                        android:textSize="@dimen/text_large"
+                        android:textColor="?android:textColorPrimary"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="@dimen/spacing_large"
+                        android:paddingEnd="@dimen/spacing_large"
+                        android:paddingTop="@dimen/spacing_small">
+                        <View
+                            android:id="@+id/run_status_dot"
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:layout_marginEnd="@dimen/spacing_small"/>
+                        <TextView
+                            android:id="@+id/run_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_small"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/run_duration"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_small"
+                            android:textSize="@dimen/text_small"
+                            android:textColor="?android:textColorSecondary"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/run_meta"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="@dimen/spacing_large"
+                        android:paddingEnd="@dimen/spacing_large"
+                        android:paddingTop="@dimen/spacing_mini"
+                        android:textSize="@dimen/text_small"
+                        android:textColor="?android:textColorSecondary"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="@dimen/spacing_large"
+                        android:paddingEnd="@dimen/spacing_large"
+                        android:paddingTop="@dimen/spacing_x_large"
+                        android:paddingBottom="@dimen/spacing_small"
+                        android:text="@string/run_jobs"
+                        android:textSize="@dimen/text_small"
+                        android:textStyle="bold"
+                        android:textColor="?android:colorAccent"/>
+
+                    <LinearLayout
+                        android:id="@+id/jobs_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"/>
+
+                    <TextView
+                        android:id="@+id/artifacts_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="@dimen/spacing_large"
+                        android:paddingEnd="@dimen/spacing_large"
+                        android:paddingTop="@dimen/spacing_x_large"
+                        android:paddingBottom="@dimen/spacing_small"
+                        android:text="@string/run_artifacts"
+                        android:textSize="@dimen/text_small"
+                        android:textStyle="bold"
+                        android:textColor="?android:colorAccent"
+                        android:visibility="gone"/>
+
+                    <LinearLayout
+                        android:id="@+id/artifacts_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"/>
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </FrameLayout>
+</LinearLayout>

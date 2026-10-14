@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A job of a workflow run: status, name, duration; its steps below. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/job_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:minHeight="48dp"
+        android:paddingStart="@dimen/spacing_large"
+        android:paddingEnd="@dimen/spacing_large"
+        android:background="?android:selectableItemBackground">
+        <View
+            android:id="@+id/job_status_dot"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginEnd="@dimen/spacing_normal"/>
+        <TextView
+            android:id="@+id/job_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="@dimen/text_normal"
+            android:textStyle="bold"
+            android:textColor="?android:textColorPrimary"/>
+        <TextView
+            android:id="@+id/job_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_small"
+            android:textSize="@dimen/text_small"
+            android:textColor="?android:textColorSecondary"/>
+        <TextView
+            android:id="@+id/job_log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:text="@string/run_log"
+            android:textSize="@dimen/text_small"
+            android:textColor="?android:colorAccent"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/job_steps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="40dp"
+        android:paddingEnd="@dimen/spacing_large"
+        android:paddingBottom="@dimen/spacing_small"/>
+</LinearLayout>
