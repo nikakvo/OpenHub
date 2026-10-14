@@ -13,6 +13,11 @@ This is a modernized fork of [OpenHub](https://github.com/ThirtyDegreesRay/OpenH
 [**yxj-github-437**](https://github.com/yxj-github-437/OpenHub). All credit for the original
 app goes to them; see [Credits](#credits).
 
+## What is new in 3.4.1
+
+* Dark and AMOLED dark themes: the navigation bar at the bottom is dark again, with
+  light buttons (it could turn light, or the buttons dark, on some phones).
+
 ## What is new in 3.4.0
 
 OpenHub can now **write** to GitHub, as close to github.com as makes sense on a phone:
