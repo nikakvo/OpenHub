@@ -313,7 +313,8 @@ public class DownloadService extends Service {
 
     private static boolean needsGitHubToken(@NonNull String url) {
         Uri uri = Uri.parse(url);
-        return "api.github.com".equalsIgnoreCase(uri.getHost());
+        return "https".equalsIgnoreCase(uri.getScheme())
+                && "api.github.com".equalsIgnoreCase(uri.getHost());
     }
 
     private static class FatalDownloadException extends IOException {

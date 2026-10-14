@@ -155,7 +155,8 @@ public enum  AppRetrofit {
                         .build();
             }
 
-            if (!StringUtils.isBlank(token) && isTokenHost(host)) {
+            // only to the GitHub API and only encrypted (an http:// address never gets it)
+            if (!StringUtils.isBlank(token) && isTokenHost(host) && request.url().isHttps()) {
                 String auth = token.startsWith("Basic") ? token : "token " + token;
                 request = request.newBuilder()
                         .header("Authorization", auth)

@@ -128,10 +128,29 @@ public final class ContentFiles {
         }
         ArrayList<UploadItem> items = new ArrayList<>();
         for (Uri uri : uris) {
-            if ("file".equals(uri.getScheme())) continue; // not readable on Android 7+
+            if (!isForeignContent(context, uri)) continue;
             items.add(describe(context, uri));
         }
         return items;
+    }
+
+    /**
+     * Only content:// addresses are accepted from a share. A file:// address (or one of
+     * OpenHub's own providers, except the FileProvider of the Download folder) could point
+     * into OpenHub's private folder, e.g. at the accounts database, and another app must
+     * never get that uploaded.
+     */
+    static boolean isForeignContent(@NonNull Context context, @NonNull Uri uri) {
+        if (!ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return false;
+        String authority = uri.getAuthority();
+        if (authority == null || authority.isEmpty()) return false;
+        String own = context.getPackageName();
+        for (String part : authority.split(";")) {
+            // OpenHub's own FileProvider shares only the public Download folder
+            if (part.equals(own + ".fileProvider")) continue;
+            if (part.equals(own) || part.startsWith(own + ".")) return false;
+        }
+        return true;
     }
 
     public static void keepReadAccess(@NonNull Context context, @NonNull Uri uri) {

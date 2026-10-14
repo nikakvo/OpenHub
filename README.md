@@ -122,8 +122,12 @@ OpenHub talks only to GitHub: no ads, no analytics, no servers of its own.
 * **Least privilege:** *Create token* ticks every permission OpenHub can use; untick
   `delete_repo` or `workflow` if you do not need them, or use a fine-grained token limited
   to some repositories.
+* **Encrypted connections only.** No plain HTTP; only the system's certificate
+  authorities are trusted (user-installed certificates are not), and the token is never
+  sent over a connection that is not HTTPS.
 * Web views cannot read files or other apps' content; exported screens accept only what
-  they need.
+  they need. Files shared to OpenHub must come from other apps (`content://`), so no app
+  can make OpenHub upload its own private files.
 
 Found a security problem? Please report it privately, see [SECURITY.md](SECURITY.md).
 

@@ -617,6 +617,8 @@
     <li><strong>Browser sign-in</strong> is protected against other apps: it only accepts the answer to a sign-in started in OpenHub (state check and PKCE).</li>
     <li><strong>Log out</strong> removes the token and the saved GitHub pages from the phone. A browser sign-in is also revoked at GitHub. A personal access token keeps working until you delete it on github.com: Settings → Developer settings → Personal access tokens.</li>
     <li><strong>Fewer rights</strong>: <span class="ui">Create token</span> ticks everything OpenHub can use. Untick <code>delete_repo</code> if you never delete repositories in the app, or <code>workflow</code> if you never edit workflow files; the rest keeps working.</li>
+    <li><strong>Encrypted connections only</strong>, checked against the phone's system certificates. Certificates added by the user or by other apps are not trusted, so a proxy on the network cannot read your token.</li>
+    <li><strong>Sharing to OpenHub</strong> accepts files that other apps share; it never uploads OpenHub's own private files, whatever another app asks.</li>
     <li>No connection at start? Your account stays; OpenHub offers to try again.</li>
   </ul>
   <p>You can see and revoke app access any time on github.com: Settings → Applications. This help page loads nothing from the internet.</p>

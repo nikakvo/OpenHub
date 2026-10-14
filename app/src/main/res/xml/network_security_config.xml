@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Encrypted connections only, checked against the certificates of the system.
+     Certificates added by the user (or by another app) are not trusted, so a proxy or a
+     changed network cannot read the GitHub token. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
+</network-security-config>
