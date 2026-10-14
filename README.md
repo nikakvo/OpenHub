@@ -53,7 +53,9 @@ app goes to them; see [Credits](#credits).
 * Trending repositories for all languages, by day, week or month
 * GitHub collections and featured topics
 * Search repositories and users
-* Bookmarks and a trace of what you viewed
+* Bookmarks and a trace of what you viewed (swipe to remove, or clear the trace)
+* Lists update themselves when you come back to them (after your own changes, or when
+  they are old); pulling down still reloads at once
 * Launcher shortcuts
 * Option to skip loading images on mobile data
 
@@ -66,7 +68,8 @@ app goes to them; see [Credits](#credits).
   committed to a folder of a repository
 * **Search code** in a repository, with the matches marked; file name search where
   GitHub's code search has nothing
-* Repository info, README, files, commits, activity, branches and tags
+* Repository info, README (with a pencil to edit it), files, commits, activity, branches
+  and tags
 * Star, watch and fork
 * Releases: create, edit, publish and delete, upload APKs and zips (also by sharing from
   other apps such as Termux), rename and delete files, Latest and Pre-release badges,
