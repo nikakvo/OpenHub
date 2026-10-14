@@ -140,10 +140,7 @@ public class CodeSearchActivity extends BaseActivity<IBaseContract.Presenter> {
                     setToolbarSubTitle(owner + "/" + repo + " · "
                             + getResources().getQuantityString(R.plurals.code_search_count, total, total));
                     loadMoreBn.setVisibility(shown < total && shown < MAX_RESULTS ? View.VISIBLE : View.GONE);
-                    if (shown == 0) {
-                        emptyText.setText(getString(R.string.code_search_none, query));
-                        emptyText.setVisibility(View.VISIBLE);
-                    }
+                    if (shown == 0) searchPaths();
                 }, error -> {
                     loader.setVisibility(View.GONE);
                     String message = StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
@@ -154,6 +151,117 @@ public class CodeSearchActivity extends BaseActivity<IBaseContract.Presenter> {
                     showErrorToast(message);
                     if (shown > 0) loadMoreBn.setVisibility(View.VISIBLE);
                 }));
+    }
+
+    /**
+     * GitHub's code search finds nothing in forks (unless they have more stars than the
+     * original) and in repositories it has not indexed yet. Then the file list of the
+     * default branch is searched by path and name instead, which always works.
+     */
+    private void searchPaths() {
+        String words = query;
+        loader.setVisibility(View.VISIBLE);
+        disposables.add(Single.fromCallable(() -> {
+                    SearchService service = GitHubApi.service(SearchService.class);
+                    JsonObject repository = GitHubApi.call(service.getRepoInfo(owner, repo));
+                    String branch = Json.str(repository, "default_branch");
+                    JsonObject tree = GitHubApi.call(service.getFileTree(owner, repo,
+                            android.net.Uri.encode(branch)));
+                    java.util.List<String> found = new java.util.ArrayList<>();
+                    JsonElement entries = tree == null ? null : tree.get("tree");
+                    if (entries != null && entries.isJsonArray()) {
+                        for (JsonElement e : entries.getAsJsonArray()) {
+                            JsonObject entry = e.getAsJsonObject();
+                            if (!"blob".equals(Json.str(entry, "type"))) continue;
+                            String path = Json.str(entry, "path");
+                            if (pathMatches(path, words)) found.add(path);
+                            if (found.size() >= 300) break;
+                        }
+                    }
+                    return new Object[]{Json.bool(repository, "fork"), branch, found};
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    loader.setVisibility(View.GONE);
+                    boolean fork = (Boolean) result[0];
+                    String branch = (String) result[1];
+                    //noinspection unchecked
+                    java.util.List<String> found = (java.util.List<String>) result[2];
+                    String why = getString(fork ? R.string.code_search_fork : R.string.code_search_not_indexed);
+                    if (found.isEmpty()) {
+                        emptyText.setText(getString(R.string.code_search_none, query) + "\n\n" + why);
+                        emptyText.setVisibility(View.VISIBLE);
+                        return;
+                    }
+                    TextView note = new TextView(this);
+                    note.setText(why + "\n" + getResources().getQuantityString(R.plurals.code_search_paths,
+                            found.size(), found.size()));
+                    note.setTextSize(13);
+                    note.setPadding(dp(16), dp(8), dp(16), dp(4));
+                    note.setTextColor(emptyText.getCurrentTextColor());
+                    results.addView(note);
+                    for (String path : found) results.addView(pathRow(path, branch));
+                    setToolbarSubTitle(owner + "/" + repo + " · "
+                            + getResources().getQuantityString(R.plurals.code_search_paths, found.size(), found.size()));
+                }, error -> {
+                    loader.setVisibility(View.GONE);
+                    emptyText.setText(getString(R.string.code_search_none, query));
+                    emptyText.setVisibility(View.VISIBLE);
+                }));
+    }
+
+    /** All words in the path; path:, extension: and filename: narrow it like on GitHub. */
+    private static boolean pathMatches(@NonNull String path, @NonNull String query) {
+        String lower = path.toLowerCase(java.util.Locale.ROOT);
+        String name = lower.substring(lower.lastIndexOf('/') + 1);
+        for (String token : query.toLowerCase(java.util.Locale.ROOT).split("\\s+")) {
+            if (token.isEmpty()) continue;
+            if (token.startsWith("extension:")) {
+                if (!name.endsWith("." + token.substring("extension:".length()))) return false;
+            } else if (token.startsWith("path:")) {
+                if (!lower.contains(token.substring("path:".length()))) return false;
+            } else if (token.startsWith("filename:")) {
+                if (!name.contains(token.substring("filename:".length()))) return false;
+            } else if (token.contains(":")) {
+                // other qualifiers (language:, size:...) cannot be applied to a path
+            } else if (!lower.contains(token)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @NonNull
+    private View pathRow(@NonNull String path, @NonNull String branch) {
+        View row = LayoutInflater.from(this).inflate(R.layout.layout_item_code_result, results, false);
+        ((TextView) row.findViewById(R.id.result_path)).setText(path);
+        TextView info = row.findViewById(R.id.result_fragments);
+        info.setText(R.string.code_search_match_in_name);
+        String encodedPath = encodePath(path);
+        String url = "https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + encodedPath
+                + "?ref=" + android.net.Uri.encode(branch);
+        String htmlUrl = "https://github.com/" + owner + "/" + repo + "/blob/" + branch + "/" + encodedPath;
+        row.setOnClickListener(v -> ViewerActivity.show(this, url, htmlUrl));
+        row.setOnLongClickListener(v -> {
+            AppUtils.copyToClipboard(this, path);
+            return true;
+        });
+        return row;
+    }
+
+    @NonNull
+    private static String encodePath(@NonNull String path) {
+        StringBuilder out = new StringBuilder();
+        for (String part : path.split("/")) {
+            if (out.length() > 0) out.append('/');
+            out.append(android.net.Uri.encode(part));
+        }
+        return out.toString();
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     @NonNull
@@ -219,6 +327,7 @@ public class CodeSearchActivity extends BaseActivity<IBaseContract.Presenter> {
         emptyText = root.findViewById(R.id.empty_text);
         loader = root.findViewById(R.id.loader);
         loadMoreBn.setOnClickListener(v -> loadNext());
+        root.findViewById(R.id.search_bn).setOnClickListener(v -> search());
         searchEdit.setOnEditorActionListener((v, actionId, event) -> {
             boolean enter = event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
                     && event.getAction() == KeyEvent.ACTION_DOWN;

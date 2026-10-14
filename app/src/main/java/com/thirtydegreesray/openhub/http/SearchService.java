@@ -13,6 +13,7 @@ import retrofit2.Response;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 import io.reactivex.rxjava3.core.Observable;
 
@@ -57,6 +58,23 @@ public interface SearchService {
             @Query("q") String query,
             @Query("page") int page,
             @Query("per_page") int perPage
+    );
+
+    /** All files of a branch (path search when code search finds nothing). */
+    @NonNull @GET("repos/{owner}/{repo}/git/trees/{branch}?recursive=1")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<com.google.gson.JsonObject>> getFileTree(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path(value = "branch", encoded = true) String branch
+    );
+
+    /** default_branch and fork of a repository. */
+    @NonNull @GET("repos/{owner}/{repo}")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<com.google.gson.JsonObject>> getRepoInfo(
+            @Path("owner") String owner,
+            @Path("repo") String repo
     );
 
 }

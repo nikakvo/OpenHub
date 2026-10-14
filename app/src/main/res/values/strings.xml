@@ -573,6 +573,12 @@
         <item quantity="one">%d result</item>
         <item quantity="other">%d results</item>
     </plurals>
+    <string name="code_search_fork">GitHub does not search the code of forks (unless the fork has more stars than the original), so the file names were searched instead.</string>
+    <string name="code_search_not_indexed">GitHub found nothing in the code (new or changed repositories are indexed after a while), so the file names were searched instead.</string>
+    <plurals name="code_search_paths">
+        <item quantity="one">%d file name matches</item>
+        <item quantity="other">%d file names match</item>
+    </plurals>
     <string name="repo_info_line">Language %1$s, size %2$s</string>
     <string name="repo_size_pending">not counted yet</string>
 
