@@ -1,6 +1,7 @@
 # OpenHub
 
 [![Release](https://img.shields.io/github/v/release/nikakvo/OpenHub?include_prereleases)](https://github.com/nikakvo/OpenHub/releases)
+[![Tests](https://github.com/nikakvo/OpenHub/actions/workflows/tests.yml/badge.svg)](https://github.com/nikakvo/OpenHub/actions/workflows/tests.yml)
 [![Android](https://img.shields.io/badge/Android-8.0%2B-brightgreen.svg)](#requirements)
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 
@@ -152,7 +153,7 @@ You need JDK 17 and the Android SDK (platform 36). Then:
 ./gradlew assembleNormalDebug
 ```
 
-Unit tests: `./gradlew testNormalDebugUnitTest`.
+Unit tests: `./gradlew testNormalDebugUnitTest`. GitHub Actions runs them and a debug build on every push and pull request (see the Tests badge above).
 
 The APK ends up in `app/build/outputs/apk/normal/debug/`. There are two flavors that only
 differ in the app name: `normal` ("OpenHub") and `fullName` ("OpenHub for GitHub").

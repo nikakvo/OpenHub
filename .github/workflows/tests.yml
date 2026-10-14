@@ -1,0 +1,53 @@
+# Builds the app and runs the unit tests on every push and pull request.
+# Needs no secrets: the debug build is signed with the standard debug key and the
+# OAuth client id/secret stay empty (they only live in local.properties).
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Read-only: this workflow cannot change the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Verify the Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Unit tests
+        run: ./gradlew testNormalDebugUnitTest --console=plain
+
+      - name: Build debug APK
+        run: ./gradlew assembleNormalDebug --console=plain
+
+      - name: Test report
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-report
+          path: app/build/reports/tests/
+          if-no-files-found: ignore
