@@ -42,6 +42,13 @@ android {
 
         buildConfigField "String", "OPENHUB_CLIENT_ID", quotedProp('openhub_client_id')
         buildConfigField "String", "OPENHUB_CLIENT_SECRET", quotedProp('openhub_client_secret')
+
+        // Room writes the database schema to app/schemas (kept in git; checked by the tests)
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments.put("room.schemaLocation", "$projectDir/schemas".toString())
+            }
+        }
     }
 
     // Release signing only when a keystore is configured (see public.properties).
@@ -111,7 +118,9 @@ dependencies {
     implementation 'androidx.work:work-runtime:2.12.0'
 
 
-    //数据库工具
+    // Database (Room; greenDAO only until all screens use Room)
+    implementation "androidx.room:room-runtime:${ROOM_VERSION}"
+    annotationProcessor "androidx.room:room-compiler:${ROOM_VERSION}"
     implementation "org.greenrobot:greendao:${GREEN_DAO_VERSION}"
     //事件总线
     implementation "org.greenrobot:eventbus:${EVENT_BUS_VERSION}"

@@ -1,0 +1,290 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 6,
+    "identityHash": "8dfdc95bd90c42fee131d2d1385151ff",
+    "entities": [
+      {
+        "tableName": "AUTH_USER",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ACCESS_TOKEN` TEXT NOT NULL, `AUTH_TIME` INTEGER NOT NULL, `EXPIRE_IN` INTEGER NOT NULL, `SCOPE` TEXT NOT NULL, `SELECTED` INTEGER NOT NULL, `LOGIN_ID` TEXT NOT NULL, `NAME` TEXT, `AVATAR` TEXT, PRIMARY KEY(`ACCESS_TOKEN`))",
+        "fields": [
+          {
+            "fieldPath": "accessToken",
+            "columnName": "ACCESS_TOKEN",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authTime",
+            "columnName": "AUTH_TIME",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "expireIn",
+            "columnName": "EXPIRE_IN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scope",
+            "columnName": "SCOPE",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "selected",
+            "columnName": "SELECTED",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loginId",
+            "columnName": "LOGIN_ID",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "NAME",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "avatar",
+            "columnName": "AVATAR",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ACCESS_TOKEN"
+          ]
+        }
+      },
+      {
+        "tableName": "LOCAL_USER",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`LOGIN` TEXT NOT NULL, `NAME` TEXT, `AVATAR_URL` TEXT, `FOLLOWERS` INTEGER, `FOLLOWING` INTEGER, PRIMARY KEY(`LOGIN`))",
+        "fields": [
+          {
+            "fieldPath": "login",
+            "columnName": "LOGIN",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "NAME",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "avatarUrl",
+            "columnName": "AVATAR_URL",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "followers",
+            "columnName": "FOLLOWERS",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "following",
+            "columnName": "FOLLOWING",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "LOGIN"
+          ]
+        }
+      },
+      {
+        "tableName": "LOCAL_REPO",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ID` INTEGER NOT NULL, `NAME` TEXT NOT NULL, `DESCRIPTION` TEXT, `LANGUAGE` TEXT, `STARGAZERS_COUNT` INTEGER, `WATCHERS_COUNT` INTEGER, `FORKS_COUNT` INTEGER, `FORK` INTEGER, `OWNER_LOGIN` TEXT, `OWNER_AVATAR_URL` TEXT, PRIMARY KEY(`ID`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "ID",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "NAME",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "DESCRIPTION",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "language",
+            "columnName": "LANGUAGE",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "stargazersCount",
+            "columnName": "STARGAZERS_COUNT",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "watchersCount",
+            "columnName": "WATCHERS_COUNT",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "forksCount",
+            "columnName": "FORKS_COUNT",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "fork",
+            "columnName": "FORK",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ownerLogin",
+            "columnName": "OWNER_LOGIN",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ownerAvatarUrl",
+            "columnName": "OWNER_AVATAR_URL",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ID"
+          ]
+        }
+      },
+      {
+        "tableName": "TRACE",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ID` TEXT NOT NULL, `TYPE` TEXT, `USER_ID` TEXT, `REPO_ID` INTEGER, `START_TIME` INTEGER, `LATEST_TIME` INTEGER, `TRACE_NUM` INTEGER, PRIMARY KEY(`ID`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "ID",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "TYPE",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "USER_ID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "repoId",
+            "columnName": "REPO_ID",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "startTime",
+            "columnName": "START_TIME",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "latestTime",
+            "columnName": "LATEST_TIME",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "traceNum",
+            "columnName": "TRACE_NUM",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ID"
+          ]
+        }
+      },
+      {
+        "tableName": "BOOKMARK",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ID` TEXT NOT NULL, `TYPE` TEXT NOT NULL, `USER_ID` TEXT, `REPO_ID` INTEGER, `MARK_TIME` INTEGER, PRIMARY KEY(`ID`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "ID",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "TYPE",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "USER_ID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "repoId",
+            "columnName": "REPO_ID",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "markTime",
+            "columnName": "MARK_TIME",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ID"
+          ]
+        }
+      },
+      {
+        "tableName": "MY_TRENDING_LANGUAGE",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`SLUG` TEXT NOT NULL, `NAME` TEXT NOT NULL, `ORDER` INTEGER NOT NULL, PRIMARY KEY(`SLUG`))",
+        "fields": [
+          {
+            "fieldPath": "slug",
+            "columnName": "SLUG",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "NAME",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "order",
+            "columnName": "ORDER",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "SLUG"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8dfdc95bd90c42fee131d2d1385151ff')"
+    ]
+  }
+}
