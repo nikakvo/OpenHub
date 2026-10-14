@@ -7,6 +7,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.os.Build;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.View;
@@ -58,10 +59,7 @@ public final class EdgeToEdge {
         final BarsDrawable bars = new BarsDrawable(statusColor, navColor);
         content.setBackground(bars);
 
-        WindowInsetsControllerCompat controller =
-                WindowCompat.getInsetsController(window, window.getDecorView());
-        controller.setAppearanceLightStatusBars(ColorUtils.calculateLuminance(statusColor) > 0.5);
-        controller.setAppearanceLightNavigationBars(ColorUtils.calculateLuminance(navColor) > 0.5);
+        applyBarAppearance(activity, statusColor, navColor);
 
         ViewCompat.setOnApplyWindowInsetsListener(content, (v, insets) -> {
             Insets system = insets.getInsets(WindowInsetsCompat.Type.systemBars()
@@ -86,6 +84,34 @@ public final class EdgeToEdge {
                     .build();
         });
         ViewCompat.requestApplyInsets(content);
+    }
+
+    /**
+     * Sets the system bar icons again (light icons on dark bars, dark icons on light bars).
+     * Called when a screen comes back to the front: the system or the ROM (HyperOS) can
+     * change the icon color while another window (dialog, other app) had the focus.
+     */
+    public static void refreshBars(@NonNull Activity activity) {
+        if (activity.findViewById(android.R.id.content) == null) return;
+        int statusColor = resolveColor(activity, androidx.appcompat.R.attr.colorPrimaryDark,
+                android.R.attr.colorBackground);
+        int navColor = resolveColor(activity, android.R.attr.colorBackground,
+                android.R.attr.colorBackground);
+        applyBarAppearance(activity, statusColor, navColor);
+    }
+
+    private static void applyBarAppearance(@NonNull Activity activity, @ColorInt int statusColor,
+                                           @ColorInt int navColor) {
+        Window window = activity.getWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // The navigation bar strip is painted by BarsDrawable: no system scrim on top.
+            window.setNavigationBarContrastEnforced(false);
+            window.setStatusBarContrastEnforced(false);
+        }
+        WindowInsetsControllerCompat controller =
+                WindowCompat.getInsetsController(window, window.getDecorView());
+        controller.setAppearanceLightStatusBars(ColorUtils.calculateLuminance(statusColor) > 0.5);
+        controller.setAppearanceLightNavigationBars(ColorUtils.calculateLuminance(navColor) > 0.5);
     }
 
     /**

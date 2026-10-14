@@ -38,6 +38,7 @@
         <item name="appbar_theme">@style/AppbarThemeLightTeal</item>
         <item name="android:contextPopupMenuStyle" tools:targetApi="n">@style/ContextPopupThemeLightTeal</item>
         <item name="popup_menu_theme">@style/PopupMenuLightTeal</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
     </style>
 
     <style name="DialogThemeLightTeal" parent="Theme.AppCompat.Light.Dialog.Alert">

@@ -200,8 +200,15 @@ BaseActivity<P extends IBaseContract.Presenter>
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus && getContentView() != 0) EdgeToEdge.refreshBars(this);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+        if (getContentView() != 0) EdgeToEdge.refreshBars(this);
         curActivity = getActivity();
     }
 

@@ -39,6 +39,12 @@
         <item name="appbar_theme">@style/AppbarThemeDark</item>
         <item name="android:contextPopupMenuStyle" tools:targetApi="n">@style/ContextPopupThemeDark</item>
         <item name="popup_menu_theme">@style/PopupMenuDark</item>
+        <!-- The parent is a light theme with dark colors: tell the system it is dark, so
+             the system bar icons stay light and the ROM never applies its own dark mode. -->
+        <item name="android:isLightTheme" tools:targetApi="q">false</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
     </style>
 
     <style name="DialogThemeAmoledDark" parent="Theme.AppCompat.Dialog.Alert">
