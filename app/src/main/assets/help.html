@@ -428,7 +428,11 @@
   </ol>
   <div class="note tip"><b class="lbl">Safe uploads</b>With new files the release stays a draft while they upload and is published only when every file arrived, so nobody downloads half a release. Uploads run in the background with a progress notification and <span class="ui">Cancel</span>; a lost connection is retried.</div>
   <h3>From other apps</h3>
-  <p>Share files from a file manager, Termux (<code>termux-share</code>) or Telegram and choose <strong>Upload to GitHub release</strong>. Pick the repository (the last one is on top), then a release or <strong>New release</strong>. Files that already exist can be replaced.</p>
+  <p>Share files from a file manager, Termux (<code>termux-share</code>) or Telegram and choose <strong>Upload to GitHub</strong>. Pick the repository (the last one is on top), then:</p>
+  <ul>
+    <li><strong>New release</strong> or an existing release: the files are added to it. Files that already exist can be replaced.</li>
+    <li><strong>Add to the repository files</strong>: type a folder (empty for the top folder; the last one is remembered) and the files are committed there, to the default branch or, in the commit dialog, to a new branch with a pull request. Files that already exist in the folder can be replaced.</li>
+  </ul>
   <h3>In an open release</h3>
   <p>The menu has Edit, Publish release (drafts), Set as latest release, Upload files and Delete release (optionally with its tag). Each file has a pencil to rename it and a menu to copy its link or delete it.</p>
 </div>

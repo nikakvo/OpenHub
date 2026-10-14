@@ -22,6 +22,7 @@ import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.ReleaseService;
 import com.thirtydegreesray.openhub.http.RepoAdminService;
+import com.thirtydegreesray.openhub.http.RepoService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.mvp.model.Release;
@@ -31,7 +32,11 @@ import com.thirtydegreesray.openhub.mvp.model.UploadItem;
 import com.thirtydegreesray.openhub.mvp.presenter.ReleaseInfoPresenter;
 import com.thirtydegreesray.openhub.service.UploadService;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.mvp.model.FileModel;
+import com.thirtydegreesray.openhub.ui.widget.RepoFileActions;
+import com.thirtydegreesray.openhub.ui.widget.TextInputDialog;
 import com.thirtydegreesray.openhub.util.ContentFiles;
+import com.thirtydegreesray.openhub.util.RepoCommitter;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
 import java.util.ArrayList;
@@ -56,6 +61,8 @@ public class ShareUploadActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private static final String PREFS = "share_upload";
     private static final String KEY_LAST_REPO = "last_repo";
+    /** + full name: the folder files were last added to in that repository */
+    private static final String KEY_LAST_FOLDER = "last_folder_";
     private static final int MAX_PAGES = 3;
 
     private TextView filesText;
@@ -195,13 +202,17 @@ public class ShareUploadActivity extends BaseActivity<IBaseContract.Presenter> {
             return list == null ? new ArrayList<Release>() : list;
         }, (ArrayList<Release> releases) -> {
             hideLoading();
-            chooseRelease(owner, repo, releases);
+            chooseRelease(repository, releases);
         }, error -> hideLoading());
     }
 
-    private void chooseRelease(@NonNull String owner, @NonNull String repo, @NonNull List<Release> releases) {
-        String[] items = new String[releases.size() + 1];
+    private void chooseRelease(@NonNull Repository repository, @NonNull List<Release> releases) {
+        final String owner = repository.getOwner().getLogin();
+        final String repo = repository.getName();
+        final int first = 2; // + New release, + Add to the files
+        String[] items = new String[releases.size() + first];
         items[0] = "+ " + getString(R.string.release_new);
+        items[1] = "+ " + getString(R.string.share_files_add, branchOf(repository));
         for (int i = 0; i < releases.size(); i++) {
             Release release = releases.get(i);
             String label = StringUtils.isBlank(release.getTagName())
@@ -214,7 +225,7 @@ public class ShareUploadActivity extends BaseActivity<IBaseContract.Presenter> {
             if (!StringUtils.isBlank(release.getName()) && !release.getName().equals(release.getTagName())) {
                 label += "\n" + release.getName();
             }
-            items[i + 1] = label;
+            items[i + first] = label;
         }
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.share_upload_choose_release, owner + "/" + repo))
@@ -222,12 +233,61 @@ public class ShareUploadActivity extends BaseActivity<IBaseContract.Presenter> {
                     if (which == 0) {
                         startActivity(EditReleaseActivity.createIntent(this, owner, repo, files));
                         finish();
+                    } else if (which == 1) {
+                        addToFiles(repository);
                     } else {
-                        uploadTo(owner, repo, releases.get(which - 1));
+                        uploadTo(owner, repo, releases.get(which - first));
                     }
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Repository files (a commit, like the Files tab's Upload)
+    // ---------------------------------------------------------------------------------
+
+    @NonNull
+    private static String branchOf(@NonNull Repository repository) {
+        return StringUtils.isBlank(repository.getDefaultBranch()) ? "main" : repository.getDefaultBranch();
+    }
+
+    private void addToFiles(@NonNull Repository repository) {
+        final String owner = repository.getOwner().getLogin();
+        final String repo = repository.getName();
+        final String branch = branchOf(repository);
+        final String key = KEY_LAST_FOLDER + repository.getFullName();
+        TextInputDialog.show(this, R.string.share_files_folder_title, R.string.share_files_folder_hint,
+                prefs().getString(key, ""), false, true, text -> {
+                    String dir = RepoCommitter.cleanFolder(text);
+                    if (dir == null) {
+                        showErrorToast(getString(R.string.share_files_folder_invalid));
+                        return;
+                    }
+                    prefs().edit().putString(key, dir).apply();
+                    showLoading();
+                    background(() -> existingNames(owner, repo, dir, branch), (Set<String> existing) -> {
+                        hideLoading();
+                        // the commit dialog: message, this branch or a new one, pull request
+                        RepoFileActions.upload(this, owner, repo, branch, dir, files, existing, this::finish);
+                    }, error -> hideLoading());
+                });
+    }
+
+    /** Names in the folder (to ask before replacing); empty for a new folder or repository. */
+    @NonNull
+    private static Set<String> existingNames(@NonNull String owner, @NonNull String repo,
+                                             @NonNull String dir, @NonNull String branch) throws Exception {
+        Set<String> names = new HashSet<>();
+        try {
+            ArrayList<FileModel> list = GitHubApi.call(GitHubApi.service(RepoService.class)
+                    .getRepoFiles(owner, repo, RepoCommitter.encode(dir), branch));
+            if (list != null) for (FileModel file : list) names.add(file.getName());
+        } catch (GitHubApi.ApiException e) {
+            // 404: the folder does not exist yet; 409: the repository is empty
+            if (e.code != 404 && e.code != 409) throw e;
+        }
+        return names;
     }
 
     private void uploadTo(@NonNull String owner, @NonNull String repo, @NonNull Release release) {

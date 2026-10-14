@@ -112,8 +112,8 @@
 
 
     <!-- share to OpenHub -->
-    <string name="share_upload_label">Upload to GitHub release</string>
-    <string name="share_upload_title">Upload to a release</string>
+    <string name="share_upload_label">Upload to GitHub</string>
+    <string name="share_upload_title">Upload to GitHub</string>
     <string name="share_upload_subtitle">Choose a repository</string>
     <string name="share_upload_search">Search your repositories</string>
     <plurals name="share_upload_files">

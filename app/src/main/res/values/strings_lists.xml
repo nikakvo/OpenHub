@@ -9,4 +9,8 @@
     <string name="download_verified">SHA-256 verified</string>
     <string name="download_sha_mismatch">SHA-256 does not match GitHub\'s checksum: the file is damaged or was replaced, so it was deleted</string>
     <string name="copy_sha256">Copy SHA-256</string>
+    <string name="share_files_add">Add to the repository files (%1$s)</string>
+    <string name="share_files_folder_title">Folder for the files</string>
+    <string name="share_files_folder_hint">Folder, e.g. docs/images (empty: top folder)</string>
+    <string name="share_files_folder_invalid">A folder cannot contain "." or ".." parts</string>
 </resources>

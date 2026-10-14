@@ -63,4 +63,16 @@ public class RepoCommitterTest {
         assertArrayEquals(new String[]{"", "README.md"}, RepoCommitter.splitPath("README.md"));
         assertArrayEquals(new String[]{"docs/api", "index.md"}, RepoCommitter.splitPath("docs/api/index.md"));
     }
+
+    @Test
+    public void folders() {
+        assertEquals("", RepoCommitter.cleanFolder(null));
+        assertEquals("", RepoCommitter.cleanFolder("  "));
+        assertEquals("", RepoCommitter.cleanFolder("/"));
+        assertEquals("docs/images", RepoCommitter.cleanFolder(" /docs//images/ "));
+        assertEquals("docs/images", RepoCommitter.cleanFolder("docs\\images"));
+        assertNull(RepoCommitter.cleanFolder("docs/../secret"));
+        assertNull(RepoCommitter.cleanFolder("./docs"));
+        assertEquals("a.b/c..d", RepoCommitter.cleanFolder("a.b/c..d"));
+    }
 }

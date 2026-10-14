@@ -34,6 +34,13 @@ public final class TextInputDialog {
      */
     public static void show(@NonNull Context context, @StringRes int title, @StringRes int hint,
                             @Nullable String initial, boolean fileName, @NonNull Callback callback) {
+        show(context, title, hint, initial, fileName, false, callback);
+    }
+
+    /** @param allowEmpty an empty answer is valid (e.g. "the top folder") */
+    public static void show(@NonNull Context context, @StringRes int title, @StringRes int hint,
+                            @Nullable String initial, boolean fileName, boolean allowEmpty,
+                            @NonNull Callback callback) {
         View view = LayoutInflater.from(new AlertDialog.Builder(context).getContext()).inflate(R.layout.dialog_text_input, null);
         TextInputLayout layout = view.findViewById(R.id.input_layout);
         TextInputEditText edit = view.findViewById(R.id.input_edit);
@@ -56,7 +63,7 @@ public final class TextInputDialog {
                 .create();
         Runnable submit = () -> {
             String text = edit.getText() == null ? "" : edit.getText().toString().trim();
-            if (StringUtils.isBlank(text)) {
+            if (StringUtils.isBlank(text) && !allowEmpty) {
                 layout.setError(context.getString(R.string.field_required));
                 return;
             }

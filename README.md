@@ -62,14 +62,15 @@ app goes to them; see [Credits](#credits).
   repository settings, transfer, archive and delete
 * Branches: create, rename, delete, restore, and branch protection
 * Create, upload, edit, rename and delete files as real commits, to the branch you
-  choose or a new branch with a pull request
+  choose or a new branch with a pull request; files shared from other apps can be
+  committed to a folder of a repository
 * **Search code** in a repository, with the matches marked; file name search where
   GitHub's code search has nothing
 * Repository info, README, files, commits, activity, branches and tags
 * Star, watch and fork
 * Releases: create, edit, publish and delete, upload APKs and zips (also by sharing from
   other apps such as Termux), rename and delete files, Latest and Pre-release badges,
-  file sizes and download counts
+  file sizes and download counts; downloads are checked against GitHub's SHA-256
 * Release notifications for any repository
 * GitHub Actions: workflow runs, artifacts, starting workflows by hand, and a
   notification when a run finishes, with buttons to download its artifacts

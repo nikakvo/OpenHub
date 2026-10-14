@@ -366,6 +366,24 @@ public final class RepoCommitter {
         return mode == null || !mode.startsWith("100") ? MODE_FILE : mode;
     }
 
+    /**
+     * A folder typed by the user as a repository path: no leading, trailing or double
+     * slashes, "" for the top folder; null when it contains "." or ".." parts.
+     */
+    @Nullable
+    public static String cleanFolder(@Nullable String folder) {
+        if (folder == null) return "";
+        StringBuilder out = new StringBuilder();
+        for (String part : folder.trim().replace('\\', '/').split("/")) {
+            String p = part.trim();
+            if (p.isEmpty()) continue;
+            if (p.equals(".") || p.equals("..")) return null;
+            if (out.length() > 0) out.append('/');
+            out.append(p);
+        }
+        return out.toString();
+    }
+
     /** {folder, name} of a path; the folder is "" at the top. */
     @NonNull
     static String[] splitPath(@NonNull String path) {
