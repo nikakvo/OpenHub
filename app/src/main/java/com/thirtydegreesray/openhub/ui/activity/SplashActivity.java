@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 
+import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.inject.component.DaggerActivityComponent;
 import com.thirtydegreesray.openhub.inject.module.ActivityModule;
