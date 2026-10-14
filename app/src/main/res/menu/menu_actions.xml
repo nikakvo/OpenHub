@@ -16,6 +16,11 @@
         android:checkable="true"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_notify_runs"
+        android:title="@string/actions_notify_runs"
+        android:checkable="true"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_open_in_browser"
         android:title="@string/open_in_browser"
         app:showAsAction="never"/>

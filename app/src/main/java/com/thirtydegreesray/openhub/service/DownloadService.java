@@ -532,6 +532,8 @@ public class DownloadService extends Service {
         private void transfer(Target target) throws IOException {
             Request.Builder rb = new Request.Builder().url(url).header("User-Agent", "OpenHub");
             String token = AppData.INSTANCE.getAccessToken();
+            // started from a notification while the app was not running
+            if (StringUtils.isBlank(token)) token = ReleaseCheckWorker.loadToken();
             if (needsGitHubToken(url) && !StringUtils.isBlank(token)) {
                 // OkHttp drops this header automatically on a redirect to another host.
                 rb.header("Authorization", token.startsWith("Basic") ? token : "token " + token);

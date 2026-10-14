@@ -20,14 +20,33 @@ import okhttp3.Response;
 /**
  * "Mark as read" on a GitHub notification posted by {@link NotificationCheckWorker}:
  * marks the thread read on GitHub and removes the Android notification.
+ * "Download" on a finished workflow run starts the artifact download.
  */
 public class NotificationActionReceiver extends BroadcastReceiver {
 
     static final String ACTION_MARK_READ = "io.github.nikakvo.openhub.MARK_NOTIFICATION_READ";
     static final String EXTRA_THREAD = "thread";
+    /** "Download" on a finished workflow run ({@link ActionsCheckWorker}). */
+    static final String ACTION_DOWNLOAD_ARTIFACT = "io.github.nikakvo.openhub.DOWNLOAD_ARTIFACT";
+    static final String EXTRA_URL = "url";
+    static final String EXTRA_FILE_NAME = "file_name";
+    static final String EXTRA_NOTIFICATION_ID = "notification_id";
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (ACTION_DOWNLOAD_ARTIFACT.equals(intent.getAction())) {
+            String url = intent.getStringExtra(EXTRA_URL);
+            String fileName = intent.getStringExtra(EXTRA_FILE_NAME);
+            if (StringUtils.isBlank(url) || StringUtils.isBlank(fileName)) return;
+            NotificationManager manager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager != null) {
+                manager.cancel(ActionsCheckWorker.TAG, intent.getIntExtra(EXTRA_NOTIFICATION_ID, 0));
+            }
+            // the download has its own progress notification
+            DownloadService.start(context, url, fileName);
+            return;
+        }
         if (!ACTION_MARK_READ.equals(intent.getAction())) return;
         String thread = intent.getStringExtra(EXTRA_THREAD);
         if (StringUtils.isBlank(thread)) return;

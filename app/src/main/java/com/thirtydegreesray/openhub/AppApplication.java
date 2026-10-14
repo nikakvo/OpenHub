@@ -61,6 +61,7 @@ public class AppApplication extends Application {
         // keep the release check scheduled (no-op when nothing is watched)
         ReleaseWatcher.schedule(this);
         com.thirtydegreesray.openhub.util.GitHubNotifier.schedule(this);
+        com.thirtydegreesray.openhub.util.ActionsWatcher.schedule(this);
         startTime = System.currentTimeMillis();
         Logger.t(TAG).i("application ok:" + (System.currentTimeMillis() - startTime));
 

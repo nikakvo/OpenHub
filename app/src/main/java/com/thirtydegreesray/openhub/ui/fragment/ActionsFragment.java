@@ -267,6 +267,14 @@ public class ActionsFragment extends ListFragment<ActionsPresenter, ActionsAdapt
     @Override
     public void onWorkflowDispatched(@NonNull String workflowName, @NonNull String ref) {
         showSuccessToast(getString(R.string.actions_workflow_started, workflowName, ref));
+        if (getContext() != null) {
+            // announce the end of the run, even if the user leaves the app
+            com.thirtydegreesray.openhub.util.ActionsWatcher.followOnce(getContext(),
+                    mPresenter.getOwner() + "/" + mPresenter.getRepoName());
+            if (getActivity() instanceof ActionsActivity) {
+                ((ActionsActivity) getActivity()).askNotificationPermission();
+            }
+        }
         // the new run shows up in the API after a few seconds
         if (recyclerView != null) {
             recyclerView.postDelayed(() -> {

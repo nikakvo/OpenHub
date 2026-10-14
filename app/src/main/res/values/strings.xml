@@ -51,7 +51,7 @@
     <string name="actions_branch">Branch or tag</string>
     <string name="actions_inputs">Inputs, one key=value per line (optional)</string>
     <string name="actions_run">Run</string>
-    <string name="actions_workflow_started">%1$s started on %2$s</string>
+    <string name="actions_workflow_started">%1$s started on %2$s. You will get a notification when it finishes.</string>
     <plurals name="release_downloads">
         <item quantity="one">%d download</item>
         <item quantity="other">%d downloads</item>
@@ -561,6 +561,21 @@
     </plurals>
 
     <string name="scroll_to_top">Scroll to top</string>
+
+    <!-- Workflow run notifications -->
+    <string name="actions_notify_runs">Notify when runs finish</string>
+    <string name="actions_notify_on">You will be notified when workflow runs of %s finish</string>
+    <string name="actions_notify_off">No more workflow run notifications for %s</string>
+    <string name="actions_runs_channel">Workflow runs</string>
+    <string name="actions_notify_succeeded">%s succeeded</string>
+    <string name="actions_notify_failed">%s failed</string>
+    <string name="actions_notify_cancelled">%s was cancelled</string>
+    <string name="actions_notify_finished">%1$s finished: %2$s</string>
+    <string name="actions_notify_download">Download %1$s (%2$s)</string>
+    <plurals name="actions_notify_artifacts">
+        <item quantity="one">%d artifact</item>
+        <item quantity="other">%d artifacts</item>
+    </plurals>
 
     <!-- Release feed of starred repositories -->
     <string name="release_feed_title">Releases</string>

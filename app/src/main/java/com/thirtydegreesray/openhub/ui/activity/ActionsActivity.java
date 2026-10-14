@@ -1,7 +1,10 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,6 +12,8 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.thirtydegreesray.openhub.AppConfig;
@@ -16,6 +21,7 @@ import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.SingleFragmentActivity;
 import com.thirtydegreesray.openhub.ui.fragment.ActionsFragment;
+import com.thirtydegreesray.openhub.util.ActionsWatcher;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ViewUtils;
@@ -79,6 +85,8 @@ public class ActionsActivity extends SingleFragmentActivity<IBaseContract.Presen
         if (item != null && getFragment() != null) item.setChecked(getFragment().isSuccessfulOnly());
         MenuItem run = menu.findItem(R.id.action_run_workflow);
         if (run != null) run.setVisible(canRun);
+        MenuItem notify = menu.findItem(R.id.action_notify_runs);
+        if (notify != null) notify.setChecked(ActionsWatcher.isWatched(this, owner + "/" + repo));
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -96,12 +104,33 @@ public class ActionsActivity extends SingleFragmentActivity<IBaseContract.Presen
             item.setChecked(checked);
             if (getFragment() != null) getFragment().setSuccessfulOnly(checked);
             return true;
+        } else if (itemId == R.id.action_notify_runs) {
+            boolean watch = !item.isChecked();
+            item.setChecked(watch);
+            ActionsWatcher.setWatched(this, owner + "/" + repo, watch);
+            if (watch) {
+                askNotificationPermission();
+                showSuccessToast(getString(R.string.actions_notify_on, owner + "/" + repo));
+            } else {
+                showInfoToast(getString(R.string.actions_notify_off, owner + "/" + repo));
+            }
+            return true;
         } else if (itemId == R.id.action_open_in_browser) {
             AppOpener.openInCustomTabsOrBrowser(this,
                     AppConfig.GITHUB_BASE_URL + owner + "/" + repo + "/actions");
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /** Android 13+: notifications need the permission (asked once, never required). */
+    public void askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS}, 0);
+        }
     }
 
     @Override
