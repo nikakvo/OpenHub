@@ -215,6 +215,10 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
             startActivity(PullRequestsActivity.createIntent(this, repository.getOwner().getLogin(),
                     repository.getName(), canCreate));
             return true;
+        } else if (itemId == R.id.action_search_code) {
+            startActivity(CodeSearchActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),
+                    mPresenter.getRepository().getName()));
+            return true;
         } else if (itemId == R.id.action_discussions) {
             startActivity(DiscussionsActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),
                     mPresenter.getRepository().getName()));
@@ -262,8 +266,10 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
         desc.setText(repo.getDescription());
         String language = StringUtils.isBlank(repo.getLanguage()) ?
                 getString(R.string.unknown) : repo.getLanguage();
-        info.setText(String.format(Locale.getDefault(), "Language %s, size %s",
-                language, StringUtils.getSizeString(repo.getSize() * 1024)));
+        // GitHub counts the size of a new repository later (it reports 0 until then)
+        String size = repo.getSize() == 0 ? getString(R.string.repo_size_pending)
+                : StringUtils.getSizeString(repo.getSize() * 1024L);
+        info.setText(getString(R.string.repo_info_line, language, size));
 
         if (pagerAdapter.getCount() == 0) {
             pagerAdapter.setPagerList(FragmentPagerModel

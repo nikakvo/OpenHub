@@ -562,6 +562,20 @@
 
     <string name="scroll_to_top">Scroll to top</string>
 
+    <!-- Code search -->
+    <string name="code_search_title">Search code</string>
+    <string name="code_search_hint">Words to find in the code</string>
+    <string name="code_search_tip">Searches the default branch. Narrow it with path:src, extension:java or filename:build.sh after the words.</string>
+    <string name="code_search_none">Nothing found for \"%s\".</string>
+    <string name="code_search_rate_limit">GitHub allows only a few code searches per minute. Wait a moment and try again.</string>
+    <string name="code_search_match_in_name">Found in the file name or path</string>
+    <plurals name="code_search_count">
+        <item quantity="one">%d result</item>
+        <item quantity="other">%d results</item>
+    </plurals>
+    <string name="repo_info_line">Language %1$s, size %2$s</string>
+    <string name="repo_size_pending">not counted yet</string>
+
     <!-- Discussions -->
     <string name="discussions">Discussions</string>
     <string name="discussions_disabled">Discussions are not turned on in this repository.</string>

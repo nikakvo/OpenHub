@@ -62,6 +62,10 @@
         android:title="@string/pulls_title"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_search_code"
+        android:title="@string/code_search_title"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_discussions"
         android:title="@string/discussions"
         android:visible="false"

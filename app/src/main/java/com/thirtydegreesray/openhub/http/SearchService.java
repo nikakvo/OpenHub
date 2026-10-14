@@ -50,4 +50,13 @@ public interface SearchService {
             @Query("page") int page
     );
 
+    /** Code search in the default branch; text matches give the found fragments. */
+    @NonNull @GET("search/code")
+    @Headers({"Accept: application/vnd.github.text-match+json", "Cache-Control: no-cache, no-store"})
+    Observable<Response<com.google.gson.JsonObject>> searchCode(
+            @Query("q") String query,
+            @Query("page") int page,
+            @Query("per_page") int perPage
+    );
+
 }
