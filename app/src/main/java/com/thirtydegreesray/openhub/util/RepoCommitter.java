@@ -209,7 +209,7 @@ public final class RepoCommitter {
         commitBody.put("parents", parents);
         String newCommit = GitHubApi.call(git.createCommit(owner, repo, commitBody)).get("sha").getAsString();
 
-        String target = options.newBranch != null ? options.newBranch : branch;
+        String target = targetBranch(branch, options);
         if (options.newBranch != null) {
             Map<String, Object> ref = new HashMap<>();
             ref.put("ref", "refs/heads/" + options.newBranch);
@@ -229,9 +229,10 @@ public final class RepoCommitter {
         }
 
         String pullUrl = null;
-        if (options.openPullRequest) {
-            String pullHead = options.newBranch != null ? options.newBranch : branch;
-            String pullBase = options.newBranch != null ? branch : options.pullBase;
+        String[] headAndBase = pullHeadAndBase(branch, options);
+        if (headAndBase != null) {
+            String pullHead = headAndBase[0];
+            String pullBase = headAndBase[1];
             Map<String, Object> pull = new HashMap<>();
             pull.put("title", options.message);
             if (!StringUtils.isBlank(options.description)) pull.put("body", options.description.trim());
@@ -315,9 +316,9 @@ public final class RepoCommitter {
                                  @NonNull String head, @NonNull String baseTree, @Nullable String path,
                                  @NonNull Map<String, Map<String, String>> cache) {
         if (path == null) return MODE_FILE;
-        int slash = path.lastIndexOf('/');
-        String dir = slash < 0 ? "" : path.substring(0, slash);
-        String name = slash < 0 ? path : path.substring(slash + 1);
+        String[] dirAndName = splitPath(path);
+        String dir = dirAndName[0];
+        String name = dirAndName[1];
         Map<String, String> entries = cache.get(dir);
         if (entries == null) {
             entries = new HashMap<>();
@@ -333,8 +334,44 @@ public final class RepoCommitter {
             }
             cache.put(dir, entries);
         }
-        String mode = entries.get(name);
+        return keptMode(entries.get(name));
+    }
+
+    // ---- decisions (plain Java, unit tested) ----------------------------------------
+
+    /** The branch that gets the commit: the new branch, or the current one. */
+    @NonNull
+    static String targetBranch(@NonNull String branch, @NonNull Options options) {
+        return options.newBranch != null ? options.newBranch : branch;
+    }
+
+    /**
+     * {head, base} of the pull request the commit opens, or null for none. From a new
+     * branch into the current one; from the current branch into options.pullBase.
+     */
+    @Nullable
+    static String[] pullHeadAndBase(@NonNull String branch, @NonNull Options options) {
+        if (!options.openPullRequest) return null;
+        return options.newBranch != null
+                ? new String[]{options.newBranch, branch}
+                : new String[]{branch, options.pullBase};
+    }
+
+    /**
+     * The mode a changed file keeps: an executable stays executable (100755); a new path,
+     * a symlink or a submodule entry becomes a normal file (100644).
+     */
+    @NonNull
+    static String keptMode(@Nullable String mode) {
         return mode == null || !mode.startsWith("100") ? MODE_FILE : mode;
+    }
+
+    /** {folder, name} of a path; the folder is "" at the top. */
+    @NonNull
+    static String[] splitPath(@NonNull String path) {
+        int slash = path.lastIndexOf('/');
+        return new String[]{slash < 0 ? "" : path.substring(0, slash),
+                slash < 0 ? path : path.substring(slash + 1)};
     }
 
     @NonNull

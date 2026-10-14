@@ -312,9 +312,7 @@ public class DownloadService extends Service {
     }
 
     private static boolean needsGitHubToken(@NonNull String url) {
-        Uri uri = Uri.parse(url);
-        return "https".equalsIgnoreCase(uri.getScheme())
-                && "api.github.com".equalsIgnoreCase(uri.getHost());
+        return com.thirtydegreesray.openhub.http.core.AppRetrofit.sendsTokenTo(okhttp3.HttpUrl.parse(url));
     }
 
     private static class FatalDownloadException extends IOException {

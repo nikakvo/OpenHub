@@ -123,6 +123,11 @@ public enum  AppRetrofit {
         return host != null && host.equalsIgnoreCase("api.github.com");
     }
 
+    /** True when a request to {@code url} gets the token: HTTPS to api.github.com only. */
+    public static boolean sendsTokenTo(@Nullable okhttp3.HttpUrl url) {
+        return url != null && url.isHttps() && isTokenHost(url.host());
+    }
+
     /** github.com and its API, where the login name may be added to keep accounts' caches apart. */
     static boolean isGitHubHost(@Nullable String host) {
         return host != null && (host.equalsIgnoreCase("api.github.com") || host.equalsIgnoreCase("github.com"));
@@ -156,7 +161,7 @@ public enum  AppRetrofit {
             }
 
             // only to the GitHub API and only encrypted (an http:// address never gets it)
-            if (!StringUtils.isBlank(token) && isTokenHost(host) && request.url().isHttps()) {
+            if (!StringUtils.isBlank(token) && sendsTokenTo(request.url())) {
                 String auth = token.startsWith("Basic") ? token : "token " + token;
                 request = request.newBuilder()
                         .header("Authorization", auth)

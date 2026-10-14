@@ -141,10 +141,14 @@ public final class ContentFiles {
      * never get that uploaded.
      */
     static boolean isForeignContent(@NonNull Context context, @NonNull Uri uri) {
-        if (!ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return false;
-        String authority = uri.getAuthority();
+        return acceptsShared(uri.getScheme(), uri.getAuthority(), context.getPackageName());
+    }
+
+    /** {@link #isForeignContent} without Android classes (unit tested). */
+    static boolean acceptsShared(@Nullable String scheme, @Nullable String authority,
+                                 @NonNull String own) {
+        if (!"content".equals(scheme)) return false;
         if (authority == null || authority.isEmpty()) return false;
-        String own = context.getPackageName();
         for (String part : authority.split(";")) {
             // OpenHub's own FileProvider shares only the public Download folder
             if (part.equals(own + ".fileProvider")) continue;
