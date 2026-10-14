@@ -24,6 +24,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.util.AccountChanges;
 import com.thirtydegreesray.openhub.common.GlideApp;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.RepoAdminService;
@@ -454,6 +455,7 @@ public class CreateRepositoryActivity extends BaseActivity<IBaseContract.Present
             if (gitignoreError != null) {
                 showWarningToast(getString(R.string.gitignore_commit_failed, gitignoreError));
             }
+            AccountChanges.markRepos();
             showSuccessToast(getString(R.string.repo_create_done, repository.getFullName()));
             RepositoryActivity.show(this, repository);
             finish();

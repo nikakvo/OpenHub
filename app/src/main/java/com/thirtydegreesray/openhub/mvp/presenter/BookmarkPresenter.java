@@ -9,7 +9,6 @@ import com.thirtydegreesray.openhub.mvp.model.BookmarkExt;
 import com.thirtydegreesray.openhub.mvp.model.Repository;
 import com.thirtydegreesray.openhub.mvp.model.User;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
-import com.thirtydegreesray.openhub.util.LocalChanges;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +29,6 @@ public class BookmarkPresenter extends BasePresenter<IBookmarkContract.View>
     private ArrayList<BookmarkExt> bookmarks;
     private BookmarkExt removedBookmark;
     private int removedPosition;
-    private long seenStamp;
 
     private static final int PAGE_SIZE = 30;
 
@@ -48,7 +46,6 @@ public class BookmarkPresenter extends BasePresenter<IBookmarkContract.View>
     @Override
     public void loadBookmarks(int page) {
         mView.showLoading();
-        if (page == 1) seenStamp = LocalChanges.bookmarksStamp();
         final ArrayList<BookmarkExt> tempBookmarks = new ArrayList<>();
         Completable.fromAction(() -> db.runInTransaction(() -> {
                     List<Bookmark> bookmarkList =
@@ -100,10 +97,4 @@ public class BookmarkPresenter extends BasePresenter<IBookmarkContract.View>
         mView.notifyItemAdded(removedPosition);
         rxDBExecute(() -> db.bookmarkDao().insert(removedBookmark));
     }
-
-    @Override
-    public void reloadIfChanged() {
-        if (LocalChanges.changedSince(seenStamp, LocalChanges.bookmarksStamp())) loadBookmarks(1);
-    }
-
 }

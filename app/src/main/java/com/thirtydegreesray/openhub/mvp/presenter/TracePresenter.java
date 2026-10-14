@@ -9,7 +9,6 @@ import com.thirtydegreesray.openhub.mvp.model.Repository;
 import com.thirtydegreesray.openhub.mvp.model.TraceExt;
 import com.thirtydegreesray.openhub.mvp.model.User;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
-import com.thirtydegreesray.openhub.util.LocalChanges;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +29,6 @@ public class TracePresenter extends BasePresenter<ITraceContract.View>
     private ArrayList<TraceExt> traceList;
     private TraceExt removedTrace;
     private int removedPosition;
-    private long seenStamp;
 
     private static final int PAGE_SIZE = 30;
 
@@ -48,7 +46,6 @@ public class TracePresenter extends BasePresenter<ITraceContract.View>
     @Override
     public void loadTraceList(int page) {
         mView.showLoading();
-        if (page == 1) seenStamp = LocalChanges.historyStamp();
         final ArrayList<TraceExt> tempTraceList = new ArrayList<>();
         Completable.fromAction(() -> db.runInTransaction(() -> {
                     List<Trace> traceListDb =
@@ -99,12 +96,6 @@ public class TracePresenter extends BasePresenter<ITraceContract.View>
         mView.notifyItemAdded(removedPosition);
         rxDBExecute(() -> db.traceDao().insert(removedTrace));
     }
-
-    @Override
-    public void reloadIfChanged() {
-        if (LocalChanges.changedSince(seenStamp, LocalChanges.historyStamp())) loadTraceList(1);
-    }
-
     @Override
     public int getFirstItemByDate(long dateTime) {
         for (TraceExt trace : traceList) {

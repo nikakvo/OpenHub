@@ -3,6 +3,7 @@
 package com.thirtydegreesray.openhub.ui.fragment.base;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -60,6 +61,18 @@ public abstract class ListFragment <P extends IBaseContract.Presenter, A extends
     private boolean autoJudgeCanLoadMoreEnable = true;
     private boolean isLoading = false;
     private final int DEFAULT_PAGE_SIZE = 30;
+
+    /** When the list was last loaded (elapsedRealtime), 0 before the first load. */
+    private long lastLoadedAt;
+    /** {@link #changeStamp()} when the last load started. */
+    private long seenStamp;
+
+    /** For feeds that change all the time. */
+    protected static final long AUTO_REFRESH_FEED_MS = 3 * 60 * 1000L;
+    /** For lists that change now and then. */
+    protected static final long AUTO_REFRESH_LIST_MS = 10 * 60 * 1000L;
+    /** For curated lists that hardly ever change. */
+    protected static final long AUTO_REFRESH_STATIC_MS = 60 * 60 * 1000L;
 
     @Override
     protected void initFragment(Bundle savedInstanceState) {
@@ -277,13 +290,62 @@ public abstract class ListFragment <P extends IBaseContract.Presenter, A extends
     @Override
     public void showLoading() {
         isLoading = true;
+        seenStamp = changeStamp();
         refreshLayout.setRefreshing(true);
     }
 
     @Override
     public void hideLoading() {
         isLoading = false;
+        lastLoadedAt = SystemClock.elapsedRealtime();
         refreshLayout.setRefreshing(false);
+    }
+
+    // ---- automatic refresh ----------------------------------------------------------
+    // A list that comes back to the front (screen resumed, or its side menu tab shown
+    // again) reloads by itself when its data was changed on another screen or when it is
+    // older than autoRefreshAfterMs(), as if it had been pulled down.
+
+    /**
+     * Current change stamp of this list's data (e.g. {@code AccountChanges.starsStamp()}),
+     * or 0 when other screens cannot change it. A different value than at the last load
+     * means: reload.
+     */
+    protected long changeStamp() {
+        return 0;
+    }
+
+    /** Reload when the list is older than this when shown again; 0 = never. */
+    protected long autoRefreshAfterMs() {
+        return 0;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!isHidden()) autoRefreshIfNeeded();
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden) autoRefreshIfNeeded();
+    }
+
+    private void autoRefreshIfNeeded() {
+        if (refreshLayout == null || !refreshEnable || isLoading || lastLoadedAt == 0) return;
+        long stamp = changeStamp();
+        boolean changed = stamp != 0 && seenStamp != 0 && stamp != seenStamp;
+        long maxAge = autoRefreshAfterMs();
+        boolean old = maxAge > 0 && SystemClock.elapsedRealtime() - lastLoadedAt > maxAge;
+        if (!changed && !old) return;
+        if (!NetHelper.INSTANCE.getNetEnabled() && usesNetwork()) return; // keep what is shown
+        onRefresh();
+    }
+
+    /** False for lists read from the phone's database (they reload offline too). */
+    protected boolean usesNetwork() {
+        return true;
     }
 
     protected abstract void onReLoadData();

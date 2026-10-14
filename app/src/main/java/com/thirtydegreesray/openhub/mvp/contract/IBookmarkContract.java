@@ -21,9 +21,6 @@ public interface IBookmarkContract {
         void loadBookmarks(int page);
         void removeBookmark(int position);
         void undoRemoveBookmark();
-
-        /** Reloads when bookmarks were changed on another screen since the last load. */
-        void reloadIfChanged();
     }
 
 }

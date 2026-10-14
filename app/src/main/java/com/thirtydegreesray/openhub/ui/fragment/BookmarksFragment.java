@@ -18,6 +18,7 @@ import com.thirtydegreesray.openhub.ui.activity.RepositoryActivity;
 import com.thirtydegreesray.openhub.ui.adapter.BookmarksAdapter;
 import com.thirtydegreesray.openhub.ui.adapter.base.ItemTouchHelperCallback;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
+import com.thirtydegreesray.openhub.util.LocalChanges;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 
 import java.util.ArrayList;
@@ -60,16 +61,14 @@ public class BookmarksFragment extends ListFragment<BookmarkPresenter, Bookmarks
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        // bookmarked, unbookmarked or opened on another screen: show it without a pull
-        if (mPresenter != null && !isHidden()) mPresenter.reloadIfChanged();
+    protected long changeStamp() {
+        // bookmarked or unbookmarked on another screen: reload without a pull
+        return LocalChanges.bookmarksStamp();
     }
 
     @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        if (!hidden && mPresenter != null) mPresenter.reloadIfChanged();
+    protected boolean usesNetwork() {
+        return false;
     }
 
     @Override

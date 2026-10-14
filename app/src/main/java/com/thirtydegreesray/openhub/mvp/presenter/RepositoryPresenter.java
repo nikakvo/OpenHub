@@ -8,6 +8,7 @@ import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.dao.Bookmark;
 import com.thirtydegreesray.openhub.dao.AppDatabase;
+import com.thirtydegreesray.openhub.util.AccountChanges;
 import com.thirtydegreesray.openhub.util.LocalChanges;
 import com.thirtydegreesray.openhub.dao.Trace;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
@@ -115,7 +116,19 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
         Observable<Response<ResponseBody>> observable = starred ?
                 getRepoService().starRepo(owner, repoName) :
                 getRepoService().unstarRepo(owner, repoName);
-        executeSimpleRequest(observable);
+        HttpObserver<ResponseBody> httpObserver = new HttpObserver<ResponseBody>() {
+            @Override
+            public void onError(Throwable error) {
+                if (mView != null) mView.showErrorToast(getErrorTip(error));
+            }
+
+            @Override
+            public void onSuccess(HttpResponse<ResponseBody> response) {
+                // the Starred list reloads when it is shown again
+                AccountChanges.markStars();
+            }
+        };
+        generalRxHttpExecute(forceNetWork -> observable, httpObserver);
     }
 
     @Override
@@ -140,6 +153,7 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
             @Override
             public void onSuccess(HttpResponse<Repository> response) {
                 if(response.body() != null) {
+                    AccountChanges.markRepos();
                     mView.showSuccessToast(getString(R.string.forked));
                     RepositoryActivity.show(getContext(), response.body());
                 } else {

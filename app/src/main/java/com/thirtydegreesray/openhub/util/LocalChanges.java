@@ -21,16 +21,12 @@ public final class LocalChanges {
         history++;
     }
 
-    /** Current value; remember it when loading and compare with {@link #changedSince}. */
+    /** Current value; a list remembers it when loading (see ListFragment.changeStamp). */
     public static long bookmarksStamp() {
         return bookmarks;
     }
 
     public static long historyStamp() {
         return history;
-    }
-
-    public static boolean changedSince(long seen, long now) {
-        return seen != 0 && seen != now;
     }
 }

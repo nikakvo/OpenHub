@@ -28,6 +28,7 @@ import com.thirtydegreesray.openhub.ui.activity.RepositoryActivity;
 import com.thirtydegreesray.openhub.ui.activity.TrendingActivity;
 import com.thirtydegreesray.openhub.ui.adapter.RepositoriesAdapter;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
+import com.thirtydegreesray.openhub.util.AccountChanges;
 import com.thirtydegreesray.openhub.ui.fragment.base.OnDrawerSelectedListener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 
@@ -140,6 +141,22 @@ public class RepositoriesFragment extends ListFragment<RepositoriesPresenter, Re
     @Override
     protected void onReLoadData() {
         mPresenter.loadRepositories(true, 1);
+    }
+
+    @Override
+    protected long changeStamp() {
+        if (mPresenter == null) return 0;
+        if (RepositoriesType.OWNED.equals(mPresenter.getType())) return AccountChanges.reposStamp();
+        if (RepositoriesType.STARRED.equals(mPresenter.getType())) return AccountChanges.starsStamp();
+        return 0;
+    }
+
+    @Override
+    protected long autoRefreshAfterMs() {
+        if (mPresenter == null) return 0;
+        return RepositoriesType.OWNED.equals(mPresenter.getType())
+                || RepositoriesType.STARRED.equals(mPresenter.getType())
+                ? AUTO_REFRESH_LIST_MS : 0;
     }
 
     @Override

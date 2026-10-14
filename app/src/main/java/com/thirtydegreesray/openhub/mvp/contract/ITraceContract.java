@@ -21,9 +21,6 @@ public interface ITraceContract {
         void loadTraceList(int page);
         void removeTrace(int position);
         void undoRemoveTrace();
-
-        /** Reloads when the history was changed on another screen since the last load. */
-        void reloadIfChanged();
         int getFirstItemByDate(long dateTime);
     }
 

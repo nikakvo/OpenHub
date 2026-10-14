@@ -66,6 +66,11 @@ public class TopicsFragment extends ListFragment<TopicsPresenter, TopicsAdapter>
     }
 
     @Override
+    protected long autoRefreshAfterMs() {
+        return AUTO_REFRESH_STATIC_MS;
+    }
+
+    @Override
     protected String getEmptyTip() {
         return getString(R.string.no_topics);
     }

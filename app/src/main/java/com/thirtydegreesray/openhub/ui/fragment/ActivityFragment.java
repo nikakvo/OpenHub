@@ -84,6 +84,15 @@ public class ActivityFragment extends ListFragment<ActivityPresenter, Activities
     }
 
     @Override
+    protected long autoRefreshAfterMs() {
+        // the News and Public news feeds of the side menu go stale quickly
+        if (mPresenter == null) return 0;
+        return ActivityType.News.equals(mPresenter.getType())
+                || ActivityType.PublicNews.equals(mPresenter.getType())
+                ? AUTO_REFRESH_FEED_MS : 0;
+    }
+
+    @Override
     protected String getEmptyTip() {
         return getString(R.string.no_activity);
     }

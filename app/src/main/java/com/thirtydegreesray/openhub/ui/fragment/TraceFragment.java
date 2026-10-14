@@ -19,6 +19,7 @@ import com.thirtydegreesray.openhub.ui.adapter.TraceAdapter;
 import com.thirtydegreesray.openhub.ui.adapter.base.StickyHeaderDecoration;
 import com.thirtydegreesray.openhub.ui.adapter.base.ItemTouchHelperCallback;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
+import com.thirtydegreesray.openhub.util.LocalChanges;
 
 import java.util.ArrayList;
 
@@ -77,16 +78,14 @@ public class TraceFragment extends ListFragment<TracePresenter, TraceAdapter>
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        // bookmarked, unbookmarked or opened on another screen: show it without a pull
-        if (mPresenter != null && !isHidden()) mPresenter.reloadIfChanged();
+    protected long changeStamp() {
+        // opened on another screen: reload without a pull
+        return LocalChanges.historyStamp();
     }
 
     @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        if (!hidden && mPresenter != null) mPresenter.reloadIfChanged();
+    protected boolean usesNetwork() {
+        return false;
     }
 
     @Override

@@ -36,6 +36,10 @@ public class ActivityPresenter extends BasePagerPresenter<IActivityContract.View
         implements IActivityContract.Presenter{
 
     @AutoAccess ActivityFragment.ActivityType type ;
+
+    public ActivityFragment.ActivityType getType() {
+        return type;
+    }
     @AutoAccess String user ;
     @AutoAccess String repo ;
 

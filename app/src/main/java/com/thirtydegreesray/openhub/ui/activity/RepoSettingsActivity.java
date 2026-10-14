@@ -26,6 +26,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.util.AccountChanges;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.RepoSettingsService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
@@ -125,7 +126,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
 
     private void load() {
         loader.setVisibility(View.VISIBLE);
-        background(() -> {
+        run(() -> {
             Response<JsonObject> repoResponse = service().getRepo(owner, repo).blockingFirst();
             if (!repoResponse.isSuccessful()) {
                 throw new GitHubApi.ApiException(repoResponse.code(), GitHubApi.errorMessage(repoResponse));
@@ -384,7 +385,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
 
     private void chooseDefaultBranch() {
         showProgressDialog(getString(R.string.please_wait));
-        background(() -> {
+        run(() -> {
             ArrayList<String> names = new ArrayList<>();
             JsonArray list = GitHubApi.call(service().getBranches(owner, repo, 1));
             if (list != null) for (JsonElement b : list) names.add(b.getAsJsonObject().get("name").getAsString());
@@ -646,8 +647,17 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
         return edit.getText() == null ? "" : edit.getText().toString().trim();
     }
 
+    /** Runs a change of the repository; "My repositories" reloads afterwards. */
     private <T> void background(@NonNull Callable<T> work, @NonNull Consumer<T> onSuccess,
                                 @Nullable Consumer<Throwable> onError) {
+        run(work, result -> {
+            AccountChanges.markRepos();
+            onSuccess.accept(result);
+        }, onError);
+    }
+
+    private <T> void run(@NonNull Callable<T> work, @NonNull Consumer<T> onSuccess,
+                         @Nullable Consumer<Throwable> onError) {
         disposables.add(Single.fromCallable(work)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
