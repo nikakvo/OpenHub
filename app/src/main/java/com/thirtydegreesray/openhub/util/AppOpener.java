@@ -232,6 +232,14 @@ public class AppOpener {
             context.startActivity(runIntent);
             return;
         }
+        // gists (gist.github.com/user/id)
+        String gistId = GistLinks.id(url);
+        if (gistId != null) {
+            Intent gistIntent = com.thirtydegreesray.openhub.ui.activity.GistActivity.createIntent(context, gistId);
+            if (!(context instanceof android.app.Activity)) gistIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(gistIntent);
+            return;
+        }
         // discussions too (github.com/o/r/discussions and /discussions/12)
         Intent discussionIntent = com.thirtydegreesray.openhub.ui.activity.DiscussionActivity.createIntent(context, url);
         if (discussionIntent != null) {

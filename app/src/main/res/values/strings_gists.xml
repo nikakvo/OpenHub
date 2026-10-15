@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gist_new">New gist</string>
+    <string name="gist_starred">Starred gists</string>
+    <string name="gist_add_file">Add file</string>
+    <string name="gist_edit_file">Edit file</string>
+    <string name="gist_edit_description">Edit description</string>
+    <string name="gist_description">Description (optional)</string>
+    <string name="gist_filename">File name, e.g. setup.sh</string>
+    <string name="gist_public">Public (anyone can find it); off: secret (only people with the link)</string>
+    <string name="gist_save">Save</string>
+    <string name="gist_create">Create gist</string>
+    <string name="gist_created">Gist created</string>
+    <string name="gist_saved">Gist saved</string>
+    <string name="gist_public_badge">Public</string>
+    <string name="gist_by">by %1$s</string>
+    <string name="gist_updated">updated %1$s</string>
+    <plurals name="gist_comments">
+        <item quantity="one">%d comment</item>
+        <item quantity="other">%d comments</item>
+    </plurals>
+    <string name="gist_star">Star</string>
+    <string name="gist_unstar">Unstar</string>
+    <string name="gist_starred_done">Starred</string>
+    <string name="gist_unstarred_done">Unstarred</string>
+    <string name="gist_fork">Fork</string>
+    <string name="gist_forked">Forked to your gists</string>
+    <string name="gist_delete">Delete gist</string>
+    <string name="gist_delete_message">Delete this gist with all its files? This cannot be undone.</string>
+    <string name="gist_deleted">Gist deleted</string>
+    <string name="gist_file_delete">Delete file</string>
+    <string name="gist_file_delete_message">Delete %1$s from this gist?</string>
+    <string name="gist_last_file">A gist needs at least one file: delete the gist instead</string>
+    <string name="gist_file_too_big">This file is too big to edit on the phone</string>
+    <string name="gist_name_invalid">A file name cannot contain "/"</string>
+    <string name="gist_name_exists">The gist already has a file named %1$s</string>
+    <string name="gist_content_required">GitHub does not keep empty files: write something</string>
+    <string name="gist_discard_message">Your changes are not saved yet. Discard them?</string>
+    <string name="gist_scope_missing">Your sign-in has no "gist" permission. Sign in with the browser again or create a token with the gist scope.</string>
+</resources>

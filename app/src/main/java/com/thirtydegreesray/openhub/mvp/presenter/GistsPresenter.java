@@ -1,7 +1,5 @@
 package com.thirtydegreesray.openhub.mvp.presenter;
 
-import androidx.annotation.NonNull;
-
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.http.core.HttpObserver;
@@ -19,12 +17,14 @@ import javax.inject.Inject;
 
 /**
  * Gists of a user, newest first. For the logged in user the list comes from /gists,
- * which includes secret gists.
+ * which includes secret gists. In starred mode: the gists the logged in user starred.
  */
 public class GistsPresenter extends BasePresenter<IGistsContract.View>
         implements IGistsContract.Presenter {
 
     @AutoAccess String user;
+    /** The gists the logged in user starred, instead of the gists of {@link #user}. */
+    @AutoAccess boolean starred;
 
     private ArrayList<Gist> gists;
 
@@ -84,28 +84,11 @@ public class GistsPresenter extends BasePresenter<IGistsContract.View>
             }
         };
         final boolean me = isMe();
-        generalRxHttpExecute(forceNetWork -> me
+        generalRxHttpExecute(forceNetWork -> starred
+                ? getUserService().getStarredGists(forceNetWork, page)
+                : me
                 ? getUserService().getMyGists(forceNetWork, page)
                 : getUserService().getUserGists(forceNetWork, user, page), observer, readCacheFirst);
-    }
-
-    @Override
-    public void openGist(@NonNull Gist gist) {
-        mView.showProgressDialog(getLoadTip());
-        HttpObserver<Gist> observer = new HttpObserver<Gist>() {
-            @Override
-            public void onError(Throwable error) {
-                mView.dismissProgressDialog();
-                mView.showErrorToast(getErrorTip(error));
-            }
-
-            @Override
-            public void onSuccess(HttpResponse<Gist> response) {
-                mView.dismissProgressDialog();
-                mView.showGistFiles(response.body() == null ? gist : response.body());
-            }
-        };
-        generalRxHttpExecute(forceNetWork -> getUserService().getGist(true, gist.getId()), observer);
     }
 
     public String getUser() {

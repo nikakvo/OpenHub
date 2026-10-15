@@ -146,6 +146,9 @@
         <activity android:name=".ui.activity.ActionsActivity" android:label="@string/actions"/>
         <activity android:name=".ui.activity.WorkflowRunActivity"/>
         <activity android:name=".ui.activity.JobLogActivity"/>
+        <activity android:name=".ui.activity.GistActivity"/>
+        <activity android:name=".ui.activity.GistEditActivity"
+            android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".ui.activity.GistsActivity" android:label="@string/gists"/>
         <activity android:name=".ui.activity.ViewerActivity"/>
         <activity android:name=".ui.activity.ReleaseInfoActivity"/>

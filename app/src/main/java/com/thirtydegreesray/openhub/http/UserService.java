@@ -133,6 +133,13 @@ public interface UserService {
             @Query("page") int page
     );
 
+    /** Gists the logged in user has starred. */
+    @NonNull @GET("gists/starred")
+    Observable<Response<ArrayList<Gist>>> getStarredGists(
+            @Header("forceNetWork") boolean forceNetWork,
+            @Query("page") int page
+    );
+
     /** One gist with its file contents. */
     @NonNull @GET("gists/{id}")
     Observable<Response<Gist>> getGist(

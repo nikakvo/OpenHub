@@ -13,14 +13,9 @@ public interface IGistsContract {
         void setCanLoadMore(boolean canLoadMore);
 
         void showLoadError(String error);
-
-        /** The full gist with file contents, after a tap. */
-        void showGistFiles(Gist gist);
     }
 
     interface Presenter extends IBaseContract.Presenter<IGistsContract.View> {
         void loadGists(int page, boolean isReload);
-
-        void openGist(Gist gist);
     }
 }
