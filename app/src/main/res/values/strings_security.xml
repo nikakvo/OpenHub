@@ -60,7 +60,7 @@
     <string name="security_reason_revoked">Revoked</string>
 
     <!-- Actions secrets -->
-    <string name="secrets_none">No repository secrets yet. Workflows read them as ${{ secrets.NAME }}.</string>
+    <string name="secrets_none">No repository secrets yet.\nWorkflows read them as ${{\u00A0secrets.NAME\u00A0}}</string>
     <string name="secrets_add">New secret</string>
     <string name="secrets_update">Update value</string>
     <string name="secrets_name">Name</string>

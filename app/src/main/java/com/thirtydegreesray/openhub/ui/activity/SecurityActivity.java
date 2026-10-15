@@ -94,6 +94,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private TabLayout tabLayout;
     private SwipeRefreshLayout refreshLayout;
+    private boolean refreshing;
     private LinearLayout emptyBox;
     private TextView emptyText;
     private Button turnOnBn;
@@ -217,20 +218,26 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
     // Loading
     // ---------------------------------------------------------------------------------
 
+    /** Posted: a SwipeRefreshLayout told before its first layout keeps a stuck circle. */
+    private void showRefreshing(boolean on) {
+        refreshing = on;
+        refreshLayout.post(() -> refreshLayout.setRefreshing(refreshing));
+    }
+
     private void load() {
         if (loading != null) loading.dispose();
         final int shownTab = tab;
-        refreshLayout.setRefreshing(true);
+        showRefreshing(true);
         if (shownTab == TAB_SECRETS) addSecretBn.show();
         else addSecretBn.hide();
         loading = Single.fromCallable(() -> fetch(shownTab))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(items -> {
-                    refreshLayout.setRefreshing(false);
+                    showRefreshing(false);
                     if (shownTab == tab) render(items);
                 }, error -> {
-                    refreshLayout.setRefreshing(false);
+                    showRefreshing(false);
                     if (shownTab == tab) showError(error);
                 });
     }

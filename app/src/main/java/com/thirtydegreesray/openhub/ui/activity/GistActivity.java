@@ -74,6 +74,7 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
     @AutoAccess String gistId;
 
     private SwipeRefreshLayout refreshLayout;
+    private boolean refreshing;
     private TextView descriptionText;
     private TextView metaText;
     private TextView filesTitle;
@@ -134,8 +135,14 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
     // Load and show
     // ---------------------------------------------------------------------------------
 
+    /** Posted: a SwipeRefreshLayout told before its first layout keeps a stuck circle. */
+    private void showRefreshing(boolean on) {
+        refreshing = on;
+        refreshLayout.post(() -> refreshLayout.setRefreshing(refreshing));
+    }
+
     private void load() {
-        refreshLayout.setRefreshing(true);
+        showRefreshing(true);
         seenStamp = GistChanges.stamp();
         background(() -> {
             JsonObject json = GitHubApi.call(service().getGist(gistId));
@@ -148,12 +155,12 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
             }
             return new Object[]{json, star};
         }, (Object[] result) -> {
-            refreshLayout.setRefreshing(false);
+            showRefreshing(false);
             gist = (JsonObject) result[0];
             starred = (Boolean) result[1];
             render();
             invalidateOptionsMenu();
-        }, error -> refreshLayout.setRefreshing(false));
+        }, error -> showRefreshing(false));
     }
 
     @NonNull
