@@ -85,6 +85,15 @@ public interface ActionsService {
             @Body Map<String, Object> body
     );
 
+    /** The artifact's zip (GitHub redirects to a storage address). A plain Call, see getJobLog. */
+    @NonNull @Streaming @GET("repos/{owner}/{repo}/actions/artifacts/{artifactId}/zip")
+    @Headers("Cache-Control: no-cache, no-store")
+    retrofit2.Call<ResponseBody> getArtifactZip(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("artifactId") long artifactId
+    );
+
     @NonNull @POST("repos/{owner}/{repo}/actions/runs/{runId}/cancel")
     Observable<Response<ResponseBody>> cancel(
             @Path("owner") String owner,

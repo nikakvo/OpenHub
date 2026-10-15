@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Files OpenHub can hand to other apps (Install / Open / Share of a download on
-     Android 8-9): only the public Download folder. -->
+<!-- Files of this provider (not exported; reachable only with a grant from OpenHub):
+     the public Download folder (Install / Open / Share of a download on Android 8-9) and
+     unpacked workflow artifacts that OpenHub itself uploads to a release. -->
 <paths>
     <external-path name="downloads" path="Download/"/>
+    <cache-path name="artifacts" path="artifacts/"/>
 </paths>

@@ -38,6 +38,7 @@ import com.thirtydegreesray.openhub.mvp.model.ArtifactsResult;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.util.ActionsWatcher;
 import com.thirtydegreesray.openhub.util.AppOpener;
+import com.thirtydegreesray.openhub.util.ArtifactFiles;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.RunChanges;
@@ -46,6 +47,7 @@ import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -393,7 +395,8 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
             row.setAlpha(artifact.isExpired() ? 0.5f : 1f);
             if (!artifact.isExpired()) {
                 row.setBackgroundResource(outValueSelectable());
-                row.setOnClickListener(v -> downloadArtifact(artifact));
+                row.setOnClickListener(v -> showArtifactMenu(v, artifact));
+                download.setOnClickListener(v -> downloadArtifact(artifact));
             }
             artifactsList.addView(row);
         }
@@ -403,6 +406,86 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
         android.util.TypedValue value = new android.util.TypedValue();
         getTheme().resolveAttribute(android.R.attr.selectableItemBackground, value, true);
         return value.resourceId;
+    }
+
+    private void showArtifactMenu(@NonNull View anchor, @NonNull Artifact artifact) {
+        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        popup.getMenu().add(0, 1, 0, R.string.download);
+        popup.getMenu().add(0, 2, 1, R.string.artifact_to_release);
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 1) downloadArtifact(artifact);
+            else unpackForRelease(artifact);
+            return true;
+        });
+        popup.show();
+    }
+
+    /**
+     * Downloads the artifact (a zip) into the app's cache, unpacks it and lets the user pick
+     * the files that go to a release of this repository (or another one).
+     */
+    private void unpackForRelease(@NonNull Artifact artifact) {
+        showProgressDialog(getString(R.string.artifact_unpacking, artifact.getName()));
+        File root = new File(getCacheDir(), "artifacts");
+        background(() -> {
+            // artifacts unpacked for earlier uploads: only today's may still be uploading
+            File[] old = root.listFiles();
+            if (old != null) {
+                for (File dir : old) {
+                    if (System.currentTimeMillis() - dir.lastModified() > 24 * 3600 * 1000L) {
+                        ArtifactFiles.deleteTree(dir);
+                    }
+                }
+            }
+            File dir = new File(root, runId + "-" + artifact.getId());
+            ArtifactFiles.deleteTree(dir);
+            retrofit2.Response<okhttp3.ResponseBody> response =
+                    service().getArtifactZip(owner, repo, artifact.getId()).execute();
+            if (!response.isSuccessful() || response.body() == null) {
+                throw new GitHubApi.ApiException(response.code(), GitHubApi.errorMessage(response));
+            }
+            try (okhttp3.ResponseBody body = response.body()) {
+                return ArtifactFiles.unzip(body.byteStream(), dir);
+            }
+        }, (List<File> files) -> {
+            dismissProgressDialog();
+            if (files.isEmpty()) {
+                showWarningToast(getString(R.string.artifact_empty));
+                return;
+            }
+            chooseArtifactFiles(files);
+        }, error -> dismissProgressDialog(), true);
+    }
+
+    private void chooseArtifactFiles(@NonNull List<File> files) {
+        String[] names = new String[files.size()];
+        boolean[] checked = new boolean[files.size()];
+        for (int i = 0; i < files.size(); i++) {
+            names[i] = files.get(i).getName() + "  (" + StringUtils.getSizeString(files.get(i).length()) + ")";
+            checked[i] = true;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.artifact_choose_files)
+                .setMultiChoiceItems(names, checked, (d, which, isChecked) -> checked[which] = isChecked)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.artifact_next, (d, w) -> {
+                    ArrayList<android.net.Uri> uris = new ArrayList<>();
+                    for (int i = 0; i < files.size(); i++) {
+                        if (!checked[i]) continue;
+                        uris.add(androidx.core.content.FileProvider.getUriForFile(this,
+                                getPackageName() + ".fileProvider", files.get(i)));
+                    }
+                    if (uris.isEmpty()) return;
+                    // the share screen: this repository, then a release (or a new one)
+                    Intent intent = new Intent(this, ShareUploadActivity.class)
+                            .setAction(Intent.ACTION_SEND_MULTIPLE)
+                            .setType("*/*")
+                            .putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+                            .putExtra(ShareUploadActivity.EXTRA_REPO, owner + "/" + repo)
+                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(intent);
+                })
+                .show();
     }
 
     private void downloadArtifact(@NonNull Artifact artifact) {

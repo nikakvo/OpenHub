@@ -77,7 +77,8 @@ app goes to them; see [Credits](#credits).
 * Release notifications for any repository
 * GitHub Actions: workflow runs with their jobs and steps, **job logs** (folded groups,
   errors marked, find, next error, download), re-run (all, failed or one job, with
-  debug logging) and cancel, artifacts, starting workflows by hand, and a notification
+  debug logging) and cancel, artifacts (download, or unpack and add their files to a
+  release in a few taps), starting workflows by hand, and a notification
   when a run finishes, with buttons to download its artifacts
 * **Discussions**: read, comment and reply, upvote, mark the answer, start discussions
 * Download source code

@@ -37,4 +37,9 @@
     <string name="log_not_ready">GitHub has no log for this job yet. It loads by itself when the job has finished.</string>
     <string name="log_empty">The log is empty</string>
     <string name="log_skipped">… %1$d earlier lines not shown (Download log has them all)</string>
+    <string name="artifact_to_release">Add to a release…</string>
+    <string name="artifact_unpacking">Downloading and unpacking %1$s…</string>
+    <string name="artifact_empty">The artifact has no files</string>
+    <string name="artifact_choose_files">Files for the release</string>
+    <string name="artifact_next">Next</string>
 </resources>

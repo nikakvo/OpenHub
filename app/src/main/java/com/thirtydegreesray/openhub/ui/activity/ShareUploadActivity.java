@@ -68,6 +68,8 @@ public class ShareUploadActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private static final String PREFS = "share_upload";
     private static final String KEY_LAST_REPO = "last_repo";
+    /** Repository to go to directly (files from OpenHub itself, e.g. a workflow artifact). */
+    public static final String EXTRA_REPO = "io.github.nikakvo.openhub.extra.REPO";
     /** + full name: the folder files were last added to in that repository */
     private static final String KEY_LAST_FOLDER = "last_folder_";
     private static final int MAX_PAGES = 3;
@@ -205,6 +207,16 @@ public class ShareUploadActivity extends BaseActivity<IBaseContract.Presenter> {
             hideLoading();
             repos.clear();
             repos.addAll(all);
+            String preselect = preselectedRepo();
+            if (preselect != null) {
+                for (Repository repository : repos) {
+                    if (repository.getFullName().equalsIgnoreCase(preselect)) {
+                        filter();
+                        onRepoChosen(repository);
+                        return;
+                    }
+                }
+            }
             // the last used repository first
             String last = prefs().getString(KEY_LAST_REPO, null);
             for (int i = 0; i < repos.size(); i++) {
@@ -215,6 +227,21 @@ public class ShareUploadActivity extends BaseActivity<IBaseContract.Presenter> {
             }
             filter();
         }, error -> hideLoading());
+    }
+
+    /**
+     * The repository of EXTRA_REPO, only for files from OpenHub's own provider (an
+     * artifact OpenHub unpacked): other apps choose the repository on this screen.
+     */
+    @Nullable
+    private String preselectedRepo() {
+        String repo = getIntent().getStringExtra(EXTRA_REPO);
+        if (StringUtils.isBlank(repo) || files == null || files.isEmpty()) return null;
+        String own = getPackageName() + ".fileProvider";
+        for (UploadItem item : files) {
+            if (!own.equals(android.net.Uri.parse(item.getUri()).getAuthority())) return null;
+        }
+        return repo;
     }
 
     private void filter() {
