@@ -130,6 +130,9 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
             Repository repository = mPresenter.getRepository();
             menu.findItem(R.id.action_repo_settings).setVisible(repository.getPermissions() != null
                     && repository.getPermissions().isAdmin());
+            // alerts are for people who can push; secrets for admins
+            menu.findItem(R.id.action_security).setVisible(repository.getPermissions() != null
+                    && (repository.getPermissions().isPush() || repository.getPermissions().isAdmin()));
         }
         return true;
     }
@@ -208,6 +211,12 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
                     && (repository.getPermissions().isPush() || repository.getPermissions().isAdmin());
             ActionsActivity.show(getActivity(), repository.getOwner().getLogin(),
                     repository.getName(), repository.getDefaultBranch(), canRun);
+            return true;
+        } else if (itemId == R.id.action_security) {
+            Repository repository = mPresenter.getRepository();
+            startActivity(SecurityActivity.createIntent(this, repository.getOwner().getLogin(),
+                    repository.getName(), repository.getPermissions() != null
+                            && repository.getPermissions().isAdmin()));
             return true;
         } else if (itemId == R.id.action_pulls) {
             Repository repository = mPresenter.getRepository();

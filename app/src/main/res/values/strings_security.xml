@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="security">Security</string>
+    <string name="security_dependabot">Dependabot</string>
+    <string name="security_code_scanning">Code scanning</string>
+    <string name="security_secret_scanning">Secret scanning</string>
+    <string name="security_secrets">Secrets</string>
+    <string name="security_show_closed">Show closed alerts</string>
+    <string name="security_no_open_alerts">No open alerts</string>
+    <string name="security_no_closed_alerts">No closed alerts</string>
+    <string name="security_first_100">Only the newest 100 are shown.</string>
+    <string name="security_turn_on">Turn on</string>
+    <string name="security_set_up_codeql">Set up CodeQL</string>
+    <string name="security_turned_on">Turned on</string>
+    <string name="security_codeql_started">CodeQL setup started. The first analysis runs in Actions and takes a few minutes.</string>
+    <string name="security_dependabot_off">Dependabot alerts are off for this repository.</string>
+    <string name="security_code_scanning_off">Code scanning has no results for this repository yet.</string>
+    <string name="security_secret_scanning_off">Secret scanning is off for this repository.</string>
+    <string name="security_no_access">Only people with admin or security access can see these alerts.</string>
+    <string name="security_admin_turns_on">An admin of the repository can turn it on.</string>
+    <string name="security_dismiss">Dismiss…</string>
+    <string name="security_resolve">Close as…</string>
+    <string name="security_reopen">Reopen</string>
+    <string name="security_reopened">Alert reopened</string>
+    <string name="security_dismissed">Alert dismissed</string>
+    <string name="security_resolved">Alert closed</string>
+    <string name="security_comment">Comment (optional)</string>
+    <string name="security_state_open">Open</string>
+    <string name="security_state_fixed">Fixed</string>
+    <string name="security_state_dismissed">Dismissed</string>
+    <string name="security_state_resolved">Closed</string>
+    <string name="security_severity">Severity: %1$s</string>
+    <string name="security_package">Package: %1$s</string>
+    <string name="security_manifest">Manifest: %1$s</string>
+    <string name="security_vulnerable">Vulnerable versions: %1$s</string>
+    <string name="security_patched">Patched version: %1$s</string>
+    <string name="security_no_patch">No patched version yet</string>
+    <string name="security_opened">Opened %1$s</string>
+    <string name="security_reason">Reason: %1$s</string>
+    <string name="security_rule">Rule: %1$s</string>
+    <string name="security_tool">Tool: %1$s</string>
+    <string name="security_location">Location: %1$s</string>
+    <string name="security_branch">Branch: %1$s</string>
+    <string name="security_secret_type">Type: %1$s</string>
+    <string name="security_validity">Still valid: %1$s</string>
+    <string name="security_push_bypassed">Pushed although push protection blocked it</string>
+    <string name="security_found_in">Found in:</string>
+    <string name="security_value_hidden">The secret itself is not shown here. Revoke it where it was issued, then close the alert as Revoked.</string>
+
+    <!-- Dependabot dismiss reasons -->
+    <string name="security_reason_fix_started">A fix has already been started</string>
+    <string name="security_reason_no_bandwidth">No bandwidth to fix this</string>
+    <string name="security_reason_tolerable_risk">Risk is tolerable to this project</string>
+    <string name="security_reason_inaccurate">This alert is inaccurate or incorrect</string>
+    <string name="security_reason_not_used">Vulnerable code is not actually used</string>
+    <!-- Code scanning and secret scanning -->
+    <string name="security_reason_false_positive">False positive</string>
+    <string name="security_reason_wont_fix">Won\'t fix</string>
+    <string name="security_reason_used_in_tests">Used in tests</string>
+    <string name="security_reason_revoked">Revoked</string>
+
+    <!-- Actions secrets -->
+    <string name="secrets_none">No repository secrets yet. Workflows read them as ${{ secrets.NAME }}.</string>
+    <string name="secrets_add">New secret</string>
+    <string name="secrets_update">Update value</string>
+    <string name="secrets_name">Name</string>
+    <string name="secrets_value">Value</string>
+    <string name="secrets_hint">GitHub encrypts the value on this phone and never shows it again, not even to you.</string>
+    <string name="secrets_updated">Updated %1$s</string>
+    <string name="secrets_saved">Secret %1$s saved</string>
+    <string name="secrets_deleted">Secret %1$s deleted</string>
+    <string name="secrets_delete_message">Delete the secret %1$s? Workflows that use it will get an empty value.</string>
+    <string name="secrets_exists">%1$s already exists. Tap it to update its value.</string>
+    <string name="secrets_name_bad">Only letters, digits and _</string>
+    <string name="secrets_name_digit">Must not start with a digit</string>
+    <string name="secrets_name_github">Must not start with GITHUB_</string>
+    <string name="secrets_value_empty">Enter a value</string>
+    <string name="secrets_value_too_big">The value is larger than 48 KB</string>
+</resources>

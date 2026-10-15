@@ -162,4 +162,7 @@ dependencies {
     implementation "com.orhanobut:logger:${LOGGER_VERSION}"
 
     implementation "org.jsoup:jsoup:${JSOUP_VERSION}"
+
+    // Sealed boxes (X25519, XSalsa20-Poly1305, BLAKE2b) for Actions secrets
+    implementation "org.bouncycastle:bcprov-jdk18on:${BOUNCY_CASTLE_VERSION}"
 }

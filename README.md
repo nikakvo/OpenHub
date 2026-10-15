@@ -80,6 +80,10 @@ app goes to them; see [Credits](#credits).
   debug logging) and cancel, artifacts (download, or unpack and add their files to a
   release in a few taps), starting workflows by hand, and a notification
   when a run finishes, with buttons to download its artifacts
+* **Security**: Dependabot, code scanning and secret scanning alerts with details;
+  dismiss, close and reopen them, turn the scanners on (admins)
+* **Actions secrets**: add, update and delete repository secrets; values are encrypted on
+  the phone as GitHub requires
 * **Discussions**: read, comment and reply, upvote, mark the answer, start discussions
 * Download source code
 * Your private, public, forked and starred repositories

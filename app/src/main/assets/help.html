@@ -214,6 +214,7 @@
     <tr><td>Notify about new releases</td><td>A phone notification when a new release comes out (<a href="#relnotify">15</a>)</td></tr>
     <tr><td>Releases</td><td>All releases (<a href="#releases">11</a>)</td></tr>
     <tr><td>Actions</td><td>Builds and automations (<a href="#actions">13</a>)</td></tr>
+    <tr><td>Security</td><td>Security alerts and, for admins, the secrets of GitHub Actions; in repositories you can push to (<a href="#reposettings">6</a>)</td></tr>
     <tr><td>Pull requests</td><td>Open and closed pull requests (<a href="#pulls">8</a>)</td></tr>
     <tr><td>Search code</td><td>Find words in the repository's code; the matches are marked, tap a result to open the file. Add <code>path:src</code>, <code>extension:java</code> or <code>filename:build.sh</code> to narrow it. GitHub searches the default branch and allows only a few code searches per minute. It does not search the code of forks or of repositories it has not indexed yet; then OpenHub searches the file names and paths instead.</td></tr>
     <tr><td>Discussions</td><td>Questions, ideas and announcements, when the repository has them turned on (<a href="#issues">10</a>)</td></tr>
@@ -280,6 +281,27 @@
     <tr><td>Commits</td><td>Require sign-off on commits made on the website.</td></tr>
     <tr><td>Releases</td><td>Release immutability: published releases and their files can no longer change (when GitHub offers it).</td></tr>
   </table></div>
+  <h3>Security</h3>
+  <p><strong>Security</strong> in the repository menu (repositories you can push to) has the tabs of the Security page on github.com:</p>
+  <div class="tw"><table>
+    <tr><td>Dependabot</td><td>Dependencies with a known vulnerability: package, vulnerable and patched versions, the advisory (CVE / GHSA).</td></tr>
+    <tr><td>Code scanning</td><td>Problems that CodeQL or another scanner found in the code, with file and line.</td></tr>
+    <tr><td>Secret scanning</td><td>Tokens and keys that were committed, and in which file and commit. The secret itself is not shown.</td></tr>
+    <tr><td>Secrets</td><td>Admins only: the repository secrets of GitHub Actions.</td></tr>
+  </table></div>
+  <ul>
+    <li>Alerts are colored by severity: critical red, high orange, medium amber. <span class="ui">Show closed alerts</span> in the menu shows fixed, dismissed and closed ones.</li>
+    <li><strong>Tap an alert</strong> for its details. <span class="ui">Dismiss…</span> (Dependabot, code scanning) or <span class="ui">Close as…</span> (secret scanning) asks for a reason and an optional comment; <span class="ui">Reopen</span> undoes it.</li>
+    <li>When a scanner is off, an admin gets <span class="ui">Turn on</span> (Dependabot alerts, secret scanning) or <span class="ui">Set up CodeQL</span> (code scanning; the first analysis runs in Actions and takes a few minutes). In private repositories some scanners need GitHub Advanced Security.</li>
+    <li>A leaked token: revoke it where it was issued (e.g. github.com → Settings → Developer settings), then close the alert as <span class="ui">Revoked</span>. Deleting the file does not help, the token stays in the history.</li>
+  </ul>
+  <h3>Secrets for workflows</h3>
+  <ul>
+    <li>Workflows read them as <code>${{ secrets.NAME }}</code>, e.g. a Telegram bot token or a signing key password.</li>
+    <li>The <strong>+</strong> button adds a secret: a name (letters, digits and <code>_</code>, stored in upper case, not starting with <code>GITHUB_</code>) and the value (up to 48 KB, several lines allowed).</li>
+    <li>Tap a secret for <span class="ui">Update value</span> or <span class="ui">Delete</span>.</li>
+    <li>OpenHub encrypts the value on the phone with the repository's public key, as GitHub requires; only GitHub Actions can read it. GitHub never shows a value again, not even to you, so keep your own copy.</li>
+  </ul>
   <h3>Danger zone</h3>
   <p><span class="pill p-red">careful</span> Change visibility (public / private), archive or unarchive, transfer ownership, and <strong>delete</strong> the repository: you type its full name to confirm.</p>
   <div class="note bad"><b class="lbl">Delete needs a permission</b>Deleting needs <code>delete_repo</code>. If OpenHub says it is missing: with a token, open it on github.com (Settings → Developer settings → Personal access tokens), tick <code>delete_repo</code> and press <em>Update token</em>. Signed in with the browser? Log out and use <span class="ui">Login with browser</span> again; GitHub asks you to allow the new permission.</div>
