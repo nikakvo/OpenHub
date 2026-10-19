@@ -28,6 +28,8 @@ public class IssuesFilter implements Parcelable {
     private IssuesFilter.UserIssuesFilterType userIssuesFilterType = UserIssuesFilterType.All;
     private IssuesFilter.SortType sortType = SortType.Created;
     private SortDirection sortDirection = SortDirection.Desc;
+    /** Only the issues of this milestone (its number), or null for all. */
+    private String milestone;
 
     public IssuesFilter(Type type, Issue.IssueState issueState) {
         this.type = type;
@@ -66,6 +68,15 @@ public class IssuesFilter implements Parcelable {
         this.issueState = issueState;
     }
 
+    public String getMilestone() {
+        return milestone;
+    }
+
+    public IssuesFilter setMilestone(String milestone) {
+        this.milestone = milestone;
+        return this;
+    }
+
     public SortDirection getSortDirection() {
         return sortDirection;
     }
@@ -87,6 +98,7 @@ public class IssuesFilter implements Parcelable {
         dest.writeInt(this.userIssuesFilterType == null ? -1 : this.userIssuesFilterType.ordinal());
         dest.writeInt(this.sortType == null ? -1 : this.sortType.ordinal());
         dest.writeInt(this.sortDirection == null ? -1 : this.sortDirection.ordinal());
+        dest.writeString(this.milestone);
     }
 
     public IssuesFilter() {
@@ -103,6 +115,7 @@ public class IssuesFilter implements Parcelable {
         this.sortType = tmpSortType == -1 ? null : SortType.values()[tmpSortType];
         int tmpSortDirection = in.readInt();
         this.sortDirection = tmpSortDirection == -1 ? null : SortDirection.values()[tmpSortDirection];
+        this.milestone = in.readString();
     }
 
     public static final Creator<IssuesFilter> CREATOR = new Creator<IssuesFilter>() {

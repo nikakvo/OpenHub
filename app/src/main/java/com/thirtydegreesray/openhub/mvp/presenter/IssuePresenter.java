@@ -134,7 +134,7 @@ public class IssuePresenter extends BasePagerPresenter<IIssuesContract.View>
             @Override
             public Observable<Response<ArrayList<Issue>>> createObservable(boolean forceNetWork) {
                 return getIssueService().getRepoIssues(forceNetWork, userId, repoName, statusStr,
-                        sortStr, sortDirectionStr, page);
+                        sortStr, sortDirectionStr, page, issuesFilter.getMilestone());
             }
         }, httpObserver, readCacheFirst);
     }

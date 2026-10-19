@@ -1,6 +1,7 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -25,6 +26,7 @@ import com.thirtydegreesray.openhub.ui.fragment.IssuesFragment;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
 import com.thirtydegreesray.openhub.ui.widget.ZoomAbleFloatingActionButton;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 
 import java.util.ArrayList;
@@ -60,11 +62,26 @@ public class IssuesActivity extends PagerActivity<IssuesActPresenter>
                         .put("repoName", repoName).build());
     }
 
+    /** The issues of one milestone of a repository (open and closed tabs). */
+    public static Intent createIntentForMilestone(@NonNull Context context, @NonNull String owner,
+                                                  @NonNull String repo, int milestone,
+                                                  @NonNull String milestoneTitle) {
+        return new Intent(context, IssuesActivity.class)
+                .putExtras(BundleHelper.builder()
+                        .put("issuesType", IssuesFilter.Type.Repo)
+                        .put("userId", owner)
+                        .put("repoName", repo)
+                        .put("milestone", String.valueOf(milestone))
+                        .put("milestoneTitle", milestoneTitle).build());
+    }
+
     private final static int ADD_ISSUE_REQUEST_CODE = 100;
 
     @AutoAccess String userId;
     @AutoAccess String repoName;
     @AutoAccess IssuesFilter.Type issuesType;
+    @AutoAccess String milestone;
+    @AutoAccess String milestoneTitle;
     ZoomAbleFloatingActionButton addBn;
 
     private ArrayList<IssuesListListener> listeners;
@@ -97,7 +114,8 @@ public class IssuesActivity extends PagerActivity<IssuesActPresenter>
         setToolbarScrollAble(true);
         setToolbarBackEnable();
         if (IssuesFilter.Type.Repo.equals(issuesType)) {
-            setToolbarTitle(getString(R.string.issues), userId.concat("/").concat(repoName));
+            setToolbarTitle(getString(R.string.issues), userId.concat("/").concat(repoName)
+                    .concat(StringUtils.isBlank(milestoneTitle) ? "" : " · " + milestoneTitle));
         } else {
             setToolbarTitle(getString(R.string.issues));
         }
@@ -108,7 +126,7 @@ public class IssuesActivity extends PagerActivity<IssuesActPresenter>
                     .createUserIssuesPagerList(getActivity(), getFragments()));
         } else {
             List<FragmentPagerModel> fragmentPagerModels = FragmentPagerModel
-                    .createRepoIssuesPagerList(getActivity(), userId, repoName, getFragments());
+                    .createRepoIssuesPagerList(getActivity(), userId, repoName, milestone, getFragments());
             pagerAdapter.setPagerList(fragmentPagerModels);
             navViewEnd.getMenu().findItem(R.id.nav_type_chooser).setVisible(false);
             ((ListFragment)fragmentPagerModels.get(0).getFragment()).setListScrollListener(this);
@@ -151,7 +169,7 @@ public class IssuesActivity extends PagerActivity<IssuesActPresenter>
 
     private IssuesFilter getIssuesFilter(boolean open) {
         IssuesFilter issuesFilter = new IssuesFilter(issuesType, open ? Issue.IssueState.open
-                : Issue.IssueState.closed);
+                : Issue.IssueState.closed).setMilestone(milestone);
         if (IssuesFilter.Type.User.equals(issuesType)) {
             MenuItem selectedUserFilterMenu = ViewUtils.getSelectedMenu(
                     navViewEnd.getMenu().findItem(R.id.nav_type_chooser));

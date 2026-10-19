@@ -242,6 +242,13 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
             startActivity(CodeSearchActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),
                     mPresenter.getRepository().getName()));
             return true;
+        } else if (itemId == R.id.action_milestones) {
+            Repository repository = mPresenter.getRepository();
+            boolean canWrite = repository.getPermissions() != null
+                    && (repository.getPermissions().isPush() || repository.getPermissions().isAdmin());
+            startActivity(MilestonesActivity.createIntent(this, repository.getOwner().getLogin(),
+                    repository.getName(), canWrite));
+            return true;
         } else if (itemId == R.id.action_discussions) {
             startActivity(DiscussionsActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),
                     mPresenter.getRepository().getName()));

@@ -40,7 +40,8 @@ public interface IssueService {
             @Query("state") String state,
             @Query("sort") String sort,
             @Query("direction") String direction,
-            @Query("page") int page
+            @Query("page") int page,
+            @Query("milestone") String milestone
     );
 
     @NonNull @GET("user/issues")

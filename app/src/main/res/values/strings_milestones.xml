@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Milestones of a repository -->
+    <string name="milestones">Milestones</string>
+    <string name="milestones_none_open">No open milestones.</string>
+    <string name="milestones_none_closed">No closed milestones.</string>
+    <string name="milestone_new">New milestone</string>
+    <string name="milestone_edit">Edit milestone</string>
+    <string name="milestone_description_hint">Description (optional)</string>
+    <string name="milestone_no_due">No due date</string>
+    <string name="milestone_due">Due %1$s</string>
+    <string name="milestone_overdue">Past due by %1$s</string>
+    <string name="milestone_closed_on">Closed %1$s</string>
+    <string name="milestone_set_due">Set date</string>
+    <string name="milestone_clear_due">Clear</string>
+    <string name="milestone_counts">%1$d%% complete · %2$d open · %3$d closed</string>
+    <string name="milestone_issues">Issues and pull requests</string>
+    <string name="milestone_close">Close milestone</string>
+    <string name="milestone_reopen">Reopen milestone</string>
+    <string name="milestone_delete_message">Delete the milestone %1$s? Its issues and pull requests stay, only the milestone is removed from them.</string>
+    <string name="milestone_saved">Milestone %1$s saved</string>
+    <string name="milestone_deleted">Milestone %1$s deleted</string>
+    <string name="milestone_closed_done">Milestone %1$s closed</string>
+    <string name="milestone_reopened_done">Milestone %1$s reopened</string>
+    <plurals name="milestone_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+</resources>

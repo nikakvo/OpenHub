@@ -108,11 +108,18 @@ public class FragmentPagerModel {
 
     public static List<FragmentPagerModel> createRepoIssuesPagerList(@NonNull Context context
             , @NonNull final String userId, @NonNull final String repoName, @NonNull ArrayList<Fragment> fragments) {
+        return createRepoIssuesPagerList(context, userId, repoName, null, fragments);
+    }
+
+    /** @param milestone number of a milestone whose issues are listed, or null for all */
+    public static List<FragmentPagerModel> createRepoIssuesPagerList(@NonNull Context context
+            , @NonNull final String userId, @NonNull final String repoName,
+            @androidx.annotation.Nullable final String milestone, @NonNull ArrayList<Fragment> fragments) {
         return setPagerFragmentFlag(Arrays.asList(
                 new FragmentPagerModel(context.getString(R.string.open),
-                        getFragment(fragments, 0, () -> IssuesFragment.createForRepo(Issue.IssueState.open, userId, repoName))),
+                        getFragment(fragments, 0, () -> IssuesFragment.createForRepo(Issue.IssueState.open, userId, repoName, milestone))),
                 new FragmentPagerModel(context.getString(R.string.closed),
-                        getFragment(fragments, 1, () -> IssuesFragment.createForRepo(Issue.IssueState.closed, userId, repoName)))
+                        getFragment(fragments, 1, () -> IssuesFragment.createForRepo(Issue.IssueState.closed, userId, repoName, milestone)))
         ));
     }
 

@@ -29,9 +29,17 @@ public class IssuesFragment extends ListFragment<IssuePresenter, IssuesAdapter>
 
     public static IssuesFragment createForRepo(@NonNull Issue.IssueState issueState,
                                                @NonNull String userId, @NonNull String repoName){
+        return createForRepo(issueState, userId, repoName, null);
+    }
+
+    /** @param milestone number of a milestone whose issues are listed, or null for all */
+    public static IssuesFragment createForRepo(@NonNull Issue.IssueState issueState,
+                                               @NonNull String userId, @NonNull String repoName,
+                                               @androidx.annotation.Nullable String milestone){
         IssuesFragment fragment = new IssuesFragment();
         fragment.setArguments(BundleHelper.builder()
-                .put("issuesFilter", new IssuesFilter(IssuesFilter.Type.Repo, issueState))
+                .put("issuesFilter", new IssuesFilter(IssuesFilter.Type.Repo, issueState)
+                        .setMilestone(milestone))
                 .put("userId", userId)
                 .put("repoName", repoName).build());
         return fragment;

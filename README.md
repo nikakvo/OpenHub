@@ -111,6 +111,8 @@ app goes to them; see [Credits](#credits).
 * Issues with comments and events; create, edit, close and reopen
 * **Issue templates** (Markdown templates and issue forms) when creating an issue
 * Labels, assignees and milestone for people with triage or write access
+* **Milestones**: open and closed, due dates and progress, their issues; create, edit,
+  close, reopen and delete
 * Comments with a Markdown editor and preview
 * Manage labels in your own repositories
 * Your created, assigned and mentioned issues
