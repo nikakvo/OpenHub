@@ -25,6 +25,7 @@ import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.common.GlideApp;
+import com.thirtydegreesray.openhub.ui.widget.MainMenuDrawer;
 import com.thirtydegreesray.openhub.dao.AuthUser;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.inject.component.DaggerActivityComponent;
@@ -184,6 +185,7 @@ public class MainActivity extends BaseDrawerActivity<MainPresenter>
         mail.setText(StringUtils.isBlank(loginUser.getBio()) ? joinTime : loginUser.getBio());
 
         tabLayout.setVisibility(View.GONE);
+        if (savedInstanceState == null) openFromMainMenu(getIntent());
     }
 
     /**
@@ -252,6 +254,31 @@ public class MainActivity extends BaseDrawerActivity<MainPresenter>
     @Override
     protected int getEndDrawerToggleMenuItemId() {
         return R.id.nav_sort;
+    }
+
+    @Override
+    protected boolean showsMainMenu() {
+        return false;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        openFromMainMenu(intent);
+    }
+
+    /** An item of the main menu of another screen: show that page (or open that screen). */
+    private void openFromMainMenu(@Nullable Intent intent) {
+        if (intent == null) return;
+        int id = intent.getIntExtra(MainMenuDrawer.EXTRA_NAV_ID, 0);
+        if (id == 0) return;
+        intent.removeExtra(MainMenuDrawer.EXTRA_NAV_ID);
+        if (isDrawerOpen()) closeDrawer();
+        if (FRAGMENT_NAV_ID_LIST.contains(id) && navViewStart != null) navViewStart.setCheckedItem(id);
+        updateFragmentByNavId(id);
+        invalidateOptionsMenu();
+        invalidateBack();
     }
 
     protected void onNavItemSelected(@NonNull MenuItem item, boolean isStartDrawer) {

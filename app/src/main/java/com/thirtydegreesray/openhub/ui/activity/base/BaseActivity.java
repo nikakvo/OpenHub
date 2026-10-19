@@ -74,6 +74,15 @@ BaseActivity<P extends IBaseContract.Presenter>
         return false;
     }
 
+    /**
+     * Whether the toolbar gets the main menu button (≡ next to Back). False on the start
+     * screen (it has the menu itself) and before sign-in.
+     */
+    protected boolean showsMainMenu() {
+        return !(this instanceof SplashActivity) && !(this instanceof LoginActivity)
+                && AppData.INSTANCE.getLoggedUser() != null;
+    }
+
     protected boolean isAlive = true;
     @Nullable protected Toolbar toolbar;
     @Nullable protected CollapsingToolbarLayout toolbarLayout;
@@ -115,6 +124,9 @@ BaseActivity<P extends IBaseContract.Presenter>
 
         initActivity();
         initView(savedInstanceState);
+        if (toolbar != null && showsMainMenu()) {
+            com.thirtydegreesray.openhub.ui.widget.MainMenuDrawer.install(this, toolbar);
+        }
         if(mPresenter != null) mPresenter.onViewInitialized();
         if(isFullScreen){
             intoFullScreen();
