@@ -134,16 +134,34 @@ public final class GitHubLinks {
         return new Blob(parts.get(0), stripGit(parts.get(1)), parts.get(3), path);
     }
 
+    /** github.com/owner/repo/tree/branch[/folder/inside] */
+    public static final class Tree {
+        public final String owner;
+        public final String repo;
+        public final String ref;
+        /** "" for the top of the repository */
+        public final String path;
+
+        Tree(String owner, String repo, String ref, String path) {
+            this.owner = owner;
+            this.repo = repo;
+            this.ref = ref;
+            this.path = path;
+        }
+    }
+
     /**
-     * github.com/owner/repo/tree/branch (the whole repository at a branch): the
-     * repository's "owner/repo", or null. Folders inside it return null (the browser).
+     * A folder of a repository at a branch, or null. As with blob links, the first part
+     * after "tree" is taken as the branch.
      */
-    public static String treeRoot(String url) {
+    public static Tree tree(String url) {
         URI uri = parse(url == null ? null : url.trim());
         if (uri == null || !isGitHub(uri)) return null;
         List<String> parts = segments(uri.getPath());
-        if (parts.size() != 4 || !"tree".equals(parts.get(2))) return null;
-        return parts.get(0) + "/" + stripGit(parts.get(1));
+        if (parts.size() < 4 || !"tree".equals(parts.get(2))) return null;
+        if (RESERVED.contains(parts.get(0).toLowerCase(Locale.ROOT))) return null;
+        String path = parts.size() > 4 ? String.join("/", parts.subList(4, parts.size())) : "";
+        return new Tree(parts.get(0), stripGit(parts.get(1)), parts.get(3), path);
     }
 
     // ---------------------------------------------------------------------------------

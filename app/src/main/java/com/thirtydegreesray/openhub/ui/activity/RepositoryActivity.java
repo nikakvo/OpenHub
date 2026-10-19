@@ -88,6 +88,18 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
                         .build());
     }
 
+    private static final String EXTRA_FILES_BRANCH = "filesBranch";
+    private static final String EXTRA_FILES_PATH = "filesPath";
+
+    /** Opens the Files tab at a folder of a branch (github.com/owner/repo/tree/branch/folder). */
+    public static Intent createFilesIntent(@NonNull Context context, @NonNull String owner,
+                                           @NonNull String repoName, @Nullable String branch,
+                                           @Nullable String path) {
+        return createIntent(context, owner, repoName)
+                .putExtra(EXTRA_FILES_BRANCH, branch == null ? "" : branch)
+                .putExtra(EXTRA_FILES_PATH, path == null ? "" : path);
+    }
+
     ImageView userImageViewBg;
     ProgressBar loader;
     TextView desc;
@@ -307,6 +319,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
             tabLayout.setupWithViewPager(viewPager);
             viewPager.setAdapter(pagerAdapter);
             showFirstPager();
+            openFilesFromLink(repo);
 
             GlideApp.with(getActivity())
                     .load(repo.getOwner().getAvatarUrl())
@@ -316,6 +329,23 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
             noticeRepositoryUpdated(repo);
         }
         invalidateOptionsMenu();
+    }
+
+    /** A tree link: switch to its branch and show its folder in the Files tab (once). */
+    private void openFilesFromLink(@NonNull Repository repo) {
+        if (!getIntent().hasExtra(EXTRA_FILES_PATH)) return;
+        String branch = getIntent().getStringExtra(EXTRA_FILES_BRANCH);
+        String path = getIntent().getStringExtra(EXTRA_FILES_PATH);
+        getIntent().removeExtra(EXTRA_FILES_BRANCH);
+        getIntent().removeExtra(EXTRA_FILES_PATH);
+        if (!StringUtils.isBlank(branch) && !branch.equals(repo.getDefaultBranch())) {
+            noticeBranchChanged(mPresenter.useBranch(branch));
+        }
+        Fragment files = pagerAdapter.getPagerList().get(1).getFragment();
+        if (files instanceof RepoFilesFragment) {
+            ((RepoFilesFragment) files).openFolder(path == null ? "" : path);
+        }
+        viewPager.setCurrentItem(1, false);
     }
 
     @Override

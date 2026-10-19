@@ -242,11 +242,13 @@ public class AppOpener {
                     .createIntent(context, wiki.owner, wiki.repo, wiki.page, true));
             return;
         }
-        // the whole repository at a branch (github.com/owner/repo/tree/dev)
-        String treeRepo = GitHubLinks.treeRoot(url);
-        if (treeRepo != null) {
-            int slash = treeRepo.indexOf('/');
-            RepositoryActivity.show(context, treeRepo.substring(0, slash), treeRepo.substring(slash + 1));
+        // a folder at a branch (github.com/owner/repo/tree/dev/docs): the Files tab there
+        GitHubLinks.Tree tree = GitHubLinks.tree(url);
+        if (tree != null) {
+            Intent treeIntent = RepositoryActivity.createFilesIntent(context, tree.owner, tree.repo,
+                    tree.ref, tree.path);
+            if (!(context instanceof android.app.Activity)) treeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(treeIntent);
             return;
         }
         // pull requests open in the app (github.com/o/r/pull/12 and API addresses)

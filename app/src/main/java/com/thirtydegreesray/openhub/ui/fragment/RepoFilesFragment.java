@@ -274,10 +274,21 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
         }
     }
 
+    /** Shows this folder ("" for the top), e.g. for a github.com/.../tree/branch/folder link. */
+    public void openFolder(@NonNull String path) {
+        if (mPresenter == null) {
+            if (getArguments() != null) getArguments().putString("curPath", path);
+        } else {
+            mPresenter.setCurPath(path);
+            mPresenter.setLoaded(false);
+            mPresenter.prepareLoadData();
+        }
+    }
+
     @Override
     public void onBranchChanged(Branch branch) {
         if(mPresenter == null){
-            getArguments().putString("branch", branch.getName());
+            getArguments().putString("curBranch", branch.getName());
         } else {
             mPresenter.setCurBranch(branch.getName());
             mPresenter.setLoaded(false);

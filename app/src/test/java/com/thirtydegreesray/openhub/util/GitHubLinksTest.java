@@ -104,8 +104,18 @@ public class GitHubLinksTest {
         assertNull(GitHubLinks.blob("https://github.com/o/r/blob/main"));
         assertNull(GitHubLinks.blob("https://github.com/o/r/tree/main/docs"));
 
-        assertEquals("o/r", GitHubLinks.treeRoot("https://github.com/o/r/tree/dev"));
-        assertNull(GitHubLinks.treeRoot("https://github.com/o/r/tree/dev/docs"));
+        GitHubLinks.Tree root = GitHubLinks.tree("https://github.com/o/r/tree/dev");
+        assertEquals("o", root.owner);
+        assertEquals("r", root.repo);
+        assertEquals("dev", root.ref);
+        assertEquals("", root.path);
+        GitHubLinks.Tree folder = GitHubLinks.tree("https://github.com/o/r.git/tree/main/app/src%20x/main/");
+        assertEquals("r", folder.repo);
+        assertEquals("main", folder.ref);
+        assertEquals("app/src x/main", folder.path);
+        assertNull(GitHubLinks.tree("https://github.com/o/r/tree"));
+        assertNull(GitHubLinks.tree("https://github.com/o/r/blob/main/a.txt"));
+        assertNull(GitHubLinks.tree("https://github.com/orgs/x/tree/y"));
         assertTrue(GitHubLinks.blob("https://github.com/o/r.git/blob/main/a.txt").repo.equals("r"));
     }
 }

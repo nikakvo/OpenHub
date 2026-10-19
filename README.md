@@ -46,7 +46,8 @@ app goes to them; see [Credits](#credits).
 * **Releases** of all your starred repositories in one list, newest first, with New
   badges and download buttons; it can be the start page
 * Built-in updater with an on/off switch; GitHub links from other apps open in the app
-  (repositories, also `.git` links, files, wiki pages, issues, pull requests, releases)
+  (repositories, also `.git` links, files, folders, wiki pages, issues, pull requests,
+  releases)
 * The side menu on every screen (≡ next to Back), to jump anywhere without pressing Back
   many times
 * Searchable in-app help that explains every screen, written for people new to GitHub

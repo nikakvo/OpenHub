@@ -2,6 +2,8 @@
 
 package com.thirtydegreesray.openhub.mvp.presenter;
 
+import androidx.annotation.NonNull;
+
 import com.thirtydegreesray.openhub.http.error.HttpErrorCode;
 
 import com.thirtydegreesray.openhub.http.error.HttpError;
@@ -267,13 +269,19 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
     }
 
     private void initCurBranch(){
-        curBranch = new Branch(repository.getDefaultBranch());
+        useBranch(repository.getDefaultBranch());
+    }
+
+    /** The branch shown (and downloaded as source) from now on. */
+    public Branch useBranch(@NonNull String name){
+        curBranch = new Branch(name);
         curBranch.setZipballUrl("https://github.com/".concat(owner).concat("/")
                 .concat(repoName).concat("/archive/")
                 .concat(curBranch.getName()).concat(".zip"));
         curBranch.setTarballUrl("https://github.com/".concat(owner).concat("/")
                 .concat(repoName).concat("/archive/")
                 .concat(curBranch.getName()).concat(".tar.gz"));
+        return curBranch;
     }
 
     public Repository getRepository() {
