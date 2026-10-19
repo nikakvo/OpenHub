@@ -36,5 +36,17 @@
     <string name="gist_name_exists">The gist already has a file named %1$s</string>
     <string name="gist_content_required">GitHub does not keep empty files: write something</string>
     <string name="gist_discard_message">Your changes are not saved yet. Discard them?</string>
+    <string name="gist_add_comment">Add a comment</string>
+    <string name="gist_comment_hint">Comment (Markdown)</string>
+    <string name="gist_comment_post">Comment</string>
+    <string name="gist_comment_edit">Edit comment</string>
+    <string name="gist_comment_copy">Copy text</string>
+    <string name="gist_comment_delete">Delete comment</string>
+    <string name="gist_comment_delete_message">Delete this comment?</string>
+    <string name="gist_comment_posted">Comment added</string>
+    <string name="gist_comment_saved">Comment saved</string>
+    <string name="gist_comment_deleted">Comment deleted</string>
+    <string name="gist_comment_edited">edited</string>
+    <string name="gist_no_comments">No comments yet.</string>
     <string name="gist_scope_missing">Your sign-in has no "gist" permission. Sign in with the browser again or create a token with the gist scope.</string>
 </resources>

@@ -2,6 +2,7 @@ package com.thirtydegreesray.openhub.http;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import io.reactivex.rxjava3.core.Observable;
@@ -16,6 +17,7 @@ import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * Gists: read, create, edit, delete, star and fork. Bodies are JSON built by hand
@@ -48,6 +50,26 @@ public interface GistService {
 
     @NonNull @DELETE("gists/{id}/star")
     Observable<Response<ResponseBody>> unstar(@Path("id") String id);
+
+    // ---- comments ----------------------------------------------------------------
+
+    /** Comments with body (Markdown) and body_html, oldest first. */
+    @NonNull @GET("gists/{id}/comments")
+    @Headers({"Cache-Control: no-cache, no-store", "Accept: application/vnd.github.full+json"})
+    Observable<Response<JsonArray>> getComments(@Path("id") String id,
+            @Query("per_page") int perPage, @Query("page") int page);
+
+    /** Body: {"body": "..."} */
+    @NonNull @POST("gists/{id}/comments")
+    Observable<Response<JsonObject>> createComment(@Path("id") String id, @Body RequestBody body);
+
+    @NonNull @PATCH("gists/{id}/comments/{comment}")
+    Observable<Response<JsonObject>> updateComment(@Path("id") String id,
+            @Path("comment") long comment, @Body RequestBody body);
+
+    @NonNull @DELETE("gists/{id}/comments/{comment}")
+    Observable<Response<ResponseBody>> deleteComment(@Path("id") String id,
+            @Path("comment") long comment);
 
     @NonNull @POST("gists/{id}/forks")
     Observable<Response<JsonObject>> fork(@Path("id") String id);

@@ -80,10 +80,15 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
     private TextView filesTitle;
     private LinearLayout filesList;
     private FloatingActionButton addFileBn;
+    private TextView commentsTitle;
+    private LinearLayout commentsList;
+    private View addCommentBn;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
     @Nullable private JsonObject gist;
     @Nullable private Boolean starred;
+    /** null while not loaded (or not loadable) */
+    @Nullable private List<JsonObject> comments;
     private long seenStamp;
 
     @Override
@@ -153,14 +158,35 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
                 if (response.body() != null) response.body().close();
             } catch (Exception ignored) {
             }
-            return new Object[]{json, star};
+            return new Object[]{json, star, fetchComments()};
         }, (Object[] result) -> {
             showRefreshing(false);
             gist = (JsonObject) result[0];
             starred = (Boolean) result[1];
+            @SuppressWarnings("unchecked") List<JsonObject> loaded = (List<JsonObject>) result[2];
+            comments = loaded;
             render();
             invalidateOptionsMenu();
         }, error -> showRefreshing(false));
+    }
+
+    /** All comments (up to 300), or null when GitHub would not give them. */
+    @Nullable
+    private List<JsonObject> fetchComments() {
+        try {
+            List<JsonObject> list = new ArrayList<>();
+            for (int page = 1; page <= 3; page++) {
+                com.google.gson.JsonArray array = GitHubApi.call(service().getComments(gistId, 100, page));
+                if (array == null || array.size() == 0) break;
+                for (JsonElement element : array) {
+                    if (element.isJsonObject()) list.add(element.getAsJsonObject());
+                }
+                if (array.size() < 100) break;
+            }
+            return list;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @NonNull
@@ -224,6 +250,140 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
         }
         if (mine) addFileBn.show();
         else addFileBn.hide();
+        renderComments();
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Comments
+    // ---------------------------------------------------------------------------------
+
+    private void renderComments() {
+        commentsList.removeAllViews();
+        if (comments == null) {
+            commentsTitle.setVisibility(View.GONE);
+            addCommentBn.setVisibility(View.GONE);
+            return;
+        }
+        commentsTitle.setVisibility(View.VISIBLE);
+        addCommentBn.setVisibility(View.VISIBLE);
+        commentsTitle.setText(comments.isEmpty() ? getString(R.string.gist_no_comments)
+                : getResources().getQuantityString(R.plurals.gist_comments, comments.size(), comments.size()));
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (JsonObject comment : comments) {
+            View row = inflater.inflate(R.layout.layout_item_gist_comment, commentsList, false);
+            String login = Json.str(comment, "user.login");
+            Date created = Json.date(comment, "created_at");
+            Date updated = Json.date(comment, "updated_at");
+            StringBuilder header = new StringBuilder(login);
+            if (created != null) header.append(" · ").append(StringUtils.getNewsTimeStr(this, created));
+            if (created != null && updated != null && updated.getTime() - created.getTime() > 60_000) {
+                header.append(" · ").append(getString(R.string.gist_comment_edited));
+            }
+            ((TextView) row.findViewById(R.id.comment_header)).setText(header);
+            TextView body = row.findViewById(R.id.comment_body);
+            String html = Json.str(comment, "body_html");
+            if (StringUtils.isBlank(html)) {
+                body.setText(Json.str(comment, "body"));
+            } else {
+                body.setText(linksInApp(android.text.Html.fromHtml(html,
+                        android.text.Html.FROM_HTML_MODE_COMPACT)));
+                body.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
+            }
+            View.OnLongClickListener menu = v -> {
+                showCommentMenu(row, comment);
+                return true;
+            };
+            row.setOnClickListener(v -> showCommentMenu(row, comment));
+            row.setOnLongClickListener(menu);
+            body.setOnLongClickListener(menu);
+            commentsList.addView(row);
+        }
+    }
+
+    /** Links in a comment open like links anywhere in the app (GitHub pages in OpenHub). */
+    @NonNull
+    private CharSequence linksInApp(@NonNull CharSequence text) {
+        android.text.SpannableStringBuilder spannable = new android.text.SpannableStringBuilder(text);
+        for (android.text.style.URLSpan span : spannable.getSpans(0, spannable.length(),
+                android.text.style.URLSpan.class)) {
+            int start = spannable.getSpanStart(span);
+            int end = spannable.getSpanEnd(span);
+            String url = span.getURL();
+            spannable.removeSpan(span);
+            spannable.setSpan(new android.text.style.ClickableSpan() {
+                @Override
+                public void onClick(@NonNull View widget) {
+                    AppOpener.launchUrl(GistActivity.this, android.net.Uri.parse(url));
+                }
+            }, start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        // trailing new lines of the last paragraph
+        int length = spannable.length();
+        while (length > 0 && spannable.charAt(length - 1) == '\n') length--;
+        return spannable.subSequence(0, length);
+    }
+
+    private void showCommentMenu(@NonNull View anchor, @NonNull JsonObject comment) {
+        String me = AppData.INSTANCE.getLoggedUser() == null ? "" : AppData.INSTANCE.getLoggedUser().getLogin();
+        boolean own = Json.str(comment, "user.login").equalsIgnoreCase(me);
+        long id = Json.get(comment, "id") == null ? 0 : Json.get(comment, "id").getAsLong();
+        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        popup.getMenu().add(0, 1, 0, R.string.gist_comment_copy);
+        if (own) popup.getMenu().add(0, 2, 1, R.string.gist_comment_edit);
+        // the gist's owner may remove anyone's comment
+        if (own || isMine()) popup.getMenu().add(0, 3, 2, R.string.gist_comment_delete);
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 1) {
+                AppUtils.copyToClipboard(this, Json.str(comment, "body"));
+            } else if (item.getItemId() == 2) {
+                writeComment(id, Json.str(comment, "body"));
+            } else {
+                deleteComment(id);
+            }
+            return true;
+        });
+        popup.show();
+    }
+
+    /** @param id 0 for a new comment */
+    private void writeComment(long id, @Nullable String text) {
+        new com.thirtydegreesray.openhub.ui.widget.ComposeDialog.Builder(this)
+                .title(getString(id == 0 ? R.string.gist_add_comment : R.string.gist_comment_edit))
+                .body(getString(R.string.gist_comment_hint), text)
+                .bodyRequired(true, null)
+                .positive(getString(id == 0 ? R.string.gist_comment_post : R.string.save))
+                .callback((choice, title, body) -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("body", body);
+                    showProgressDialog(getString(R.string.please_wait));
+                    background(() -> id == 0
+                            ? GitHubApi.call(service().createComment(gistId, json(json)))
+                            : GitHubApi.call(service().updateComment(gistId, id, json(json))), done -> {
+                        dismissProgressDialog();
+                        showSuccessToast(getString(id == 0 ? R.string.gist_comment_posted : R.string.gist_comment_saved));
+                        load();
+                    }, error -> dismissProgressDialog());
+                })
+                .show();
+    }
+
+    private void deleteComment(long id) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.gist_comment_delete)
+                .setMessage(R.string.gist_comment_delete_message)
+                .setPositiveButton(R.string.delete, (d, w) -> {
+                    showProgressDialog(getString(R.string.please_wait));
+                    background(() -> {
+                        GitHubApi.call(service().deleteComment(gistId, id));
+                        return true;
+                    }, done -> {
+                        dismissProgressDialog();
+                        showSuccessToast(getString(R.string.gist_comment_deleted));
+                        load();
+                    }, error -> dismissProgressDialog());
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     private int selectable() {
@@ -490,5 +650,9 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
         filesTitle = root.findViewById(R.id.gist_files_title);
         filesList = root.findViewById(R.id.gist_files);
         addFileBn = root.findViewById(R.id.add_file_bn);
+        commentsTitle = root.findViewById(R.id.gist_comments_title);
+        commentsList = root.findViewById(R.id.gist_comments);
+        addCommentBn = root.findViewById(R.id.gist_add_comment);
+        addCommentBn.setOnClickListener(v -> writeComment(0, null));
     }
 }

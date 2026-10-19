@@ -26,7 +26,8 @@ app goes to them; see [Credits](#credits).
   and download counts, Install / Open / Share right from the download notification.
 * **Release notifications**: follow any repository and get a notification when a new
   release comes out, with an adjustable check interval.
-* **Gists**: your gists and anyone else's, with formatted Markdown and highlighted code. Create gists (public or secret), add, edit, rename and delete files, star, fork and delete them.
+* **Gists**: your gists and anyone else's, with formatted Markdown and highlighted code. Create gists (public or secret), add, edit, rename and delete files, star, fork and delete them; read, write, edit and delete
+  comments.
 * **Built-in downloader** that works on Wi-Fi, mobile data, roaming and VPN and resumes
   after a lost connection.
 * Wide tables and code blocks in READMEs scroll sideways.
