@@ -350,22 +350,29 @@ public class MainActivity extends BaseDrawerActivity<MainPresenter>
         selectedPage = itemId;
         invalidateBack();
         String fragmentTag = TAG_MAP.get(itemId);
-        Fragment showFragment = getSupportFragmentManager().findFragmentByTag(fragmentTag);
-        boolean isExist = true;
+        androidx.fragment.app.FragmentManager manager = getSupportFragmentManager();
+        // earlier page changes may still be queued (start page + an item of the side menu
+        // of another screen): run them first, so the page shown before is really hidden
+        manager.executePendingTransactions();
+        Fragment showFragment = manager.findFragmentByTag(fragmentTag);
+        boolean isExist = showFragment != null;
         if (showFragment == null) {
-            isExist = false;
             showFragment = getFragment(itemId);
         }
-        if (showFragment.isVisible()) {
-            return;
-        }
-
-        Fragment visibleFragment = getVisibleFragment();
+        androidx.fragment.app.FragmentTransaction transaction = manager.beginTransaction();
         if (isExist) {
-            showAndHideFragment(showFragment, visibleFragment);
+            transaction.show(showFragment);
         } else {
-            addAndHideFragment(showFragment, visibleFragment, fragmentTag);
+            transaction.add(R.id.frame_layout_content, showFragment, fragmentTag);
         }
+        // only one page at a time: every other page of the start screen is hidden
+        for (Fragment fragment : manager.getFragments()) {
+            if (fragment != null && fragment != showFragment
+                    && fragment.getId() == R.id.frame_layout_content && !fragment.isHidden()) {
+                transaction.hide(fragment);
+            }
+        }
+        transaction.commit();
     }
 
     @NonNull
@@ -392,38 +399,6 @@ public class MainActivity extends BaseDrawerActivity<MainPresenter>
             return TopicsFragment.create();
         }
         return null;
-    }
-
-    private void showAndHideFragment(@NonNull Fragment showFragment, @Nullable Fragment hideFragment) {
-        if (hideFragment == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .show(showFragment)
-                    .commit();
-        } else {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .show(showFragment)
-                    .hide(hideFragment)
-                    .commit();
-        }
-
-    }
-
-    private void addAndHideFragment(@NonNull Fragment showFragment,
-                                    @Nullable Fragment hideFragment, @NonNull String addTag) {
-        if (hideFragment == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.frame_layout_content, showFragment, addTag)
-                    .commit();
-        } else {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.frame_layout_content, showFragment, addTag)
-                    .hide(hideFragment)
-                    .commit();
-        }
     }
 
     @Override
