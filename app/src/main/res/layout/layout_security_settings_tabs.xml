@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Second row of tabs on the Security screen (admins): Secrets and Variables. -->
+<com.google.android.material.tabs.TabLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/settings_tab_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:tabGravity="fill"
+    app:tabMode="fixed"
+    app:tabTextAppearance="@style/TextAppearance.Design.Tab"
+    app:tabSelectedTextColor="?title_color"/>

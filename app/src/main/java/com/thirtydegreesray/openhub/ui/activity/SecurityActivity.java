@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -113,6 +114,8 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
     private TextView footerText;
     private FloatingActionButton addSecretBn;
     private TextView scopeText;
+    @Nullable private TabLayout settingsTabLayout;
+    @Nullable private android.content.res.ColorStateList tabTextColors;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
     @Nullable private Disposable loading;
@@ -134,34 +137,26 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.security), owner + "/" + repo);
 
+        // all tabs visible at once: the alerts in the first row, Secrets and Variables
+        // (admins) in a second row below it
         tabLayout.setVisibility(View.VISIBLE);
-        tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.security_dependabot));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.security_code_scanning));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.security_secret_scanning));
+        tabLayout.setTabMode(TabLayout.MODE_FIXED);
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.security_dependabot), false);
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.security_code_scanning), false);
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.security_secret_scanning), false);
+        tabTextColors = tabLayout.getTabTextColors();
         if (admin) {
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.security_secrets));
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.security_variables));
+            ViewGroup appBar = findViewById(R.id.app_bar);
+            settingsTabLayout = (TabLayout) LayoutInflater.from(appBar.getContext())
+                    .inflate(R.layout.layout_security_settings_tabs, appBar, false);
+            appBar.addView(settingsTabLayout);
+            settingsTabLayout.addTab(settingsTabLayout.newTab().setText(R.string.security_secrets), false);
+            settingsTabLayout.addTab(settingsTabLayout.newTab().setText(R.string.security_variables), false);
         }
-        if (tab >= tabLayout.getTabCount()) tab = TAB_DEPENDABOT;
-        TabLayout.Tab selected = tabLayout.getTabAt(tab);
-        if (selected != null) selected.select();
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab t) {
-                tab = t.getPosition();
-                invalidateOptionsMenu();
-                load();
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab t) {
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab t) {
-            }
-        });
+        if (tab < 0 || tab > TAB_VARIABLES || (!admin && isSettingsTab(tab))) tab = TAB_DEPENDABOT;
+        showSelectedTab();
+        tabLayout.addOnTabSelectedListener(rowListener(0));
+        if (settingsTabLayout != null) settingsTabLayout.addOnTabSelectedListener(rowListener(TAB_SECRETS));
 
         refreshLayout.setColorSchemeColors(ViewUtils.getRefreshLayoutColors(this));
         refreshLayout.setOnRefreshListener(this::load);
@@ -171,6 +166,55 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         });
         scopeText.setOnClickListener(v -> chooseScope());
         load();
+    }
+
+    /** Tabs of one row; {@code first} is the screen tab of its first tab. */
+    @NonNull
+    private TabLayout.OnTabSelectedListener rowListener(int first) {
+        return new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab t) {
+                selectTab(first + t.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab t) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab t) {
+                // the tab still marked in the row that is not active
+                if (tab != first + t.getPosition()) selectTab(first + t.getPosition());
+            }
+        };
+    }
+
+    private void selectTab(int newTab) {
+        if (newTab == tab) return;
+        tab = newTab;
+        showSelectedTab();
+        invalidateOptionsMenu();
+        load();
+    }
+
+    /** Marks the shown tab; the other row shows no tab as selected. */
+    private void showSelectedTab() {
+        boolean settings = isSettingsTab(tab);
+        markRow(tabLayout, settings ? -1 : tab);
+        if (settingsTabLayout != null) markRow(settingsTabLayout, settings ? tab - TAB_SECRETS : -1);
+    }
+
+    private void markRow(@NonNull TabLayout row, int position) {
+        if (position >= 0) {
+            TabLayout.Tab selected = row.getTabAt(position);
+            if (selected != null && row.getSelectedTabPosition() != position) selected.select();
+            row.setSelectedTabIndicatorColor(ViewUtils.getAccentColor(this));
+            if (tabTextColors != null) row.setTabTextColors(tabTextColors);
+        } else {
+            row.setSelectedTabIndicatorColor(Color.TRANSPARENT);
+            if (tabTextColors != null) row.setTabTextColors(tabTextColors.getDefaultColor(),
+                    tabTextColors.getDefaultColor());
+        }
     }
 
     @Override
