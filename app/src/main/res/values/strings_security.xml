@@ -104,4 +104,20 @@
     <string name="variables_delete_message">Delete the variable %1$s? Workflows that use it will get an empty value.</string>
     <string name="variables_exists">%1$s already exists. Tap it to edit it.</string>
     <string name="variables_copy_value">Copy value</string>
+
+    <!-- Security settings (admins) -->
+    <string name="security_settings">Security settings</string>
+    <string name="security_setting_alerts">Dependabot alerts</string>
+    <string name="security_setting_alerts_summary">Warns when a dependency has a known vulnerability.</string>
+    <string name="security_setting_updates">Dependabot security updates</string>
+    <string name="security_setting_updates_summary">Opens pull requests that update vulnerable dependencies. Needs Dependabot alerts.</string>
+    <string name="security_setting_secret_scanning">Secret scanning</string>
+    <string name="security_setting_secret_scanning_summary">Finds tokens and keys committed to the repository.</string>
+    <string name="security_setting_push_protection">Push protection</string>
+    <string name="security_setting_push_protection_summary">Blocks pushes that contain tokens or keys. Needs secret scanning.</string>
+    <string name="security_setting_private_reporting">Private vulnerability reporting</string>
+    <string name="security_setting_private_reporting_summary">Lets anyone report a vulnerability privately to the maintainers.</string>
+    <string name="security_setting_unavailable">Not available for this repository.</string>
+    <string name="security_setting_on">%1$s turned on</string>
+    <string name="security_setting_off">%1$s turned off</string>
 </resources>

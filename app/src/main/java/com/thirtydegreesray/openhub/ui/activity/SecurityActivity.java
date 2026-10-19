@@ -32,6 +32,7 @@ import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.http.ActionsSettingsService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.SecurityService;
+import com.thirtydegreesray.openhub.http.SecuritySettingsService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
@@ -244,6 +245,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, 1, 0, R.string.security_show_closed).setCheckable(true);
         menu.add(0, 2, 1, R.string.open_in_browser);
+        if (admin) menu.add(0, 3, 2, R.string.security_settings);
         return true;
     }
 
@@ -265,6 +267,9 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
                 return true;
             case 2:
                 AppOpener.openInCustomTabsOrBrowser(this, pageUrl());
+                return true;
+            case 3:
+                showSettings();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -1116,6 +1121,202 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
                 }, getString(R.string.variables_deleted, name)))
                 .setNegativeButton(R.string.cancel, null)
                 .show();
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Security settings: features on or off (admins)
+    // ---------------------------------------------------------------------------------
+
+    private static final int F_ALERTS = 0;
+    private static final int F_UPDATES = 1;
+    private static final int F_SECRET_SCANNING = 2;
+    private static final int F_PUSH_PROTECTION = 3;
+    private static final int F_PRIVATE_REPORTING = 4;
+
+    private SecuritySettingsService switches() {
+        return GitHubApi.service(SecuritySettingsService.class);
+    }
+
+    private String repoPath() {
+        return "repos/" + owner + "/" + repo;
+    }
+
+    private void showSettings() {
+        showProgressDialog(getString(R.string.please_wait));
+        background(this::loadSettings, (Boolean[] states) -> {
+            dismissProgressDialog();
+            showSettingsDialog(states);
+        }, error -> dismissProgressDialog());
+    }
+
+    /** On, off, or null when GitHub does not offer it here (or did not say). */
+    @NonNull
+    private Boolean[] loadSettings() {
+        Boolean[] states = new Boolean[5];
+        String base = repoPath();
+        states[F_ALERTS] = answerState(base + "/vulnerability-alerts");
+        states[F_UPDATES] = enabledState(base + "/automated-security-fixes");
+        states[F_PRIVATE_REPORTING] = enabledState(base + "/private-vulnerability-reporting");
+        JsonObject repository = jsonOf(base);
+        states[F_SECRET_SCANNING] = statusState(repository, "security_and_analysis.secret_scanning.status");
+        states[F_PUSH_PROTECTION] = statusState(repository,
+                "security_and_analysis.secret_scanning_push_protection.status");
+        return states;
+    }
+
+    /** 204: on, 404: off */
+    @Nullable
+    private Boolean answerState(@NonNull String url) {
+        try {
+            retrofit2.Response<okhttp3.ResponseBody> response = switches().get(url).blockingFirst();
+            closeQuietly(response);
+            if (response.code() == 204 || response.code() == 200) return true;
+            if (response.code() == 404) return false;
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    /** {"enabled": true} or 404: off */
+    @Nullable
+    private Boolean enabledState(@NonNull String url) {
+        try {
+            retrofit2.Response<okhttp3.ResponseBody> response = switches().get(url).blockingFirst();
+            if (response.code() == 404) {
+                closeQuietly(response);
+                return false;
+            }
+            if (response.isSuccessful() && response.body() != null) {
+                JsonElement json = com.google.gson.JsonParser.parseString(response.body().string());
+                if (json.isJsonObject() && json.getAsJsonObject().has("enabled")) {
+                    return Json.bool(json.getAsJsonObject(), "enabled");
+                }
+            }
+            closeQuietly(response);
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    @Nullable
+    private JsonObject jsonOf(@NonNull String url) {
+        try {
+            retrofit2.Response<okhttp3.ResponseBody> response = switches().get(url).blockingFirst();
+            if (response.isSuccessful() && response.body() != null) {
+                JsonElement json = com.google.gson.JsonParser.parseString(response.body().string());
+                return json.isJsonObject() ? json.getAsJsonObject() : null;
+            }
+            closeQuietly(response);
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    /** "enabled" / "disabled"; missing: the feature is not offered for this repository */
+    @Nullable
+    private static Boolean statusState(@Nullable JsonObject repository, @NonNull String path) {
+        if (repository == null) return null;
+        String status = Json.str(repository, path);
+        if ("enabled".equals(status)) return true;
+        if ("disabled".equals(status)) return false;
+        return null;
+    }
+
+    private static void closeQuietly(@NonNull retrofit2.Response<okhttp3.ResponseBody> response) {
+        try {
+            if (response.body() != null) response.body().close();
+            if (response.errorBody() != null) response.errorBody().close();
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void showSettingsDialog(@NonNull Boolean[] states) {
+        android.content.Context dialogContext = new AlertDialog.Builder(this).getContext();
+        int pad = Math.round(getResources().getDisplayMetrics().density * 24);
+        LinearLayout box = new LinearLayout(dialogContext);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(pad, pad / 3, pad, 0);
+        int[] titles = {R.string.security_setting_alerts, R.string.security_setting_updates,
+                R.string.security_setting_secret_scanning, R.string.security_setting_push_protection,
+                R.string.security_setting_private_reporting};
+        int[] summaries = {R.string.security_setting_alerts_summary, R.string.security_setting_updates_summary,
+                R.string.security_setting_secret_scanning_summary,
+                R.string.security_setting_push_protection_summary,
+                R.string.security_setting_private_reporting_summary};
+        for (int i = 0; i < titles.length; i++) {
+            final int feature = i;
+            View row = LayoutInflater.from(dialogContext).inflate(R.layout.layout_security_switch, box, false);
+            androidx.appcompat.widget.SwitchCompat toggle = row.findViewById(R.id.security_switch);
+            TextView summary = row.findViewById(R.id.security_switch_summary);
+            String title = getString(titles[i]);
+            toggle.setText(title);
+            Boolean state = states[i];
+            if (state == null) {
+                toggle.setEnabled(false);
+                summary.setText(getString(summaries[i]) + "\n" + getString(R.string.security_setting_unavailable));
+            } else {
+                summary.setText(summaries[i]);
+                toggle.setChecked(state);
+                toggle.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(android.widget.CompoundButton button, boolean on) {
+                        applySetting(feature, on, toggle, this, title);
+                    }
+                });
+            }
+            box.addView(row);
+        }
+        android.widget.ScrollView scroll = new android.widget.ScrollView(dialogContext);
+        scroll.addView(box);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.security_settings)
+                .setView(scroll)
+                .setPositiveButton(R.string.close, null)
+                .setOnDismissListener(d -> load())
+                .show();
+    }
+
+    private void applySetting(int feature, boolean on, @NonNull androidx.appcompat.widget.SwitchCompat toggle,
+                              @NonNull android.widget.CompoundButton.OnCheckedChangeListener listener,
+                              @NonNull String title) {
+        toggle.setEnabled(false);
+        String base = repoPath();
+        background(() -> {
+            switch (feature) {
+                case F_ALERTS:
+                    GitHubApi.call(on ? switches().put(base + "/vulnerability-alerts")
+                            : switches().delete(base + "/vulnerability-alerts"));
+                    break;
+                case F_UPDATES:
+                    GitHubApi.call(on ? switches().put(base + "/automated-security-fixes")
+                            : switches().delete(base + "/automated-security-fixes"));
+                    break;
+                case F_PRIVATE_REPORTING:
+                    GitHubApi.call(on ? switches().put(base + "/private-vulnerability-reporting")
+                            : switches().delete(base + "/private-vulnerability-reporting"));
+                    break;
+                default: {
+                    JsonObject status = new JsonObject();
+                    status.addProperty("status", on ? "enabled" : "disabled");
+                    JsonObject analysis = new JsonObject();
+                    analysis.add(feature == F_SECRET_SCANNING ? "secret_scanning"
+                            : "secret_scanning_push_protection", status);
+                    JsonObject body = new JsonObject();
+                    body.add("security_and_analysis", analysis);
+                    GitHubApi.call(service().updateRepo(owner, repo, GistActivity.json(body)));
+                }
+            }
+            return true;
+        }, done -> {
+            toggle.setEnabled(true);
+            showSuccessToast(getString(on ? R.string.security_setting_on : R.string.security_setting_off, title));
+        }, error -> {
+            // GitHub said no (e.g. updates need alerts first): show the switch as it is
+            toggle.setOnCheckedChangeListener(null);
+            toggle.setChecked(!on);
+            toggle.setOnCheckedChangeListener(listener);
+            toggle.setEnabled(true);
+        });
     }
 
     // ---------------------------------------------------------------------------------

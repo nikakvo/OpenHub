@@ -296,6 +296,7 @@
     <li>Alerts are colored by severity: critical red, high orange, medium amber. <span class="ui">Show closed alerts</span> in the menu shows fixed, dismissed and closed ones.</li>
     <li><strong>Tap an alert</strong> for its details. <span class="ui">Dismiss…</span> (Dependabot, code scanning) or <span class="ui">Close as…</span> (secret scanning) asks for a reason and an optional comment; <span class="ui">Reopen</span> undoes it.</li>
     <li>When a scanner is off, an admin gets <span class="ui">Turn on</span> (Dependabot alerts, secret scanning) or <span class="ui">Set up CodeQL</span> (code scanning; the first analysis runs in Actions and takes a few minutes). In private repositories some scanners need GitHub Advanced Security.</li>
+    <li>Admins: ⋮ → <span class="ui">Security settings</span> turns features on or off: <span class="ui">Dependabot alerts</span>, <span class="ui">Dependabot security updates</span> (pull requests that update vulnerable dependencies), <span class="ui">Secret scanning</span>, <span class="ui">Push protection</span> (blocks pushes that contain tokens) and <span class="ui">Private vulnerability reporting</span>. A switch that is grey is not offered for this repository (some need GitHub Advanced Security in private repositories).</li>
     <li>A leaked token: revoke it where it was issued (e.g. github.com → Settings → Developer settings), then close the alert as <span class="ui">Revoked</span>. Deleting the file does not help, the token stays in the history.</li>
   </ul>
   <h3>Secrets for workflows</h3>
