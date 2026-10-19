@@ -35,6 +35,16 @@ public class GitHubLinksTest {
     }
 
     @Test
+    public void pagesOfGitHubItself() {
+        assertTrue(GitHubLinks.isGitHubPage("https://github.com/sponsors/v1s1t0r1sh3r3"));
+        assertTrue(GitHubLinks.isGitHubPage("https://github.com/orgs/x/repositories"));
+        assertTrue(GitHubLinks.isGitHubPage("https://github.com/topics/android"));
+        assertTrue(!GitHubLinks.isGitHubPage("https://github.com/v1s1t0r1sh3r3/https-captive-portal"));
+        assertTrue(!GitHubLinks.isGitHubPage("https://github.com/nikakvo"));
+        assertTrue(!GitHubLinks.isGitHubPage("https://example.com/sponsors/x"));
+    }
+
+    @Test
     public void wikiPages() {
         GitHubLinks.Wiki wiki = GitHubLinks.wiki(
                 "https://github.com/v1s1t0r1sh3r3/airgeddon/wiki/Installation%20&%20Usage");

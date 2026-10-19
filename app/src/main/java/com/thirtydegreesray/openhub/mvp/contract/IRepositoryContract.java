@@ -19,6 +19,9 @@ public interface IRepositoryContract {
         void showBranchesAndTags(ArrayList<Branch> list, Branch curBranch);
         void invalidateOptionsMenu();
         void showStarWishes();
+
+        /** GitHub answered 404: no such repository, or a private one without access. */
+        void showRepoNotFound();
     }
 
     interface Presenter extends IBaseContract.Presenter<IRepositoryContract.View>{

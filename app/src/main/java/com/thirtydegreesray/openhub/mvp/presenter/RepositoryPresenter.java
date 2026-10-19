@@ -2,6 +2,10 @@
 
 package com.thirtydegreesray.openhub.mvp.presenter;
 
+import com.thirtydegreesray.openhub.http.error.HttpErrorCode;
+
+import com.thirtydegreesray.openhub.http.error.HttpError;
+
 import com.thirtydegreesray.openhub.util.RepoChanges;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppData;
@@ -201,6 +205,11 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
                     @Override
                     public void onError(Throwable error) {
                         if (isShowLoading) mView.hideLoading();
+                        if (repository == null && error instanceof HttpError
+                                && ((HttpError) error).getErrorCode() == HttpErrorCode.PAGE_NOT_FOUND) {
+                            mView.showRepoNotFound();
+                            return;
+                        }
                         mView.showErrorToast(getErrorTip(error));
                     }
 

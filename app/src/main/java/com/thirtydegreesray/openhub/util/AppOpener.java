@@ -212,6 +212,11 @@ public class AppOpener {
         // "github.com/owner/repo.git", "...repo#readme" and the like open the repository
         String url = GitHubLinks.normalize(uri.toString());
         uri = Uri.parse(url);
+        // github.com/sponsors/user, /orgs/..., /topics/...: GitHub's own pages, not a repository
+        if (GitHubLinks.isGitHubPage(url)) {
+            openInCustomTabsOrBrowser(context, url);
+            return;
+        }
         GitHubLinks.Blob blob = GitHubLinks.blob(url);
         if(GitHubHelper.isImage(url)){
             // an image in a repository: its file, not the github.com page around it

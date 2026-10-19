@@ -62,6 +62,18 @@ public final class GitHubLinks {
         return "https://github.com/" + owner + "/" + repo;
     }
 
+    /**
+     * Pages of GitHub itself (github.com/sponsors/user, /orgs/x, /topics/y, /settings, ...):
+     * they look like "owner/repo" or "user" but are no repository or profile, so they
+     * open in the browser.
+     */
+    public static boolean isGitHubPage(String url) {
+        URI uri = parse(url == null ? null : url.trim());
+        if (uri == null || !isGitHub(uri)) return false;
+        List<String> parts = segments(uri.getPath());
+        return !parts.isEmpty() && RESERVED.contains(parts.get(0).toLowerCase(Locale.ROOT));
+    }
+
     /** "repo.git" -> "repo"; GitHub never gives a repository a name ending in ".git". */
     public static String stripGit(String repo) {
         if (repo == null) return null;

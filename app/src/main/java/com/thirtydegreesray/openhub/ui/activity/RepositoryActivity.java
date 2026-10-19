@@ -273,6 +273,23 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
     }
 
     @Override
+    public void showRepoNotFound() {
+        String owner = getIntent().getStringExtra("owner");
+        String name = getIntent().getStringExtra("repoName");
+        String fullName = owner + "/" + name;
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.repo_not_found_title)
+                .setMessage(getString(R.string.repo_not_found_message, fullName))
+                .setPositiveButton(R.string.open_in_browser, (dialog, which) -> {
+                    AppOpener.openInCustomTabsOrBrowser(getActivity(), "https://github.com/" + fullName);
+                    finish();
+                })
+                .setNegativeButton(R.string.close, (dialog, which) -> finish())
+                .setOnCancelListener(dialog -> finish())
+                .show();
+    }
+
+    @Override
     public void showRepo(Repository repo) {
 //        setToolbarTitle(repo.getFullName(), repo.getDefaultBranch());
         desc.setText(repo.getDescription());
