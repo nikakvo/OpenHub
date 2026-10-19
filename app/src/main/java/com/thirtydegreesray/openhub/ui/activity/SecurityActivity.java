@@ -28,13 +28,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.http.ActionsSettingsService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.SecurityService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.TextInputDialog;
+import com.thirtydegreesray.openhub.util.ActionsScopes;
 import com.thirtydegreesray.openhub.util.AppOpener;
+import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.SealedBox;
@@ -61,7 +64,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 /**
  * The Security tab of a repository, like on github.com: Dependabot, code scanning and
  * secret scanning alerts (dismiss, close, reopen; admins can turn the scanners on), and
- * for admins the repository secrets of GitHub Actions (values are sealed on the phone
+ * for admins the secrets (Actions, Dependabot, environments) and the variables of GitHub
+ * Actions (secret values are sealed on the phone
  * with the repository's public key, as GitHub requires).
  */
 public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
@@ -78,9 +82,13 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
     private static final int TAB_CODE_SCANNING = 1;
     private static final int TAB_SECRET_SCANNING = 2;
     private static final int TAB_SECRETS = 3;
+    private static final int TAB_VARIABLES = 4;
 
     private static final int PER_PAGE = 100;
     private static final int MAX_SECRET_PAGES = 3;
+    /** GitHub lists at most 30 variables per page. */
+    private static final int VARIABLES_PER_PAGE = 30;
+    private static final int MAX_VARIABLE_PAGES = 10;
 
     private static final int COLOR_CRITICAL = Color.parseColor("#E5534B");
     private static final int COLOR_HIGH = Color.parseColor("#DB6D28");
@@ -91,6 +99,9 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
     @AutoAccess boolean admin;
     @AutoAccess int tab;
     @AutoAccess boolean showClosed;
+    /** Which secrets / variables are shown: see ActionsScopes */
+    @AutoAccess String secretScope = ActionsScopes.ACTIONS;
+    @AutoAccess String variableScope = ActionsScopes.ACTIONS;
 
     private TabLayout tabLayout;
     private SwipeRefreshLayout refreshLayout;
@@ -101,10 +112,12 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
     private LinearLayout itemList;
     private TextView footerText;
     private FloatingActionButton addSecretBn;
+    private TextView scopeText;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
     @Nullable private Disposable loading;
     private final List<String> secretNames = new ArrayList<>();
+    private final List<String> variableNames = new ArrayList<>();
 
     @Override
     protected void setupActivityComponent(AppComponent appComponent) {
@@ -126,7 +139,10 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.security_dependabot));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.security_code_scanning));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.security_secret_scanning));
-        if (admin) tabLayout.addTab(tabLayout.newTab().setText(R.string.security_secrets));
+        if (admin) {
+            tabLayout.addTab(tabLayout.newTab().setText(R.string.security_secrets));
+            tabLayout.addTab(tabLayout.newTab().setText(R.string.security_variables));
+        }
         if (tab >= tabLayout.getTabCount()) tab = TAB_DEPENDABOT;
         TabLayout.Tab selected = tabLayout.getTabAt(tab);
         if (selected != null) selected.select();
@@ -149,7 +165,11 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
 
         refreshLayout.setColorSchemeColors(ViewUtils.getRefreshLayoutColors(this));
         refreshLayout.setOnRefreshListener(this::load);
-        addSecretBn.setOnClickListener(v -> editSecret(null));
+        addSecretBn.setOnClickListener(v -> {
+            if (tab == TAB_VARIABLES) editVariable(null);
+            else editSecret(null);
+        });
+        scopeText.setOnClickListener(v -> chooseScope());
         load();
     }
 
@@ -162,6 +182,14 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private SecurityService service() {
         return GitHubApi.service(SecurityService.class);
+    }
+
+    private ActionsSettingsService settings() {
+        return GitHubApi.service(ActionsSettingsService.class);
+    }
+
+    private boolean isSettingsTab(int forTab) {
+        return forTab == TAB_SECRETS || forTab == TAB_VARIABLES;
     }
 
     // ---------------------------------------------------------------------------------
@@ -178,7 +206,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem closed = menu.findItem(1);
-        closed.setVisible(tab != TAB_SECRETS);
+        closed.setVisible(!isSettingsTab(tab));
         closed.setChecked(showClosed);
         return super.onPrepareOptionsMenu(menu);
     }
@@ -209,8 +237,10 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
                 return base + "/security/code-scanning";
             case TAB_SECRET_SCANNING:
                 return base + "/security/secret-scanning";
+            case TAB_VARIABLES:
+                return ActionsScopes.settingsPage(owner, repo, variableScope, true);
             default:
-                return base + "/settings/secrets/actions";
+                return ActionsScopes.settingsPage(owner, repo, secretScope, false);
         }
     }
 
@@ -228,9 +258,13 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         if (loading != null) loading.dispose();
         final int shownTab = tab;
         showRefreshing(true);
-        if (shownTab == TAB_SECRETS) addSecretBn.show();
+        if (isSettingsTab(shownTab)) addSecretBn.show();
         else addSecretBn.hide();
-        loading = Single.fromCallable(() -> fetch(shownTab))
+        addSecretBn.setContentDescription(getString(shownTab == TAB_VARIABLES
+                ? R.string.variables_add : R.string.secrets_add));
+        updateScopeText();
+        final String shownScope = shownTab == TAB_VARIABLES ? variableScope : secretScope;
+        loading = Single.fromCallable(() -> fetch(shownTab, shownScope))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(items -> {
@@ -243,7 +277,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     @NonNull
-    private List<JsonObject> fetch(int forTab) throws Exception {
+    private List<JsonObject> fetch(int forTab, @NonNull String scope) throws Exception {
         List<JsonObject> items = new ArrayList<>();
         JsonArray array;
         switch (forTab) {
@@ -259,17 +293,12 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
                 array = GitHubApi.call(service().getSecretScanningAlerts(owner, repo,
                         showClosed ? "resolved" : "open", PER_PAGE));
                 break;
+            case TAB_VARIABLES:
+                return listAll(ActionsScopes.variables(ActionsScopes.base(owner, repo, scope)),
+                        "variables", VARIABLES_PER_PAGE, MAX_VARIABLE_PAGES);
             default:
-                for (int page = 1; page <= MAX_SECRET_PAGES; page++) {
-                    JsonObject result = GitHubApi.call(service().getSecrets(owner, repo, PER_PAGE, page));
-                    JsonElement secrets = result == null ? null : result.get("secrets");
-                    if (secrets == null || !secrets.isJsonArray() || secrets.getAsJsonArray().size() == 0) break;
-                    for (JsonElement element : secrets.getAsJsonArray()) {
-                        if (element.isJsonObject()) items.add(element.getAsJsonObject());
-                    }
-                    if (secrets.getAsJsonArray().size() < PER_PAGE) break;
-                }
-                return items;
+                return listAll(ActionsScopes.secrets(ActionsScopes.base(owner, repo, scope)),
+                        "secrets", PER_PAGE, MAX_SECRET_PAGES);
         }
         if (array != null) {
             for (JsonElement element : array) {
@@ -279,17 +308,42 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         return items;
     }
 
+    /** Every page of a list answer {"total_count":n, key:[...]} (up to maxPages). */
+    @NonNull
+    private List<JsonObject> listAll(@NonNull String url, @NonNull String key, int perPage,
+                                     int maxPages) throws Exception {
+        List<JsonObject> items = new ArrayList<>();
+        for (int page = 1; page <= maxPages; page++) {
+            JsonObject result = GitHubApi.call(settings().list(url, perPage, page));
+            JsonElement list = result == null ? null : result.get(key);
+            if (list == null || !list.isJsonArray() || list.getAsJsonArray().size() == 0) break;
+            for (JsonElement element : list.getAsJsonArray()) {
+                if (element.isJsonObject()) items.add(element.getAsJsonObject());
+            }
+            if (list.getAsJsonArray().size() < perPage) break;
+        }
+        return items;
+    }
+
     private void render(@NonNull List<JsonObject> items) {
         itemList.removeAllViews();
         turnOnBn.setVisibility(View.GONE);
-        footerText.setVisibility(tab != TAB_SECRETS && items.size() >= PER_PAGE ? View.VISIBLE : View.GONE);
+        footerText.setVisibility(!isSettingsTab(tab) && items.size() >= PER_PAGE ? View.VISIBLE : View.GONE);
         footerText.setText(R.string.security_first_100);
         if (items.isEmpty()) {
             emptyBox.setVisibility(View.VISIBLE);
-            emptyText.setText(tab == TAB_SECRETS ? R.string.secrets_none
-                    : showClosed ? R.string.security_no_closed_alerts : R.string.security_no_open_alerts);
+            emptyText.setText(isSettingsTab(tab) ? emptySettingsText()
+                    : getString(showClosed ? R.string.security_no_closed_alerts : R.string.security_no_open_alerts));
         } else {
             emptyBox.setVisibility(View.GONE);
+        }
+        if (tab == TAB_VARIABLES) {
+            variableNames.clear();
+            for (JsonObject variable : items) {
+                variableNames.add(Json.str(variable, "name"));
+                itemList.addView(variableRow(variable));
+            }
+            return;
         }
         if (tab == TAB_SECRETS) {
             secretNames.clear();
@@ -327,6 +381,8 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
                     intro = R.string.security_secret_scanning_off;
                     break;
             }
+        } else if ((code == 403 || code == 404) && isSettingsTab(tab)) {
+            intro = R.string.scope_settings_no_access;
         } else if (code == 403 || code == 404) {
             intro = R.string.security_no_access;
         }
@@ -710,6 +766,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         TextInputEditText nameEdit = view.findViewById(R.id.secret_name);
         TextInputLayout valueLayout = view.findViewById(R.id.secret_value_layout);
         TextInputEditText valueEdit = view.findViewById(R.id.secret_value);
+        ((TextView) view.findViewById(R.id.secret_hint)).setText(R.string.secrets_hint);
         if (existing != null) {
             nameEdit.setText(existing);
             nameEdit.setEnabled(false);
@@ -757,14 +814,15 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void saveSecret(@NonNull String name, @NonNull byte[] value) {
         run(() -> {
-            JsonObject key = GitHubApi.call(service().getSecretsPublicKey(owner, repo));
+            String base = ActionsScopes.base(owner, repo, secretScope);
+            JsonObject key = GitHubApi.call(settings().get(ActionsScopes.publicKey(base)));
             byte[] publicKey = Base64.getDecoder().decode(Json.str(key, "key"));
             byte[] sealed = SealedBox.seal(value, publicKey);
             java.util.Arrays.fill(value, (byte) 0);
             JsonObject body = new JsonObject();
             body.addProperty("encrypted_value", Base64.getEncoder().encodeToString(sealed));
             body.addProperty("key_id", Json.str(key, "key_id"));
-            GitHubApi.call(service().putSecret(owner, repo, name, GistActivity.json(body)));
+            GitHubApi.call(settings().put(ActionsScopes.secret(base, name), GistActivity.json(body)));
             return true;
         }, getString(R.string.secrets_saved, name));
     }
@@ -774,9 +832,210 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
                 .setTitle(R.string.delete)
                 .setMessage(getString(R.string.secrets_delete_message, name))
                 .setPositiveButton(R.string.delete, (d, w) -> run(() -> {
-                    GitHubApi.call(service().deleteSecret(owner, repo, name));
+                    GitHubApi.call(settings().delete(ActionsScopes.secret(
+                            ActionsScopes.base(owner, repo, secretScope), name)));
                     return true;
                 }, getString(R.string.secrets_deleted, name)))
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Where: repository, Dependabot or an environment
+    // ---------------------------------------------------------------------------------
+
+    private void updateScopeText() {
+        if (!isSettingsTab(tab)) {
+            scopeText.setVisibility(View.GONE);
+            return;
+        }
+        String scope = tab == TAB_VARIABLES ? variableScope : secretScope;
+        scopeText.setVisibility(View.VISIBLE);
+        if (ActionsScopes.isEnvironment(scope)) {
+            scopeText.setText(getString(R.string.scope_environment, ActionsScopes.environmentName(scope)));
+        } else if (ActionsScopes.DEPENDABOT.equals(scope)) {
+            scopeText.setText(R.string.scope_dependabot_secrets);
+        } else {
+            scopeText.setText(tab == TAB_VARIABLES ? R.string.scope_actions_variables
+                    : R.string.scope_actions_secrets);
+        }
+    }
+
+    @NonNull
+    private String emptySettingsText() {
+        String scope = tab == TAB_VARIABLES ? variableScope : secretScope;
+        String environment = ActionsScopes.environmentName(scope);
+        if (tab == TAB_VARIABLES) {
+            return environment != null ? getString(R.string.variables_none_environment, environment)
+                    : getString(R.string.variables_none);
+        }
+        if (environment != null) return getString(R.string.secrets_none_environment, environment);
+        return getString(ActionsScopes.DEPENDABOT.equals(scope)
+                ? R.string.secrets_none_dependabot : R.string.secrets_none);
+    }
+
+    /** Lists the environments, then lets the user pick what the tab shows. */
+    private void chooseScope() {
+        final int forTab = tab;
+        showProgressDialog(getString(R.string.please_wait));
+        background(() -> {
+            List<String> names = new ArrayList<>();
+            for (JsonObject environment : listAll(ActionsScopes.environmentsUrl(owner, repo),
+                    "environments", PER_PAGE, 2)) {
+                String name = Json.str(environment, "name");
+                if (!StringUtils.isBlank(name)) names.add(name);
+            }
+            return names;
+        }, (List<String> names) -> {
+            dismissProgressDialog();
+            if (forTab == tab) showScopeChoice(names);
+        }, error -> dismissProgressDialog());
+    }
+
+    private void showScopeChoice(@NonNull List<String> environments) {
+        boolean variables = tab == TAB_VARIABLES;
+        List<String> scopes = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        scopes.add(ActionsScopes.ACTIONS);
+        labels.add(getString(variables ? R.string.scope_repository_variables : R.string.scope_repository_secrets));
+        if (!variables) {
+            scopes.add(ActionsScopes.DEPENDABOT);
+            labels.add(getString(R.string.scope_dependabot));
+        }
+        for (String name : environments) {
+            scopes.add(ActionsScopes.environment(name));
+            labels.add(getString(R.string.scope_environment_item, name));
+        }
+        String current = variables ? variableScope : secretScope;
+        int checked = Math.max(0, scopes.indexOf(current));
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(R.string.scope_choose)
+                .setSingleChoiceItems(labels.toArray(new String[0]), checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    if (variables) variableScope = scopes.get(which);
+                    else secretScope = scopes.get(which);
+                    load();
+                })
+                .setNegativeButton(R.string.cancel, null);
+        if (environments.isEmpty()) builder.setMessage(R.string.scope_no_environments);
+        builder.show();
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Actions variables (readable values)
+    // ---------------------------------------------------------------------------------
+
+    @NonNull
+    private View variableRow(@NonNull JsonObject variable) {
+        View row = LayoutInflater.from(this).inflate(R.layout.layout_setting_row, itemList, false);
+        String name = Json.str(variable, "name");
+        String value = Json.str(variable, "value");
+        TextView title = row.findViewById(R.id.setting_title);
+        title.setText(name);
+        title.setTypeface(android.graphics.Typeface.MONOSPACE);
+        TextView summary = row.findViewById(R.id.setting_summary);
+        Date updated = Json.date(variable, "updated_at");
+        String shown = value.length() > 200 ? value.substring(0, 200) + "…" : value;
+        summary.setText(updated == null ? shown : shown + "\n"
+                + getString(R.string.secrets_updated, StringUtils.getNewsTimeStr(this, updated)));
+        summary.setMaxLines(4);
+        summary.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        row.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(this, v, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+            popup.getMenu().add(0, 1, 0, R.string.variables_edit);
+            popup.getMenu().add(0, 2, 1, R.string.variables_copy_value);
+            popup.getMenu().add(0, 3, 2, R.string.delete);
+            popup.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == 1) {
+                    editVariable(variable);
+                } else if (item.getItemId() == 2) {
+                    AppUtils.copyToClipboard(this, value);
+                } else {
+                    deleteVariable(name);
+                }
+                return true;
+            });
+            popup.show();
+        });
+        return row;
+    }
+
+    /** @param existing null: a new variable; else this one (its name can change too) */
+    private void editVariable(@Nullable JsonObject existing) {
+        View view = LayoutInflater.from(new AlertDialog.Builder(this).getContext())
+                .inflate(R.layout.dialog_secret, null);
+        TextInputLayout nameLayout = view.findViewById(R.id.secret_name_layout);
+        TextInputEditText nameEdit = view.findViewById(R.id.secret_name);
+        TextInputLayout valueLayout = view.findViewById(R.id.secret_value_layout);
+        TextInputEditText valueEdit = view.findViewById(R.id.secret_value);
+        ((TextView) view.findViewById(R.id.secret_hint)).setText(R.string.variables_hint);
+        String oldName = existing == null ? null : Json.str(existing, "name");
+        if (existing != null) {
+            nameEdit.setText(oldName);
+            valueEdit.setText(Json.str(existing, "value"));
+        }
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(existing == null ? R.string.variables_add : R.string.variables_edit)
+                .setView(view)
+                .setPositiveButton(R.string.save, null)
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String name = SecretNames.normalize(nameEdit.getText() == null ? "" : nameEdit.getText().toString());
+            String value = valueEdit.getText() == null ? "" : valueEdit.getText().toString();
+            nameLayout.setError(null);
+            valueLayout.setError(null);
+            int check = SecretNames.check(name);
+            if (check != SecretNames.OK) {
+                nameLayout.setError(getString(check == SecretNames.EMPTY ? R.string.field_required
+                        : check == SecretNames.STARTS_WITH_DIGIT ? R.string.secrets_name_digit
+                        : check == SecretNames.GITHUB_PREFIX ? R.string.secrets_name_github
+                        : R.string.secrets_name_bad));
+                return;
+            }
+            if (!name.equals(oldName) && variableNames.contains(name)) {
+                nameLayout.setError(getString(R.string.variables_exists, name));
+                return;
+            }
+            int size = value.getBytes(StandardCharsets.UTF_8).length;
+            if (size == 0) {
+                valueLayout.setError(getString(R.string.secrets_value_empty));
+                return;
+            }
+            if (size > SecretNames.MAX_VALUE_BYTES) {
+                valueLayout.setError(getString(R.string.secrets_value_too_big));
+                return;
+            }
+            dialog.dismiss();
+            saveVariable(oldName, name, value);
+        }));
+        dialog.show();
+    }
+
+    private void saveVariable(@Nullable String oldName, @NonNull String name, @NonNull String value) {
+        String base = ActionsScopes.base(owner, repo, variableScope);
+        run(() -> {
+            JsonObject body = new JsonObject();
+            body.addProperty("name", name);
+            body.addProperty("value", value);
+            if (oldName == null) {
+                GitHubApi.call(settings().post(ActionsScopes.variables(base), GistActivity.json(body)));
+            } else {
+                GitHubApi.call(settings().patch(ActionsScopes.variable(base, oldName), GistActivity.json(body)));
+            }
+            return true;
+        }, getString(R.string.variables_saved, name));
+    }
+
+    private void deleteVariable(@NonNull String name) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.delete)
+                .setMessage(getString(R.string.variables_delete_message, name))
+                .setPositiveButton(R.string.delete, (d, w) -> run(() -> {
+                    GitHubApi.call(settings().delete(ActionsScopes.variable(
+                            ActionsScopes.base(owner, repo, variableScope), name)));
+                    return true;
+                }, getString(R.string.variables_deleted, name)))
                 .setNegativeButton(R.string.cancel, null)
                 .show();
     }
@@ -817,5 +1076,6 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         itemList = root.findViewById(R.id.item_list);
         footerText = root.findViewById(R.id.footer_text);
         addSecretBn = root.findViewById(R.id.add_secret_bn);
+        scopeText = root.findViewById(R.id.scope_text);
     }
 }

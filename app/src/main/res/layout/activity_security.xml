@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Security of a repository: alert tabs and Actions secrets. -->
+<!-- Security of a repository: alert tabs, secrets and variables. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -27,6 +27,20 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:paddingBottom="88dp">
+
+                    <!-- Secrets and Variables: which ones (repository, Dependabot, an environment) -->
+                    <TextView
+                        android:id="@+id/scope_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="@dimen/spacing_large"
+                        android:paddingEnd="@dimen/spacing_large"
+                        android:paddingTop="@dimen/spacing_normal"
+                        android:paddingBottom="@dimen/spacing_normal"
+                        android:background="?android:selectableItemBackground"
+                        android:textColor="?colorAccent"
+                        android:textStyle="bold"
+                        android:visibility="gone"/>
 
                     <LinearLayout
                         android:id="@+id/empty_box"

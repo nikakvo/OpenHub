@@ -76,4 +76,32 @@
     <string name="secrets_name_github">Must not start with GITHUB_</string>
     <string name="secrets_value_empty">Enter a value</string>
     <string name="secrets_value_too_big">The value is larger than 48 KB</string>
+
+    <!-- Where secrets and variables live -->
+    <string name="security_variables">Variables</string>
+    <string name="scope_actions_secrets">Repository secrets (Actions) ▾</string>
+    <string name="scope_dependabot_secrets">Dependabot secrets ▾</string>
+    <string name="scope_actions_variables">Repository variables (Actions) ▾</string>
+    <string name="scope_environment">Environment: %1$s ▾</string>
+    <string name="scope_choose">Show</string>
+    <string name="scope_repository_secrets">Repository secrets (Actions)</string>
+    <string name="scope_repository_variables">Repository variables (Actions)</string>
+    <string name="scope_dependabot">Dependabot secrets</string>
+    <string name="scope_environment_item">Environment: %1$s</string>
+    <string name="scope_no_environments">This repository has no environments. Create them on github.com under Settings, Environments.</string>
+    <string name="scope_settings_no_access">Only admins of the repository can see these.</string>
+    <string name="secrets_none_dependabot">No Dependabot secrets yet.\nDependabot uses them to reach private registries when it updates dependencies.</string>
+    <string name="secrets_none_environment">No secrets in the environment %1$s yet.\nJobs that use the environment read them as ${{\u00A0secrets.NAME\u00A0}}</string>
+
+    <!-- Actions variables -->
+    <string name="variables_none">No repository variables yet.\nWorkflows read them as ${{\u00A0vars.NAME\u00A0}}</string>
+    <string name="variables_none_environment">No variables in the environment %1$s yet.\nJobs that use the environment read them as ${{\u00A0vars.NAME\u00A0}}</string>
+    <string name="variables_add">New variable</string>
+    <string name="variables_edit">Edit variable</string>
+    <string name="variables_hint">Variables are not secret: everyone who can see the workflow runs can read them. Use a secret for passwords and tokens.</string>
+    <string name="variables_saved">Variable %1$s saved</string>
+    <string name="variables_deleted">Variable %1$s deleted</string>
+    <string name="variables_delete_message">Delete the variable %1$s? Workflows that use it will get an empty value.</string>
+    <string name="variables_exists">%1$s already exists. Tap it to edit it.</string>
+    <string name="variables_copy_value">Copy value</string>
 </resources>

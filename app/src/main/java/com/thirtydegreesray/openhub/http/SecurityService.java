@@ -10,7 +10,6 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 import retrofit2.http.Body;
-import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.PATCH;
@@ -83,27 +82,4 @@ public interface SecurityService {
     @NonNull @PATCH("repos/{owner}/{repo}")
     Observable<Response<JsonObject>> updateRepo(@Path("owner") String owner,
             @Path("repo") String repo, @Body RequestBody body);
-
-    // ---- Actions secrets -------------------------------------------------------------
-
-    /** {total_count, secrets: [{name, created_at, updated_at}]}; values are never returned. */
-    @NonNull @GET("repos/{owner}/{repo}/actions/secrets")
-    @Headers("Cache-Control: no-cache, no-store")
-    Observable<Response<JsonObject>> getSecrets(@Path("owner") String owner,
-            @Path("repo") String repo, @Query("per_page") int perPage, @Query("page") int page);
-
-    /** {key_id, key}: the public key that secret values are sealed with. */
-    @NonNull @GET("repos/{owner}/{repo}/actions/secrets/public-key")
-    @Headers("Cache-Control: no-cache, no-store")
-    Observable<Response<JsonObject>> getSecretsPublicKey(@Path("owner") String owner,
-            @Path("repo") String repo);
-
-    /** Body: encrypted_value (base64 sealed box), key_id. Creates or replaces. */
-    @NonNull @PUT("repos/{owner}/{repo}/actions/secrets/{name}")
-    Observable<Response<ResponseBody>> putSecret(@Path("owner") String owner,
-            @Path("repo") String repo, @Path("name") String name, @Body RequestBody body);
-
-    @NonNull @DELETE("repos/{owner}/{repo}/actions/secrets/{name}")
-    Observable<Response<ResponseBody>> deleteSecret(@Path("owner") String owner,
-            @Path("repo") String repo, @Path("name") String name);
 }

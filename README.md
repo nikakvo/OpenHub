@@ -86,8 +86,10 @@ app goes to them; see [Credits](#credits).
   when a run finishes, with buttons to download its artifacts
 * **Security**: Dependabot, code scanning and secret scanning alerts with details;
   dismiss, close and reopen them, turn the scanners on (admins)
-* **Actions secrets**: add, update and delete repository secrets; values are encrypted on
-  the phone as GitHub requires
+* **Secrets**: add, update and delete the secrets of Actions, Dependabot and environments;
+  values are encrypted on the phone as GitHub requires
+* **Actions variables** of the repository and of environments: add, edit, rename, copy and
+  delete
 * **Discussions**: read, comment and reply, upvote, mark the answer, start discussions
 * Download source code
 * Your private, public, forked and starred repositories

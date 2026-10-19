@@ -288,7 +288,8 @@
     <tr><td>Dependabot</td><td>Dependencies with a known vulnerability: package, vulnerable and patched versions, the advisory (CVE / GHSA).</td></tr>
     <tr><td>Code scanning</td><td>Problems that CodeQL or another scanner found in the code, with file and line.</td></tr>
     <tr><td>Secret scanning</td><td>Tokens and keys that were committed, and in which file and commit. The secret itself is not shown.</td></tr>
-    <tr><td>Secrets</td><td>Admins only: the repository secrets of GitHub Actions.</td></tr>
+    <tr><td>Secrets</td><td>Admins only: the secrets of GitHub Actions, of Dependabot and of each environment.</td></tr>
+    <tr><td>Variables</td><td>Admins only: the variables of GitHub Actions, of the repository and of each environment.</td></tr>
   </table></div>
   <ul>
     <li>Alerts are colored by severity: critical red, high orange, medium amber. <span class="ui">Show closed alerts</span> in the menu shows fixed, dismissed and closed ones.</li>
@@ -301,7 +302,15 @@
     <li>Workflows read them as <code>${{ secrets.NAME }}</code>, e.g. a Telegram bot token or a signing key password.</li>
     <li>The <strong>+</strong> button adds a secret: a name (letters, digits and <code>_</code>, stored in upper case, not starting with <code>GITHUB_</code>) and the value (up to 48 KB, several lines allowed).</li>
     <li>Tap a secret for <span class="ui">Update value</span> or <span class="ui">Delete</span>.</li>
+    <li>The line at the top (<span class="ui">Repository secrets (Actions) ▾</span>) switches to <span class="ui">Dependabot secrets</span> (Dependabot uses them for private registries) or to an <strong>environment</strong> (e.g. <em>production</em>): only jobs that name that environment get its secrets. Environments are created on github.com under Settings → Environments.</li>
     <li>OpenHub encrypts the value on the phone with the repository's public key, as GitHub requires; only GitHub Actions can read it. GitHub never shows a value again, not even to you, so keep your own copy.</li>
+  </ul>
+  <h3>Variables for workflows</h3>
+  <ul>
+    <li>Workflows read them as <code>${{ vars.NAME }}</code>: settings that are not secret, e.g. a build type, a channel name or a server address.</li>
+    <li>Unlike secrets, values can be read: each one is shown under its name. Tap it for <span class="ui">Edit variable</span> (the name can change too), <span class="ui">Copy value</span> or <span class="ui">Delete</span>; <strong>+</strong> adds one. Names follow the rules of secrets.</li>
+    <li>The line at the top switches between the repository's variables and those of an environment.</li>
+    <li>Everyone who can see the workflow runs can read variables: put passwords and tokens in a secret.</li>
   </ul>
   <h3>Danger zone</h3>
   <p><span class="pill p-red">careful</span> Change visibility (public / private), archive or unarchive, transfer ownership, and <strong>delete</strong> the repository: you type its full name to confirm.</p>
