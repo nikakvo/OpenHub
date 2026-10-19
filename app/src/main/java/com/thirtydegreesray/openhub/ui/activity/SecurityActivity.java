@@ -952,17 +952,51 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         }
         String current = variables ? variableScope : secretScope;
         int checked = Math.max(0, scopes.indexOf(current));
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+
+        // radio buttons and, when there are no environments, a note below them (an
+        // AlertDialog shows either a message or a list, never both)
+        android.content.Context dialogContext = new AlertDialog.Builder(this).getContext();
+        int pad = Math.round(getResources().getDisplayMetrics().density * 20);
+        LinearLayout box = new LinearLayout(dialogContext);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(pad, pad / 2, pad, 0);
+        android.widget.RadioGroup group = new android.widget.RadioGroup(dialogContext);
+        for (int i = 0; i < labels.size(); i++) {
+            android.widget.RadioButton button = new android.widget.RadioButton(dialogContext);
+            button.setId(View.generateViewId());
+            button.setText(labels.get(i));
+            button.setPadding(button.getPaddingLeft(), pad / 2, button.getPaddingRight(), pad / 2);
+            button.setTag(i);
+            group.addView(button);
+            if (i == checked) button.setChecked(true);
+        }
+        box.addView(group);
+        if (environments.isEmpty()) {
+            TextView note = new TextView(dialogContext);
+            note.setText(R.string.scope_no_environments);
+            note.setTextColor(emptyText.getCurrentTextColor());
+            note.setPadding(0, pad / 2, 0, 0);
+            box.addView(note);
+        }
+        android.widget.ScrollView scroll = new android.widget.ScrollView(dialogContext);
+        scroll.addView(box);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.scope_choose)
-                .setSingleChoiceItems(labels.toArray(new String[0]), checked, (dialog, which) -> {
-                    dialog.dismiss();
-                    if (variables) variableScope = scopes.get(which);
-                    else secretScope = scopes.get(which);
-                    load();
-                })
-                .setNegativeButton(R.string.cancel, null);
-        if (environments.isEmpty()) builder.setMessage(R.string.scope_no_environments);
-        builder.show();
+                .setView(scroll)
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        group.setOnCheckedChangeListener((radioGroup, id) -> {
+            View button = radioGroup.findViewById(id);
+            if (button == null || !(button.getTag() instanceof Integer)) return;
+            String scope = scopes.get((Integer) button.getTag());
+            dialog.dismiss();
+            if (scope.equals(variables ? variableScope : secretScope)) return;
+            if (variables) variableScope = scope;
+            else secretScope = scope;
+            load();
+        });
+        dialog.show();
     }
 
     // ---------------------------------------------------------------------------------
