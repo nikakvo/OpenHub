@@ -161,6 +161,19 @@ class HtmlHelper {
                 "</body>\n</html>\n";
     }
 
+    /** Scheme of "#anchor" links handed to CodeWebView, which scrolls to them. */
+    static final String ANCHOR_SCHEME = "openhub-anchor";
+
+    /**
+     * "#anchor" links: the page cannot jump by itself (GitHub names the target
+     * "user-content-anchor", and a README is scrolled by the screen around it).
+     */
+    private static final String ANCHOR_SCRIPT = "<script>document.addEventListener('click',function(ev){"
+            + "var a=ev.target&&ev.target.closest?ev.target.closest('a[href^=\"#\"]'):null;"
+            + "if(!a)return;ev.preventDefault();"
+            + "location.href='" + ANCHOR_SCHEME + ":'+encodeURIComponent(a.getAttribute('href').substring(1));"
+            + "});</script>\n";
+
     static String generateMdHtml(@NonNull String mdSource, @Nullable String baseUrl,
                                  boolean isDark, @NonNull String backgroundColor,
                                  @NonNull String accentColor, boolean wrapCode) {
@@ -191,6 +204,7 @@ class HtmlHelper {
                     "</head>\n" +
                     "<body>\n" +
                         mdSource +
+                        ANCHOR_SCRIPT +
                     "</body>\n" +
                 "</html>";
     }

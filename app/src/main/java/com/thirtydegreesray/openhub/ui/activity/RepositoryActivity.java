@@ -49,6 +49,7 @@ import com.thirtydegreesray.openhub.ui.fragment.CommitsFragment;
 import com.thirtydegreesray.openhub.ui.fragment.RepoFilesFragment;
 import com.thirtydegreesray.openhub.ui.fragment.RepoInfoFragment;
 import com.thirtydegreesray.openhub.util.AppOpener;
+import com.thirtydegreesray.openhub.util.GitHubLinks;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.PrefUtils;
@@ -83,7 +84,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
         return new Intent(activity, RepositoryActivity.class)
                 .putExtras(BundleHelper.builder()
                         .put("owner", owner)
-                        .put("repoName", repoName)
+                        .put("repoName", GitHubLinks.stripGit(repoName))
                         .build());
     }
 
@@ -242,8 +243,9 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
                     mPresenter.getRepository().getOwner().getLogin(), mPresenter.getRepository().getName()));
             return true;
         } else if (itemId == R.id.action_wiki) {
-            WikiActivity.show(getActivity(), mPresenter.getRepository().getOwner().getLogin(),
-                    mPresenter.getRepository().getName());
+            startActivity(WikiPageActivity.createIntent(this,
+                    mPresenter.getRepository().getOwner().getLogin(),
+                    mPresenter.getRepository().getName(), "Home", false));
             return true;
         } else if (itemId == R.id.action_download_source_zip) {
             AppOpener.startDownload(getActivity(), mPresenter.getZipSourceUrl(),

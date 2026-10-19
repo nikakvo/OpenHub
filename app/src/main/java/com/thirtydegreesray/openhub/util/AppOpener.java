@@ -209,9 +209,39 @@ public class AppOpener {
 
     public static void launchUrl(@NonNull Context context, @NonNull Uri uri){
         if(StringUtils.isBlank(uri.toString())) return;
-        String url = uri.toString();
+        // "github.com/owner/repo.git", "...repo#readme" and the like open the repository
+        String url = GitHubLinks.normalize(uri.toString());
+        uri = Uri.parse(url);
+        GitHubLinks.Blob blob = GitHubLinks.blob(url);
         if(GitHubHelper.isImage(url)){
-            ViewerActivity.showImage(context, url);
+            // an image in a repository: its file, not the github.com page around it
+            ViewerActivity.showImage(context, blob != null ? blob.rawUrl() : url);
+            return;
+        }
+        // files of a repository (README links like docs/INSTALL.md) open in the file viewer
+        if (blob != null) {
+            com.thirtydegreesray.openhub.mvp.model.FileModel file =
+                    new com.thirtydegreesray.openhub.mvp.model.FileModel();
+            file.setName(blob.name());
+            file.setPath(blob.path);
+            file.setUrl(blob.apiUrl());
+            file.setHtmlUrl(blob.htmlUrl());
+            file.setDownloadUrl(blob.rawUrl());
+            ViewerActivity.show(context, file, blob.repo);
+            return;
+        }
+        // wiki pages (github.com/owner/repo/wiki/Page)
+        GitHubLinks.Wiki wiki = GitHubLinks.wiki(url);
+        if (wiki != null) {
+            context.startActivity(com.thirtydegreesray.openhub.ui.activity.WikiPageActivity
+                    .createIntent(context, wiki.owner, wiki.repo, wiki.page, true));
+            return;
+        }
+        // the whole repository at a branch (github.com/owner/repo/tree/dev)
+        String treeRepo = GitHubLinks.treeRoot(url);
+        if (treeRepo != null) {
+            int slash = treeRepo.indexOf('/');
+            RepositoryActivity.show(context, treeRepo.substring(0, slash), treeRepo.substring(slash + 1));
             return;
         }
         // pull requests open in the app (github.com/o/r/pull/12 and API addresses)

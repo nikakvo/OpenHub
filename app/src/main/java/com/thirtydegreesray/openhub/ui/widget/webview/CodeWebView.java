@@ -19,6 +19,11 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ScrollView;
+
+import androidx.core.widget.NestedScrollView;
+
+import org.json.JSONObject;
 
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.util.AppOpener;
@@ -280,7 +285,65 @@ public class CodeWebView extends WebView {
 
     private void startActivity(Uri uri){
         if(uri == null) return;
+        // the page's own address (file:///android_asset/...): "#anchor" links of the page
+        if (HtmlHelper.ANCHOR_SCHEME.equalsIgnoreCase(uri.getScheme())) {
+            scrollToAnchor(uri.getSchemeSpecificPart());
+            return;
+        }
+        if ("file".equalsIgnoreCase(uri.getScheme())) {
+            scrollToAnchor(uri.getFragment());
+            return;
+        }
         AppOpener.launchUrl(getContext(), uri);
+    }
+
+    /**
+     * Table-of-contents links ("#installation"). GitHub renders the target as
+     * id="user-content-installation"; the browser cannot find it by "#installation".
+     */
+    private void scrollToAnchor(@Nullable String anchor) {
+        if (StringUtils.isBlank(anchor)) return;
+        String js = "(function(n){"
+                + "var e=document.getElementById('user-content-'+n)||document.getElementById(n)"
+                + "||document.getElementsByName('user-content-'+n)[0]||document.getElementsByName(n)[0];"
+                + "if(!e){var l=n.toLowerCase();"
+                + "e=document.getElementById('user-content-'+l)||document.getElementById(l);}"
+                + "if(!e)return -1;"
+                + "return e.getBoundingClientRect().top+window.scrollY;"
+                + "})(" + JSONObject.quote(anchor) + ")";
+        evaluateJavascript(js, value -> {
+            float y;
+            try {
+                y = Float.parseFloat(value);
+            } catch (Exception e) {
+                return;
+            }
+            if (y < 0) return;
+            scrollToContentY(Math.round(y * getResources().getDisplayMetrics().density));
+        });
+    }
+
+    /** Scrolls the page itself, or the scroll view around it when it shows the whole page. */
+    private void scrollToContentY(int y) {
+        if (canScrollVertically(1) || canScrollVertically(-1)) {
+            scrollTo(getScrollX(), y);
+            return;
+        }
+        int top = getTop();
+        ViewParent parent = getParent();
+        while (parent instanceof View) {
+            View view = (View) parent;
+            if (view instanceof NestedScrollView) {
+                ((NestedScrollView) view).smoothScrollTo(0, top + y);
+                return;
+            }
+            if (view instanceof ScrollView) {
+                ((ScrollView) view).smoothScrollTo(0, top + y);
+                return;
+            }
+            top += view.getTop();
+            parent = view.getParent();
+        }
     }
 }
 

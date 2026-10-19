@@ -46,6 +46,7 @@ app goes to them; see [Credits](#credits).
 * **Releases** of all your starred repositories in one list, newest first, with New
   badges and download buttons; it can be the start page
 * Built-in updater with an on/off switch; GitHub links from other apps open in the app
+  (repositories, also `.git` links, files, wiki pages, issues, pull requests, releases)
 * Searchable in-app help that explains every screen, written for people new to GitHub
 * Light, dark and AMOLED dark themes, many accent colors, colored or plain side menu icons
 * Markdown rendering and code highlighting
@@ -87,7 +88,9 @@ app goes to them; see [Credits](#credits).
 * **Discussions**: read, comment and reply, upvote, mark the answer, start discussions
 * Download source code
 * Your private, public, forked and starred repositories
-* Wiki
+* **Wiki** pages rendered in the app, with links between pages, the wiki's contents and
+  its recent changes; links in a README to files and wiki pages open in the app, and its
+  table of contents jumps to the section
 
 ### Pull requests
 * List, conversation with reviews and checks, commits and files

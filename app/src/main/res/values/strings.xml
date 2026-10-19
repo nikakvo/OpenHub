@@ -464,6 +464,12 @@
     <string name="wiki" translatable="false">Wiki</string>
     <string name="recent_wiki_updates">Recent Wiki Updates</string>
     <string name="no_recent_wiki_updates">No recent Wiki Updates</string>
+    <string name="wiki_home">Home</string>
+    <string name="wiki_contents">Contents</string>
+    <string name="wiki_no_contents">This wiki has no sidebar with its contents. Open in browser shows the list of all its pages.</string>
+    <string name="wiki_no_pages">This repository has no wiki pages yet, or its wiki is private.</string>
+    <string name="wiki_page_missing">The wiki page \"%1$s\" was not found here.</string>
+    <string name="wiki_page_failed">Cannot load the wiki page.\n%1$s</string>
 
     <string name="repo_collections">Repo collections</string>
     <string name="no_repo_collections">No repo collections</string>

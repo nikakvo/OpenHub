@@ -196,6 +196,7 @@
         <activity android:name=".ui.activity.NotificationsActivity"/>
         <activity android:name=".ui.activity.LanguagesEditorActivity" android:windowSoftInputMode="stateHidden"/>
         <activity android:name=".ui.activity.WikiActivity"/>
+        <activity android:name=".ui.activity.WikiPageActivity"/>
         <activity android:name=".ui.activity.LabelManageActivity"/>
 
     </application>
