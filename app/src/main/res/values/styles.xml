@@ -113,4 +113,10 @@
         <item name="android:maxLines">1</item>
     </style>
 
+    <!-- The side menu on other screens slides in from the left (MainMenuDrawer). -->
+    <style name="MainMenuAnimation">
+        <item name="android:windowEnterAnimation">@anim/main_menu_in</item>
+        <item name="android:windowExitAnimation">@anim/main_menu_out</item>
+    </style>
+
 </resources>

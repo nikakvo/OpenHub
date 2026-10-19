@@ -1,22 +1,28 @@
 package com.thirtydegreesray.openhub.ui.widget;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
 
 import com.google.android.material.navigation.NavigationView;
 import com.thirtydegreesray.openhub.AppData;
@@ -27,11 +33,13 @@ import com.thirtydegreesray.openhub.ui.activity.MainActivity;
 import com.thirtydegreesray.openhub.util.DrawerIcons;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.util.ViewUtils;
 
 /**
  * The main menu (side menu of the start screen) on every other screen: a ≡ button next to
- * Back opens it, Back closes it, and an item goes straight there (the start screen comes
- * back to the front and the screens opened on top of it are closed).
+ * Back slides it in as a panel over the screen, Back or a tap beside it closes it, and an
+ * item goes straight there (the start screen comes back to the front and the screens
+ * opened on top of it are closed).
  */
 public final class MainMenuDrawer {
 
@@ -42,19 +50,19 @@ public final class MainMenuDrawer {
     }
 
     public static void install(@NonNull AppCompatActivity activity, @NonNull Toolbar toolbar) {
-        ViewGroup content = activity.findViewById(android.R.id.content);
-        if (content == null || content.getChildCount() != 1) return;
-        View root = content.getChildAt(0);
+        // a panel over the screen: the screen's own layout (collapsing headers, its own
+        // drawers, insets) is never touched
+        addButton(activity, toolbar, () -> show(activity));
+    }
 
-        // the screen's own layout goes into a drawer; insets are handled as before
-        DrawerLayout drawer = new DrawerLayout(activity);
-        drawer.setFitsSystemWindows(root.getFitsSystemWindows());
-        content.removeView(root);
-        drawer.addView(root, new DrawerLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
+    private static void show(@NonNull AppCompatActivity activity) {
+        if (activity.isFinishing() || activity.isDestroyed()) return;
+        Dialog dialog = new Dialog(activity);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+        // made with the activity, so it has the app's theme colors (not the dialog theme's)
         NavigationView nav = new NavigationView(activity);
-        nav.setFitsSystemWindows(root.getFitsSystemWindows());
+        nav.setBackgroundColor(ViewUtils.getWindowBackground(activity));
         nav.setItemTextColor(ContextCompat.getColorStateList(activity, R.color.main_drawer_content_color));
         nav.setItemIconTintList(ContextCompat.getColorStateList(activity, R.color.main_drawer_content_color));
         nav.inflateMenu(R.menu.activity_main_drawer);
@@ -63,43 +71,37 @@ public final class MainMenuDrawer {
         menu.setGroupVisible(R.id.manage_accounts, false);
         fillHeader(activity, nav.inflateHeaderView(R.layout.nav_header_main));
         DrawerIcons.apply(nav);
-        drawer.addView(nav, new DrawerLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.MATCH_PARENT, GravityCompat.START));
-        content.addView(drawer);
-
         nav.setNavigationItemSelectedListener(item -> {
-            drawer.closeDrawer(GravityCompat.START, false);
+            dialog.dismiss();
             Intent intent = new Intent(activity, MainActivity.class)
                     .putExtra(EXTRA_NAV_ID, item.getItemId())
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             activity.startActivity(intent);
             return false;
         });
+        dialog.setContentView(nav);
 
-        // only the ≡ button opens it: an edge swipe would fight with tabs and wide code
-        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        OnBackPressedCallback back = new OnBackPressedCallback(false) {
-            @Override
-            public void handleOnBackPressed() {
-                drawer.closeDrawer(GravityCompat.START);
-            }
+        Window window = dialog.getWindow();
+        if (window != null) {
+            DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
+            int max = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, metrics));
+            int gap = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 56, metrics));
+            int width = Math.min(max, metrics.widthPixels - gap);
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.setLayout(width, ViewGroup.LayoutParams.MATCH_PARENT);
+            window.setGravity(Gravity.START | Gravity.TOP);
+            window.setWindowAnimations(R.style.MainMenuAnimation);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            window.setDimAmount(0.5f);
+        }
+        dialog.setCanceledOnTouchOutside(true);
+        // a turned phone or a closed screen takes the panel with it
+        LifecycleEventObserver closer = (source, event) -> {
+            if (event == Lifecycle.Event.ON_DESTROY && dialog.isShowing()) dialog.dismiss();
         };
-        activity.getOnBackPressedDispatcher().addCallback(activity, back);
-        drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-            @Override
-            public void onDrawerOpened(@NonNull View drawerView) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                back.setEnabled(true);
-            }
-
-            @Override
-            public void onDrawerClosed(@NonNull View drawerView) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                back.setEnabled(false);
-            }
-        });
-
-        addButton(activity, toolbar, () -> drawer.openDrawer(GravityCompat.START));
+        activity.getLifecycle().addObserver(closer);
+        dialog.setOnDismissListener(d -> activity.getLifecycle().removeObserver(closer));
+        dialog.show();
     }
 
     /** The ≡ icon in the toolbar's logo place: right after Back, before the title. */
