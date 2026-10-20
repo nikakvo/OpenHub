@@ -1,3 +1,5 @@
+<p align="center"><img src="openhub.png" alt="OpenHub"></p>
+
 # OpenHub
 
 [![Release](https://img.shields.io/github/v/release/nikakvo/OpenHub?include_prereleases)](https://github.com/nikakvo/OpenHub/releases)
