@@ -30,6 +30,7 @@ import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.common.GlideApp;
 import com.thirtydegreesray.openhub.mvp.model.User;
 import com.thirtydegreesray.openhub.ui.activity.MainActivity;
+import com.thirtydegreesray.openhub.util.DrawerHeader;
 import com.thirtydegreesray.openhub.util.DrawerIcons;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -140,6 +141,7 @@ public final class MainMenuDrawer {
     }
 
     private static void fillHeader(@NonNull AppCompatActivity activity, @NonNull View header) {
+        DrawerHeader.apply(header);
         View toggle = header.findViewById(R.id.toggle_account_bn);
         if (toggle != null) toggle.setVisibility(View.GONE);
         User user = AppData.INSTANCE.getLoggedUser();

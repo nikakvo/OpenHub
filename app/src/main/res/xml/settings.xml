@@ -19,6 +19,11 @@
         android:key="menuIconStyle"/>
 
     <Preference
+        android:icon="@drawable/ic_menu_settings"
+        android:title="@string/menu_header_title"
+        android:key="menuHeaderStyle"/>
+
+    <Preference
         android:icon="@drawable/ic_one"
         android:title="@string/start_page"
         android:key="startPage"/>

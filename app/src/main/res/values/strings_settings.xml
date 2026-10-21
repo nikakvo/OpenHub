@@ -115,4 +115,7 @@
     <string name="menu_icons_title">Menu icons</string>
     <string name="menu_icons_colored">Colored</string>
     <string name="menu_icons_plain">Plain</string>
+    <string name="menu_header_title">Menu header</string>
+    <string name="menu_header_matrix">Matrix rain</string>
+    <string name="menu_header_theme">Theme color</string>
 </resources>

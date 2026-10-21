@@ -23,6 +23,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.ui.widget.colorChooser.ColorChooserPreference;
 import com.thirtydegreesray.openhub.util.AppUpdater;
+import com.thirtydegreesray.openhub.util.DrawerHeader;
 import com.thirtydegreesray.openhub.util.DrawerIcons;
 import com.thirtydegreesray.openhub.util.GitHubNotifier;
 import com.thirtydegreesray.openhub.util.PrefUtils;
@@ -85,6 +86,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
         findPreference(OPEN_LINKS).setOnPreferenceClickListener(this);
         findPreference(DrawerIcons.PREF).setOnPreferenceClickListener(this);
         updateMenuIconsSummary();
+        findPreference(DrawerHeader.PREF).setOnPreferenceClickListener(this);
+        updateMenuHeaderSummary();
         findPreference(GitHubNotifier.PREF_ENABLED).setOnPreferenceChangeListener(this);
         findPreference(GitHubNotifier.PREF_INTERVAL).setOnPreferenceClickListener(this);
         updateGitHubNotificationsSummary();
@@ -169,6 +172,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 return true;
             case DrawerIcons.PREF:
                 showMenuIconsChooser();
+                return true;
+            case DrawerHeader.PREF:
+                showMenuHeaderChooser();
                 return true;
             case GitHubNotifier.PREF_INTERVAL:
                 showGitHubNotificationsIntervalChooser();
@@ -363,6 +369,35 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     androidx.preference.PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
                             .putString(DrawerIcons.PREF, DrawerIcons.STYLES[which]).apply();
                     updateMenuIconsSummary();
+                    recreateMain();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void updateMenuHeaderSummary() {
+        Preference pref = findPreference(DrawerHeader.PREF);
+        if (pref != null && getContext() != null) {
+            pref.setSummary(DrawerHeader.label(DrawerHeader.getStyle(getContext())));
+        }
+    }
+
+    private void showMenuHeaderChooser() {
+        if (getContext() == null) return;
+        String current = DrawerHeader.getStyle(getContext());
+        String[] items = new String[DrawerHeader.STYLES.length];
+        int checked = 0;
+        for (int i = 0; i < items.length; i++) {
+            items[i] = getString(DrawerHeader.label(DrawerHeader.STYLES[i]));
+            if (DrawerHeader.STYLES[i].equals(current)) checked = i;
+        }
+        new AlertDialog.Builder(getContext())
+                .setTitle(R.string.menu_header_title)
+                .setSingleChoiceItems(items, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    androidx.preference.PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
+                            .putString(DrawerHeader.PREF, DrawerHeader.STYLES[which]).apply();
+                    updateMenuHeaderSummary();
                     recreateMain();
                 })
                 .setNegativeButton(R.string.cancel, null)
