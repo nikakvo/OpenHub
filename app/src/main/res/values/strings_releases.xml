@@ -155,10 +155,19 @@
     <string name="releases_clean_up_next">Next</string>
     <string name="releases_clean_up_none">Nothing to delete</string>
     <string name="releases_clean_up_more">…and %1$d more</string>
-    <string name="releases_clean_up_confirm">Delete these %1$d releases and their files? Their tags stay. This cannot be undone.\n\n%2$s</string>
-    <string name="releases_clean_up_confirm_tags">Delete these %1$d releases, their files and their tags? This cannot be undone.\n\n%2$s</string>
     <string name="releases_clean_up_progress">Deleting %1$d of %2$d…</string>
-    <string name="releases_clean_up_done">%1$d releases deleted</string>
     <string name="releases_clean_up_failed">Could not delete: %1$s</string>
     <string name="releases_clean_up_tags_kept">Releases deleted, but these tags could not be deleted (they may be protected): %1$s</string>
+    <plurals name="releases_clean_up_confirm">
+        <item quantity="one">Delete this release and its files? Its tag stays. This cannot be undone.\n\n%2$s</item>
+        <item quantity="other">Delete these %1$d releases and their files? Their tags stay. This cannot be undone.\n\n%2$s</item>
+    </plurals>
+    <plurals name="releases_clean_up_confirm_tags">
+        <item quantity="one">Delete this release, its files and its tag? This cannot be undone.\n\n%2$s</item>
+        <item quantity="other">Delete these %1$d releases, their files and their tags? This cannot be undone.\n\n%2$s</item>
+    </plurals>
+    <plurals name="releases_clean_up_done">
+        <item quantity="one">1 release deleted</item>
+        <item quantity="other">%1$d releases deleted</item>
+    </plurals>
 </resources>

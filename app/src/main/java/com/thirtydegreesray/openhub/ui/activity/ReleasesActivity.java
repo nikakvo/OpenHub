@@ -218,7 +218,8 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
 
     /**
      * The releases to delete: published ones (pre-releases too) after the {@code keep}
-     * newest, never the one marked Latest; drafts only when asked.
+     * newest. The one marked Latest counts as one of the kept when it is among the newest,
+     * and is kept anyway when it is not. Drafts only when asked.
      */
     @NonNull
     static List<Release> pick(@NonNull AllReleases all, int keep, boolean withDrafts) {
@@ -230,11 +231,11 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
                 if (withDrafts) result.add(release);
                 continue;
             }
-            if (release.getId() != null && release.getId().equals(all.latestId)) continue;
             if (kept < keep) {
                 kept++;
                 continue;
             }
+            if (release.getId() != null && release.getId().equals(all.latestId)) continue;
             result.add(release);
         }
         return result;
@@ -260,8 +261,9 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
         }
         new AlertDialog.Builder(this)
                 .setTitle(R.string.releases_clean_up)
-                .setMessage(getString(withTags ? R.string.releases_clean_up_confirm_tags
-                        : R.string.releases_clean_up_confirm, toDelete.size(), names.toString()))
+                .setMessage(getResources().getQuantityString(withTags
+                                ? R.plurals.releases_clean_up_confirm_tags : R.plurals.releases_clean_up_confirm,
+                        toDelete.size(), toDelete.size(), names.toString()))
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.delete, (dialog, which) -> runCleanUp(toDelete, withTags))
                 .show();
@@ -315,7 +317,8 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
                             refreshList();
                             int deleted = total - failed.size();
                             if (failed.isEmpty() && tagsKept.isEmpty()) {
-                                showSuccessToast(getString(R.string.releases_clean_up_done, deleted));
+                                showSuccessToast(getResources().getQuantityString(
+                                        R.plurals.releases_clean_up_done, deleted, deleted));
                             } else {
                                 List<String> notes = new ArrayList<>();
                                 if (!failed.isEmpty()) {
@@ -327,7 +330,8 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
                                             String.join(", ", tagsKept)));
                                 }
                                 new AlertDialog.Builder(this)
-                                        .setTitle(getString(R.string.releases_clean_up_done, deleted))
+                                        .setTitle(getResources().getQuantityString(
+                                                R.plurals.releases_clean_up_done, deleted, deleted))
                                         .setMessage(String.join("\n\n", notes))
                                         .setPositiveButton(R.string.ok, null)
                                         .show();
