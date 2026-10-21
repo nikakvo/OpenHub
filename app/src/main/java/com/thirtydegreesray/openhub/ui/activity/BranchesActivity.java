@@ -174,13 +174,21 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
         String name = name(branch);
         boolean isDefault = name.equals(defaultBranch);
         boolean isProtected = branch.has("protected") && branch.get("protected").getAsBoolean();
-        if (!isAdmin && !canPush) return;
+        if (!isAdmin && !canPush) {
+            // nothing to manage: a tap goes straight to the branch's files
+            browse(name);
+            return;
+        }
         PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        popup.getMenu().add(0, 1, 0, R.string.branches_browse);
         if (isAdmin) popup.getMenu().add(0, 2, 1, R.string.branches_protection);
         if (canPush) popup.getMenu().add(0, 3, 2, R.string.rename);
         if (canPush && !isDefault && !isProtected) popup.getMenu().add(0, 4, 3, R.string.delete);
         popup.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
+                case 1:
+                    browse(name);
+                    break;
                 case 2:
                     editProtection(name);
                     break;
@@ -194,6 +202,11 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
             return true;
         });
         popup.show();
+    }
+
+    /** The repository's Files tab on this branch. */
+    private void browse(@NonNull String branch) {
+        startActivity(RepositoryActivity.createFilesIntent(this, owner, repo, branch, null));
     }
 
     // ---------------------------------------------------------------------------------

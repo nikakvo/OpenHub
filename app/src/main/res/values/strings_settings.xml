@@ -91,6 +91,7 @@
     <string name="branches_none">No branches</string>
     <string name="branches_new">New branch</string>
     <string name="branches_new_source">Create the branch from</string>
+    <string name="branches_browse">Browse files</string>
     <string name="branches_default">default</string>
     <string name="branches_protected">protected</string>
     <string name="branches_protection">Branch protection</string>

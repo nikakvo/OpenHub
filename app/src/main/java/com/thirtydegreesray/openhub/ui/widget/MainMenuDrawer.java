@@ -131,6 +131,9 @@ public final class MainMenuDrawer {
         toolbar.setNavigationOnClickListener(v -> open.run());
 
         if (back == null) return;
+        // Back right next to the menu button (the toolbar keeps 72dp free after the
+        // navigation button by default)
+        toolbar.setContentInsetStartWithNavigation(0);
         actionBar.setLogo(back);
         actionBar.setDisplayUseLogoEnabled(true);
         actionBar.setDisplayShowHomeEnabled(true);
