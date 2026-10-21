@@ -72,6 +72,7 @@ public final class MainMenuDrawer {
         menu.setGroupVisible(R.id.manage_accounts, false);
         fillHeader(activity, nav.inflateHeaderView(R.layout.nav_header_main));
         DrawerIcons.apply(nav);
+        DrawerHeader.apply(nav);
         nav.setNavigationItemSelectedListener(item -> {
             dialog.dismiss();
             Intent intent = new Intent(activity, MainActivity.class)
@@ -141,7 +142,6 @@ public final class MainMenuDrawer {
     }
 
     private static void fillHeader(@NonNull AppCompatActivity activity, @NonNull View header) {
-        DrawerHeader.apply(header);
         View toggle = header.findViewById(R.id.toggle_account_bn);
         if (toggle != null) toggle.setVisibility(View.GONE);
         User user = AppData.INSTANCE.getLoggedUser();

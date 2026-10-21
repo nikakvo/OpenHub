@@ -2,13 +2,18 @@ package com.thirtydegreesray.openhub.util;
 
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.material.navigation.NavigationView;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.ui.widget.MatrixRainView;
 
 /**
- * Background of the side menu header (the account part at the top).
+ * Background of the side menu header (the account part at the top): Matrix rain with a
+ * greeting, or the theme color.
  * Settings: Menu header (Matrix rain / Theme color).
  */
 public final class DrawerHeader {
@@ -27,11 +32,40 @@ public final class DrawerHeader {
                 .getString(PREF, STYLE_MATRIX);
     }
 
-    /** Shows or hides the rain in a header inflated from nav_header_main. */
-    public static void apply(@NonNull View header) {
-        View rain = header.findViewById(R.id.matrix_rain);
-        if (rain == null) return;
-        rain.setVisibility(STYLE_THEME.equals(getStyle(header.getContext())) ? View.GONE : View.VISIBLE);
+    /**
+     * Puts the Matrix rain behind the menu (the header and a strip at the right edge) and
+     * shows the greeting, or leaves the theme colored header. Safe to call again.
+     */
+    public static void apply(@NonNull NavigationView nav) {
+        if (nav.getHeaderCount() == 0) return;
+        View header = nav.getHeaderView(0);
+        boolean matrix = !STYLE_THEME.equals(getStyle(nav.getContext()));
+
+        MatrixRainView rain = null;
+        for (int i = 0; i < nav.getChildCount(); i++) {
+            if (nav.getChildAt(i) instanceof MatrixRainView) {
+                rain = (MatrixRainView) nav.getChildAt(i);
+                break;
+            }
+        }
+        if (matrix && rain == null) {
+            rain = new MatrixRainView(nav.getContext());
+            // behind the menu list, so the items and the header stay on top
+            nav.addView(rain, 0, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        } else if (!matrix && rain != null) {
+            nav.removeView(rain);
+            rain = null;
+        }
+        if (rain != null) rain.setHeader(header);
+
+        if (matrix) {
+            header.setBackground(null);
+        } else {
+            header.setBackgroundResource(R.drawable.side_nav_bar);
+        }
+        View welcome = header.findViewById(R.id.matrix_welcome);
+        if (welcome != null) welcome.setVisibility(matrix ? View.VISIBLE : View.GONE);
     }
 
     /** For the settings summary. */

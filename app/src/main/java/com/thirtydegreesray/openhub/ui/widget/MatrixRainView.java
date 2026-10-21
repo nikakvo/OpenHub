@@ -11,6 +11,7 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,31 +19,44 @@ import androidx.annotation.Nullable;
 import java.util.Random;
 
 /**
- * "Digital rain" background for the side menu header: columns of green glyphs falling
- * down on black, the head of each column bright, its trail fading out. A dark band at the
- * bottom keeps the name and the bio readable.
+ * "Digital rain" for the side menu: columns of green glyphs slowly falling on black
+ * behind the account header, the head of each column bright, its trail fading out. The
+ * last {@link #STRIP_COLS} columns keep falling down the right edge of the menu, under
+ * the header, over the menu's own background. A dark band at the bottom of the header
+ * keeps the name and the bio readable.
  *
- * It only animates while it is on screen (the menu is open), at about 30 frames a second,
- * and draws one still frame when the system's animations are turned off.
+ * The view lies behind the menu list and follows the header when the list scrolls. It
+ * only animates while it is on screen (the menu is open) and draws one still frame when
+ * the system's animations are turned off.
  */
 public class MatrixRainView extends View {
 
-    private static final String GLYPHS =
+    static final String GLYPHS =
             "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789Z:.=*+-<>|";
     private static final int BACKGROUND = 0xFF000000;
     private static final int HEAD_COLOR = 0xFFD8FFE0;
     private static final int TRAIL_COLOR = 0x00FF41;
-    private static final long FRAME_MS = 33L;
-    /** Share of the glyphs that change on every frame. */
-    private static final float MUTATION = 0.04f;
+    /** Columns at the right edge that go on falling below the header. */
+    private static final int STRIP_COLS = 3;
+    private static final long FRAME_MS = 50L;
+    /** Rows a second. */
+    private static final float MIN_SPEED = 1.2f;
+    private static final float MAX_SPEED = 3.6f;
+    /** Share of the glyphs that change every second. */
+    private static final float MUTATION_PER_SEC = 0.05f;
 
     private final Paint glyphPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint backPaint = new Paint();
     private final Paint shadePaint = new Paint();
     private final Random random = new Random();
     private final char[] oneChar = new char[1];
+    private final int[] headerPos = new int[2];
+    private final int[] ownPos = new int[2];
+    private final ViewTreeObserver.OnScrollChangedListener scrollListener = this::invalidate;
 
-    private float cellW;
-    private float cellH;
+    private final float cellW;
+    private final float cellH;
+    private final float baseline;
     private int cols;
     private int rows;
     /** Glyph per cell, column-major. */
@@ -50,7 +64,12 @@ public class MatrixRainView extends View {
     private float[] head = new float[0];
     private float[] speed = new float[0];
     private int[] trail = new int[0];
+    private boolean seeded;
+    private float pendingMutations;
 
+    @Nullable private View header;
+    private int shadeTop = -1;
+    private int shadeBottom = -1;
     private long lastFrame;
     private boolean running;
 
@@ -69,9 +88,18 @@ public class MatrixRainView extends View {
         glyphPaint.setTextSize(textSize);
         glyphPaint.setTypeface(Typeface.MONOSPACE);
         glyphPaint.setTextAlign(Paint.Align.CENTER);
+        backPaint.setColor(BACKGROUND);
         cellW = textSize * 0.95f;
         cellH = textSize * 1.15f;
+        Paint.FontMetrics fm = glyphPaint.getFontMetrics();
+        baseline = (cellH - fm.ascent - fm.descent) / 2f;
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+    }
+
+    /** The header the full-width rain stays behind. */
+    public void setHeader(@Nullable View header) {
+        this.header = header;
+        invalidate();
     }
 
     @Override
@@ -84,24 +112,33 @@ public class MatrixRainView extends View {
         head = new float[cols];
         speed = new float[cols];
         trail = new int[cols];
-        for (int c = 0; c < cols; c++) {
-            resetColumn(c);
-            // start spread over the whole height, so even the first frame is full
-            head[c] = random.nextFloat() * (rows + trail[c]);
-        }
-        // the dark band under the name and the bio
-        shadePaint.setShader(new LinearGradient(0, h * 0.35f, 0, h,
-                0x00000000, 0xCC000000, Shader.TileMode.CLAMP));
+        seeded = false;
+        shadeTop = -1;
     }
 
-    private void resetColumn(int c) {
-        speed[c] = 5f + random.nextFloat() * 11f;
-        trail[c] = 6 + random.nextInt(Math.max(4, rows));
-        head[c] = -random.nextFloat() * rows;
+    private boolean isStrip(int c) {
+        return c >= cols - STRIP_COLS;
+    }
+
+    /** Last row a column falls to: the header's bottom, or the whole height for the strip. */
+    private int limit(int c, int headerRows) {
+        return isStrip(c) ? rows : Math.max(1, headerRows);
+    }
+
+    private void resetColumn(int c, int headerRows) {
+        speed[c] = MIN_SPEED + random.nextFloat() * (MAX_SPEED - MIN_SPEED);
+        trail[c] = 5 + random.nextInt(Math.max(4, Math.min(14, headerRows)));
+        head[c] = -random.nextFloat() * Math.max(2, headerRows / 2f);
     }
 
     private char randomGlyph() {
         return GLYPHS.charAt(random.nextInt(GLYPHS.length()));
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getViewTreeObserver().addOnScrollChangedListener(scrollListener);
     }
 
     @Override
@@ -117,52 +154,93 @@ public class MatrixRainView extends View {
     @Override
     protected void onDetachedFromWindow() {
         running = false;
+        getViewTreeObserver().removeOnScrollChangedListener(scrollListener);
         super.onDetachedFromWindow();
     }
 
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
+        int width = getWidth();
+        int headerTop = 0;
+        int headerBottom = 0;
+        if (header != null && header.isAttachedToWindow() && header.getHeight() > 0) {
+            header.getLocationInWindow(headerPos);
+            getLocationInWindow(ownPos);
+            headerTop = headerPos[1] - ownPos[1];
+            headerBottom = headerTop + header.getHeight();
+        }
+        // rows of the header in the rain's grid (the header's place when the list is at the top)
+        int headerRows = header != null && header.getHeight() > 0
+                ? (int) Math.ceil(header.getHeight() / cellH) : rows;
+
+        if (!seeded && cols > 0) {
+            for (int c = 0; c < cols; c++) {
+                resetColumn(c, headerRows);
+                // spread over the column's height, so even the first frame is full
+                head[c] = random.nextFloat() * (limit(c, headerRows) + trail[c]);
+            }
+            seeded = true;
+        }
+
         boolean animate = ValueAnimator.areAnimatorsEnabled();
         long now = SystemClock.uptimeMillis();
-        if (animate && running) {
-            float dt = Math.min(0.1f, (now - lastFrame) / 1000f);
-            step(dt);
-        }
+        if (animate && running) step(Math.min(0.2f, (now - lastFrame) / 1000f), headerRows);
         lastFrame = now;
 
-        canvas.drawColor(BACKGROUND);
-        Paint.FontMetrics fm = glyphPaint.getFontMetrics();
-        float baseline = (cellH - fm.ascent - fm.descent) / 2f;
+        if (headerBottom > 0) {
+            canvas.drawRect(0, Math.max(0, headerTop), width, headerBottom, backPaint);
+        }
+        // the grid scrolls with the header, so its rain moves with it
+        float shift = headerTop;
+        float stripLeft = (cols - STRIP_COLS) * cellW;
         for (int c = 0; c < cols; c++) {
+            boolean strip = isStrip(c);
             int top = (int) Math.floor(head[c]);
             float x = c * cellW + cellW / 2f;
             for (int k = 0; k <= trail[c]; k++) {
                 int r = top - k;
                 if (r < 0) break;
                 if (r >= rows) continue;
+                float y = r * cellH + shift;
+                // outside the header only the strip is drawn
+                if (!strip && (y < headerTop || y + cellH > headerBottom)) continue;
+                if (y + cellH < 0 || y > getHeight()) continue;
                 if (k == 0) {
                     glyphPaint.setColor(HEAD_COLOR);
                 } else {
                     float fade = 1f - (float) k / (trail[c] + 1);
                     int alpha = (int) (40 + 215 * fade * fade);
+                    // a bit softer over the menu, so it does not fight with the items
+                    if (strip && y >= headerBottom) alpha = alpha * 3 / 4;
                     glyphPaint.setColor((alpha << 24) | TRAIL_COLOR);
                 }
                 oneChar[0] = cells[c * rows + r];
-                canvas.drawText(oneChar, 0, 1, x, r * cellH + baseline, glyphPaint);
+                canvas.drawText(oneChar, 0, 1, x, y + baseline, glyphPaint);
             }
         }
-        canvas.drawRect(0, 0, getWidth(), getHeight(), shadePaint);
+        if (headerBottom > 0) {
+            if (shadeTop != headerTop || shadeBottom != headerBottom) {
+                shadeTop = headerTop;
+                shadeBottom = headerBottom;
+                float from = headerTop + (headerBottom - headerTop) * 0.35f;
+                shadePaint.setShader(new LinearGradient(0, from, 0, headerBottom,
+                        0x00000000, 0xCC000000, Shader.TileMode.CLAMP));
+            }
+            canvas.drawRect(0, Math.max(0, headerTop), Math.min(width, stripLeft), headerBottom, shadePaint);
+        }
 
         if (animate && running && isShown()) postInvalidateDelayed(FRAME_MS);
     }
 
-    private void step(float dt) {
+    private void step(float dt, int headerRows) {
         for (int c = 0; c < cols; c++) {
             head[c] += speed[c] * dt;
-            if (head[c] - trail[c] > rows) resetColumn(c);
+            if (head[c] - trail[c] > limit(c, headerRows)) resetColumn(c, headerRows);
         }
-        int changes = Math.max(1, (int) (cells.length * MUTATION));
+        pendingMutations += cells.length * MUTATION_PER_SEC * dt;
+        int changes = (int) pendingMutations;
+        pendingMutations -= changes;
         for (int i = 0; i < changes; i++) {
             cells[random.nextInt(cells.length)] = randomGlyph();
         }
