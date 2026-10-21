@@ -51,8 +51,11 @@ app goes to them; see [Credits](#credits).
 * Built-in updater with an on/off switch; GitHub links from other apps open in the app
   (repositories, also `.git` links, files, folders, wiki pages, issues, pull requests,
   releases)
-* The side menu on every screen (≡ next to Back), to jump anywhere without pressing Back
-  many times
+* The side menu on every screen (≡ always at the top left, Back right next to it), to jump
+  anywhere without pressing Back many times
+* **Matrix rain** side menu: slowly falling green characters behind your account and down
+  the edges of the menu, with an animated "Welcome to OpenHub"; or the plain theme color
+* **App icon** to choose: Matrix, Classic, Cosmic or Outline
 * Searchable in-app help that explains every screen, written for people new to GitHub
 * Light, dark and AMOLED dark themes, many accent colors, colored or plain side menu icons
 * Markdown rendering and code highlighting
@@ -69,7 +72,9 @@ app goes to them; see [Credits](#credits).
 ### Repositories
 * Create repositories (README, .gitignore templates and your own lines, license);
   repository settings, transfer, archive and delete
-* Branches: create, rename, delete, restore, and branch protection
+* Branches: browse their files, create, rename, delete, restore, and branch protection
+* **Compare** two branches or tags: commits ahead and behind, changed files and diffs, and
+  a pull request from there
 * Create, upload, edit, rename and delete files as real commits, to the branch you
   choose or a new branch with a pull request; files shared from other apps can be
   committed to a folder of a repository
@@ -81,6 +86,8 @@ app goes to them; see [Credits](#credits).
 * Releases: create, edit, publish and delete, upload APKs and zips (also by sharing from
   other apps such as Termux), rename and delete files, Latest and Pre-release badges,
   file sizes and download counts; downloads are checked against GitHub's SHA-256
+* **SHA256SUMS** file for a release (for `sha256sum -c`), written from GitHub's checksums
+* **Clean up old releases**: keep the newest one, 3 or 5 and delete the rest, with their tags
 * Release notifications for any repository
 * GitHub Actions: workflow runs with their jobs and steps, **job logs** (folded groups,
   errors marked, find, next error, download), re-run (all, failed or one job, with
