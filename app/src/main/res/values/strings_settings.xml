@@ -92,6 +92,7 @@
     <string name="branches_new">New branch</string>
     <string name="branches_new_source">Create the branch from</string>
     <string name="branches_browse">Browse files</string>
+    <string name="branches_compare">Compare with %1$s</string>
     <string name="branches_default">default</string>
     <string name="branches_protected">protected</string>
     <string name="branches_protection">Branch protection</string>
@@ -125,4 +126,36 @@
     <string name="app_icon_cosmic">Cosmic</string>
     <string name="app_icon_outline">Outline</string>
     <string name="app_icon_changed">Icon changed. The launcher may need a moment to show it, and some launchers take the old icon off the home screen: add it there again from the app drawer.</string>
+    <string name="compare_title">Compare</string>
+    <string name="compare_base">Base</string>
+    <string name="compare_head">Compare</string>
+    <string name="compare_choose">Choose a branch or tag</string>
+    <string name="compare_tag">Tag %1$s</string>
+    <string name="compare_swap">Swap base and compare</string>
+    <string name="compare_pick_two">Choose two branches or tags to compare.</string>
+    <string name="compare_same">Choose two different branches or tags.</string>
+    <string name="compare_loading">Comparing…</string>
+    <string name="compare_identical">%1$s and %2$s are identical.</string>
+    <string name="compare_status_both">%1$s is %2$s and %3$s %4$s.</string>
+    <string name="compare_status_one">%1$s is %2$s %3$s.</string>
+    <plurals name="compare_ahead">
+        <item quantity="one">1 commit ahead of</item>
+        <item quantity="other">%d commits ahead of</item>
+    </plurals>
+    <plurals name="compare_behind">
+        <item quantity="one">1 commit behind</item>
+        <item quantity="other">%d commits behind</item>
+    </plurals>
+    <plurals name="compare_commits">
+        <item quantity="one">1 commit</item>
+        <item quantity="other">%d commits</item>
+    </plurals>
+    <plurals name="compare_files">
+        <item quantity="one">1 changed file</item>
+        <item quantity="other">%d changed files</item>
+    </plurals>
+    <string name="compare_files_limit">(GitHub shows at most %1$d)</string>
+    <string name="compare_no_files">No changed files</string>
+    <string name="compare_open_pull">Open a pull request</string>
+    <string name="compare_open_pull_summary">Merge %1$s into %2$s</string>
 </resources>

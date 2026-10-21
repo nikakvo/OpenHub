@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Compare two branches or tags: commits and changed files between them. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/layout_appbar"/>
+
+    <ProgressBar
+        android:id="@+id/loader"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-6dp"
+        android:layout_marginBottom="-6dp"
+        android:indeterminate="true"
+        android:visibility="invisible"/>
+
+    <include
+        android:id="@+id/base_row"
+        layout="@layout/layout_setting_row"/>
+
+    <include
+        android:id="@+id/head_row"
+        layout="@layout/layout_setting_row"/>
+
+    <TextView
+        android:id="@+id/swap_bn"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/spacing_small"
+        android:paddingEnd="@dimen/spacing_small"
+        android:text="@string/compare_swap"
+        android:textSize="@dimen/text_small"
+        android:textColor="?colorAccent"
+        android:background="?android:selectableItemBackground"/>
+
+    <TextView
+        android:id="@+id/status_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/spacing_large"
+        android:paddingEnd="@dimen/spacing_large"
+        android:paddingTop="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_small"
+        android:textSize="@dimen/text_normal"
+        android:textColor="?android:textColorPrimary"/>
+
+    <include
+        android:id="@+id/commits_row"
+        layout="@layout/layout_setting_row"/>
+
+    <include
+        android:id="@+id/pull_row"
+        layout="@layout/layout_setting_row"/>
+
+    <TextView
+        android:id="@+id/files_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/spacing_large"
+        android:paddingEnd="@dimen/spacing_large"
+        android:paddingTop="@dimen/spacing_normal"
+        android:paddingBottom="@dimen/spacing_mini"
+        android:textSize="@dimen/text_small"
+        android:textStyle="bold"
+        android:textColor="?android:textColorSecondary"/>
+
+    <FrameLayout
+        android:id="@+id/files_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+</LinearLayout>

@@ -174,13 +174,16 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
         String name = name(branch);
         boolean isDefault = name.equals(defaultBranch);
         boolean isProtected = branch.has("protected") && branch.get("protected").getAsBoolean();
-        if (!isAdmin && !canPush) {
-            // nothing to manage: a tap goes straight to the branch's files
+        if (!isAdmin && !canPush && isDefault) {
+            // nothing else to do with it: a tap goes straight to the branch's files
             browse(name);
             return;
         }
         PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.branches_browse);
+        if (!isDefault && defaultBranch != null) {
+            popup.getMenu().add(0, 5, 0, getString(R.string.branches_compare, defaultBranch));
+        }
         if (isAdmin) popup.getMenu().add(0, 2, 1, R.string.branches_protection);
         if (canPush) popup.getMenu().add(0, 3, 2, R.string.rename);
         if (canPush && !isDefault && !isProtected) popup.getMenu().add(0, 4, 3, R.string.delete);
@@ -188,6 +191,9 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
             switch (item.getItemId()) {
                 case 1:
                     browse(name);
+                    break;
+                case 5:
+                    startActivity(CompareActivity.createIntent(this, owner, repo, defaultBranch, name));
                     break;
                 case 2:
                     editProtection(name);

@@ -253,6 +253,10 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
             startActivity(DiscussionsActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),
                     mPresenter.getRepository().getName()));
             return true;
+        } else if (itemId == R.id.action_compare) {
+            startActivity(CompareActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),
+                    mPresenter.getRepository().getName(), null, null));
+            return true;
         } else if (itemId == R.id.action_branches) {
             startActivity(BranchesActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),
                     mPresenter.getRepository().getName()));
