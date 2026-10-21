@@ -21,9 +21,10 @@ import java.util.Random;
 /**
  * "Digital rain" for the side menu: columns of green glyphs slowly falling on black
  * behind the account header, the head of each column bright, its trail fading out. The
- * last {@link #STRIP_COLS} columns keep falling down the right edge of the menu, under
- * the header, over the menu's own background. A dark band at the bottom of the header
- * keeps the name and the bio readable.
+ * first {@link #LEFT_COLS} and the last {@link #RIGHT_COLS} columns keep falling down
+ * the edges of the menu, under the header, over the menu's own background. A dark band at the bottom of the header
+ * keeps the name and the bio readable. The edge columns carry several drops at once, so
+ * they are never empty for long.
  *
  * The view lies behind the menu list and follows the header when the list scrolls. It
  * only animates while it is on screen (the menu is open) and draws one still frame when
@@ -36,8 +37,11 @@ public class MatrixRainView extends View {
     private static final int BACKGROUND = 0xFF000000;
     private static final int HEAD_COLOR = 0xFFD8FFE0;
     private static final int TRAIL_COLOR = 0x00FF41;
-    /** Columns at the right edge that go on falling below the header. */
-    private static final int STRIP_COLS = 3;
+    /** Columns at the edges that go on falling below the header (narrow enough to miss the icons). */
+    private static final int LEFT_COLS = 1;
+    private static final int RIGHT_COLS = 3;
+    /** Rows of menu per drop in an edge column. */
+    private static final int ROWS_PER_DROP = 16;
     private static final long FRAME_MS = 50L;
     /** Rows a second. */
     private static final float MIN_SPEED = 1.2f;
@@ -61,6 +65,8 @@ public class MatrixRainView extends View {
     private int rows;
     /** Glyph per cell, column-major. */
     private char[] cells = new char[0];
+    /** Drops: one per header column, several per edge column. */
+    private int[] dropCol = new int[0];
     private float[] head = new float[0];
     private float[] speed = new float[0];
     private int[] trail = new int[0];
@@ -109,15 +115,24 @@ public class MatrixRainView extends View {
         rows = Math.max(1, (int) Math.ceil(h / cellH));
         cells = new char[cols * rows];
         for (int i = 0; i < cells.length; i++) cells[i] = randomGlyph();
-        head = new float[cols];
-        speed = new float[cols];
-        trail = new int[cols];
+        int edgeDrops = Math.max(2, rows / ROWS_PER_DROP);
+        int drops = 0;
+        for (int c = 0; c < cols; c++) drops += isStrip(c) ? edgeDrops : 1;
+        dropCol = new int[drops];
+        int d = 0;
+        for (int c = 0; c < cols; c++) {
+            int n = isStrip(c) ? edgeDrops : 1;
+            for (int i = 0; i < n; i++) dropCol[d++] = c;
+        }
+        head = new float[drops];
+        speed = new float[drops];
+        trail = new int[drops];
         seeded = false;
         shadeTop = -1;
     }
 
     private boolean isStrip(int c) {
-        return c >= cols - STRIP_COLS;
+        return c < LEFT_COLS || c >= cols - RIGHT_COLS;
     }
 
     /** Last row a column falls to: the header's bottom, or the whole height for the strip. */
@@ -125,10 +140,10 @@ public class MatrixRainView extends View {
         return isStrip(c) ? rows : Math.max(1, headerRows);
     }
 
-    private void resetColumn(int c, int headerRows) {
-        speed[c] = MIN_SPEED + random.nextFloat() * (MAX_SPEED - MIN_SPEED);
-        trail[c] = 5 + random.nextInt(Math.max(4, Math.min(14, headerRows)));
-        head[c] = -random.nextFloat() * Math.max(2, headerRows / 2f);
+    private void resetDrop(int d, int headerRows) {
+        speed[d] = MIN_SPEED + random.nextFloat() * (MAX_SPEED - MIN_SPEED);
+        trail[d] = 5 + random.nextInt(Math.max(4, Math.min(14, headerRows)));
+        head[d] = -random.nextFloat() * Math.max(2, headerRows / 2f);
     }
 
     private char randomGlyph() {
@@ -175,10 +190,10 @@ public class MatrixRainView extends View {
                 ? (int) Math.ceil(header.getHeight() / cellH) : rows;
 
         if (!seeded && cols > 0) {
-            for (int c = 0; c < cols; c++) {
-                resetColumn(c, headerRows);
+            for (int d = 0; d < dropCol.length; d++) {
+                resetDrop(d, headerRows);
                 // spread over the column's height, so even the first frame is full
-                head[c] = random.nextFloat() * (limit(c, headerRows) + trail[c]);
+                head[d] = random.nextFloat() * (limit(dropCol[d], headerRows) + trail[d]);
             }
             seeded = true;
         }
@@ -193,12 +208,13 @@ public class MatrixRainView extends View {
         }
         // the grid scrolls with the header, so its rain moves with it
         float shift = headerTop;
-        float stripLeft = (cols - STRIP_COLS) * cellW;
-        for (int c = 0; c < cols; c++) {
+        float stripLeft = (cols - RIGHT_COLS) * cellW;
+        for (int d = 0; d < dropCol.length; d++) {
+            int c = dropCol[d];
             boolean strip = isStrip(c);
-            int top = (int) Math.floor(head[c]);
+            int top = (int) Math.floor(head[d]);
             float x = c * cellW + cellW / 2f;
-            for (int k = 0; k <= trail[c]; k++) {
+            for (int k = 0; k <= trail[d]; k++) {
                 int r = top - k;
                 if (r < 0) break;
                 if (r >= rows) continue;
@@ -209,7 +225,7 @@ public class MatrixRainView extends View {
                 if (k == 0) {
                     glyphPaint.setColor(HEAD_COLOR);
                 } else {
-                    float fade = 1f - (float) k / (trail[c] + 1);
+                    float fade = 1f - (float) k / (trail[d] + 1);
                     int alpha = (int) (40 + 215 * fade * fade);
                     // a bit softer over the menu, so it does not fight with the items
                     if (strip && y >= headerBottom) alpha = alpha * 3 / 4;
@@ -234,9 +250,9 @@ public class MatrixRainView extends View {
     }
 
     private void step(float dt, int headerRows) {
-        for (int c = 0; c < cols; c++) {
-            head[c] += speed[c] * dt;
-            if (head[c] - trail[c] > limit(c, headerRows)) resetColumn(c, headerRows);
+        for (int d = 0; d < dropCol.length; d++) {
+            head[d] += speed[d] * dt;
+            if (head[d] - trail[d] > limit(dropCol[d], headerRows)) resetDrop(d, headerRows);
         }
         pendingMutations += cells.length * MUTATION_PER_SEC * dt;
         int changes = (int) pendingMutations;
