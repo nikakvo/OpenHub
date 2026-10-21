@@ -51,6 +51,15 @@ public interface ReleaseService {
             @Path("repo") String repo
     );
 
+    /** One page of 100, newest first, never from the cache (used by Clean up old releases). */
+    @NonNull @GET("repos/{owner}/{repo}/releases?per_page=100")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<ArrayList<Release>>> getReleasesPage(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Query("page") int page
+    );
+
     @NonNull @GET("repos/{owner}/{repo}/releases/latest")
     Observable<Response<Release>> getLatestRelease(
             @Header("forceNetWork") boolean forceNetWork,
