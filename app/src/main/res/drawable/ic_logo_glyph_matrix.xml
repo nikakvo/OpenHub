@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App icon "Matrix": green branch glyph over faint digital rain (foreground layer). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M27,22 L27,30 M27,34 L27,38 M27,44 L27,52"
+        android:strokeColor="#2E00FF41"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M34,60 L34,66 M34,70 L34,78"
+        android:strokeColor="#2E00FF41"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M75,28 L75,34 M75,38 L75,46 M75,50 L75,54"
+        android:strokeColor="#2E00FF41"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M81,56 L81,62 M81,66 L81,74 M81,78 L81,82"
+        android:strokeColor="#2E00FF41"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"/>
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.82"
+        android:scaleY="0.82">
+        <path
+            android:pathData="M44,40 L44,68 M66,46 C66,58 44,54 44,64"
+            android:strokeColor="#00FF41"
+            android:strokeWidth="5.5"
+            android:strokeLineCap="round"/>
+        <path
+            android:fillColor="#00FF41"
+            android:pathData="M37.5,36 a6.5,6.5 0 1,0 13.0,0 a6.5,6.5 0 1,0 -13.0,0 Z M37.5,72 a6.5,6.5 0 1,0 13.0,0 a6.5,6.5 0 1,0 -13.0,0 Z"/>
+        <path
+            android:fillColor="#D8FFE0"
+            android:pathData="M59.5,40 a6.5,6.5 0 1,0 13.0,0 a6.5,6.5 0 1,0 -13.0,0 Z"/>
+    </group>
+</vector>

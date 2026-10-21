@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="logo_background">#24292F</color>
+    <color name="icon_matrix_background">#070B08</color>
+    <color name="icon_cosmic_background">#0D1117</color>
+    <color name="icon_outline_background">#0D1117</color>
 </resources>

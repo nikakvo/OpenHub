@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App icon "Outline": the branch glyph drawn as thin outlines in the light blue accent. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.82"
+        android:scaleY="0.82">
+        <path
+            android:pathData="M44,42 L44,66 M66,46 C66,58 44,54 44,64"
+            android:strokeColor="#4FC3F7"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"/>
+        <path
+            android:pathData="M38,36 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 Z M38,72 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 Z M60,40 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 Z"
+            android:strokeColor="#4FC3F7"
+            android:strokeWidth="4"/>
+    </group>
+</vector>

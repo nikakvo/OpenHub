@@ -3,6 +3,7 @@
 package com.thirtydegreesray.openhub.ui.fragment;
 
 import com.thirtydegreesray.openhub.util.ReleaseWatcher;
+import android.widget.Toast;
 import android.text.InputType;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -23,6 +24,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.ui.widget.colorChooser.ColorChooserPreference;
 import com.thirtydegreesray.openhub.util.AppUpdater;
+import com.thirtydegreesray.openhub.util.AppIcons;
 import com.thirtydegreesray.openhub.util.DrawerHeader;
 import com.thirtydegreesray.openhub.util.DrawerIcons;
 import com.thirtydegreesray.openhub.util.GitHubNotifier;
@@ -88,6 +90,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
         updateMenuIconsSummary();
         findPreference(DrawerHeader.PREF).setOnPreferenceClickListener(this);
         updateMenuHeaderSummary();
+        findPreference(AppIcons.PREF).setOnPreferenceClickListener(this);
+        updateAppIconSummary();
         findPreference(GitHubNotifier.PREF_ENABLED).setOnPreferenceChangeListener(this);
         findPreference(GitHubNotifier.PREF_INTERVAL).setOnPreferenceClickListener(this);
         updateGitHubNotificationsSummary();
@@ -175,6 +179,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 return true;
             case DrawerHeader.PREF:
                 showMenuHeaderChooser();
+                return true;
+            case AppIcons.PREF:
+                showAppIconChooser();
                 return true;
             case GitHubNotifier.PREF_INTERVAL:
                 showGitHubNotificationsIntervalChooser();
@@ -399,6 +406,35 @@ public class SettingsFragment extends PreferenceFragmentCompat
                             .putString(DrawerHeader.PREF, DrawerHeader.STYLES[which]).apply();
                     updateMenuHeaderSummary();
                     recreateMain();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void updateAppIconSummary() {
+        Preference pref = findPreference(AppIcons.PREF);
+        if (pref != null && getContext() != null) {
+            pref.setSummary(AppIcons.label(AppIcons.current(getContext())));
+        }
+    }
+
+    private void showAppIconChooser() {
+        if (getContext() == null) return;
+        String current = AppIcons.current(getContext());
+        String[] items = new String[AppIcons.ICONS.length];
+        int checked = 0;
+        for (int i = 0; i < items.length; i++) {
+            items[i] = getString(AppIcons.label(AppIcons.ICONS[i]));
+            if (AppIcons.ICONS[i].equals(current)) checked = i;
+        }
+        new AlertDialog.Builder(getContext())
+                .setTitle(R.string.app_icon_title)
+                .setSingleChoiceItems(items, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    if (AppIcons.ICONS[which].equals(current)) return;
+                    AppIcons.set(getContext(), AppIcons.ICONS[which]);
+                    updateAppIconSummary();
+                    Toast.makeText(getContext(), R.string.app_icon_changed, Toast.LENGTH_LONG).show();
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();

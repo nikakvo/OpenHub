@@ -119,4 +119,10 @@
     <string name="menu_header_title">Menu header</string>
     <string name="menu_header_matrix">Matrix rain</string>
     <string name="menu_header_theme">Theme color</string>
+    <string name="app_icon_title">App icon</string>
+    <string name="app_icon_matrix">Matrix</string>
+    <string name="app_icon_classic">Classic</string>
+    <string name="app_icon_cosmic">Cosmic</string>
+    <string name="app_icon_outline">Outline</string>
+    <string name="app_icon_changed">Icon changed. The launcher may need a moment to show it, and some launchers take the old icon off the home screen: add it there again from the app drawer.</string>
 </resources>
