@@ -1,6 +1,7 @@
 package com.thirtydegreesray.openhub.util;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -22,6 +23,9 @@ public final class DrawerHeader {
     public static final String STYLE_MATRIX = "matrix";
     public static final String STYLE_THEME = "theme";
     public static final String[] STYLES = {STYLE_MATRIX, STYLE_THEME};
+
+    /** Menu background with the rain on dark themes: almost black, a faint green tint. */
+    private static final int MATRIX_MENU_BACKGROUND = 0xFF070B08;
 
     private DrawerHeader() {
     }
@@ -63,6 +67,18 @@ public final class DrawerHeader {
             header.setBackground(null);
         } else {
             header.setBackgroundResource(R.drawable.side_nav_bar);
+        }
+
+        // the menu's own background goes dark under the rain; light themes keep theirs,
+        // because their item texts are dark
+        if (nav.getTag(R.id.menu_background_tag) == null) {
+            // the theme's background, kept for switching back (a holder, it may be null)
+            nav.setTag(R.id.menu_background_tag, new Drawable[]{nav.getBackground()});
+        }
+        if (matrix && AppUtils.isNightMode()) {
+            nav.setBackgroundColor(MATRIX_MENU_BACKGROUND);
+        } else {
+            nav.setBackground(((Drawable[]) nav.getTag(R.id.menu_background_tag))[0]);
         }
         View welcome = header.findViewById(R.id.matrix_welcome);
         if (welcome != null) welcome.setVisibility(matrix ? View.VISIBLE : View.GONE);

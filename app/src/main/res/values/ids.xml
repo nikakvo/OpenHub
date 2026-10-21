@@ -3,4 +3,5 @@
 
 <resources>
     <item name="position_tag" type="id"/>
+    <item name="menu_background_tag" type="id"/>
 </resources>
