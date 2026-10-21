@@ -475,7 +475,8 @@
     <li><strong>Add to the repository files</strong>: type a folder (empty for the top folder; the last one is remembered) and the files are committed there, to the default branch or, in the commit dialog, to a new branch with a pull request. Files that already exist in the folder can be replaced.</li>
   </ul>
   <h3>In an open release</h3>
-  <p>The menu has Edit, Publish release (drafts), Set as latest release, Upload files and Delete release (optionally with its tag). Each file has a pencil to rename it and a menu to copy its link or delete it.</p>
+  <p>The menu has Edit, Publish release (drafts), Set as latest release, Upload files, Update SHA256SUMS and Delete release (optionally with its tag). Each file has a pencil to rename it and a menu to copy its link or delete it.</p>
+  <p><strong>SHA256SUMS</strong>: tick <span class="ui">Add a SHA256SUMS file</span> under the files of a release (the choice is remembered) and, after the uploads, the release gets a file named SHA256SUMS with the checksum of every file, in the format of <code>sha256sum</code>, so anyone can check a download with <code>sha256sum -c SHA256SUMS</code>. The checksums are the ones GitHub keeps for each file, so nothing is hashed on the phone. A release that already has the file keeps it up to date when you upload more files; <span class="ui">Update SHA256SUMS</span> in the menu writes it again at any time. Files uploaded before June 2025 have no checksum on GitHub and are left out.</p>
   <p><strong>Clean up old releases</strong> (⋮ on the release list of a repository you can write to) deletes all but the newest releases at once: keep only the newest one, or the 3 or 5 newest, optionally with their tags and with drafts. The release marked Latest is always kept, and you see the list of what goes before anything is deleted.</p>
 </div>
 </div>

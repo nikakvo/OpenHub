@@ -129,6 +129,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
     private TextInputEditText titleEdit;
     private TextInputEditText bodyEdit;
     private MarkdownWritePreview notesEditor;
+    private CheckBox checksumsCheck;
     private CheckBox preReleaseCheck;
     private CheckBox latestCheck;
     private TextView latestHint;
@@ -687,6 +688,8 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
         final HashMap<String, String> renames = new HashMap<>(renamedAssets);
         for (String id : deletes) renames.remove(id);
         final ArrayList<UploadItem> files = new ArrayList<>(pendingFiles);
+        final boolean checksums = checksumsCheck != null && checksumsCheck.isChecked();
+        UploadService.setChecksumsWanted(this, checksums);
 
         saving = true;
         invalidateBack();
@@ -716,7 +719,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
             ReleaseChanges.markChanged();
             if (!files.isEmpty()) {
                 UploadService.start(this, owner, repo, saved, files, publishAfterUpload,
-                        publishAfterUpload ? makeLatest : null);
+                        publishAfterUpload ? makeLatest : null, checksums);
                 pendingFiles.clear();
                 showInfoToast(publishAfterUpload
                         ? getResources().getQuantityString(R.plurals.upload_started_then_publish,
@@ -724,6 +727,10 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
                         : getResources().getQuantityString(R.plurals.upload_started,
                         files.size(), files.size()));
             } else {
+                // files deleted or renamed: the SHA256SUMS file follows
+                if (checksums && (!deletes.isEmpty() || !renames.isEmpty())) {
+                    UploadService.writeChecksums(this, owner, repo, saved);
+                }
                 showSuccessToast(getString(publishNow ? R.string.release_published_short
                         : saved.isDraft() ? R.string.release_draft_saved : R.string.release_updated));
             }
@@ -836,6 +843,8 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
         bodyEdit = notesEditor.getEditText();
         preReleaseCheck = root.findViewById(R.id.prerelease_check);
         latestCheck = root.findViewById(R.id.latest_check);
+        checksumsCheck = root.findViewById(R.id.checksums_check);
+        checksumsCheck.setChecked(UploadService.checksumsWanted(this));
         latestHint = root.findViewById(R.id.latest_hint);
         filesTitle = root.findViewById(R.id.files_title);
         filesList = root.findViewById(R.id.files_list);

@@ -166,8 +166,22 @@
         <item quantity="one">Delete this release, its files and its tag? This cannot be undone.\n\n%2$s</item>
         <item quantity="other">Delete these %1$d releases, their files and their tags? This cannot be undone.\n\n%2$s</item>
     </plurals>
+    <plurals name="releases_clean_up_confirm_drafts">
+        <item quantity="one">Delete this draft and its files? This cannot be undone.\n\n%2$s</item>
+        <item quantity="other">Delete these %1$d drafts and their files? This cannot be undone.\n\n%2$s</item>
+    </plurals>
     <plurals name="releases_clean_up_done">
         <item quantity="one">1 release deleted</item>
         <item quantity="other">%1$d releases deleted</item>
+    </plurals>
+    <string name="release_checksums_option">Add a SHA256SUMS file (checksums of all files, for sha256sum -c)</string>
+    <string name="release_update_checksums">Update SHA256SUMS</string>
+    <string name="checksums_started">Writing SHA256SUMS…</string>
+    <string name="checksums_nothing">No file has a checksum yet, so no SHA256SUMS was written.</string>
+    <string name="checksums_missing">Left out (GitHub has no checksum for them): %1$s</string>
+    <string name="checksums_failed">SHA256SUMS could not be written: %1$s</string>
+    <plurals name="checksums_written">
+        <item quantity="one">SHA256SUMS written (1 file).</item>
+        <item quantity="other">SHA256SUMS written (%d files).</item>
     </plurals>
 </resources>

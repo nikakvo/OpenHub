@@ -348,6 +348,8 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
         menu.findItem(R.id.action_make_latest).setVisible(edit && !draft
                 && !release.isPreRelease() && !mPresenter.isLatest());
         menu.findItem(R.id.action_upload_assets).setVisible(edit);
+        menu.findItem(R.id.action_update_checksums).setVisible(edit
+                && release.getAssets() != null && !release.getAssets().isEmpty());
         menu.findItem(R.id.action_delete_release).setVisible(edit);
         menu.findItem(R.id.action_share_release).setVisible(release != null && !draft);
         menu.findItem(R.id.action_release_in_browser).setVisible(release != null);
@@ -371,6 +373,10 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
             return true;
         } else if (id == R.id.action_upload_assets) {
             filePicker.launch(ContentFiles.pickerIntent());
+            return true;
+        } else if (id == R.id.action_update_checksums) {
+            UploadService.writeChecksums(this, mPresenter.getOwner(), mPresenter.getRepoName(), release);
+            showInfoToast(getString(R.string.checksums_started));
             return true;
         } else if (id == R.id.action_delete_release) {
             confirmDelete(release);
@@ -448,8 +454,11 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
                 return;
             }
         }
+        // a release that already has a SHA256SUMS file keeps it up to date
+        boolean checksums = UploadService.checksumsWanted(this)
+                || existing.contains(com.thirtydegreesray.openhub.util.ReleaseChecksums.FILE_NAME);
         UploadService.start(this, mPresenter.getOwner(), mPresenter.getRepoName(), release,
-                items, false, null);
+                items, false, null, checksums);
         showInfoToast(getResources().getQuantityString(R.plurals.upload_started,
                 items.size(), items.size()));
     }

@@ -36,6 +36,7 @@ import com.thirtydegreesray.openhub.ui.activity.ReleaseInfoActivity;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ContentFiles;
 import com.thirtydegreesray.openhub.util.ReleaseChanges;
+import com.thirtydegreesray.openhub.util.ReleaseChecksums;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
 import java.io.File;
@@ -45,7 +46,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -103,6 +107,16 @@ public class UploadService extends Service {
     public static void start(@NonNull Context context, @NonNull String owner, @NonNull String repo,
                              @NonNull Release release, @NonNull ArrayList<UploadItem> items,
                              boolean publish, @Nullable String makeLatest) {
+        start(context, owner, repo, release, items, publish, makeLatest, false);
+    }
+
+    /**
+     * @param checksums after the uploads (and before publishing), write the release's
+     *                  SHA256SUMS file from the checksums GitHub keeps for its files
+     */
+    public static void start(@NonNull Context context, @NonNull String owner, @NonNull String repo,
+                             @NonNull Release release, @NonNull ArrayList<UploadItem> items,
+                             boolean publish, @Nullable String makeLatest, boolean checksums) {
         Intent intent = new Intent(context, UploadService.class)
                 .setAction(ACTION_START)
                 .putExtras(BundleHelper.builder()
@@ -114,9 +128,29 @@ public class UploadService extends Service {
                         .putParcelableList("items", items)
                         .put("publish", publish)
                         .put("makeLatest", makeLatest)
+                        .put("checksums", checksums)
                         .build());
         ContentFiles.grantRead(intent, items);
         ContextCompat.startForegroundService(context, intent);
+    }
+
+    /** Only (re)writes the SHA256SUMS file of a release, with no files to upload. */
+    public static void writeChecksums(@NonNull Context context, @NonNull String owner,
+                                      @NonNull String repo, @NonNull Release release) {
+        start(context, owner, repo, release, new ArrayList<>(), false, null, true);
+    }
+
+    private static final String PREF_CHECKSUMS = "releaseChecksums";
+
+    /** The "Add a SHA256SUMS file" choice, remembered for the next upload. */
+    public static boolean checksumsWanted(@NonNull Context context) {
+        return androidx.preference.PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext())
+                .getBoolean(PREF_CHECKSUMS, false);
+    }
+
+    public static void setChecksumsWanted(@NonNull Context context, boolean wanted) {
+        androidx.preference.PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext())
+                .edit().putBoolean(PREF_CHECKSUMS, wanted).apply();
     }
 
     @Override
@@ -188,6 +222,7 @@ public class UploadService extends Service {
         ArrayList<UploadItem> items;
         boolean publish;
         String makeLatest;
+        boolean checksums;
 
         volatile boolean cancelled;
         volatile Call call;
@@ -212,6 +247,7 @@ public class UploadService extends Service {
             job.items = intent.getParcelableArrayListExtra("items");
             job.publish = intent.getBooleanExtra("publish", false);
             job.makeLatest = intent.getStringExtra("makeLatest");
+            job.checksums = intent.getBooleanExtra("checksums", false);
             if (StringUtils.isBlank(job.owner) || StringUtils.isBlank(job.repo)
                     || StringUtils.isBlank(job.releaseId) || job.items == null) {
                 return null;
@@ -264,9 +300,23 @@ public class UploadService extends Service {
                 }
             }
 
+            // a failed SHA256SUMS does not keep the release from being published
+            boolean filesOk = failures.isEmpty();
+            String checksumNote = null;
+            if (job.checksums) {
+                if (job.cancelled) throw new CancelledException();
+                try {
+                    checksumNote = writeChecksums(job);
+                } catch (CancelledException e) {
+                    throw e;
+                } catch (Exception e) {
+                    failures.add(getString(R.string.checksums_failed, reason(e)));
+                }
+            }
+
             String published = null;
             if (job.publish) {
-                if (failures.isEmpty()) {
+                if (filesOk) {
                     try {
                         publish(job);
                         published = getString(R.string.upload_release_published);
@@ -277,7 +327,7 @@ public class UploadService extends Service {
                     published = getString(R.string.upload_kept_draft);
                 }
             }
-            notifyFinished(job, uploaded, failures, published);
+            notifyFinished(job, uploaded, failures, published, checksumNote);
         } catch (CancelledException e) {
             notificationManager.cancel(job.id);
             toast(getString(R.string.upload_cancelled), false);
@@ -285,7 +335,7 @@ public class UploadService extends Service {
             for (UploadItem item : job.items) {
                 ContentFiles.releaseReadAccess(this, Uri.parse(item.getUri()));
             }
-            if (uploaded > 0 || job.publish) ReleaseChanges.markChanged();
+            if (uploaded > 0 || job.publish || job.checksums) ReleaseChanges.markChanged();
             jobs.remove(job.id);
             mainHandler.post(() -> {
                 updateForeground();
@@ -460,21 +510,101 @@ public class UploadService extends Service {
         return AppConfig.GITHUB_API_BASE_URL + "repos/" + job.owner + "/" + job.repo + "/" + path;
     }
 
+    /** Every asset of the release (a release has at most 1000; GitHub pages them by 100). */
+    @NonNull
+    private List<JsonObject> listAssets(@NonNull Job job) throws IOException {
+        List<JsonObject> result = new ArrayList<>();
+        for (int page = 1; page <= 10; page++) {
+            Request request = authorized(new Request.Builder()
+                    .url(api(job, "releases/" + job.releaseId + "/assets?per_page=100&page=" + page)))
+                    .header("Cache-Control", "no-cache").build();
+            int count;
+            try (Response response = client.newCall(request).execute()) {
+                ResponseBody body = response.body();
+                if (!response.isSuccessful() || body == null) throw new IOException(errorText(response));
+                JsonArray assets = JsonParser.parseString(body.string()).getAsJsonArray();
+                count = assets.size();
+                for (JsonElement element : assets) result.add(element.getAsJsonObject());
+            }
+            if (count < 100) break;
+        }
+        return result;
+    }
+
     /** Assets of the release by name; the upload may have half-created one. */
     @Nullable
     private JsonObject findAsset(@NonNull Job job, @NonNull String name) throws IOException {
-        Request request = authorized(new Request.Builder()
-                .url(api(job, "releases/" + job.releaseId + "/assets?per_page=100"))).build();
-        try (Response response = client.newCall(request).execute()) {
-            ResponseBody body = response.body();
-            if (!response.isSuccessful() || body == null) throw new IOException(errorText(response));
-            JsonArray assets = JsonParser.parseString(body.string()).getAsJsonArray();
-            for (JsonElement element : assets) {
-                JsonObject asset = element.getAsJsonObject();
-                if (name.equals(asset.get("name").getAsString())) return asset;
-            }
-            return null;
+        for (JsonObject asset : listAssets(job)) {
+            if (name.equals(asset.get("name").getAsString())) return asset;
         }
+        return null;
+    }
+
+    @Nullable
+    private static String digestOf(@NonNull JsonObject asset) {
+        JsonElement digest = asset.get("digest");
+        return digest == null || digest.isJsonNull() ? null : digest.getAsString();
+    }
+
+    /**
+     * Writes (replaces) the SHA256SUMS file of the release from the checksums GitHub keeps
+     * for every uploaded file, and returns the line for the result notification.
+     */
+    @NonNull
+    private String writeChecksums(@NonNull Job job) throws IOException, InterruptedException {
+        Set<String> justUploaded = new HashSet<>();
+        for (UploadItem item : job.items) justUploaded.add(item.getName());
+        List<JsonObject> assets = listAssets(job);
+        // GitHub may need a moment to list the checksum of a file it has just received
+        for (int attempt = 0; attempt < 3 && missesNewDigest(assets, justUploaded); attempt++) {
+            Thread.sleep(2000);
+            if (job.cancelled) throw new CancelledException();
+            assets = listAssets(job);
+        }
+
+        Map<String, String> digests = new LinkedHashMap<>();
+        String oldId = null;
+        for (JsonObject asset : assets) {
+            String name = asset.get("name").getAsString();
+            if (ReleaseChecksums.FILE_NAME.equals(name)) {
+                oldId = asset.get("id").getAsString();
+            } else if ("uploaded".equals(asset.get("state").getAsString())) {
+                digests.put(name, digestOf(asset));
+            }
+        }
+        ReleaseChecksums.Result sums = ReleaseChecksums.build(digests);
+        if (sums.count == 0) return getString(R.string.checksums_nothing);
+
+        if (oldId != null) {
+            Request delete = authorized(new Request.Builder()
+                    .url(api(job, "releases/assets/" + oldId)).delete()).build();
+            try (Response response = client.newCall(delete).execute()) {
+                if (!response.isSuccessful() && response.code() != 404) {
+                    throw new IOException(errorText(response));
+                }
+            }
+        }
+        HttpUrl url = HttpUrl.parse(job.uploadUrl);
+        if (url == null) throw new IOException("Bad upload URL");
+        url = url.newBuilder().addQueryParameter("name", ReleaseChecksums.FILE_NAME).build();
+        Request upload = authorized(new Request.Builder().url(url)
+                .post(RequestBody.create(sums.text.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                        MediaType.parse("text/plain")))).build();
+        try (Response response = client.newCall(upload).execute()) {
+            if (!response.isSuccessful()) throw new IOException(errorText(response));
+        }
+        String note = getResources().getQuantityString(R.plurals.checksums_written, sums.count, sums.count);
+        if (!sums.missing.isEmpty()) {
+            note += " " + getString(R.string.checksums_missing, String.join(", ", sums.missing));
+        }
+        return note;
+    }
+
+    private static boolean missesNewDigest(@NonNull List<JsonObject> assets, @NonNull Set<String> names) {
+        for (JsonObject asset : assets) {
+            if (names.contains(asset.get("name").getAsString()) && digestOf(asset) == null) return true;
+        }
+        return false;
     }
 
     private boolean isAlreadyUploaded(@NonNull Job job, @NonNull String name, long size) {
@@ -636,10 +766,17 @@ public class UploadService extends Service {
     }
 
     private void notifyFinished(@NonNull Job job, int uploaded, @NonNull List<String> failures,
-                                @Nullable String published) {
+                                @Nullable String published, @Nullable String checksumNote) {
         boolean success = failures.isEmpty();
-        StringBuilder text = new StringBuilder(getResources()
-                .getQuantityString(R.plurals.upload_done, uploaded, uploaded));
+        StringBuilder text = new StringBuilder();
+        // a SHA256SUMS-only job has no files to count
+        if (!job.items.isEmpty()) {
+            text.append(getResources().getQuantityString(R.plurals.upload_done, uploaded, uploaded));
+        }
+        if (checksumNote != null) {
+            if (text.length() > 0) text.append(" ");
+            text.append(checksumNote);
+        }
         if (published != null) text.append(" ").append(published);
         for (String failure : failures) text.append("\n").append(failure);
 

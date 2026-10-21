@@ -261,12 +261,24 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
         }
         new AlertDialog.Builder(this)
                 .setTitle(R.string.releases_clean_up)
-                .setMessage(getResources().getQuantityString(withTags
-                                ? R.plurals.releases_clean_up_confirm_tags : R.plurals.releases_clean_up_confirm,
+                .setMessage(getResources().getQuantityString(confirmText(toDelete, withTags),
                         toDelete.size(), toDelete.size(), names.toString()))
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.delete, (dialog, which) -> runCleanUp(toDelete, withTags))
                 .show();
+    }
+
+    /** Drafts have no tag yet, so only drafts means no word about tags. */
+    private static int confirmText(@NonNull List<Release> toDelete, boolean withTags) {
+        boolean anyPublished = false;
+        for (Release release : toDelete) {
+            if (!release.isDraft()) {
+                anyPublished = true;
+                break;
+            }
+        }
+        if (!anyPublished) return R.plurals.releases_clean_up_confirm_drafts;
+        return withTags ? R.plurals.releases_clean_up_confirm_tags : R.plurals.releases_clean_up_confirm;
     }
 
     private void runCleanUp(@NonNull List<Release> toDelete, boolean withTags) {
