@@ -4,10 +4,12 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -19,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
@@ -106,22 +109,35 @@ public final class MainMenuDrawer {
         dialog.show();
     }
 
-    /** The ≡ icon in the toolbar's logo place: right after Back, before the title. */
+    /**
+     * The ≡ button takes the toolbar's navigation place at the very left, where the start
+     * screen has it too, so it never moves between screens. Back (when the screen has one)
+     * goes right after it, in the logo place, and still does what the screen's Back
+     * (home) did before.
+     */
     private static void addButton(@NonNull AppCompatActivity activity, @NonNull Toolbar toolbar,
                                   @NonNull Runnable open) {
-        DrawerArrowDrawable icon = new DrawerArrowDrawable(toolbar.getContext());
         ActionBar actionBar = activity.getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setLogo(icon);
-            actionBar.setDisplayUseLogoEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(true);
-        } else {
-            toolbar.setLogo(icon);
-        }
+        if (actionBar == null) return;
+        boolean hadBack = (actionBar.getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0;
+        // the screen's own (themed) back arrow, reused next to the menu button
+        Drawable back = hadBack ? toolbar.getNavigationIcon() : null;
+
+        DrawerArrowDrawable menuIcon = new DrawerArrowDrawable(toolbar.getContext());
+        actionBar.setHomeAsUpIndicator(menuIcon);
+        actionBar.setHomeActionContentDescription(R.string.main_menu);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        // replaces the action bar's own listener (it is set once, when the bar is created)
+        toolbar.setNavigationOnClickListener(v -> open.run());
+
+        if (back == null) return;
+        actionBar.setLogo(back);
+        actionBar.setDisplayUseLogoEnabled(true);
+        actionBar.setDisplayShowHomeEnabled(true);
         ImageView button = null;
         for (int i = 0; i < toolbar.getChildCount(); i++) {
             View child = toolbar.getChildAt(i);
-            if (child instanceof ImageView && ((ImageView) child).getDrawable() == icon) {
+            if (child instanceof ImageView && ((ImageView) child).getDrawable() == back) {
                 button = (ImageView) child;
                 break;
             }
@@ -135,10 +151,17 @@ public final class MainMenuDrawer {
                 android.R.attr.selectableItemBackgroundBorderless, ripple, true)) {
             button.setBackgroundResource(ripple.resourceId);
         }
-        button.setContentDescription(activity.getString(R.string.main_menu));
+        button.setContentDescription(activity.getString(R.string.navigate_back));
         button.setClickable(true);
         button.setFocusable(true);
-        button.setOnClickListener(v -> open.run());
+        ImageView anchor = button;
+        button.setOnClickListener(v -> {
+            // the same "home" item the navigation button sends, so every screen keeps its
+            // own Back behavior (transitions, results, confirmations)
+            MenuItem home = new PopupMenu(activity, anchor).getMenu()
+                    .add(Menu.NONE, android.R.id.home, Menu.NONE, R.string.navigate_back);
+            activity.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, home);
+        });
     }
 
     private static void fillHeader(@NonNull AppCompatActivity activity, @NonNull View header) {
