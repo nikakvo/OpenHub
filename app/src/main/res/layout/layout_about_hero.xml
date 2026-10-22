@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Top of the About screen in the Matrix look: glowing app icon, decoding name, version. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="120dp"
+        android:layout_height="120dp">
+
+        <View
+            android:id="@+id/about_glow"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/about_icon_glow"/>
+
+        <FrameLayout
+            android:layout_width="92dp"
+            android:layout_height="92dp"
+            android:layout_gravity="center"
+            android:background="@drawable/about_icon_frame">
+
+            <ImageView
+                android:id="@+id/about_icon"
+                android:layout_width="76dp"
+                android:layout_height="76dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"/>
+        </FrameLayout>
+    </FrameLayout>
+
+    <com.thirtydegreesray.openhub.ui.widget.MatrixWelcomeView
+        android:id="@+id/about_title"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"/>
+
+    <LinearLayout
+        android:id="@+id/about_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:minHeight="40dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:background="@drawable/about_version_chip"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/about_version_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textSize="14sp"
+            android:textColor="#CFFFDD"/>
+
+        <TextView
+            android:id="@+id/about_version_cursor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textSize="14sp"
+            android:textColor="#39FF7A"
+            android:text="_"
+            android:importantForAccessibility="no"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/about_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:minHeight="16dp"
+        android:fontFamily="monospace"
+        android:textSize="12sp"
+        android:textColor="#8FD9A8"
+        android:accessibilityLiveRegion="polite"/>
+
+    <TextView
+        android:id="@+id/about_maintainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="18dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:gravity="center"
+        android:textSize="14sp"
+        android:textColor="#B7BDC4"
+        android:text="@string/about_tagline"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#4739FF7A"/>
+</LinearLayout>

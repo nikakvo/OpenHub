@@ -43,6 +43,8 @@ public class MatrixRainView extends View {
     private int rightCols = 3;
     /** Strength of the edge columns below the header, in percent. */
     private int edgeAlpha = 75;
+    /** Dark band at the bottom of the header (the menu's name and bio). */
+    private boolean shade = true;
     /** Rows of menu per drop in an edge column. */
     private static final int ROWS_PER_DROP = 16;
     private static final long FRAME_MS = 50L;
@@ -114,6 +116,12 @@ public class MatrixRainView extends View {
         rightCols = Math.max(0, right);
         edgeAlpha = Math.max(0, Math.min(100, alphaPercent));
         if (getWidth() > 0 && getHeight() > 0) onSizeChanged(getWidth(), getHeight(), getWidth(), getHeight());
+        invalidate();
+    }
+
+    /** Without the dark band at the bottom of the header (rain over a whole screen). */
+    public void setShade(boolean shade) {
+        this.shade = shade;
         invalidate();
     }
 
@@ -250,7 +258,7 @@ public class MatrixRainView extends View {
                 canvas.drawText(oneChar, 0, 1, x, y + baseline, glyphPaint);
             }
         }
-        if (headerBottom > 0) {
+        if (shade && headerBottom > 0) {
             if (shadeTop != headerTop || shadeBottom != headerBottom) {
                 shadeTop = headerTop;
                 shadeBottom = headerBottom;

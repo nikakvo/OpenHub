@@ -10,7 +10,9 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.TextView;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.ViewCompat;
@@ -23,7 +25,8 @@ import com.thirtydegreesray.openhub.ui.widget.MatrixWelcomeView;
 /**
  * The Matrix look of the side menu, for whole screens (Settings, About, Help): the rain
  * behind the app bar, a large decoding title with a terminal line under it, and on dark
- * themes an almost black screen with one column of rain falling down each edge.
+ * themes an almost black screen. Unlike the menu, no rain falls down the edges of the
+ * screen below the app bar (it only distracted from the lists).
  *
  * Follows Settings - Menu header: with "Theme color" the screen stays as it was.
  */
@@ -31,8 +34,8 @@ public final class MatrixScreen {
 
     /** The same almost black as the side menu with the rain. */
     public static final int BACKGROUND = 0xFF070B08;
-    /** Edge columns are softer than in the menu, so they never fight with the text. */
-    private static final int EDGE_ALPHA = 45;
+    /** Cards on the almost black background. */
+    public static final int CARD = 0xFF111713;
 
     private MatrixScreen() {
     }
@@ -57,9 +60,30 @@ public final class MatrixScreen {
      */
     public static void apply(@NonNull AppCompatActivity activity, @NonNull ViewGroup root,
                              @NonNull String title, @NonNull String subtitle) {
-        if (!isOn(activity)) return;
+        View block = install(activity, root, R.layout.layout_matrix_title);
+        if (block == null) return;
+        MatrixWelcomeView titleView = block.findViewById(R.id.matrix_title);
+        titleView.setTextSizeSp(22);
+        titleView.setAlignStart(true);
+        titleView.setText(title);
+        TextView subtitleView = block.findViewById(R.id.matrix_subtitle);
+        subtitleView.setText(subtitle);
+        blink(block.findViewById(R.id.matrix_cursor));
+    }
+
+    /**
+     * The common part: background, bars, the rain behind the app bar, and the given layout
+     * added to the app bar below the toolbar.
+     *
+     * @return the added layout, or null with "Theme color" or when it was done already
+     */
+    @Nullable
+    public static View install(@NonNull AppCompatActivity activity, @NonNull ViewGroup root,
+                               @LayoutRes int blockLayout) {
+        if (!isOn(activity)) return null;
         AppBarLayout appBar = root.findViewById(R.id.app_bar);
-        if (appBar == null || appBar.findViewById(R.id.matrix_title) != null) return;
+        if (appBar == null || appBar.getTag(R.id.matrix_screen_tag) != null) return null;
+        appBar.setTag(R.id.matrix_screen_tag, Boolean.TRUE);
         Toolbar toolbar = appBar.findViewById(R.id.toolbar);
         boolean dark = AppUtils.isNightMode();
 
@@ -72,8 +96,8 @@ public final class MatrixScreen {
         }
 
         MatrixRainView rain = new MatrixRainView(activity);
-        // on light themes green glyphs over the list would only be noise
-        rain.setEdgeColumns(dark ? 1 : 0, dark ? 1 : 0, EDGE_ALPHA);
+        // the rain stays behind the app bar
+        rain.setEdgeColumns(0, 0, 0);
         root.addView(rain, 0, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         rain.setHeader(appBar);
@@ -87,18 +111,15 @@ public final class MatrixScreen {
             activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        View block = LayoutInflater.from(activity).inflate(R.layout.layout_matrix_title, appBar, false);
+        View block = LayoutInflater.from(activity).inflate(blockLayout, appBar, false);
         int index = toolbar != null ? appBar.indexOfChild(toolbar) + 1 : 0;
         appBar.addView(block, index);
+        return block;
+    }
 
-        MatrixWelcomeView titleView = block.findViewById(R.id.matrix_title);
-        titleView.setTextSizeSp(22);
-        titleView.setAlignStart(true);
-        titleView.setText(title);
-        TextView subtitleView = block.findViewById(R.id.matrix_subtitle);
-        subtitleView.setText(subtitle);
-        View cursor = block.findViewById(R.id.matrix_cursor);
-        if (ValueAnimator.areAnimatorsEnabled()) {
+    /** A terminal cursor: blinks while animations are on. */
+    public static void blink(@Nullable View cursor) {
+        if (cursor != null && ValueAnimator.areAnimatorsEnabled()) {
             AlphaAnimation blink = new AlphaAnimation(1f, 0f);
             blink.setDuration(500);
             blink.setRepeatMode(Animation.REVERSE);

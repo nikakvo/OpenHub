@@ -79,6 +79,17 @@ public final class AppIcons {
         }
     }
 
+    /** The launcher icon the user chose, for the About screen. */
+    @NonNull
+    public static android.graphics.drawable.Drawable drawable(@NonNull Context context) {
+        try {
+            return context.getPackageManager().getActivityIcon(component(context, current(context)));
+        } catch (PackageManager.NameNotFoundException e) {
+            return java.util.Objects.requireNonNull(
+                    androidx.core.content.ContextCompat.getDrawable(context, R.mipmap.logo_matrix));
+        }
+    }
+
     /** For the settings summary and the chooser. */
     public static int label(@NonNull String icon) {
         switch (icon) {
