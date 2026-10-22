@@ -55,8 +55,13 @@ app goes to them; see [Credits](#credits).
   anywhere without pressing Back many times
 * **Matrix rain** side menu: slowly falling green characters behind your account and down
   the edges of the menu, with an animated "Welcome to OpenHub"; or the plain theme color
+* Settings, About and Help in the same Matrix look: the rain behind a large decoding title,
+  an almost black screen on dark themes; settings in groups with colored icons
+* About shows the SHA-256 of the APK's signing certificate (tap to copy), checks for
+  updates and links to private security reports
 * **App icon** to choose: Matrix, Classic, Cosmic or Outline
-* Searchable in-app help that explains every screen, written for people new to GitHub
+* Searchable in-app help that explains every screen, written for people new to GitHub;
+  its feature tiles jump to the matching section
 * Light, dark and AMOLED dark themes, many accent colors, colored or plain side menu icons
 * Markdown rendering and code highlighting
 * Offline mode (cached pages)
