@@ -1,11 +1,14 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebResourceRequest;
@@ -82,6 +85,10 @@ public class HelpActivity extends BaseActivity<IBaseContract.Presenter> {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 String scheme = uri.getScheme();
+                if (OPEN_LINKS_ACTION.equals(uri.toString())) {
+                    openLinkSettings();
+                    return true;
+                }
                 if ("http".equals(scheme) || "https".equals(scheme)) {
                     AppOpener.launchUrl(HelpActivity.this, uri);
                     return true;
@@ -91,6 +98,21 @@ public class HelpActivity extends BaseActivity<IBaseContract.Presenter> {
         });
         if (savedInstanceState != null) web.restoreState(savedInstanceState);
         else web.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "UTF-8", null);
+    }
+
+    /** A link in the help that opens Android's "Open by default" page of OpenHub. */
+    private static final String OPEN_LINKS_ACTION = "openhub-action:open-links";
+
+    private void openLinkSettings() {
+        Uri app = Uri.parse("package:" + getPackageName());
+        Intent intent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                ? new Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, app)
+                : new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app);
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app));
+        }
     }
 
     @Override

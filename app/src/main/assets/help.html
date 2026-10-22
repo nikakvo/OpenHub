@@ -30,7 +30,8 @@
   .hero h1 { font-size: 20px; color: var(--hi); font-weight: 600; margin-bottom: 6px; }
   .hero p { color: var(--text); }
   .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-  .tile { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; line-height: 1.4; }
+  .tile { display: block; color: var(--text); background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; line-height: 1.4; }
+  .tile:active { border-color: var(--acc); }
   .tile b { display: block; color: var(--acc); font-weight: 600; font-size: 13px; margin-bottom: 2px; }
 
   .toc { margin: 12px 14px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
@@ -110,14 +111,14 @@
   <h1>Welcome to OpenHub</h1>
   <p>OpenHub is a GitHub client for Android. Read and write almost everything you would on github.com: browse and search code, edit files, publish releases, review and merge pull requests, work with issues and discussions, follow builds, get notifications.</p>
   <div class="tiles">
-    <div class="tile" style="--c:#58A6FF"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><b>Browse</b>Repositories, code, READMEs, users</div>
-    <div class="tile" style="--c:#DB61A2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg><b>Edit</b>Create, upload, edit files with commits</div>
-    <div class="tile" style="--c:#A371F7"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M6 8v8M18 16V9a2 2 0 0 0-2-2h-4M14 5l-2 2 2 2"/></svg><b>Pull requests</b>Reviews, line comments, merge</div>
-    <div class="tile" style="--c:#E3B341"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12V4h8l9 9-8 8z"/><circle cx="8" cy="8.5" r="1.5"/></svg><b>Releases</b>Publish, upload, all starred in one list</div>
-    <div class="tile" style="--c:#56D4DD"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M10 8.5l5 3.5-5 3.5z"/></svg><b>Actions</b>Runs, artifacts, notified when done</div>
-    <div class="tile" style="--c:#F0883E"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><b>Notifications</b>Inbox and phone notifications</div>
-    <div class="tile" style="--c:#3FB950"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5M12 16h.01"/></svg><b>Issues</b>Templates, assignees, milestones</div>
-    <div class="tile" style="--c:#79C0FF"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11v8H8l-4 3z"/><path d="M15 9h5v8l-3-2h-6v-2"/></svg><b>Discussions</b>Read, reply, upvote, answer</div>
+    <a class="tile" href="#repo" style="--c:#58A6FF"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><b>Browse</b>Repositories, code, READMEs, users</a>
+    <a class="tile" href="#files" style="--c:#DB61A2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg><b>Edit</b>Create, upload, edit files with commits</a>
+    <a class="tile" href="#pulls" style="--c:#A371F7"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M6 8v8M18 16V9a2 2 0 0 0-2-2h-4M14 5l-2 2 2 2"/></svg><b>Pull requests</b>Reviews, line comments, merge</a>
+    <a class="tile" href="#releases" style="--c:#E3B341"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12V4h8l9 9-8 8z"/><circle cx="8" cy="8.5" r="1.5"/></svg><b>Releases</b>Publish, upload, all starred in one list</a>
+    <a class="tile" href="#actions" style="--c:#56D4DD"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M10 8.5l5 3.5-5 3.5z"/></svg><b>Actions</b>Runs, artifacts, notified when done</a>
+    <a class="tile" href="#notifications" style="--c:#F0883E"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><b>Notifications</b>Inbox and phone notifications</a>
+    <a class="tile" href="#issues" style="--c:#3FB950"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5M12 16h.01"/></svg><b>Issues</b>Templates, assignees, milestones</a>
+    <a class="tile" href="#issues" style="--c:#79C0FF"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11v8H8l-4 3z"/><path d="M15 9h5v8l-3-2h-6v-2"/></svg><b>Discussions</b>Read, reply, upvote, answer</a>
   </div>
 </div>
 
@@ -643,7 +644,7 @@
   <h3>Open GitHub links in OpenHub</h3>
   <p>Since Android 12 an app opens links of a website only when you allow it once. To open github.com links from Telegram, mail or a browser in OpenHub:</p>
   <ol class="steps">
-    <li><strong>Settings → Open GitHub links in OpenHub</strong> (it shows <em>On</em> or <em>Off</em>).</li>
+    <li><strong>Settings → Open GitHub links in OpenHub</strong> (it shows <em>On</em> or <em>Off</em>), or tap here: <a href="openhub-action:open-links">open the setting</a>.</li>
     <li>Turn on <strong>Open supported links</strong>.</li>
     <li><strong>Add link</strong> → tick <code>github.com</code>.</li>
   </ol>
