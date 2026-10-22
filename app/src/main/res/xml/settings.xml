@@ -3,102 +3,133 @@
 
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <Preference
-        android:icon="@drawable/ic_color_lens"
-        android:title="@string/choose_theme"
-        android:key="appTheme"/>
 
-    <com.thirtydegreesray.openhub.ui.widget.colorChooser.ColorChooserPreference
-        android:icon="@drawable/ic_color_lens"
-        android:title="@string/theme_accent_color"
-        android:key="accentColor"/>
+    <PreferenceCategory
+        android:key="group_appearance"
+        android:title="@string/settings_group_appearance">
 
-    <Preference
-        android:icon="@drawable/ic_menu_settings"
-        android:title="@string/menu_icons_title"
-        android:key="menuIconStyle"/>
+        <Preference
+            android:icon="@drawable/ic_color_lens"
+            android:title="@string/choose_theme"
+            android:key="appTheme"/>
 
-    <Preference
-        android:icon="@drawable/ic_menu_settings"
-        android:title="@string/menu_header_title"
-        android:key="menuHeaderStyle"/>
+        <com.thirtydegreesray.openhub.ui.widget.colorChooser.ColorChooserPreference
+            android:icon="@drawable/ic_pref_accent"
+            android:title="@string/theme_accent_color"
+            android:key="accentColor"/>
 
-    <Preference
-        android:icon="@drawable/ic_menu_settings"
-        android:title="@string/app_icon_title"
-        android:key="appIcon"/>
+        <Preference
+            android:icon="@drawable/ic_pref_grid"
+            android:title="@string/menu_icons_title"
+            android:key="menuIconStyle"/>
 
-    <Preference
-        android:icon="@drawable/ic_one"
-        android:title="@string/start_page"
-        android:key="startPage"/>
+        <Preference
+            android:icon="@drawable/ic_pref_header"
+            android:title="@string/menu_header_title"
+            android:key="menuHeaderStyle"/>
 
-    <Preference
-        android:icon="@drawable/ic_menu_notifications"
-        android:title="@string/watched_releases"
-        android:key="watchedReleases"/>
+        <Preference
+            android:icon="@drawable/ic_pref_sparkle"
+            android:title="@string/app_icon_title"
+            android:key="appIcon"/>
 
-    <Preference
-        android:icon="@drawable/ic_menu_notifications"
-        android:title="@string/release_check_interval"
-        android:key="releaseCheckInterval"/>
+    </PreferenceCategory>
 
-    <SwitchPreference
-        android:icon="@drawable/ic_menu_notifications"
-        android:title="@string/github_notifications_pref"
-        android:summary="@string/github_notifications_pref_summary"
-        android:key="githubNotifications"
-        android:defaultValue="false"/>
+    <PreferenceCategory
+        android:key="group_general"
+        android:title="@string/settings_group_general">
 
-    <Preference
-        android:icon="@drawable/ic_menu_notifications"
-        android:title="@string/github_notifications_interval"
-        android:dependency="githubNotifications"
-        android:key="githubNotificationsInterval"/>
+        <Preference
+            android:icon="@drawable/ic_pref_star"
+            android:title="@string/start_page"
+            android:key="startPage"/>
 
-    <SwitchPreference
-        android:icon="@drawable/ic_http"
-        android:title="@string/cache_controller"
-        android:summary="@string/cache_controller_desc"
-        android:key="cacheFirstEnable"
-        android:defaultValue="true"/>
+        <SwitchPreference
+            android:icon="@drawable/ic_open_in_browser"
+            android:title="@string/use_custom_tabs"
+            android:summary="@string/custom_tabs_desc"
+            android:key="customTabsEnable"
+            android:defaultValue="true"/>
 
-    <SwitchPreference
-        android:icon="@drawable/ic_download"
-        android:title="@string/use_system_downloader"
-        android:summary="@string/use_system_downloader_summary"
-        android:key="systemDownloader"
-        android:defaultValue="true"/>
+        <Preference
+            android:icon="@drawable/ic_link"
+            android:title="@string/open_links_title"
+            android:key="openGitHubLinks"/>
 
-    <SwitchPreference
-        android:icon="@drawable/ic_open_in_browser"
-        android:title="@string/use_custom_tabs"
-        android:summary="@string/custom_tabs_desc"
-        android:key="customTabsEnable"
-        android:defaultValue="true"/>
+        <SwitchPreference
+            android:icon="@drawable/ic_download"
+            android:title="@string/use_system_downloader"
+            android:summary="@string/use_system_downloader_summary"
+            android:key="systemDownloader"
+            android:defaultValue="true"/>
 
-    <Preference
-        android:icon="@drawable/ic_link"
-        android:title="@string/open_links_title"
-        android:key="openGitHubLinks"/>
+    </PreferenceCategory>
 
-    <SwitchPreference
-        android:icon="@drawable/ic_image"
-        android:title="@string/disable_loading_image"
-        android:summary="@string/disable_loading_image_desc"
-        android:key="disableLoadingImage"
-        android:defaultValue="false"/>
+    <PreferenceCategory
+        android:key="group_notifications"
+        android:title="@string/settings_group_notifications">
 
-    <SwitchPreference
-        android:icon="@drawable/ic_update"
-        android:title="@string/update_pref_title"
-        android:summary="@string/update_pref_summary"
-        android:key="checkUpdates"
-        android:defaultValue="true"/>
+        <Preference
+            android:icon="@drawable/ic_pref_tag"
+            android:title="@string/watched_releases"
+            android:key="watchedReleases"/>
 
-    <Preference
-        android:icon="@drawable/ic_update"
-        android:title="@string/update_check_now"
-        android:key="checkUpdatesNow"/>
+        <Preference
+            android:icon="@drawable/ic_pref_schedule"
+            android:title="@string/release_check_interval"
+            android:key="releaseCheckInterval"/>
+
+        <SwitchPreference
+            android:icon="@drawable/ic_menu_notifications"
+            android:title="@string/github_notifications_pref"
+            android:summary="@string/github_notifications_pref_summary"
+            android:key="githubNotifications"
+            android:defaultValue="false"/>
+
+        <Preference
+            android:icon="@drawable/ic_pref_schedule"
+            android:title="@string/github_notifications_interval"
+            android:dependency="githubNotifications"
+            android:key="githubNotificationsInterval"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="group_network"
+        android:title="@string/settings_group_network">
+
+        <SwitchPreference
+            android:icon="@drawable/ic_http"
+            android:title="@string/cache_controller"
+            android:summary="@string/cache_controller_desc"
+            android:key="cacheFirstEnable"
+            android:defaultValue="true"/>
+
+        <SwitchPreference
+            android:icon="@drawable/ic_image"
+            android:title="@string/disable_loading_image"
+            android:summary="@string/disable_loading_image_desc"
+            android:key="disableLoadingImage"
+            android:defaultValue="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="group_updates"
+        android:title="@string/settings_group_updates">
+
+        <SwitchPreference
+            android:icon="@drawable/ic_update"
+            android:title="@string/update_pref_title"
+            android:summary="@string/update_pref_summary"
+            android:key="checkUpdates"
+            android:defaultValue="true"/>
+
+        <Preference
+            android:icon="@drawable/ic_update"
+            android:title="@string/update_check_now"
+            android:key="checkUpdatesNow"/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

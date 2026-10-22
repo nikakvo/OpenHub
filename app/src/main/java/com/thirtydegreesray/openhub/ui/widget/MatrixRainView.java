@@ -24,7 +24,8 @@ import java.util.Random;
  * first {@link #LEFT_COLS} and the last {@link #RIGHT_COLS} columns keep falling down
  * the edges of the menu, under the header, over the menu's own background. A dark band at the bottom of the header
  * keeps the name and the bio readable. The edge columns carry several drops at once, so
- * they are never empty for long.
+ * they are never empty for long. Other screens (Settings, About, Help) use the same rain
+ * behind their title, with their own edge columns ({@link #setEdgeColumns}).
  *
  * The view lies behind the menu list and follows the header when the list scrolls. It
  * only animates while it is on screen (the menu is open) and draws one still frame when
@@ -38,8 +39,10 @@ public class MatrixRainView extends View {
     private static final int HEAD_COLOR = 0xFFD8FFE0;
     private static final int TRAIL_COLOR = 0x00FF41;
     /** Columns at the edges that go on falling below the header (narrow enough to miss the icons). */
-    private static final int LEFT_COLS = 1;
-    private static final int RIGHT_COLS = 3;
+    private int leftCols = 1;
+    private int rightCols = 3;
+    /** Strength of the edge columns below the header, in percent. */
+    private int edgeAlpha = 75;
     /** Rows of menu per drop in an edge column. */
     private static final int ROWS_PER_DROP = 16;
     private static final long FRAME_MS = 50L;
@@ -102,6 +105,18 @@ public class MatrixRainView extends View {
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
+    /**
+     * How many columns at the left and right edges keep falling below the header, and how
+     * strong they are there (percent). The side menu uses 1, 3 and 75.
+     */
+    public void setEdgeColumns(int left, int right, int alphaPercent) {
+        leftCols = Math.max(0, left);
+        rightCols = Math.max(0, right);
+        edgeAlpha = Math.max(0, Math.min(100, alphaPercent));
+        if (getWidth() > 0 && getHeight() > 0) onSizeChanged(getWidth(), getHeight(), getWidth(), getHeight());
+        invalidate();
+    }
+
     /** The header the full-width rain stays behind. */
     public void setHeader(@Nullable View header) {
         this.header = header;
@@ -132,7 +147,7 @@ public class MatrixRainView extends View {
     }
 
     private boolean isStrip(int c) {
-        return c < LEFT_COLS || c >= cols - RIGHT_COLS;
+        return c < leftCols || c >= cols - rightCols;
     }
 
     /** Last row a column falls to: the header's bottom, or the whole height for the strip. */
@@ -208,7 +223,7 @@ public class MatrixRainView extends View {
         }
         // the grid scrolls with the header, so its rain moves with it
         float shift = headerTop;
-        float stripLeft = (cols - RIGHT_COLS) * cellW;
+        float stripLeft = (cols - rightCols) * cellW;
         for (int d = 0; d < dropCol.length; d++) {
             int c = dropCol[d];
             boolean strip = isStrip(c);
@@ -228,7 +243,7 @@ public class MatrixRainView extends View {
                     float fade = 1f - (float) k / (trail[d] + 1);
                     int alpha = (int) (40 + 215 * fade * fade);
                     // a bit softer over the menu, so it does not fight with the items
-                    if (strip && y >= headerBottom) alpha = alpha * 3 / 4;
+                    if (strip && y >= headerBottom) alpha = alpha * edgeAlpha / 100;
                     glyphPaint.setColor((alpha << 24) | TRAIL_COLOR);
                 }
                 oneChar[0] = cells[c * rows + r];

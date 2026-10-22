@@ -22,10 +22,12 @@ import java.util.Random;
  * again and comes back after a pause.
  *
  * Animates only while on screen; with the system's animations off it just shows the text.
+ * Other screens use it for their title ({@link #setText}, {@link #setTextSizeSp},
+ * {@link #setAlignStart}).
  */
 public class MatrixWelcomeView extends View {
 
-    private static final String TEXT = "Welcome to OpenHub";
+    private String text = "Welcome to OpenHub";
     private static final int TEXT_COLOR = 0xFFC8FFD4;
     private static final int GLYPH_COLOR = 0x00FF41;
     private static final int GLOW_COLOR = 0xFF00FF41;
@@ -42,9 +44,10 @@ public class MatrixWelcomeView extends View {
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Random random = new Random();
-    private final char[] glyphs = new char[TEXT.length()];
+    private char[] glyphs = new char[text.length()];
     private final char[] oneChar = new char[1];
-    private final float baseTextSize;
+    private float baseTextSize;
+    private boolean alignStart;
     private final float glowRadius;
 
     private long startTime = SystemClock.uptimeMillis();
@@ -70,7 +73,38 @@ public class MatrixWelcomeView extends View {
         paint.setTextAlign(Paint.Align.LEFT);
         paint.setTextSize(baseTextSize);
         for (int i = 0; i < glyphs.length; i++) glyphs[i] = randomGlyph();
-        setContentDescription(TEXT);
+        setContentDescription(text);
+    }
+
+    /** The text to decode (the side menu's greeting by default). */
+    public void setText(@NonNull String text) {
+        this.text = text;
+        glyphs = new char[text.length()];
+        for (int i = 0; i < glyphs.length; i++) glyphs[i] = randomGlyph();
+        setContentDescription(text);
+        fitText(getWidth());
+        startTime = SystemClock.uptimeMillis();
+        invalidate();
+    }
+
+    public void setTextSizeSp(float sp) {
+        baseTextSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp,
+                getResources().getDisplayMetrics());
+        fitText(getWidth());
+        invalidate();
+    }
+
+    /** Text at the start (a screen title) instead of centered (the menu greeting). */
+    public void setAlignStart(boolean alignStart) {
+        this.alignStart = alignStart;
+        invalidate();
+    }
+
+    private void fitText(int w) {
+        // shrink the text when the space is narrow
+        paint.setTextSize(baseTextSize);
+        float needed = paint.measureText(text) + glowRadius * 2;
+        if (w > 0 && needed > w) paint.setTextSize(baseTextSize * w / needed);
     }
 
     private char randomGlyph() {
@@ -80,10 +114,7 @@ public class MatrixWelcomeView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        // shrink the text when the space between the avatar and the logo is narrow
-        paint.setTextSize(baseTextSize);
-        float needed = paint.measureText(TEXT) + glowRadius * 2;
-        if (w > 0 && needed > w) paint.setTextSize(baseTextSize * w / needed);
+        fitText(w);
     }
 
     @Override
@@ -107,9 +138,9 @@ public class MatrixWelcomeView extends View {
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
-        int n = TEXT.length();
+        int n = text.length();
         float charW = paint.measureText("M");
-        float left = (getWidth() - charW * n) / 2f;
+        float left = alignStart ? glowRadius : (getWidth() - charW * n) / 2f;
         Paint.FontMetrics fm = paint.getFontMetrics();
         float y = (getHeight() - fm.ascent - fm.descent) / 2f;
 
@@ -117,7 +148,7 @@ public class MatrixWelcomeView extends View {
         if (!animate) {
             paint.setColor(TEXT_COLOR);
             paint.setShadowLayer(glowRadius * 0.6f, 0, 0, GLOW_COLOR);
-            canvas.drawText(TEXT, left, y, paint);
+            canvas.drawText(text, left, y, paint);
             return;
         }
 
@@ -139,7 +170,7 @@ public class MatrixWelcomeView extends View {
                 : 0.5f;
 
         for (int i = 0; i < n; i++) {
-            char real = TEXT.charAt(i);
+            char real = text.charAt(i);
             if (real == ' ') continue;
             float slot = (float) i / Math.max(1, n - 1);
             char shown;

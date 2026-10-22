@@ -19,11 +19,16 @@ import android.os.Bundle;
 import androidx.annotation.ColorInt;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceScreen;
+import android.graphics.drawable.Drawable;
 
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.ui.widget.colorChooser.ColorChooserPreference;
 import com.thirtydegreesray.openhub.util.AppUpdater;
+import com.thirtydegreesray.openhub.util.AppUtils;
+import com.thirtydegreesray.openhub.util.MatrixScreen;
 import com.thirtydegreesray.openhub.util.AppIcons;
 import com.thirtydegreesray.openhub.util.DrawerHeader;
 import com.thirtydegreesray.openhub.util.DrawerIcons;
@@ -31,6 +36,9 @@ import com.thirtydegreesray.openhub.util.GitHubNotifier;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.List;
 
 import es.dmoral.toasty.Toasty;
@@ -79,6 +87,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.settings);
+        styleScreen();
         findPreference(PrefUtils.THEME).setOnPreferenceClickListener(this);
 //        findPreference(PrefUtils.LOGOUT).setOnPreferenceClickListener(this);
         findPreference(PrefUtils.START_PAGE).setOnPreferenceClickListener(this);
@@ -438,6 +447,69 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
+    }
+
+    /** Icon colors of the settings: bright on dark themes, deeper on light ones (like the side menu). */
+    private static final Map<String, int[]> ICON_COLORS = new HashMap<>();
+
+    static {
+        icon(PrefUtils.THEME, 0xFFA371F7, 0xFF8250DF);
+        icon(PrefUtils.ACCENT_COLOR, 0xFF58A6FF, 0xFF0969DA);
+        icon(DrawerIcons.PREF, 0xFFE3B341, 0xFF9A6700);
+        icon(DrawerHeader.PREF, 0xFF3FB950, 0xFF1A7F37);
+        icon(AppIcons.PREF, 0xFFDB61A2, 0xFFBF3989);
+        icon(PrefUtils.START_PAGE, 0xFFE3B341, 0xFF9A6700);
+        icon("customTabsEnable", 0xFF79C0FF, 0xFF0969DA);
+        icon(OPEN_LINKS, 0xFF79C0FF, 0xFF0969DA);
+        icon("systemDownloader", 0xFF79C0FF, 0xFF0969DA);
+        icon(WATCHED_RELEASES, 0xFF3FB950, 0xFF1A7F37);
+        icon(RELEASE_CHECK_INTERVAL, 0xFF3FB950, 0xFF1A7F37);
+        icon(GitHubNotifier.PREF_ENABLED, 0xFFF0883E, 0xFFBC4C00);
+        icon(GitHubNotifier.PREF_INTERVAL, 0xFFF0883E, 0xFFBC4C00);
+        icon("cacheFirstEnable", 0xFF56D4DD, 0xFF1B7C83);
+        icon("disableLoadingImage", 0xFF56D4DD, 0xFF1B7C83);
+        icon("checkUpdates", 0xFF58A6FF, 0xFF0969DA);
+        icon(AppUpdater.PREF_CHECK_NOW, 0xFF58A6FF, 0xFF0969DA);
+    }
+
+    private static void icon(String key, int dark, int light) {
+        ICON_COLORS.put(key, new int[]{dark, light});
+    }
+
+    /**
+     * Colored icons (they follow Settings - Menu icons) and, on a Matrix screen with a dark
+     * theme, group titles like "> APPEARANCE" in green.
+     */
+    private void styleScreen() {
+        if (getContext() == null) return;
+        PreferenceScreen screen = getPreferenceScreen();
+        boolean matrix = MatrixScreen.isDark(getContext());
+        boolean colored = !DrawerIcons.STYLE_PLAIN.equals(DrawerIcons.getStyle(getContext()));
+        boolean night = AppUtils.isNightMode();
+        for (int i = 0; i < screen.getPreferenceCount(); i++) {
+            Preference pref = screen.getPreference(i);
+            if (pref instanceof PreferenceCategory) {
+                PreferenceCategory group = (PreferenceCategory) pref;
+                if (matrix) {
+                    group.setLayoutResource(R.layout.preference_category_matrix);
+                    group.setTitle("> " + String.valueOf(group.getTitle()).toUpperCase(Locale.ROOT));
+                }
+                for (int j = 0; j < group.getPreferenceCount(); j++) {
+                    tintIcon(group.getPreference(j), colored, night);
+                }
+            } else {
+                tintIcon(pref, colored, night);
+            }
+        }
+    }
+
+    private static void tintIcon(Preference pref, boolean colored, boolean night) {
+        int[] colors = ICON_COLORS.get(pref.getKey());
+        Drawable icon = pref.getIcon();
+        if (!colored || colors == null || icon == null) return;
+        icon = icon.mutate();
+        icon.setTint(night ? colors[0] : colors[1]);
+        pref.setIcon(icon);
     }
 
     private void recreateMain() {

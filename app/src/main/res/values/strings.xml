@@ -718,4 +718,12 @@
         <item quantity="one">%d file</item>
         <item quantity="other">%d files</item>
     </plurals>
+    <!-- Settings groups and the Matrix screens -->
+    <string name="settings_group_appearance">Appearance</string>
+    <string name="settings_group_general">General</string>
+    <string name="settings_group_notifications">Notifications</string>
+    <string name="settings_group_network">Network and cache</string>
+    <string name="settings_group_updates">Updates</string>
+    <string name="matrix_settings_title">OpenHub Settings</string>
+    <string name="matrix_settings_subtitle">&gt; configure your OpenHub</string>
 </resources>

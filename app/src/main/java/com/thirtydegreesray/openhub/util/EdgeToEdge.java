@@ -98,6 +98,21 @@ public final class EdgeToEdge {
         applyBarAppearance(activity, statusColor, navColor);
     }
 
+    /**
+     * Paints the status and navigation bar strips in other colors, for a screen with its own
+     * background (the Matrix screens: black above the title, almost black below).
+     */
+    public static void setBarColors(@NonNull Activity activity, @ColorInt int statusColor,
+                                    @ColorInt int navColor) {
+        View content = activity.findViewById(android.R.id.content);
+        if (content == null || !(content.getBackground() instanceof BarsDrawable)) return;
+        BarsDrawable bars = (BarsDrawable) content.getBackground();
+        bars.statusPaint.setColor(statusColor);
+        bars.navPaint.setColor(navColor);
+        bars.invalidateSelf();
+        applyBarAppearance(activity, statusColor, navColor);
+    }
+
     private static void applyBarAppearance(@NonNull Activity activity, @ColorInt int statusColor,
                                            @ColorInt int navColor) {
         Window window = activity.getWindow();
@@ -135,7 +150,7 @@ public final class EdgeToEdge {
      * attribute is light there and is only a fallback.
      */
     @ColorInt
-    private static int navigationBarColor(@NonNull Context context) {
+    static int navigationBarColor(@NonNull Context context) {
         TypedValue value = new TypedValue();
         if (context.getTheme().resolveAttribute(android.R.attr.windowBackground, value, true)
                 && value.type >= TypedValue.TYPE_FIRST_COLOR_INT

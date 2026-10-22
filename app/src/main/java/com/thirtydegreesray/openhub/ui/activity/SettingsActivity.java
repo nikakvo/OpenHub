@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewAnimationUtils;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
@@ -20,6 +21,7 @@ import com.thirtydegreesray.openhub.mvp.contract.ISettingsContract;
 import com.thirtydegreesray.openhub.mvp.presenter.SettingsPresenter;
 import com.thirtydegreesray.openhub.ui.activity.base.SingleFragmentActivity;
 import com.thirtydegreesray.openhub.ui.fragment.SettingsFragment;
+import com.thirtydegreesray.openhub.util.MatrixScreen;
 
 
 /**
@@ -53,6 +55,10 @@ public class SettingsActivity extends SingleFragmentActivity<SettingsPresenter, 
     protected void initView(Bundle savedInstanceState) {
         super.initView(savedInstanceState);
         setToolbarTitle(getString(R.string.settings));
+        if (rootLayout instanceof ViewGroup) {
+            MatrixScreen.apply(this, (ViewGroup) rootLayout,
+                    getString(R.string.matrix_settings_title), getString(R.string.matrix_settings_subtitle));
+        }
         if(recreated){
             rootLayout.post(new Runnable() {
                 @Override

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Settings group title on a Matrix screen: "> APPEARANCE" in green monospace. -->
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/title"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="22dp"
+    android:paddingBottom="6dp"
+    android:fontFamily="monospace"
+    android:textStyle="bold"
+    android:textSize="12sp"
+    android:letterSpacing="0.12"
+    android:textColor="#39FF7A"
+    android:accessibilityHeading="true"/>
