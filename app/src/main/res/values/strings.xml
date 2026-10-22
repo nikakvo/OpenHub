@@ -726,6 +726,8 @@
     <string name="settings_group_updates">Updates</string>
     <string name="matrix_settings_title">OpenHub Settings</string>
     <string name="matrix_settings_subtitle">&gt; configure your OpenHub</string>
+    <string name="matrix_help_title">OpenHub Help Page</string>
+    <string name="matrix_help_subtitle">&gt; help for version %1$s</string>
     <string name="about_tagline">A GitHub client for Android, maintained by Tears Burn (nikakvo)</string>
     <string name="about_version_line" translatable="false">&gt; version %1$s (%2$d)</string>
     <string name="about_check_updates">Check for updates</string>
@@ -737,6 +739,7 @@
     <string name="about_signing_summary">SHA-256 %1$s - tap to copy</string>
     <string name="about_credits_matrix" translatable="false">$ git log --credits</string>
     <string name="about_credit_this">This build</string>
+    <string name="about_credit_original_short">Original author of OpenHub (© 2017)</string>
     <string name="about_egg_title" translatable="false">ACCESS GRANTED</string>
     <string name="about_egg_text">You found the rain.\nKeep building.</string>
     <string name="about_egg_exit">&gt; exit_</string>

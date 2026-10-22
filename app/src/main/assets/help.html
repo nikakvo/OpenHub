@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="{{MATRIX}}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,30 +77,52 @@
   .top { position: fixed; right: 16px; bottom: 18px; width: 44px; height: 44px; border-radius: 22px; background: var(--acc); color: var(--bg); font-size: 22px; line-height: 44px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.4); display: none; }
   .footer { text-align: center; padding: 26px 16px 8px; font-size: 11px; font-family: var(--mono); color: var(--dim); }
   .hidden { display: none !important; }
+
+  /* Matrix look (Settings - Menu header: Matrix rain, dark themes): filled in as class="matrix" */
+  .prompt, .tile svg, .toc-title .mx { display: none; }
+  .matrix .search { display: flex; align-items: center; gap: 10px; background: #050806; }
+  .matrix .prompt { display: block; font-family: var(--mono); font-weight: 700; color: var(--matrix); }
+  .matrix .search input { font-family: var(--mono); background: #0A0F0B; color: #CFFFDD; border-color: rgba(57,255,122,.4); box-shadow: 0 0 12px rgba(57,255,122,.12); caret-color: var(--matrix); }
+  .matrix .search input:focus { border-color: var(--matrix); }
+  .matrix .search input::placeholder { color: #7FBF95; }
+  .matrix .hero { border-left: 1px solid var(--border); border-radius: 14px; }
+  .matrix .hero h1 { display: none; }
+  .matrix .tile { padding: 10px 12px; border-radius: 12px; }
+  .matrix .tile svg { display: block; width: 20px; height: 20px; margin-bottom: 6px; fill: none; stroke: var(--c); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .matrix .tile b { color: var(--c); }
+  .matrix .toc { background: #0A0F0B; border-color: rgba(57,255,122,.25); border-radius: 14px; }
+  .matrix .toc-title .std { display: none; }
+  .matrix .toc-title .mx { display: inline; }
+  .matrix .toc-title { color: var(--matrix); font-size: 11px; text-transform: none; letter-spacing: .08em; }
+  .matrix .toc a { color: #CFE9D7; border-bottom-color: #24342A; }
+  .matrix .toc a span { color: var(--matrix); }
+  .matrix .sec-title { color: #8FD9A8; }
+  .matrix .sec-title::before { content: '> '; color: var(--matrix); }
+  .matrix .box { border-radius: 14px; }
 </style>
 </head>
 <body>
 
-<div class="search"><input id="q" type="search" placeholder="Search the help, e.g. merge, token, upload" autocomplete="off"></div>
+<div class="search"><span class="prompt" aria-hidden="true">&gt;</span><input id="q" type="search" placeholder="Search the help, e.g. merge, token, upload" aria-label="Search the help" autocomplete="off"></div>
 <div id="noresult">Nothing found. Try another word.</div>
 
 <div class="hero" data-hero>
   <h1>Welcome to OpenHub</h1>
   <p>OpenHub is a GitHub client for Android. Read and write almost everything you would on github.com: browse and search code, edit files, publish releases, review and merge pull requests, work with issues and discussions, follow builds, get notifications.</p>
   <div class="tiles">
-    <div class="tile"><b>Browse</b>Repositories, code, READMEs, users</div>
-    <div class="tile"><b>Edit</b>Create, upload, edit files with commits</div>
-    <div class="tile"><b>Pull requests</b>Reviews, line comments, merge</div>
-    <div class="tile"><b>Releases</b>Publish, upload, all starred in one list</div>
-    <div class="tile"><b>Actions</b>Runs, artifacts, notified when done</div>
-    <div class="tile"><b>Notifications</b>Inbox and phone notifications</div>
-    <div class="tile"><b>Issues</b>Templates, assignees, milestones</div>
-    <div class="tile"><b>Discussions</b>Read, reply, upvote, answer</div>
+    <div class="tile" style="--c:#58A6FF"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><b>Browse</b>Repositories, code, READMEs, users</div>
+    <div class="tile" style="--c:#DB61A2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg><b>Edit</b>Create, upload, edit files with commits</div>
+    <div class="tile" style="--c:#A371F7"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M6 8v8M18 16V9a2 2 0 0 0-2-2h-4M14 5l-2 2 2 2"/></svg><b>Pull requests</b>Reviews, line comments, merge</div>
+    <div class="tile" style="--c:#E3B341"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12V4h8l9 9-8 8z"/><circle cx="8" cy="8.5" r="1.5"/></svg><b>Releases</b>Publish, upload, all starred in one list</div>
+    <div class="tile" style="--c:#56D4DD"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M10 8.5l5 3.5-5 3.5z"/></svg><b>Actions</b>Runs, artifacts, notified when done</div>
+    <div class="tile" style="--c:#F0883E"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><b>Notifications</b>Inbox and phone notifications</div>
+    <div class="tile" style="--c:#3FB950"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5M12 16h.01"/></svg><b>Issues</b>Templates, assignees, milestones</div>
+    <div class="tile" style="--c:#79C0FF"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11v8H8l-4 3z"/><path d="M15 9h5v8l-3-2h-6v-2"/></svg><b>Discussions</b>Read, reply, upvote, answer</div>
   </div>
 </div>
 
 <div class="toc" data-toc>
-  <div class="toc-title">contents</div>
+  <div class="toc-title"><span class="std">contents</span><span class="mx">$ ls contents/</span></div>
   <a href="#start"><span>1</span>Getting started</a>
   <a href="#menu"><span>2</span>The side menu</a>
   <a href="#repo"><span>3</span>A repository</a>
@@ -596,7 +618,7 @@
     <tr><td>Choose Theme</td><td>Dark (default), Light teal, Light indigo or AMOLED dark (pure black, saves battery on OLED screens)</td></tr>
     <tr><td>Theme Accent Color</td><td>The color of buttons, links and highlights</td></tr>
     <tr><td>Menu icons</td><td>Side menu icons <strong>Colored</strong> (default) or <strong>Plain</strong></td></tr>
-    <tr><td>Menu header</td><td>Background of the account part at the top of the side menu: <strong>Matrix rain</strong> (default: on dark themes the menu turns almost black, with slowly falling green characters behind the account part and down both edges of the menu, with a "Welcome to OpenHub" greeting; animated only while the menu is open) or <strong>Theme color</strong>. Settings and About follow it too: with Matrix rain they get the rain behind a large decoding title ("OpenHub Settings", or the app icon and name in About), and on dark themes the same almost black background</td></tr>
+    <tr><td>Menu header</td><td>Background of the account part at the top of the side menu: <strong>Matrix rain</strong> (default: on dark themes the menu turns almost black, with slowly falling green characters behind the account part and down both edges of the menu, with a "Welcome to OpenHub" greeting; animated only while the menu is open) or <strong>Theme color</strong>. Settings, About and Help follow it too: with Matrix rain they get the rain behind a large decoding title ("OpenHub Settings", "OpenHub Help Page", or the app icon and name in About), and on dark themes the same almost black background</td></tr>
     <tr><td>App icon</td><td>The launcher icon: <strong>Matrix</strong> (default), <strong>Classic</strong>, <strong>Cosmic</strong> or <strong>Outline</strong>. Some launchers take the old icon off the home screen when it changes; add it again from the app drawer</td></tr>
     <tr><td>Start Page</td><td>Which page opens when you start the app, for example Starred repos or Releases</td></tr>
     <tr><td>Release notifications</td><td>Repositories you follow releases of (<a href="#relnotify">15</a>)</td></tr>
@@ -716,6 +738,9 @@
 <a class="top" id="top" href="#">↑</a>
 
 <script>
+  if (document.documentElement.classList.contains('matrix')) {
+    document.getElementById('q').placeholder = 'search: merge, token, upload';
+  }
   // jump links scroll inside the page (the page is loaded from text, not a file)
   document.querySelectorAll('a[href^="#"]').forEach(function (a) {
     a.addEventListener('click', function (e) {

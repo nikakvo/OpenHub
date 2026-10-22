@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -19,6 +20,7 @@ import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUpdater;
+import com.thirtydegreesray.openhub.util.MatrixScreen;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 
@@ -55,6 +57,11 @@ public class HelpActivity extends BaseActivity<IBaseContract.Presenter> {
         super.initView(savedInstanceState);
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.help));
+        ViewGroup root = findViewById(R.id.help_root);
+        if (root != null) {
+            MatrixScreen.apply(this, root, getString(R.string.matrix_help_title),
+                    getString(R.string.matrix_help_subtitle, AppUpdater.currentVersion()));
+        }
         String html;
         try {
             html = read("help.html");
@@ -64,7 +71,8 @@ public class HelpActivity extends BaseActivity<IBaseContract.Presenter> {
         }
         String[] palette = palette();
         html = html.replace("{{THEME_VARS}}", ":root { " + palette[0] + " }")
-                .replace("{{VERSION}}", AppUpdater.currentVersion());
+                .replace("{{VERSION}}", AppUpdater.currentVersion())
+                .replace("{{MATRIX}}", MatrixScreen.isDark(this) ? "matrix" : "");
         web.setBackgroundColor(Color.parseColor(palette[1]));
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setAllowFileAccess(false);
@@ -104,7 +112,12 @@ public class HelpActivity extends BaseActivity<IBaseContract.Presenter> {
         String theme = PrefUtils.getTheme();
         String bg;
         String vars;
-        if (PrefUtils.AMOLED_DARK.equals(theme)) {
+        if (MatrixScreen.isDark(this)) {
+            // the almost black of the side menu, cards with a faint green tint
+            bg = "#070B08";
+            vars = "--bg:#070B08; --surface:#111713; --surface2:#0B100D; --border:#1E2A22; --border2:#2A3A2F;"
+                    + " --text:#D7DCE1; --dim:#8A9690; --hi:#FFFFFF; --matrix:#39FF7A;";
+        } else if (PrefUtils.AMOLED_DARK.equals(theme)) {
             bg = "#000000";
             vars = "--bg:#000000; --surface:#0D0F12; --surface2:#08090B; --border:#22262C; --border2:#30353C;"
                     + " --text:#D7DCE1; --dim:#8B949E; --hi:#FFFFFF;";

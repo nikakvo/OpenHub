@@ -15,6 +15,9 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -153,7 +156,14 @@ public class AboutActivity extends AppCompatActivity {
             creditsTitle.setText(R.string.about_credits_matrix);
             creditsTitle.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
             creditsTitle.setTextColor(0xFF39FF7A);
-            for (View row : new View[]{original, fork, self}) terminalRow(row);
+            // the original author by his GitHub name, without the Chinese display name
+            ((TextView) original.findViewById(R.id.about_item_title))
+                    .setText(getString(R.string.author_login_id));
+            ((TextView) original.findViewById(R.id.about_item_subtitle))
+                    .setText(R.string.about_credit_original_short);
+            terminalRow(original, 0xFFE3B341);
+            terminalRow(fork, 0xFFA371F7);
+            terminalRow(self, 0xFF39FF7A);
         }
     }
 
@@ -185,13 +195,16 @@ public class AboutActivity extends AppCompatActivity {
         }
     }
 
-    /** Credits as lines of a terminal: "* name" over an indented note. */
-    private static void terminalRow(@NonNull View row) {
+    /** Credits as lines of a terminal: "* name" (the name in its own color) over a note. */
+    private static void terminalRow(@NonNull View row, @ColorInt int nameColor) {
         TextView title = row.findViewById(R.id.about_item_title);
         TextView sub = row.findViewById(R.id.about_item_subtitle);
-        title.setText("* " + title.getText());
-        title.setTypeface(Typeface.MONOSPACE);
-        title.setTextColor(0xFFE6E8EB);
+        SpannableString line = new SpannableString("* " + title.getText());
+        line.setSpan(new ForegroundColorSpan(nameColor), 2, line.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        title.setText(line);
+        title.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        title.setTextColor(0xFF8A9690);
         sub.setTypeface(Typeface.MONOSPACE);
         sub.setTextColor(0xFF8A9690);
         row.findViewById(R.id.about_item_icon).setVisibility(View.GONE);
