@@ -84,6 +84,15 @@ BaseActivity<P extends IBaseContract.Presenter>
                 && AppData.INSTANCE.getLoggedUser() != null;
     }
 
+    /**
+     * With the Matrix look, the text decoded in the black bar of a screen with a collapsing
+     * header; null shows the header's own title there.
+     */
+    @Nullable
+    protected String matrixBarTitle() {
+        return null;
+    }
+
     protected boolean isAlive = true;
     @Nullable protected Toolbar toolbar;
     @Nullable protected CollapsingToolbarLayout toolbarLayout;
@@ -126,7 +135,7 @@ BaseActivity<P extends IBaseContract.Presenter>
         initActivity();
         initView(savedInstanceState);
         if (toolbar != null && !(this instanceof SplashActivity) && !(this instanceof LoginActivity)) {
-            MatrixBar.install(this, toolbar);
+            MatrixBar.install(this, toolbar, matrixBarTitle());
         }
         if (toolbar != null && showsMainMenu()) {
             com.thirtydegreesray.openhub.ui.widget.MainMenuDrawer.install(this, toolbar);

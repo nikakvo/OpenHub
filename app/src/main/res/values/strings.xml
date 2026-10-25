@@ -92,6 +92,7 @@
 
     <!-- menu -->
     <string name="profile">Profile</string>
+    <string name="my_profile">My Profile</string>
     <string name="notifications">Notifications</string>
     <string name="news">News</string>
     <string name="issues">Issues</string>

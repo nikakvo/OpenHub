@@ -23,6 +23,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.thirtydegreesray.openhub.R;
 
 import java.util.Random;
+import java.util.function.Supplier;
 
 /**
  * The toolbar title in the Matrix style: drawn over the toolbar's own title (which is made
@@ -57,6 +58,14 @@ public final class MatrixTitleDrawable extends android.graphics.drawable.Drawabl
     private final float glowRadius;
     private final Typeface mono = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD);
 
+    /**
+     * For a toolbar under a collapsing header, whose own title is empty (the header draws
+     * the name): the text to decode in the bar, asked for on every frame.
+     */
+    @Nullable private Supplier<CharSequence> barText;
+    private float barTextSize;
+    private final float gap;
+
     private String title = "";
     /** The title as it fits (maybe cut). */
     private String shown = "";
@@ -73,12 +82,27 @@ public final class MatrixTitleDrawable extends android.graphics.drawable.Drawabl
                 toolbar.getResources().getDisplayMetrics());
         paint.setTypeface(mono);
         paint.setTextAlign(Paint.Align.LEFT);
+        barTextSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20,
+                toolbar.getResources().getDisplayMetrics());
+        gap = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12,
+                toolbar.getResources().getDisplayMetrics());
     }
 
     /** Puts the Matrix title on the toolbar (once). */
     public static void attach(@NonNull Toolbar toolbar) {
+        attach(toolbar, null);
+    }
+
+    /**
+     * Puts the Matrix title on the toolbar (once).
+     *
+     * @param barText the text to show in the bar itself, between the buttons on the left
+     *                and the menu, instead of following the toolbar's own title
+     */
+    public static void attach(@NonNull Toolbar toolbar, @Nullable Supplier<CharSequence> barText) {
         if (toolbar.getTag(R.id.matrix_title_tag) != null) return;
         MatrixTitleDrawable drawable = new MatrixTitleDrawable(toolbar);
+        drawable.barText = barText;
         toolbar.setTag(R.id.matrix_title_tag, drawable);
         toolbar.setTitleTextColor(Color.TRANSPARENT);
         toolbar.setSubtitleTextColor(SUBTITLE_COLOR);
@@ -136,13 +160,31 @@ public final class MatrixTitleDrawable extends android.graphics.drawable.Drawabl
 
         String newTitle = titleView == null ? "" : t.toString();
         int left = 0, top = 0, right = 0, bottom = 0;
-        if (titleView != null && titleView.getWidth() > 0) {
+        float size = titleView == null ? textSize : titleView.getTextSize();
+        if (barText != null) {
+            CharSequence text = barText.get();
+            newTitle = text == null ? "" : text.toString();
+            // after the menu and Back buttons on the left
+            int start = toolbar.getPaddingStart();
+            for (int i = 0; i < toolbar.getChildCount(); i++) {
+                View child = toolbar.getChildAt(i);
+                if (child.getVisibility() == View.VISIBLE && child.getWidth() > 0
+                        && !(child instanceof TextView) && !(child instanceof ActionMenuView)
+                        && child.getRight() < toolbar.getWidth() / 2) {
+                    start = Math.max(start, child.getRight());
+                }
+            }
+            left = (int) (start + gap);
+            top = 0;
+            bottom = toolbar.getHeight();
+            right = menuLeft;
+            size = barTextSize;
+        } else if (titleView != null && titleView.getWidth() > 0) {
             left = titleView.getLeft();
             top = titleView.getTop();
             bottom = titleView.getBottom();
             right = Math.max(titleView.getRight(), menuLeft);
         }
-        float size = titleView == null ? textSize : titleView.getTextSize();
         boolean changed = !newTitle.equals(title);
         if (changed || size != textSize || area.left != left || area.top != top
                 || area.right != right || area.bottom != bottom) {

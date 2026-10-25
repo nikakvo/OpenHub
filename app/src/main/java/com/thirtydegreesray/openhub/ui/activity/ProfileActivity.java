@@ -123,6 +123,18 @@ public class ProfileActivity extends PagerActivity<ProfilePresenter>
         return true;
     }
 
+    /** "My Profile" in the Matrix bar of the own profile, the login of anyone else. */
+    @Override
+    protected String matrixBarTitle() {
+        String login = mPresenter == null ? null : mPresenter.getLoginId();
+        com.thirtydegreesray.openhub.mvp.model.User me =
+                com.thirtydegreesray.openhub.AppData.INSTANCE.getLoggedUser();
+        if (login != null && me != null && login.equalsIgnoreCase(me.getLogin())) {
+            return getString(R.string.my_profile);
+        }
+        return null;
+    }
+
     @Override
     protected void initView(Bundle savedInstanceState) {
         super.initView(savedInstanceState);

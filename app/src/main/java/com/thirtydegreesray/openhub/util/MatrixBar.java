@@ -1,7 +1,6 @@
 package com.thirtydegreesray.openhub.util;
 
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -32,12 +31,19 @@ import com.thirtydegreesray.openhub.ui.widget.MatrixTitleDrawable;
  */
 public final class MatrixBar {
 
-    private static final int COLLAPSED_TITLE_COLOR = 0xFFC8FFD4;
-
     private MatrixBar() {
     }
 
     public static void install(@NonNull AppCompatActivity activity, @NonNull Toolbar toolbar) {
+        install(activity, toolbar, null);
+    }
+
+    /**
+     * @param barTitle for a screen with a collapsing header: the text decoded in the black
+     *                 bar instead of the header's name (e.g. "My Profile"); null = that name
+     */
+    public static void install(@NonNull AppCompatActivity activity, @NonNull Toolbar toolbar,
+                               @Nullable String barTitle) {
         if (!MatrixScreen.isOn(activity)) return;
         AppBarLayout appBar = findAppBar(toolbar);
         if (appBar == null || appBar.getTag(R.id.matrix_screen_tag) != null) return;
@@ -64,10 +70,11 @@ public final class MatrixBar {
             // the scrims would cover the rain when the header collapses
             header.setContentScrim(null);
             header.setStatusBarScrim(null);
-            header.setCollapsedTitleTextColor(COLLAPSED_TITLE_COLOR);
-            header.setCollapsedTitleTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
-            // only when the toolbar shows its own title (usually the header draws it)
-            MatrixTitleDrawable.attach(toolbar);
+            // the bar has its own decoding title: the header's name fades out as it
+            // moves up instead of landing on top of it
+            header.setCollapsedTitleTextColor(Color.TRANSPARENT);
+            MatrixTitleDrawable.attach(toolbar,
+                    () -> barTitle != null ? barTitle : header.getTitle());
             return;
         }
 
