@@ -112,6 +112,11 @@
             android:key="disableLoadingImage"
             android:defaultValue="false"/>
 
+        <Preference
+            android:icon="@drawable/ic_delete"
+            android:title="@string/clear_cache"
+            android:key="clearCache"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

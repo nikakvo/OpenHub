@@ -101,6 +101,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         updateMenuHeaderSummary();
         findPreference(AppIcons.PREF).setOnPreferenceClickListener(this);
         updateAppIconSummary();
+        findPreference(CLEAR_CACHE).setOnPreferenceClickListener(this);
         findPreference(GitHubNotifier.PREF_ENABLED).setOnPreferenceChangeListener(this);
         findPreference(GitHubNotifier.PREF_INTERVAL).setOnPreferenceClickListener(this);
         updateGitHubNotificationsSummary();
@@ -195,8 +196,75 @@ public class SettingsFragment extends PreferenceFragmentCompat
             case GitHubNotifier.PREF_INTERVAL:
                 showGitHubNotificationsIntervalChooser();
                 return true;
+            case CLEAR_CACHE:
+                confirmClearCache();
+                return true;
         }
         return false;
+    }
+
+    private static final String CLEAR_CACHE = "clearCache";
+    private String cacheSize = "";
+
+    /** Size of the app's cache folder (HTTP responses, images, temporary files), counted off the main thread. */
+    private void updateCacheSummary() {
+        final Preference pref = findPreference(CLEAR_CACHE);
+        final Context context = getContext();
+        if (pref == null || context == null) return;
+        pref.setSummary(R.string.clear_cache_counting);
+        final java.io.File dir = context.getCacheDir();
+        new Thread(() -> {
+            final long bytes = folderSize(dir);
+            if (getActivity() == null) return;
+            getActivity().runOnUiThread(() -> {
+                if (!isAdded()) return;
+                cacheSize = com.thirtydegreesray.openhub.util.StringUtils.getSizeString(bytes);
+                pref.setSummary(getString(R.string.clear_cache_summary, cacheSize));
+            });
+        }, "cache-size").start();
+    }
+
+    private static long folderSize(@androidx.annotation.Nullable java.io.File file) {
+        if (file == null || !file.exists()) return 0;
+        if (file.isFile()) return file.length();
+        long total = 0;
+        java.io.File[] children = file.listFiles();
+        if (children != null) for (java.io.File child : children) total += folderSize(child);
+        return total;
+    }
+
+    private void confirmClearCache() {
+        if (getContext() == null) return;
+        new AlertDialog.Builder(getContext())
+                .setTitle(R.string.clear_cache)
+                .setMessage(getString(R.string.clear_cache_message, cacheSize))
+                .setPositiveButton(R.string.clear_cache_bn, (dialog, which) -> clearCache())
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    /**
+     * The HTTP cache (through OkHttp, which owns its files), Glide's memory and disk caches
+     * and the temporary files (unpacked artifacts). The database and the settings are not
+     * in the cache folder.
+     */
+    private void clearCache() {
+        final Context context = getContext();
+        if (context == null) return;
+        final Context app = context.getApplicationContext();
+        com.bumptech.glide.Glide.get(app).clearMemory();
+        new Thread(() -> {
+            com.thirtydegreesray.openhub.http.core.AppRetrofit.INSTANCE.clearCache();
+            com.bumptech.glide.Glide.get(app).clearDiskCache();
+            com.thirtydegreesray.openhub.util.ArtifactFiles.deleteTree(
+                    new java.io.File(app.getCacheDir(), "artifacts"));
+            if (getActivity() == null) return;
+            getActivity().runOnUiThread(() -> {
+                if (!isAdded()) return;
+                Toasty.success(app, getString(R.string.clear_cache_done), Toast.LENGTH_SHORT).show();
+                updateCacheSummary();
+            });
+        }, "cache-clear").start();
     }
 
     private static final String OPEN_LINKS = "openGitHubLinks";
@@ -205,6 +273,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     public void onResume() {
         super.onResume();
         updateOpenLinksSummary();
+        updateCacheSummary();
     }
 
     /**
@@ -468,6 +537,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         icon(GitHubNotifier.PREF_INTERVAL, 0xFFF0883E, 0xFFBC4C00);
         icon("cacheFirstEnable", 0xFF56D4DD, 0xFF1B7C83);
         icon("disableLoadingImage", 0xFF56D4DD, 0xFF1B7C83);
+        icon(CLEAR_CACHE, 0xFF56D4DD, 0xFF1B7C83);
         icon("checkUpdates", 0xFF58A6FF, 0xFF0969DA);
         icon(AppUpdater.PREF_CHECK_NOW, 0xFF58A6FF, 0xFF0969DA);
     }

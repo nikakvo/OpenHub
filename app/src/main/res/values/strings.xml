@@ -647,6 +647,12 @@
         <item quantity="one">%d vote</item>
         <item quantity="other">%d votes</item>
     </plurals>
+    <string name="clear_cache">Clear cache</string>
+    <string name="clear_cache_summary">Saved pages and images: %s</string>
+    <string name="clear_cache_counting">Counting…</string>
+    <string name="clear_cache_message">Removes the saved pages and images (%s). Everything loads from the network again. Your accounts, settings, bookmarks and history stay.</string>
+    <string name="clear_cache_bn">Clear</string>
+    <string name="clear_cache_done">Cache cleared</string>
     <plurals name="discussion_comments">
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
