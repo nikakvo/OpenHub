@@ -93,6 +93,22 @@ BaseActivity<P extends IBaseContract.Presenter>
         return null;
     }
 
+    /** Theme, accent color and menu header style this screen was built with. */
+    @Nullable private String lookStamp;
+
+    @NonNull
+    private String lookStamp() {
+        return PrefUtils.getTheme() + "|" + PrefUtils.getAccentColor() + "|"
+                + com.thirtydegreesray.openhub.util.DrawerHeader.getStyle(this);
+    }
+
+    /** A rebuild that was asked for already counts as done for the look check in onResume. */
+    @Override
+    public void recreate() {
+        lookStamp = lookStamp();
+        super.recreate();
+    }
+
     protected boolean isAlive = true;
     @Nullable protected Toolbar toolbar;
     @Nullable protected CollapsingToolbarLayout toolbarLayout;
@@ -110,6 +126,7 @@ BaseActivity<P extends IBaseContract.Presenter>
         }
 
         ThemeHelper.apply(this);
+        lookStamp = lookStamp();
         AppUtils.updateAppLanguage(getActivity());
         super.onCreate(savedInstanceState);
         isAlive = true;
@@ -242,6 +259,13 @@ BaseActivity<P extends IBaseContract.Presenter>
     @Override
     protected void onResume() {
         super.onResume();
+        // the theme, accent or menu header changed while this screen was in the back stack
+        // (Settings can be opened from any screen through the side menu): rebuild it
+        if (lookStamp != null && !lookStamp.equals(lookStamp())) {
+            lookStamp = lookStamp();
+            recreate();
+            return;
+        }
         if (getContentView() != 0) EdgeToEdge.refreshBars(this);
         MatrixBar.restart(toolbar);
         curActivity = getActivity();
