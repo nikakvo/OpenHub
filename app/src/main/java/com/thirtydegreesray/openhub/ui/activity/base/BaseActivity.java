@@ -41,6 +41,7 @@ import com.thirtydegreesray.openhub.ui.activity.SplashActivity;
 import com.thirtydegreesray.openhub.ui.widget.DoubleClickHandler;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.EdgeToEdge;
+import com.thirtydegreesray.openhub.util.MatrixBar;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.ThemeHelper;
 import com.thirtydegreesray.openhub.util.WindowUtil;
@@ -124,6 +125,9 @@ BaseActivity<P extends IBaseContract.Presenter>
 
         initActivity();
         initView(savedInstanceState);
+        if (toolbar != null && !(this instanceof SplashActivity) && !(this instanceof LoginActivity)) {
+            MatrixBar.install(this, toolbar);
+        }
         if (toolbar != null && showsMainMenu()) {
             com.thirtydegreesray.openhub.ui.widget.MainMenuDrawer.install(this, toolbar);
         }
@@ -230,6 +234,7 @@ BaseActivity<P extends IBaseContract.Presenter>
     protected void onResume() {
         super.onResume();
         if (getContentView() != 0) EdgeToEdge.refreshBars(this);
+        MatrixBar.restart(toolbar);
         curActivity = getActivity();
     }
 

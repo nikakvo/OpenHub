@@ -5,5 +5,6 @@
     <item name="position_tag" type="id"/>
     <item name="menu_background_tag" type="id"/>
     <item name="matrix_screen_tag" type="id"/>
+    <item name="matrix_title_tag" type="id"/>
     <item name="action_clean_up_releases" type="id"/>
 </resources>

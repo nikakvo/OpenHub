@@ -91,10 +91,20 @@ public final class EdgeToEdge {
      * change the icon color while another window (dialog, other app) had the focus.
      */
     public static void refreshBars(@NonNull Activity activity) {
-        if (activity.findViewById(android.R.id.content) == null) return;
-        int statusColor = resolveColor(activity, androidx.appcompat.R.attr.colorPrimaryDark,
-                android.R.attr.colorBackground);
-        int navColor = navigationBarColor(activity);
+        View content = activity.findViewById(android.R.id.content);
+        if (content == null) return;
+        int statusColor;
+        int navColor;
+        if (content.getBackground() instanceof BarsDrawable) {
+            // the colors this screen paints (setBarColors), not only the theme's
+            BarsDrawable bars = (BarsDrawable) content.getBackground();
+            statusColor = bars.statusPaint.getColor();
+            navColor = bars.navPaint.getColor();
+        } else {
+            statusColor = resolveColor(activity, androidx.appcompat.R.attr.colorPrimaryDark,
+                    android.R.attr.colorBackground);
+            navColor = navigationBarColor(activity);
+        }
         applyBarAppearance(activity, statusColor, navColor);
     }
 

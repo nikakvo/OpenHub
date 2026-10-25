@@ -45,6 +45,8 @@ public class MatrixRainView extends View {
     private int edgeAlpha = 75;
     /** Dark band at the bottom of the header (the menu's name and bio). */
     private boolean shade = true;
+    /** The black band starts at the top of the window, not at the header (status bar). */
+    private boolean fromTop;
     /** Rows of menu per drop in an edge column. */
     private static final int ROWS_PER_DROP = 16;
     private static final long FRAME_MS = 50L;
@@ -122,6 +124,15 @@ public class MatrixRainView extends View {
     /** Without the dark band at the bottom of the header (rain over a whole screen). */
     public void setShade(boolean shade) {
         this.shade = shade;
+        invalidate();
+    }
+
+    /**
+     * The black band and the rain start at the top of the window instead of at the header,
+     * so they also fill the status bar above a toolbar (screens with a collapsing header).
+     */
+    public void setFromTop(boolean fromTop) {
+        this.fromTop = fromTop;
         invalidate();
     }
 
@@ -207,10 +218,12 @@ public class MatrixRainView extends View {
             getLocationInWindow(ownPos);
             headerTop = headerPos[1] - ownPos[1];
             headerBottom = headerTop + header.getHeight();
+            if (fromTop) headerTop = -ownPos[1];
         }
         // rows of the header in the rain's grid (the header's place when the list is at the top)
-        int headerRows = header != null && header.getHeight() > 0
-                ? (int) Math.ceil(header.getHeight() / cellH) : rows;
+        int headerHeight = header == null ? 0
+                : fromTop ? headerBottom - headerTop : header.getHeight();
+        int headerRows = headerHeight > 0 ? (int) Math.ceil(headerHeight / cellH) : rows;
 
         if (!seeded && cols > 0) {
             for (int d = 0; d < dropCol.length; d++) {
