@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Labels of radio buttons and check boxes on the dark themes: off-white, dimmed when disabled. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:color="#61E2E8EE"/>
+    <item android:color="#E2E8EE"/>
+</selector>

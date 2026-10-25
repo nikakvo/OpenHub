@@ -29,6 +29,9 @@
         <item name="android:textColorPrimary">@color/amoled_dark_text_color_primary</item>
         <item name="android:textColorSecondary">@color/amoled_dark_text_color_secondary</item>
         <item name="android:textColorTertiary">@color/material_grey_200</item>
+        <!-- The light parent leaves hints and radio / check box labels dark: off-white here. -->
+        <item name="android:textColorHint">#B7C1CB</item>
+        <item name="android:textColorPrimaryDisableOnly">@color/dark_text_label</item>
         <item name="icon_color">@color/amoled_dark_icon_color</item>
         <item name="card_background">@color/amoled_dark_card_background</item>
         <item name="title_color">@color/amoled_dark_title_color</item>
