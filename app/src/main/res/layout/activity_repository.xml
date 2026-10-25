@@ -49,6 +49,7 @@
                 android:fitsSystemWindows="true"/>
 
             <RelativeLayout
+                android:id="@+id/repo_header_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start|top"
@@ -57,14 +58,26 @@
                 android:paddingBottom="@dimen/spacing_normal"
                 android:layout_marginTop="96dp">
 
+                <!-- The whole name, over up to three lines (the header's own title was cut). -->
+                <TextView
+                    android:id="@+id/repo_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="22sp"
+                    android:textColor="?title_color"
+                    android:layout_marginStart="@dimen/spacing_normal"
+                    android:maxLines="3"
+                    android:ellipsize="end"/>
+
                 <TextView
                     android:id="@+id/desc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/text_small"
                     android:textColor="?title_color"
+                    android:layout_below="@+id/repo_name"
                     android:layout_marginStart="@dimen/spacing_normal"
-                    android:layout_marginTop="@dimen/spacing_x_large"
+                    android:layout_marginTop="@dimen/spacing_mini"
                     android:maxLines="4"
                     android:ellipsize="end"/>
 

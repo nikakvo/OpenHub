@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -102,6 +103,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
 
     ImageView userImageViewBg;
     ProgressBar loader;
+    TextView repoName;
     TextView desc;
     TextView info;
 
@@ -174,7 +176,34 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
         toolbar.setTitleTextAppearance(getActivity(), R.style.Toolbar_TitleText);
         toolbar.setSubtitleTextAppearance(getActivity(), R.style.Toolbar_Subtitle);
         setToolbarBackEnable();
+        // the name is a text view in the header, so it can take several lines
+        if (toolbarLayout != null) toolbarLayout.setTitleEnabled(false);
         setToolbarTitle(mPresenter.getRepoName());
+        // ...and not a second time in the toolbar above it
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayShowTitleEnabled(false);
+        repoName.setText(mPresenter.getRepoName());
+        keepHeaderBelowToolbar();
+    }
+
+    /** The name, description and info start right below the toolbar, whatever the status bar height. */
+    private void keepHeaderBelowToolbar() {
+        final View headerInfo = findViewById(R.id.repo_header_info);
+        if (toolbar == null || headerInfo == null) return;
+        final int gap = getResources().getDimensionPixelSize(R.dimen.spacing_small);
+        toolbar.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) headerInfo.getLayoutParams();
+            int top = v.getBottom() + gap;
+            if (lp.topMargin != top) {
+                lp.topMargin = top;
+                headerInfo.setLayoutParams(lp);
+            }
+        });
+    }
+
+    /** In the Matrix bar: the repository name (the header's title is turned off). */
+    @Override
+    protected String matrixBarTitle() {
+        return mPresenter == null ? null : mPresenter.getRepoName();
     }
 
     @Override
@@ -315,6 +344,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
     @Override
     public void showRepo(Repository repo) {
 //        setToolbarTitle(repo.getFullName(), repo.getDefaultBranch());
+        repoName.setText(repo.getName());
         desc.setText(repo.getDescription());
         String language = StringUtils.isBlank(repo.getLanguage()) ?
                 getString(R.string.unknown) : repo.getLanguage();
@@ -544,6 +574,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
         super.bindViews(root);
         userImageViewBg = root.findViewById(R.id.user_avatar_bg);
         loader = root.findViewById(R.id.loader);
+        repoName = root.findViewById(R.id.repo_name);
         desc = root.findViewById(R.id.desc);
         info = root.findViewById(R.id.info);
     }

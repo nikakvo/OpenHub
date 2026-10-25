@@ -66,6 +66,12 @@ public final class MatrixTitleDrawable extends android.graphics.drawable.Drawabl
     private float barTextSize;
     private final float gap;
 
+    private static final int[] ONE_LINE = {0};
+    private static final int MAX_LINES = 3;
+    private static final float LINE_SPACING = 1.12f;
+    /** Where each line of {@link #shown} starts. */
+    private int[] lineStarts = ONE_LINE;
+
     private String title = "";
     /** The title as it fits (maybe cut). */
     private String shown = "";
@@ -202,24 +208,86 @@ public final class MatrixTitleDrawable extends android.graphics.drawable.Drawabl
         return true;
     }
 
-    /** Shrinks a long title a little, then cuts it with an ellipsis. */
+    /**
+     * Shrinks a long title a little. A title in the bar of a collapsing header may then go
+     * on over two or three smaller lines (a long repository name stays whole); anything
+     * longer is cut with an ellipsis.
+     */
     private void fit() {
         paint.setTextSize(textSize);
         float width = area.width() - glowRadius;
         shown = title;
+        lineStarts = ONE_LINE;
         if (width > 0 && !title.isEmpty()) {
             float needed = paint.measureText(title);
             if (needed > width) {
                 float scale = Math.max(MIN_SCALE, width / needed);
                 paint.setTextSize(textSize * scale);
                 if (paint.measureText(title) > width) {
-                    int n = Math.max(1, (int) (width / paint.measureText("M")) - 1);
-                    shown = title.substring(0, Math.min(title.length(), n)) + "…";
+                    if (barText == null || !wrap(width)) {
+                        int n = Math.max(1, (int) (width / paint.measureText("M")) - 1);
+                        shown = title.substring(0, Math.min(title.length(), n)) + "\u2026";
+                    }
                 }
             }
         }
         if (glyphs.length != shown.length()) glyphs = new char[shown.length()];
         for (int i = 0; i < glyphs.length; i++) glyphs[i] = randomGlyph();
+    }
+
+    /**
+     * Lays the title out over two or three lines that fit the bar's height, breaking after
+     * _ - / . or a space where it can. False when even three lines are not enough.
+     */
+    private boolean wrap(float width) {
+        float height = area.height();
+        for (int lines = 2; lines <= MAX_LINES; lines++) {
+            float size = Math.min(textSize * MIN_SCALE, height / (lines * LINE_SPACING));
+            paint.setTextSize(size);
+            int perLine = (int) (width / paint.measureText("M"));
+            if (perLine < 4) return false;
+            int[] starts = breakLines(title, perLine, lines);
+            if (starts != null) {
+                lineStarts = starts;
+                return true;
+            }
+        }
+        // three lines, the last one cut
+        float size = Math.min(textSize * MIN_SCALE, height / (MAX_LINES * LINE_SPACING));
+        paint.setTextSize(size);
+        int perLine = (int) (width / paint.measureText("M"));
+        if (perLine < 4) return false;
+        int keep = perLine * MAX_LINES - 1;
+        shown = title.substring(0, Math.min(title.length(), keep)) + "\u2026";
+        lineStarts = new int[MAX_LINES];
+        for (int k = 0; k < MAX_LINES; k++) lineStarts[k] = k * perLine;
+        return true;
+    }
+
+    /** Start index of every line, or null when the text needs more than {@code lines}. */
+    @Nullable
+    private static int[] breakLines(@NonNull String text, int perLine, int lines) {
+        int[] starts = new int[lines];
+        int start = 0;
+        for (int k = 0; k < lines; k++) {
+            starts[k] = start;
+            if (text.length() - start <= perLine) {
+                int[] used = new int[k + 1];
+                System.arraycopy(starts, 0, used, 0, k + 1);
+                return used;
+            }
+            int end = start + perLine;
+            // break after a separator in the last 40 % of the line, if there is one
+            for (int b = end; b > start + perLine * 0.6f; b--) {
+                char c = text.charAt(b - 1);
+                if (c == '_' || c == '-' || c == '/' || c == '.' || c == ' ') {
+                    end = b;
+                    break;
+                }
+            }
+            start = end;
+        }
+        return null;
     }
 
     private char randomGlyph() {
@@ -233,18 +301,14 @@ public final class MatrixTitleDrawable extends android.graphics.drawable.Drawabl
         float charW = paint.measureText("M");
         float left = area.left;
         Paint.FontMetrics fm = paint.getFontMetrics();
-        float y = area.top + (area.height() - fm.ascent - fm.descent) / 2f;
-
-        if (!ValueAnimator.areAnimatorsEnabled()) {
-            paint.setColor(TEXT_COLOR);
-            paint.setShadowLayer(glowRadius * 0.6f, 0, 0, GLOW_COLOR);
-            canvas.drawText(shown, left, y, paint);
-            paint.clearShadowLayer();
-            return;
-        }
+        int lines = lineStarts.length;
+        float lineH = paint.getTextSize() * LINE_SPACING;
+        float blockTop = area.top + (area.height() - lineH * lines) / 2f;
+        float firstBaseline = blockTop + (lineH - fm.ascent - fm.descent) / 2f;
+        boolean animate = ValueAnimator.areAnimatorsEnabled();
 
         long now = SystemClock.uptimeMillis();
-        long t = now - startTime;
+        long t = animate ? now - startTime : DECODE;
         boolean decoding = t < DECODE;
         if (decoding && now - lastGlyphChange >= GLYPH_CHANGE_MS) {
             lastGlyphChange = now;
@@ -255,9 +319,11 @@ public final class MatrixTitleDrawable extends android.graphics.drawable.Drawabl
             flickerUntil = now + 60 + random.nextInt(90);
             nextFlicker = now + 4000 + random.nextInt(8000);
         }
-        boolean flicker = !decoding && now < flickerUntil;
+        boolean flicker = animate && !decoding && now < flickerUntil;
 
+        int line = 0;
         for (int i = 0; i < n; i++) {
+            while (line + 1 < lines && i >= lineStarts[line + 1]) line++;
             char real = shown.charAt(i);
             if (real == ' ') continue;
             float slot = (float) i / Math.max(1, n - 1);
@@ -289,9 +355,11 @@ public final class MatrixTitleDrawable extends android.graphics.drawable.Drawabl
                 paint.clearShadowLayer();
             }
             oneChar[0] = c;
-            canvas.drawText(oneChar, 0, 1, left + i * charW, y, paint);
+            canvas.drawText(oneChar, 0, 1, left + (i - lineStarts[line]) * charW,
+                    firstBaseline + line * lineH, paint);
         }
         paint.clearShadowLayer();
+        if (!animate) return;
 
         // frames only while something moves: the decoding, the flicker, the next flicker
         if (decoding || flicker) {
