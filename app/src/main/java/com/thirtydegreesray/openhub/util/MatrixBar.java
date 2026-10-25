@@ -73,6 +73,14 @@ public final class MatrixBar {
             // the bar has its own decoding title: the header's name fades out as it
             // moves up instead of landing on top of it
             header.setCollapsedTitleTextColor(Color.TRANSPARENT);
+            // the header collapses down to the bar and stops there (it used to scroll
+            // away completely, which left the bar half under the status bar)
+            if (header.getLayoutParams() instanceof AppBarLayout.LayoutParams) {
+                AppBarLayout.LayoutParams scroll = (AppBarLayout.LayoutParams) header.getLayoutParams();
+                scroll.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+                        | AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED);
+                header.setLayoutParams(scroll);
+            }
             MatrixTitleDrawable.attach(toolbar,
                     () -> barTitle != null ? barTitle : header.getTitle());
             return;
