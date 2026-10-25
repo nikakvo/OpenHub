@@ -171,7 +171,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.pull_title_number, number), owner + "/" + repo);
         tabNormalColor = tabConversation.getTextColors();
-        markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this);
+        markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this,
+                () -> com.thirtydegreesray.openhub.util.MarkdownRenderer.refreshImages(getWindow().getDecorView()));
         showTab(tab);
         load();
     }

@@ -2,12 +2,22 @@ package com.thirtydegreesray.openhub.util;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Spanned;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
 import io.noties.markwon.Markwon;
@@ -16,6 +26,7 @@ import io.noties.markwon.ext.tables.TablePlugin;
 import io.noties.markwon.ext.tasklist.TaskListPlugin;
 import io.noties.markwon.html.HtmlPlugin;
 import io.noties.markwon.image.AsyncDrawable;
+import io.noties.markwon.image.AsyncDrawableSpan;
 import io.noties.markwon.image.glide.GlideImagesPlugin;
 import io.noties.markwon.linkify.LinkifyPlugin;
 
@@ -33,7 +44,23 @@ public final class MarkdownRenderer {
 
     @NonNull
     public static Markwon create(@NonNull Context context) {
+        return create(context, null);
+    }
+
+    /**
+     * @param onImageLoaded called on the main thread when an image arrived from the network
+     *                      (not from the cache), to lay the texts out again with it; see
+     *                      {@link #refreshImages}
+     */
+    @NonNull
+    public static Markwon create(@NonNull Context context, @Nullable Runnable onImageLoaded) {
         final RequestManager glide = Glide.with(context);
+        final Handler main = new Handler(Looper.getMainLooper());
+        final Runnable relayout = onImageLoaded == null ? null : () -> {
+            main.removeCallbacksAndMessages(null);
+            // several images in a row: one pass after the last one
+            main.postDelayed(onImageLoaded, 120);
+        };
         final int maxWidth = context.getResources().getDisplayMetrics().widthPixels;
         return Markwon.builder(context)
                 .usePlugin(StrikethroughPlugin.create())
@@ -48,7 +75,24 @@ public final class MarkdownRenderer {
                         // big screenshots are decoded at most as wide as the screen
                         return glide.load(drawable.getDestination())
                                 .override(maxWidth, Target.SIZE_ORIGINAL)
-                                .fitCenter();
+                                .fitCenter()
+                                .addListener(new RequestListener<Drawable>() {
+                                    @Override
+                                    public boolean onLoadFailed(@Nullable GlideException e, Object model,
+                                                                @NonNull Target<Drawable> target, boolean isFirst) {
+                                        return false;
+                                    }
+
+                                    @Override
+                                    public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model,
+                                                                   Target<Drawable> target, @NonNull DataSource source,
+                                                                   boolean isFirst) {
+                                        if (relayout != null && source != DataSource.MEMORY_CACHE) {
+                                            main.post(relayout);
+                                        }
+                                        return false;
+                                    }
+                                });
                     }
 
                     @Override
@@ -57,5 +101,23 @@ public final class MarkdownRenderer {
                     }
                 }))
                 .build();
+    }
+
+    /**
+     * Sets every text with images under {@code root} again, so it takes the height of the
+     * images that have arrived (a text laid out before its image came from the network kept
+     * the empty space of the placeholder).
+     */
+    public static void refreshImages(@Nullable View root) {
+        if (root instanceof TextView) {
+            CharSequence text = ((TextView) root).getText();
+            if (text instanceof Spanned
+                    && ((Spanned) text).getSpans(0, text.length(), AsyncDrawableSpan.class).length > 0) {
+                ((TextView) root).setText(text);
+            }
+        } else if (root instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) root;
+            for (int i = 0; i < group.getChildCount(); i++) refreshImages(group.getChildAt(i));
+        }
     }
 }

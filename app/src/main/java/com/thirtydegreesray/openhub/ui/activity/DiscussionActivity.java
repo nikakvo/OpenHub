@@ -135,7 +135,8 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         super.initView(savedInstanceState);
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.discussion_number, number), owner + "/" + repo);
-        markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this);
+        markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this,
+                () -> com.thirtydegreesray.openhub.util.MarkdownRenderer.refreshImages(getWindow().getDecorView()));
         load();
     }
 
