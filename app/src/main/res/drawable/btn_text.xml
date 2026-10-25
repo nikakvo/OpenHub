@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Text action (dialogs): no fill, a rounded ripple when pressed. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/btn_ripple_accent">
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp"/>
+            <solid android:color="#FFFFFFFF"/>
+        </shape>
+    </item>
+</ripple>

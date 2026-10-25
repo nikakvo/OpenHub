@@ -814,13 +814,12 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                 bar.setOrientation(LinearLayout.HORIZONTAL);
                 bar.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT));
+                bar.setPadding(dp(12), dp(2), dp(12), dp(8));
                 for (int i = 0; i < 2; i++) {
                     TextView action = new TextView(parent.getContext());
-                    action.setTextColor(ViewUtils.getAccentColor(PullDiffActivity.this));
-                    action.setPadding(dp(16), dp(8), dp(16), dp(12));
-                    action.setTextSize(14);
-                    action.setBackgroundResource(selectable());
+                    com.thirtydegreesray.openhub.util.ButtonStyles.tonal(action);
                     bar.addView(action);
+                    com.thirtydegreesray.openhub.util.ButtonStyles.spaceInRow(action);
                 }
                 return new Holder(bar);
             }

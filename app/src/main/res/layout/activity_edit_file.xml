@@ -95,7 +95,7 @@
             android:textColor="?attr/colorAccent"/>
         <Button
             android:id="@+id/commit_bn"
-            style="@style/Widget.AppCompat.Button.Colored"
+            style="@style/OpenHubButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/commit_changes"/>

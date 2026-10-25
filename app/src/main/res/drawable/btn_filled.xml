@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Main action: a rounded pill in the accent color. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#40FFFFFF">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp"/>
+            <solid android:color="@color/btn_filled_fill"/>
+        </shape>
+    </item>
+</ripple>

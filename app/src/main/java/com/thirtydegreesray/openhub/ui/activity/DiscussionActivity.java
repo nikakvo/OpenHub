@@ -339,9 +339,15 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
                     barParams.topMargin = dp(4);
                     row.addView(bar, barParams);
                 } else if (canVote) {
-                    android.util.TypedValue value = new android.util.TypedValue();
-                    getTheme().resolveAttribute(android.R.attr.selectableItemBackground, value, true);
-                    row.setBackgroundResource(value.resourceId);
+                    // each option is a button to vote with
+                    row.setBackgroundResource(R.drawable.btn_tonal);
+                    row.setPadding(dp(14), dp(10), dp(14), dp(10));
+                    com.thirtydegreesray.openhub.util.ButtonStyles.press(row);
+                    LinearLayout.LayoutParams optionParams = new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    optionParams.topMargin = dp(4);
+                    optionParams.bottomMargin = dp(4);
+                    row.setLayoutParams(optionParams);
                     row.setOnClickListener(v -> new AlertDialog.Builder(this)
                             .setTitle(R.string.discussion_poll_vote_title)
                             .setMessage(getString(R.string.discussion_poll_vote_message, text))
@@ -376,11 +382,12 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
     private View actions(@NonNull JsonObject item, boolean answerable, @Nullable JsonObject replyTarget, int indent) {
         LinearLayout bar = new LinearLayout(this);
         bar.setOrientation(LinearLayout.HORIZONTAL);
-        bar.setPadding(dp(16 + indent), 0, dp(16), 0);
+        bar.setPadding(dp(16 + indent), dp(2), dp(16), dp(6));
 
         boolean voted = Json.bool(item, "viewerHasUpvoted");
         TextView vote = action("▲ " + Json.integer(item, "upvoteCount"));
-        if (!voted) vote.setTextColor(secondaryText());
+        // your upvote is a filled pill, like a pressed toggle
+        if (voted) com.thirtydegreesray.openhub.util.ButtonStyles.filled(vote);
         if (Json.bool(item, "viewerCanUpvote") || voted) {
             vote.setOnClickListener(v -> mutate(voted
                     ? "mutation($id:ID!){removeUpvote(input:{subjectId:$id}){subject{upvoteCount}}}"
@@ -415,12 +422,8 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
     private TextView action(@NonNull String text) {
         TextView view = new TextView(this);
         view.setText(text);
-        view.setTextSize(14);
-        view.setTextColor(ViewUtils.getAccentColor(this));
-        view.setPadding(dp(8), dp(8), dp(8), dp(8));
-        android.util.TypedValue value = new android.util.TypedValue();
-        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, value, true);
-        view.setBackgroundResource(value.resourceId);
+        com.thirtydegreesray.openhub.util.ButtonStyles.tonal(view);
+        com.thirtydegreesray.openhub.util.ButtonStyles.spaceInRow(view);
         return view;
     }
 

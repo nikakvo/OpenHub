@@ -126,26 +126,26 @@
                         android:textColor="?android:textColorPrimary"/>
                     <Button
                         android:id="@+id/merge_bn"
-                        style="@style/Widget.AppCompat.Button.Colored"
+                        style="@style/OpenHubButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
                         android:text="@string/pull_merge"/>
                     <Button
                         android:id="@+id/ready_bn"
-                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        style="@style/OpenHubButton.Tonal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/pull_ready"/>
                     <Button
                         android:id="@+id/delete_branch_bn"
-                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        style="@style/OpenHubButton.Tonal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/pull_delete_branch"/>
                     <Button
                         android:id="@+id/close_bn"
-                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        style="@style/OpenHubButton.Tonal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/pull_close"/>
@@ -160,13 +160,13 @@
                     android:paddingEnd="@dimen/spacing_normal">
                     <Button
                         android:id="@+id/review_bn"
-                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        style="@style/OpenHubButton.Tonal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/pull_review"/>
                     <Button
                         android:id="@+id/comment_bn"
-                        style="@style/Widget.AppCompat.Button.Colored"
+                        style="@style/OpenHubButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/pull_comment"/>

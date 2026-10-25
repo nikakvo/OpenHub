@@ -19,6 +19,10 @@
     <color name="light_text_color_secondary">#757575</color>
 
     <style name="ThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="buttonStyle">@style/OpenHubButton</item>
+        <item name="android:buttonStyle">@style/OpenHubButton</item>
+        <item name="borderlessButtonStyle">@style/OpenHubButton.Text</item>
+        <item name="android:borderlessButtonStyle">@style/OpenHubButton.Text</item>
         <!-- Keep the classic layout on Android 15+ until the UI handles insets itself. -->
         <item name="colorPrimary">@color/light_color_primary</item>
         <item name="colorPrimaryDark">@color/light_color_primary_dark</item>
@@ -42,6 +46,8 @@
     </style>
 
     <style name="DialogThemeLight" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="buttonBarButtonStyle">@style/OpenHubButton.Text</item>
+        <item name="android:buttonBarButtonStyle">@style/OpenHubButton.Text</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="icon_color">@color/light_icon_color</item>

@@ -19,6 +19,10 @@
     <color name="amoled_dark_selected_color">#3f3f3f</color>
 
     <style name="ThemeAmoledDark" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="buttonStyle">@style/OpenHubButton</item>
+        <item name="android:buttonStyle">@style/OpenHubButton</item>
+        <item name="borderlessButtonStyle">@style/OpenHubButton.Text</item>
+        <item name="android:borderlessButtonStyle">@style/OpenHubButton.Text</item>
         <!-- Keep the classic layout on Android 15+ until the UI handles insets itself. -->
         <item name="colorPrimary">@color/amoled_dark_color_primary</item>
         <item name="colorPrimaryDark">@color/amoled_dark_color_primary_dark</item>
@@ -51,6 +55,8 @@
     </style>
 
     <style name="DialogThemeAmoledDark" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="buttonBarButtonStyle">@style/OpenHubButton.Text</item>
+        <item name="android:buttonBarButtonStyle">@style/OpenHubButton.Text</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="icon_color">@color/amoled_dark_icon_color</item>

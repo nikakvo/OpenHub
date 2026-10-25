@@ -51,7 +51,7 @@
             android:textColor="?android:textColorPrimary"/>
         <Button
             android:id="@+id/review_bar_bn"
-            style="@style/Widget.AppCompat.Button.Colored"
+            style="@style/OpenHubButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/review_finish"/>

@@ -269,13 +269,13 @@
         android:paddingBottom="@dimen/spacing_small">
         <Button
             android:id="@+id/secondary_bn"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/OpenHubButton.Tonal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/release_save_draft"/>
         <Button
             android:id="@+id/primary_bn"
-            style="@style/Widget.AppCompat.Button.Colored"
+            style="@style/OpenHubButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_small"

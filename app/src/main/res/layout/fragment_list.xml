@@ -40,10 +40,8 @@
             android:gravity="center"
             android:text="@string/tap_to_retry"
             android:textSize="@dimen/text_normal"
-            android:textColor="?colorAccent"
-            android:background="?android:selectableItemBackground"
-            android:paddingStart="@dimen/spacing_normal"
-            android:paddingEnd="@dimen/spacing_normal"/>
+            style="@style/OpenHubButton.Tonal"
+            android:layout_marginTop="@dimen/spacing_small"/>
 
     </LinearLayout>
 

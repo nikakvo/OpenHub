@@ -55,13 +55,13 @@
                 android:textColor="?android:textColorPrimary"/>
             <Button
                 android:id="@+id/milestone_due_set"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/OpenHubButton.Tonal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/milestone_set_due"/>
             <Button
                 android:id="@+id/milestone_due_clear"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/OpenHubButton.Tonal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/milestone_clear_due"/>

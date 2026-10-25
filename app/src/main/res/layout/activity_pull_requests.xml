@@ -48,7 +48,7 @@
                     android:orientation="vertical"/>
                 <Button
                     android:id="@+id/load_more_bn"
-                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    style="@style/OpenHubButton.Tonal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/pulls_load_more"

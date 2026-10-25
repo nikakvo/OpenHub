@@ -87,7 +87,7 @@
 
                     <Button
                         android:id="@+id/gist_add_comment"
-                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        style="@style/OpenHubButton.Tonal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/spacing_normal"

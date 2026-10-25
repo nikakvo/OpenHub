@@ -119,4 +119,36 @@
         <item name="android:windowExitAnimation">@anim/main_menu_out</item>
     </style>
 
+
+    <!-- Modern buttons: rounded pills, sentence case, sink a little while pressed. -->
+    <style name="OpenHubButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/btn_filled</item>
+        <item name="android:textColor">@color/btn_filled_text</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:minHeight">40dp</item>
+        <item name="android:minWidth">64dp</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:stateListAnimator">@animator/btn_press</item>
+    </style>
+
+    <!-- Secondary actions: accent-tinted pill with a thin outline. -->
+    <style name="OpenHubButton.Tonal">
+        <item name="android:background">@drawable/btn_tonal</item>
+        <item name="android:textColor">@color/btn_accent_text</item>
+        <item name="android:minHeight">36dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+    </style>
+
+    <!-- Dialog and other text actions: accent text, rounded ripple. -->
+    <style name="OpenHubButton.Text">
+        <item name="android:background">@drawable/btn_text</item>
+        <item name="android:textColor">@color/btn_accent_text</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+    </style>
+
 </resources>
