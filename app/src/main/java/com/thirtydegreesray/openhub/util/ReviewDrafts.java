@@ -22,7 +22,9 @@ import java.util.Map;
  * so it survives closing the app.
  *
  * Stored as JSON "owner/repo#number" -> [{"id": local id, "path", "line", "side",
- * "start_line", "start_side", "body", "created": millis}].
+ * "start_line", "start_side", "body", "created": millis}]. A reply to an existing thread
+ * has "reply_to" (the id of the thread's first comment) and "thread" (the thread's
+ * GraphQL id) instead of a line; it is sent with the review (see ReviewSender).
  */
 public final class ReviewDrafts {
 
@@ -92,6 +94,28 @@ public final class ReviewDrafts {
         save(context, key, drafts);
     }
 
+    /** A reply to the thread whose first comment is {@code replyTo}, sent with the review. */
+    public static synchronized void addReply(@NonNull Context context, @NonNull String owner, @NonNull String repo,
+                                             int number, @NonNull String path, long replyTo,
+                                             @NonNull String threadNodeId, @NonNull String body) {
+        String key = key(owner, repo, number);
+        JsonArray drafts = load(context, key);
+        JsonObject draft = new JsonObject();
+        long now = System.currentTimeMillis();
+        draft.addProperty("id", now);
+        draft.addProperty("path", path);
+        draft.addProperty("reply_to", replyTo);
+        draft.addProperty("thread", threadNodeId);
+        draft.addProperty("body", body);
+        draft.addProperty("created", now);
+        drafts.add(draft);
+        save(context, key, drafts);
+    }
+
+    public static boolean isReply(@NonNull JsonObject draft) {
+        return draft.has("reply_to");
+    }
+
     public static synchronized void update(@NonNull Context context, @NonNull String owner, @NonNull String repo,
                                            int number, long id, @NonNull String body) {
         String key = key(owner, repo, number);
@@ -124,6 +148,7 @@ public final class ReviewDrafts {
     public static List<Map<String, Object>> toReviewComments(@NonNull List<JsonObject> drafts) {
         List<Map<String, Object>> comments = new ArrayList<>();
         for (JsonObject draft : drafts) {
+            if (isReply(draft)) continue;
             Map<String, Object> comment = new HashMap<>();
             comment.put("path", Json.str(draft, "path"));
             comment.put("line", Json.integer(draft, "line"));

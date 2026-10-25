@@ -39,6 +39,7 @@ import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.ReviewDrafts;
+import com.thirtydegreesray.openhub.util.ReviewSender;
 import com.thirtydegreesray.openhub.util.ReviewThreads;
 import com.thirtydegreesray.openhub.util.PullChanges;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -103,6 +104,8 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
     private List<JsonObject> lastComments = new ArrayList<>();
     /** review threads by the id of their first comment */
     private Map<Long, ReviewThreads.Thread> threads = new HashMap<>();
+    /** pending replies of this file, by the id of their thread's first comment */
+    private final Map<Long, List<JsonObject>> draftReplies = new HashMap<>();
     /** resolved threads the user opened */
     private final java.util.Set<Long> expanded = new java.util.HashSet<>();
 
@@ -246,8 +249,17 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         }
 
         List<JsonObject> drafts = new ArrayList<>();
+        draftReplies.clear();
         for (JsonObject draft : ReviewDrafts.list(this, owner, repo, number)) {
-            if (path.equals(Json.str(draft, "path"))) drafts.add(draftComment(draft));
+            if (!path.equals(Json.str(draft, "path"))) continue;
+            if (ReviewDrafts.isReply(draft)) {
+                long to = draft.get("reply_to").getAsLong();
+                if (threads.containsKey(to)) {
+                    draftReplies.computeIfAbsent(to, k -> new ArrayList<>()).add(draftComment(draft));
+                    continue;
+                }
+            }
+            drafts.add(draftComment(draft));
         }
         updateReviewBar();
 
@@ -358,6 +370,15 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
             row.threadId = id;
             rows.add(row);
         }
+        List<JsonObject> pendingReplies = draftReplies.get(id);
+        if (pendingReplies != null) {
+            for (JsonObject c : pendingReplies) {
+                Row row = new Row(COMMENT);
+                row.comment = c;
+                row.threadId = id;
+                rows.add(row);
+            }
+        }
         Row reply = new Row(REPLY);
         reply.threadId = id;
         rows.add(reply);
@@ -396,7 +417,8 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void finishReview() {
         ReviewDialog.show(this, owner, repo, number, headSha, (data, hasDrafts) -> run(() -> {
-            GitHubApi.call(pulls().createReview(owner, repo, number, data));
+            ReviewSender.send(owner, repo, number, data,
+                    ReviewDrafts.list(getApplicationContext(), owner, repo, number));
             if (hasDrafts) ReviewDrafts.clear(getApplicationContext(), owner, repo, number);
             return Boolean.TRUE;
         }, getString(R.string.review_sent)));
@@ -559,19 +581,35 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void reply(long threadId) {
-        new ComposeDialog.Builder(this)
+        // a reply can also wait in the pending review, like "Start a review" on github.com
+        ReviewThreads.Thread info = threads.get(threadId);
+        boolean canQueue = info != null && !info.id.isEmpty();
+        boolean reviewing = ReviewDrafts.count(this, owner, repo, number) > 0;
+        ComposeDialog.Builder dialog = new ComposeDialog.Builder(this)
                 .title(getString(R.string.diff_reply_title))
                 .repo(owner + "/" + repo)
                 .body(getString(R.string.diff_comment_hint), null)
                 .bodyRequired(true, null)
-                .positive(getString(R.string.pull_comment))
-                .callback((choice, unusedTitle, body) -> {
+                .positive(getString(R.string.pull_comment));
+        if (canQueue) {
+            dialog.choices(new CharSequence[]{getString(R.string.review_single),
+                    getString(reviewing ? R.string.review_add : R.string.review_start)}, reviewing ? 1 : 0);
+        }
+        dialog.callback((choice, unusedTitle, body) -> {
+                    if (canQueue && choice == 1) {
+                        ReviewDrafts.addReply(this, owner, repo, number, path, threadId, info.id, body);
+                        int pending = ReviewDrafts.count(this, owner, repo, number);
+                        showSuccessToast(getResources().getQuantityString(R.plurals.review_added, pending, pending));
+                        PullChanges.markChanged();
+                        build(lastComments);
+                        return;
+                    }
                     Map<String, Object> data = new HashMap<>();
                     data.put("body", body);
                     run(() -> GitHubApi.call(pulls().replyReviewComment(owner, repo, number, threadId, data)),
                             getString(R.string.diff_comment_sent));
-                })
-                .show();
+                });
+        dialog.show();
     }
 
     private boolean isMine(@NonNull JsonObject comment) {

@@ -161,6 +161,25 @@ public interface PullService {
             @Body Map<String, Object> body
     );
 
+    /** Submits a pending review. Body: event (APPROVE, REQUEST_CHANGES, COMMENT) and body. */
+    @NonNull @POST("repos/{owner}/{repo}/pulls/{number}/reviews/{id}/events")
+    Observable<Response<JsonObject>> submitReview(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Path("id") long id,
+            @Body Map<String, Object> body
+    );
+
+    /** Deletes a review that has not been submitted yet. */
+    @NonNull @DELETE("repos/{owner}/{repo}/pulls/{number}/reviews/{id}")
+    Observable<Response<JsonObject>> deletePendingReview(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Path("id") long id
+    );
+
     /** Body: body. Answers a line comment thread. */
     @NonNull @POST("repos/{owner}/{repo}/pulls/{number}/comments/{id}/replies")
     Observable<Response<JsonObject>> replyReviewComment(

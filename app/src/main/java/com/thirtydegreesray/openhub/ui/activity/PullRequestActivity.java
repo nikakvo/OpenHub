@@ -643,7 +643,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     private void review() {
         ReviewDialog.show(this, owner, repo, number, pull == null ? "" : Json.str(pull, "head.sha"),
                 (data, hasDrafts) -> run(() -> {
-                    GitHubApi.call(pulls().createReview(owner, repo, number, data));
+                    com.thirtydegreesray.openhub.util.ReviewSender.send(owner, repo, number, data,
+                            ReviewDrafts.list(getApplicationContext(), owner, repo, number));
                     if (hasDrafts) ReviewDrafts.clear(getApplicationContext(), owner, repo, number);
                     return Boolean.TRUE;
                 }, getString(R.string.review_sent)));
