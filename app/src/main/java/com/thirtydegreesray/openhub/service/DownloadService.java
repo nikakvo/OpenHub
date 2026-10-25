@@ -31,6 +31,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.util.Checksums;
@@ -587,6 +588,9 @@ public class DownloadService extends Service {
             if (needsGitHubToken(url) && !StringUtils.isBlank(token)) {
                 // OkHttp drops this header automatically on a redirect to another host.
                 rb.header("Authorization", token.startsWith("Basic") ? token : "token " + token);
+            }
+            if (needsGitHubToken(url)) {
+                rb.header(AppConfig.GITHUB_API_VERSION_HEADER, AppConfig.GITHUB_API_VERSION);
             }
             if (needsGitHubToken(url) && url.contains("/releases/assets/")) {
                 // API address of a release asset (e.g. of a draft): ask for the file itself

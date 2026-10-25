@@ -31,7 +31,8 @@ public interface IActionsContract {
 
         void onWorkflowFilterChanged(@Nullable String workflowName);
 
-        void onWorkflowDispatched(@NonNull String workflowName, @NonNull String ref);
+        /** @param runId the new run (GitHub names it since REST API 2026-03-10), 0 if unknown */
+        void onWorkflowDispatched(@NonNull String workflowName, @NonNull String ref, long runId);
     }
 
     interface Presenter extends IBaseContract.Presenter<IActionsContract.View> {

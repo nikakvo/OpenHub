@@ -195,7 +195,7 @@ public class ActionsPresenter extends BasePresenter<IActionsContract.View>
             public void onSuccess(HttpResponse<ResponseBody> response) {
                 mView.dismissProgressDialog();
                 if (response.isSuccessful()) {
-                    mView.onWorkflowDispatched(workflow.getName(), ref);
+                    mView.onWorkflowDispatched(workflow.getName(), ref, readRunId(response));
                 } else {
                     mView.showErrorToast(readErrorMessage(response));
                 }
@@ -203,6 +203,21 @@ public class ActionsPresenter extends BasePresenter<IActionsContract.View>
         });
         generalRxHttpExecute(getRepoService().dispatchWorkflow(owner, repo, workflow.getId(), body),
                 subscriber);
+    }
+
+    /** The id of the started run: {"workflow_run_id", "run_url", "html_url"}, or 0 (old 204). */
+    private long readRunId(HttpResponse<ResponseBody> response) {
+        try {
+            ResponseBody body = response.body();
+            if (body == null) return 0;
+            String text = body.string();
+            if (text.isEmpty()) return 0;
+            JsonObject json = JsonParser.parseString(text).getAsJsonObject();
+            return json.has("workflow_run_id") && !json.get("workflow_run_id").isJsonNull()
+                    ? json.get("workflow_run_id").getAsLong() : 0;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     /** GitHub's own explanation, e.g. "Workflow does not have 'workflow_dispatch' trigger". */

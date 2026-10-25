@@ -223,7 +223,7 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
     @Override
     public boolean onItemLongClick(int position, @NonNull View view) {
         FileModel model = adapter.getData().get(position);
-        if (model.isDir()) return false;
+        if (model.isDir() || model.isSubmodule()) return false;
         showFileMenu(view, model);
         return true;
     }
@@ -244,6 +244,11 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
         FileModel model = adapter.getData().get(position);
         if(model.isDir()){
             mPresenter.loadFiles(model.getPath(), false);
+        }else if(model.isSubmodule()){
+            // the submodule's own repository at the commit this repository points to
+            if (model.getHtmlUrl() != null && getActivity() != null) {
+                AppOpener.launchUrl(getActivity(), android.net.Uri.parse(model.getHtmlUrl()));
+            }
         }else{
             ViewerActivity.show(getActivity(), model, mPresenter.getRepoName());
         }

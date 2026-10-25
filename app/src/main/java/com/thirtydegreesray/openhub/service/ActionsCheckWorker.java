@@ -147,6 +147,7 @@ public class ActionsCheckWorker extends Worker {
         Request.Builder request = new Request.Builder()
                 .url(AppConfig.GITHUB_API_BASE_URL + path)
                 .header("Accept", "application/vnd.github+json")
+                    .header(AppConfig.GITHUB_API_VERSION_HEADER, AppConfig.GITHUB_API_VERSION)
                 .header("Cache-Control", "no-cache");
         if (!StringUtils.isBlank(token)) {
             request.header("Authorization", token.startsWith("Basic") ? token : "token " + token);

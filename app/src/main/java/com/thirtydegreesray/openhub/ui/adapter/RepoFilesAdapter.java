@@ -44,7 +44,10 @@ public class RepoFilesAdapter extends BaseAdapter<RepoFilesAdapter.ViewHolder, F
         super.onBindViewHolder(holder, position);
         FileModel model = data.get(position);
         holder.fileName.setText(model.getName());
-        if(model.isFile()){
+        if(model.isSubmodule()){
+            holder.fileType.setImageResource(R.drawable.ic_link);
+            holder.fileSize.setText(R.string.file_submodule);
+        }else if(model.isFile()){
             holder.fileType.setImageResource(R.drawable.ic_file);
             holder.fileSize.setText(StringUtils.getSizeString(model.getSize()));
         }else{

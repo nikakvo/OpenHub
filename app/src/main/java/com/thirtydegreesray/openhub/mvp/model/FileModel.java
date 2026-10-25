@@ -107,6 +107,16 @@ public class FileModel implements Parcelable {
         return type.equals("dir");
     }
 
+    /** A git submodule (REST API 2026-03-10 lists it with its own type, before as "file"). */
+    public boolean isSubmodule(){
+        return "submodule".equals(type);
+    }
+
+    /** Folders first, then submodules, then files and links. */
+    public int sortRank(){
+        return isDir() ? 0 : isSubmodule() ? 1 : 2;
+    }
+
 
     @Override
     public int describeContents() {

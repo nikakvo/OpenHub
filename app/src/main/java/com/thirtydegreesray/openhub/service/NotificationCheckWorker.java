@@ -68,6 +68,7 @@ public class NotificationCheckWorker extends Worker {
         Request.Builder request = new Request.Builder()
                 .url(AppConfig.GITHUB_API_BASE_URL + "notifications?per_page=50")
                 .header("Accept", "application/vnd.github+json")
+                    .header(AppConfig.GITHUB_API_VERSION_HEADER, AppConfig.GITHUB_API_VERSION)
                 .header("Cache-Control", "no-cache")
                 .header("Authorization", token.startsWith("Basic") ? token : "token " + token);
         String lastModified = GitHubNotifier.getLastModified(context);

@@ -498,7 +498,8 @@ public class UploadService extends Service {
     private Request.Builder authorized(@NonNull Request.Builder builder) {
         String token = AppData.INSTANCE.getAccessToken();
         if (StringUtils.isBlank(token)) token = ReleaseCheckWorker.loadToken();
-        builder.header("Accept", "application/vnd.github+json").header("User-Agent", "OpenHub");
+        builder.header("Accept", "application/vnd.github+json").header("User-Agent", "OpenHub")
+                .header(AppConfig.GITHUB_API_VERSION_HEADER, AppConfig.GITHUB_API_VERSION);
         if (!StringUtils.isBlank(token)) {
             builder.header("Authorization", token.startsWith("Basic") ? token : "token " + token);
         }

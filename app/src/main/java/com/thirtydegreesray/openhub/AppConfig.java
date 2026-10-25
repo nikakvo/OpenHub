@@ -19,6 +19,13 @@ public class AppConfig {
 
     public final static String GITHUB_API_BASE_URL = "https://api.github.com/";
 
+    /**
+     * The REST API version every request to api.github.com asks for (header
+     * X-GitHub-Api-Version). Without it GitHub answers with 2022-11-28.
+     */
+    public final static String GITHUB_API_VERSION = "2026-03-10";
+    public final static String GITHUB_API_VERSION_HEADER = "X-GitHub-Api-Version";
+
     public final static String GITHUB_CONTENT_BASE_URL = "https://raw.githubusercontent.com/";
 
     public final static int HTTP_TIME_OUT = 32 * 1000;

@@ -254,8 +254,10 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
                     }
                     break;
                 case assigned:
-                    info = String.format(getString(R.string.issue_assigned), model.getAssignee().getLogin());
-                    text.append(info);
+                    if (model.getAssignee() != null) {
+                        info = String.format(getString(R.string.issue_assigned), model.getAssignee().getLogin());
+                        text.append(info);
+                    }
                     break;
                 case unassigned:
                     text.append(getString(R.string.issue_unassigned));

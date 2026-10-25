@@ -66,6 +66,7 @@ public class NotificationActionReceiver extends BroadcastReceiver {
                 Request request = new Request.Builder()
                         .url(AppConfig.GITHUB_API_BASE_URL + "notifications/threads/" + thread)
                         .header("Accept", "application/vnd.github+json")
+                    .header(AppConfig.GITHUB_API_VERSION_HEADER, AppConfig.GITHUB_API_VERSION)
                         .header("Authorization", token.startsWith("Basic") ? token : "token " + token)
                         .patch(RequestBody.create("", MediaType.get("application/json")))
                         .build();

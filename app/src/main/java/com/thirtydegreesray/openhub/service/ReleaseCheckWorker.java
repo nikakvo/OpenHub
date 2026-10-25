@@ -64,7 +64,8 @@ public class ReleaseCheckWorker extends Worker {
             if (isStopped()) break;
             Request.Builder request = new Request.Builder()
                     .url(AppConfig.GITHUB_API_BASE_URL + "repos/" + fullName + "/releases/latest")
-                    .header("Accept", "application/vnd.github+json");
+                    .header("Accept", "application/vnd.github+json")
+                    .header(AppConfig.GITHUB_API_VERSION_HEADER, AppConfig.GITHUB_API_VERSION);
             if (!StringUtils.isBlank(token)) {
                 request.header("Authorization", token.startsWith("Basic") ? token : "token " + token);
             }

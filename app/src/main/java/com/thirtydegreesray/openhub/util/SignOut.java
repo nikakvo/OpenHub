@@ -53,6 +53,7 @@ public final class SignOut {
             Request request = new Request.Builder()
                     .url(AppConfig.GITHUB_API_BASE_URL + "applications/" + AppConfig.OPENHUB_CLIENT_ID + "/token")
                     .header("Accept", "application/vnd.github+json")
+                    .header(AppConfig.GITHUB_API_VERSION_HEADER, AppConfig.GITHUB_API_VERSION)
                     .header("Authorization", Credentials.basic(AppConfig.OPENHUB_CLIENT_ID,
                             AppConfig.OPENHUB_CLIENT_SECRET))
                     .delete(RequestBody.create(json, MediaType.get("application/json")))

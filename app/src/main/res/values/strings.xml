@@ -247,6 +247,7 @@
     <string name="no_activity">No activities</string>
     <string name="no_repository">No repositories</string>
     <string name="no_file">No files</string>
+    <string name="file_submodule">submodule</string>
     <string name="developing">Developing</string>
     <string name="version" >Version</string>
     <string name="source_code" >Source code</string>

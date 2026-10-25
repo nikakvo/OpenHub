@@ -133,10 +133,7 @@ public class RepoFilesPresenter extends BasePagerPresenter<IRepoFilesContract.Vi
         Collections.sort(oriList, new Comparator<FileModel>() {
             @Override
             public int compare(FileModel o1, FileModel o2) {
-                if(!o1.getType().equals(o2.getType())){
-                    return o1.isDir() ? -1 : 1;
-                }
-                return 0;
+                return Integer.compare(o1.sortRank(), o2.sortRank());
             }
         });
     }

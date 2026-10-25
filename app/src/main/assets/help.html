@@ -265,6 +265,7 @@
   </ul>
   <h3>Changing</h3>
   <ul>
+    <li>A <strong>submodule</strong> (link icon, "submodule" instead of a size) opens the repository it points to, at the commit this repository uses.</li>
     <li>Long-press a file: <strong>Edit file</strong>, <strong>Rename or move</strong>, <strong>Delete file</strong>, <strong>Download</strong>. An open file has the same actions in its toolbar (pencil) and menu.</li>
     <li>The editor shows the file in a monospace font; Markdown files also get <span class="ui">Write</span> and <span class="ui">Preview</span>. Text files up to 512 KB can be edited.</li>
     <li>At the bottom: <span class="ui">Branch: main ▾</span>. Tap it to commit to another branch; an open file is then loaded again from that branch.</li>
@@ -517,7 +518,7 @@
     <li><strong>Tap a run</strong> to open it: status and duration, every <strong>job</strong> with its <strong>steps</strong> (the failed step in red) and the <strong>artifacts</strong> (the files it built; tap one to download it as a zip). GitHub deletes artifacts after a while (usually 90 days); old ones show <em>expired</em>. A run that is still going updates itself every few seconds: a moving bar at the top, pulsing dots and running timers show what is going on, and the step that runs now is bold (also in the status line).</li>
     <li><strong>Long-press a run</strong> to open it in the browser.</li>
     <li>The filter icon shows one workflow; the menu has <span class="ui">Successful runs only</span>.</li>
-    <li>In your own repositories the play button starts a workflow by hand: pick it, check the branch, add inputs as <code>key=value</code> lines. Only workflows with a <code>workflow_dispatch</code> trigger can be started.</li>
+    <li>In your own repositories the play button starts a workflow by hand: pick it, check the branch, add inputs as <code>key=value</code> lines. Only workflows with a <code>workflow_dispatch</code> trigger can be started. The new run opens right away and updates itself while it runs.</li>
   </ul>
   <h3>Logs, re-run and cancel</h3>
   <ul>

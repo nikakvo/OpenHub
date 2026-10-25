@@ -160,6 +160,13 @@ public enum  AppRetrofit {
                         .build();
             }
 
+            // the REST API version, for every request to the GitHub API
+            if (sendsTokenTo(request.url()) && request.header(AppConfig.GITHUB_API_VERSION_HEADER) == null) {
+                request = request.newBuilder()
+                        .header(AppConfig.GITHUB_API_VERSION_HEADER, AppConfig.GITHUB_API_VERSION)
+                        .build();
+            }
+
             // only to the GitHub API and only encrypted (an http:// address never gets it)
             if (!StringUtils.isBlank(token) && sendsTokenTo(request.url())) {
                 String auth = token.startsWith("Basic") ? token : "token " + token;
