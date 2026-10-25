@@ -39,6 +39,7 @@ app goes to them; see [Credits](#credits).
 * New app icon, a fixed toolbar and readable dialogs in dark themes.
 * Up-to-date libraries throughout (RxJava 3, Retrofit 3, AndroidX, Material 1.14) and no
   more dependencies on JCenter or the old support library.
+* Uses the current GitHub REST API version (2026-03-10) for every request.
 
 ## Features
 
@@ -57,14 +58,18 @@ app goes to them; see [Credits](#credits).
   the edges of the menu, with an animated "Welcome to OpenHub"; or the plain theme color
 * Settings, About and Help in the same Matrix look: the rain behind a large decoding title,
   an almost black screen on dark themes; settings in groups with colored icons
+* Every other screen gets a black Matrix top bar with the rain and a title that decodes
+  letter by letter (My Profile, repository names over up to three lines)
+* Modern rounded buttons that sink a little when pressed; readable hints and labels in
+  dark themes; a new theme or accent color reaches every open screen
 * About shows the SHA-256 of the APK's signing certificate (tap to copy), checks for
   updates and links to private security reports
 * **App icon** to choose: Matrix, Classic, Cosmic or Outline
 * Searchable in-app help that explains every screen, written for people new to GitHub;
   its feature tiles jump to the matching section
 * Light, dark and AMOLED dark themes, many accent colors, colored or plain side menu icons
-* Markdown rendering and code highlighting
-* Offline mode (cached pages)
+* Markdown rendering and code highlighting, with images in comments and posts
+* Offline mode (cached pages); Clear cache in the settings
 * Trending repositories for all languages, by day, week or month
 * GitHub collections and featured topics
 * Search repositories and users
@@ -82,7 +87,7 @@ app goes to them; see [Credits](#credits).
   a pull request from there
 * Create, upload, edit, rename and delete files as real commits, to the branch you
   choose or a new branch with a pull request; files shared from other apps can be
-  committed to a folder of a repository
+  committed to a folder of a repository; submodules open the repository they point to
 * **Search code** in a repository, with the matches marked; file name search where
   GitHub's code search has nothing
 * Repository info, README (with a pencil to edit it), files, commits, activity, branches
@@ -97,7 +102,8 @@ app goes to them; see [Credits](#credits).
 * GitHub Actions: workflow runs with their jobs and steps, **job logs** (folded groups,
   errors marked, find, next error, download), re-run (all, failed or one job, with
   debug logging) and cancel, artifacts (download, or unpack and add their files to a
-  release in a few taps), starting workflows by hand, and a notification
+  release in a few taps), starting workflows by hand (the new run opens right away),
+  and a notification
   when a run finishes, with buttons to download its artifacts
 * **Security**: Dependabot, code scanning and secret scanning alerts with details;
   dismiss, close and reopen them; admins turn Dependabot alerts and security updates,
@@ -106,7 +112,8 @@ app goes to them; see [Credits](#credits).
   values are encrypted on the phone as GitHub requires
 * **Actions variables** of the repository and of environments: add, edit, rename, copy and
   delete
-* **Discussions**: read, comment and reply, upvote, mark the answer, start discussions
+* **Discussions**: read, comment and reply, upvote, mark the answer, start discussions,
+  vote in polls, close (resolved, outdated, duplicate) and reopen
 * Download source code
 * Your private, public, forked and starred repositories
 * **Wiki** pages rendered in the app, with links between pages, the wiki's contents and
@@ -119,8 +126,8 @@ app goes to them; see [Credits](#credits).
 * Merge, squash or rebase; delete and restore the branch
 * Line-by-line review of the diff: comment on one or several lines, suggest changes,
   reply, edit and delete your comments
-* **Pending reviews**: collect line comments and send them as one review (Comment,
-  Approve or Request changes)
+* **Pending reviews**: collect line comments and replies to threads and send them as one
+  review (Comment, Approve or Request changes)
 * Resolve and unresolve conversations
 
 ### Issues and commits
