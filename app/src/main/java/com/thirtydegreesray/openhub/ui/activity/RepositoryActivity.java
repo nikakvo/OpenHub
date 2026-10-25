@@ -185,15 +185,24 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
         keepHeaderBelowToolbar();
     }
 
-    /** The name, description and info start right below the toolbar, whatever the status bar height. */
+    /**
+     * The name, description and info start right below the toolbar, whatever the status bar
+     * height. The toolbar's own position cannot be used: the header moves it below the
+     * status bar only after it has been laid out.
+     */
     private void keepHeaderBelowToolbar() {
         final View headerInfo = findViewById(R.id.repo_header_info);
-        if (toolbar == null || headerInfo == null) return;
+        if (toolbar == null || toolbarLayout == null || headerInfo == null) return;
         final int gap = getResources().getDimensionPixelSize(R.dimen.spacing_small);
-        toolbar.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+        toolbarLayout.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            androidx.core.view.WindowInsetsCompat insets =
+                    androidx.core.view.ViewCompat.getRootWindowInsets(v);
+            int statusTop = insets == null ? 0 : insets.getInsets(
+                    androidx.core.view.WindowInsetsCompat.Type.systemBars()
+                            | androidx.core.view.WindowInsetsCompat.Type.displayCutout()).top;
+            int top = statusTop + toolbar.getHeight() + gap;
             ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) headerInfo.getLayoutParams();
-            int top = v.getBottom() + gap;
-            if (lp.topMargin != top) {
+            if (toolbar.getHeight() > 0 && lp.topMargin != top) {
                 lp.topMargin = top;
                 headerInfo.setLayoutParams(lp);
             }
