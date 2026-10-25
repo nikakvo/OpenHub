@@ -100,7 +100,10 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
             + " viewerCanUpdate viewerCanDelete author{login avatarUrl}";
     private static final String QUERY = "query($owner:String!,$repo:String!,$number:Int!,$after:String){"
             + "repository(owner:$owner,name:$repo){discussion(number:$number){"
-            + "id number title body url createdAt closed locked upvoteCount viewerHasUpvoted viewerCanUpvote"
+            + "id number title body url createdAt closed stateReason locked upvoteCount viewerHasUpvoted viewerCanUpvote"
+            + " viewerCanClose viewerCanReopen"
+            + " poll{id question totalVoteCount viewerCanVote viewerHasVoted"
+            + " options(first:20){nodes{id option totalVoteCount viewerHasVoted}}}"
             + " author{login avatarUrl} category{name isAnswerable}"
             + " comments(first:50,after:$after){pageInfo{hasNextPage endCursor} totalCount nodes{"
             + COMMENT_FIELDS + " isAnswer viewerCanMarkAsAnswer viewerCanUnmarkAsAnswer"
@@ -132,12 +135,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         super.initView(savedInstanceState);
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.discussion_number, number), owner + "/" + repo);
-        markwon = Markwon.builder(this)
-                .usePlugin(StrikethroughPlugin.create())
-                .usePlugin(TablePlugin.create(this))
-                .usePlugin(TaskListPlugin.create(this))
-                .usePlugin(LinkifyPlugin.create())
-                .build();
+        markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this);
         load();
     }
 
@@ -193,7 +191,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
 
         TextView meta = new TextView(this);
         StringBuilder m = new StringBuilder(Json.str(d, "category.name"));
-        if (Json.bool(d, "closed")) m.append(" · ").append(getString(R.string.discussion_closed));
+        if (Json.bool(d, "closed")) m.append(" · ").append(closedText(Json.str(d, "stateReason")));
         if (Json.bool(d, "locked")) m.append(" · ").append(getString(R.string.discussion_locked));
         meta.setText(m);
         meta.setTextColor(secondaryText());
@@ -204,6 +202,8 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         // the post
         View post = box(inflater, d, 0);
         content.addView(post);
+        JsonObject poll = Json.obj(d, "poll");
+        if (poll != null) content.addView(poll(poll));
         content.addView(actions(d, false, null));
 
         boolean answerable = Json.bool(d, "category.isAnswerable");
@@ -256,6 +256,113 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         view.setOnLongClickListener(menu);
         body.setOnLongClickListener(menu);
         return view;
+    }
+
+    @NonNull
+    private String closedText(@NonNull String reason) {
+        switch (reason) {
+            case "RESOLVED":
+                return getString(R.string.discussion_closed_resolved);
+            case "OUTDATED":
+                return getString(R.string.discussion_closed_outdated);
+            case "DUPLICATE":
+                return getString(R.string.discussion_closed_duplicate);
+            default:
+                return getString(R.string.discussion_closed);
+        }
+    }
+
+    /**
+     * The poll under the post. Like on github.com the results show once you have voted (or
+     * when you cannot vote); before that the options are tapped to vote.
+     */
+    @NonNull
+    private View poll(@NonNull JsonObject poll) {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(16), dp(4), dp(16), dp(8));
+        int accent = ViewUtils.getAccentColor(this);
+
+        TextView question = new TextView(this);
+        question.setText(Json.str(poll, "question"));
+        question.setTextSize(16);
+        question.setTextColor(primaryText());
+        question.setTypeface(question.getTypeface(), android.graphics.Typeface.BOLD);
+        question.setPadding(0, dp(4), 0, dp(6));
+        box.addView(question);
+
+        int total = Json.integer(poll, "totalVoteCount");
+        boolean results = Json.bool(poll, "viewerHasVoted") || !Json.bool(poll, "viewerCanVote");
+        boolean canVote = Json.bool(poll, "viewerCanVote") && !Json.bool(poll, "viewerHasVoted")
+                && !Json.bool(discussion, "locked");
+        JsonElement options = Json.get(poll, "options.nodes");
+        if (options != null && options.isJsonArray()) {
+            for (JsonElement e : options.getAsJsonArray()) {
+                JsonObject option = e.getAsJsonObject();
+                String text = Json.str(option, "option");
+                boolean mine = Json.bool(option, "viewerHasVoted");
+                int votes = Json.integer(option, "totalVoteCount");
+                int percent = total > 0 ? Math.round(votes * 100f / total) : 0;
+
+                LinearLayout row = new LinearLayout(this);
+                row.setOrientation(LinearLayout.VERTICAL);
+                row.setPadding(dp(8), dp(6), dp(8), dp(6));
+                LinearLayout line = new LinearLayout(this);
+                line.setOrientation(LinearLayout.HORIZONTAL);
+                TextView label = new TextView(this);
+                label.setText((results ? (mine ? "\u2713 " : "") : "\u25CB ") + text);
+                label.setTextSize(14);
+                label.setTextColor(mine ? accent : primaryText());
+                line.addView(label, new LinearLayout.LayoutParams(0,
+                        ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+                if (results) {
+                    TextView count = new TextView(this);
+                    count.setText(percent + "% \u00B7 " + votes);
+                    count.setTextSize(13);
+                    count.setTextColor(secondaryText());
+                    line.addView(count);
+                }
+                row.addView(line);
+                if (results) {
+                    // a thin bar like github.com's
+                    LinearLayout bar = new LinearLayout(this);
+                    bar.setOrientation(LinearLayout.HORIZONTAL);
+                    View filled = new View(this);
+                    filled.setBackgroundColor(mine ? accent : (accent & 0x00FFFFFF) | 0x99000000);
+                    View rest = new View(this);
+                    rest.setBackgroundColor((accent & 0x00FFFFFF) | 0x22000000);
+                    bar.addView(filled, new LinearLayout.LayoutParams(0, dp(6), Math.max(percent, 0)));
+                    bar.addView(rest, new LinearLayout.LayoutParams(0, dp(6), Math.max(100 - percent, 0)));
+                    LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, dp(6));
+                    barParams.topMargin = dp(4);
+                    row.addView(bar, barParams);
+                } else if (canVote) {
+                    android.util.TypedValue value = new android.util.TypedValue();
+                    getTheme().resolveAttribute(android.R.attr.selectableItemBackground, value, true);
+                    row.setBackgroundResource(value.resourceId);
+                    row.setOnClickListener(v -> new AlertDialog.Builder(this)
+                            .setTitle(R.string.discussion_poll_vote_title)
+                            .setMessage(getString(R.string.discussion_poll_vote_message, text))
+                            .setPositiveButton(R.string.discussion_poll_vote_bn, (dialog, which) -> mutate(
+                                    "mutation($id:ID!){addDiscussionPollVote(input:{pollOptionId:$id}){pollOption{id}}}",
+                                    GraphQl.vars("id", Json.str(option, "id")),
+                                    getString(R.string.discussion_poll_voted)))
+                            .setNegativeButton(R.string.cancel, null)
+                            .show());
+                }
+                box.addView(row);
+            }
+        }
+
+        TextView footer = new TextView(this);
+        String votes = getResources().getQuantityString(R.plurals.discussion_poll_votes, total, total);
+        footer.setText(canVote ? votes + " \u00B7 " + getString(R.string.discussion_poll_pick) : votes);
+        footer.setTextSize(13);
+        footer.setTextColor(secondaryText());
+        footer.setPadding(dp(8), dp(4), dp(8), 0);
+        box.addView(footer);
+        return box;
     }
 
     @NonNull
@@ -403,6 +510,11 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         menu.add(0, 2, 1, R.string.share);
         menu.add(0, 3, 2, R.string.copy_url);
         menu.add(0, 4, 3, R.string.open_in_browser);
+        if (discussion != null) {
+            boolean closed = Json.bool(discussion, "closed");
+            if (!closed && Json.bool(discussion, "viewerCanClose")) menu.add(0, 5, 4, R.string.discussion_close);
+            if (closed && Json.bool(discussion, "viewerCanReopen")) menu.add(0, 6, 4, R.string.discussion_reopen);
+        }
         return true;
     }
 
@@ -423,8 +535,36 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
             case 4:
                 AppOpener.openInCustomTabsOrBrowser(this, url);
                 return true;
+            case 5:
+                closeDiscussion();
+                return true;
+            case 6:
+                if (discussion != null) {
+                    mutate("mutation($id:ID!){reopenDiscussion(input:{discussionId:$id}){discussion{id}}}",
+                            GraphQl.vars("id", Json.str(discussion, "id")), getString(R.string.discussion_reopened));
+                }
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /** Close with a reason, like github.com: resolved (default), outdated or duplicate. */
+    private void closeDiscussion() {
+        if (discussion == null) return;
+        final String[] reasons = {"RESOLVED", "OUTDATED", "DUPLICATE"};
+        final int[] chosen = {0};
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.discussion_close_title)
+                .setSingleChoiceItems(new String[]{getString(R.string.discussion_reason_resolved),
+                        getString(R.string.discussion_reason_outdated),
+                        getString(R.string.discussion_reason_duplicate)}, 0, (d, which) -> chosen[0] = which)
+                .setPositiveButton(R.string.discussion_close_bn, (d, w) -> mutate(
+                        "mutation($id:ID!,$reason:DiscussionCloseReason){closeDiscussion(input:"
+                                + "{discussionId:$id,reason:$reason}){discussion{id}}}",
+                        GraphQl.vars("id", Json.str(discussion, "id"), "reason", reasons[chosen[0]]),
+                        getString(R.string.discussion_closed_done)))
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     // ---------------------------------------------------------------------------------

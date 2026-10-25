@@ -171,12 +171,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.pull_title_number, number), owner + "/" + repo);
         tabNormalColor = tabConversation.getTextColors();
-        markwon = Markwon.builder(this)
-                .usePlugin(StrikethroughPlugin.create())
-                .usePlugin(TablePlugin.create(this))
-                .usePlugin(TaskListPlugin.create(this))
-                .usePlugin(LinkifyPlugin.create())
-                .build();
+        markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this);
         showTab(tab);
         load();
     }

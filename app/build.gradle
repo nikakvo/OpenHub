@@ -158,6 +158,9 @@ dependencies {
     implementation "io.noties.markwon:ext-tables:${MARKWON_VERSION}"
     implementation "io.noties.markwon:ext-tasklist:${MARKWON_VERSION}"
     implementation "io.noties.markwon:linkify:${MARKWON_VERSION}"
+    // images in comments and posts (Markdown and GitHub's <img> tags)
+    implementation "io.noties.markwon:image-glide:${MARKWON_VERSION}"
+    implementation "io.noties.markwon:html:${MARKWON_VERSION}"
 
     implementation "com.orhanobut:logger:${LOGGER_VERSION}"
 

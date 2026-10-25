@@ -47,12 +47,7 @@ public class MarkdownPreviewFragment extends BaseFragment{
     private Markwon getMarkwon(){
         if(markwon == null){
             // GitHub flavored: tables, ~~strikethrough~~, - [ ] task lists, bare links.
-            markwon = Markwon.builder(requireContext())
-                    .usePlugin(StrikethroughPlugin.create())
-                    .usePlugin(TablePlugin.create(requireContext()))
-                    .usePlugin(TaskListPlugin.create(requireContext()))
-                    .usePlugin(LinkifyPlugin.create())
-                    .build();
+            markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(requireContext());
         }
         return markwon;
     }

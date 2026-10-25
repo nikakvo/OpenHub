@@ -159,12 +159,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         super.initView(savedInstanceState);
         setToolbarBackEnable();
         setToolbarTitle(fileName(), getString(R.string.pull_title_number, number) + " · " + owner + "/" + repo);
-        markwon = Markwon.builder(this)
-                .usePlugin(StrikethroughPlugin.create())
-                .usePlugin(TablePlugin.create(this))
-                .usePlugin(TaskListPlugin.create(this))
-                .usePlugin(LinkifyPlugin.create())
-                .build();
+        markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
         load();

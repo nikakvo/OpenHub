@@ -626,6 +626,27 @@
     <string name="discussion_comment_title">Comment</string>
     <string name="discussion_reply_title">Reply</string>
     <string name="copy_text">Copy text</string>
+    <string name="discussion_closed_resolved">Closed as resolved</string>
+    <string name="discussion_closed_outdated">Closed as outdated</string>
+    <string name="discussion_closed_duplicate">Closed as duplicate</string>
+    <string name="discussion_close">Close discussion…</string>
+    <string name="discussion_close_title">Close discussion</string>
+    <string name="discussion_close_bn">Close discussion</string>
+    <string name="discussion_reason_resolved">Resolved</string>
+    <string name="discussion_reason_outdated">Outdated</string>
+    <string name="discussion_reason_duplicate">Duplicate</string>
+    <string name="discussion_reopen">Reopen discussion</string>
+    <string name="discussion_closed_done">Discussion closed</string>
+    <string name="discussion_reopened">Discussion reopened</string>
+    <string name="discussion_poll_pick">Tap an option to vote</string>
+    <string name="discussion_poll_vote_title">Vote</string>
+    <string name="discussion_poll_vote_message">Vote for \"%s\"? A vote cannot be changed afterwards.</string>
+    <string name="discussion_poll_vote_bn">Vote</string>
+    <string name="discussion_poll_voted">Vote cast</string>
+    <plurals name="discussion_poll_votes">
+        <item quantity="one">%d vote</item>
+        <item quantity="other">%d votes</item>
+    </plurals>
     <plurals name="discussion_comments">
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
