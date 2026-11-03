@@ -243,6 +243,8 @@
         <activity android:name=".ui.activity.NewPullRequestActivity" android:windowSoftInputMode="stateHidden|adjustResize"/>
         <activity android:name=".ui.activity.RepoSettingsActivity" android:windowSoftInputMode="stateHidden|adjustResize"/>
         <activity android:name=".ui.activity.BranchesActivity"/>
+        <activity android:name=".ui.activity.RulesetsActivity"/>
+        <activity android:name=".ui.activity.RulesetEditActivity"/>
         <activity android:name=".ui.activity.CompareActivity"/>
         <activity android:name=".ui.activity.EditReleaseActivity" android:windowSoftInputMode="stateHidden|adjustResize"/>
         <activity android:name=".ui.activity.IssuesActivity"/>

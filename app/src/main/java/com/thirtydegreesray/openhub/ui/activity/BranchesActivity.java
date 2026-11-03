@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.Menu;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -26,6 +28,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.util.RulesetForm;
+import com.thirtydegreesray.openhub.util.Json;
+import com.thirtydegreesray.openhub.http.RulesetService;
 import com.thirtydegreesray.openhub.http.GitDataService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.RepoSettingsService;
@@ -186,6 +191,7 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
         if (!isDefault && defaultBranch != null) {
             popup.getMenu().add(0, 5, 0, getString(R.string.branches_compare, defaultBranch));
         }
+        popup.getMenu().add(0, 6, 1, R.string.branches_rules);
         if (isAdmin) popup.getMenu().add(0, 2, 1, R.string.branches_protection);
         if (canPush) popup.getMenu().add(0, 3, 2, R.string.rename);
         if (canPush && !isDefault && !isProtected) popup.getMenu().add(0, 4, 3, R.string.delete);
@@ -196,6 +202,9 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
                     break;
                 case 5:
                     startActivity(CompareActivity.createIntent(this, owner, repo, defaultBranch, name));
+                    break;
+                case 6:
+                    showRules(name);
                     break;
                 case 2:
                     editProtection(name);
@@ -396,7 +405,105 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
                     }, getString(R.string.protection_saved, branch));
                 })
                 .setNegativeButton(R.string.cancel, null)
+                .setNeutralButton(wasProtected ? getString(R.string.protection_convert) : null,
+                        wasProtected ? (d, w) -> startActivity(RulesetEditActivity.createNewIntent(this,
+                                owner, repo, RulesetForm.TARGET_BRANCH,
+                                RulesetForm.fromProtection(branch, current).toPrefill())) : null)
                 .show();
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Rulesets
+    // ---------------------------------------------------------------------------------
+
+    /** Every active rule that applies to the branch, with the ruleset it comes from. */
+    private void showRules(@NonNull String branch) {
+        showProgressDialog(getString(R.string.please_wait));
+        background(() -> {
+            RulesetService rulesets = GitHubApi.service(RulesetService.class);
+            JsonArray rules = GitHubApi.call(rulesets.getBranchRules(owner, repo, RepoCommitter.encode(branch)));
+            Map<Long, String> names = new HashMap<>();
+            if (rules != null && rules.size() > 0) {
+                JsonArray all = GitHubApi.call(rulesets.getRulesets(owner, repo, 1));
+                if (all != null) {
+                    for (JsonElement e : all) {
+                        if (!e.isJsonObject()) continue;
+                        JsonObject r = e.getAsJsonObject();
+                        names.put((long) Json.integer(r, "id"), Json.str(r, "name"));
+                    }
+                }
+            }
+            return new Object[]{rules == null ? new JsonArray() : rules, names};
+        }, (Object[] result) -> {
+            dismissProgressDialog();
+            JsonArray rules = (JsonArray) result[0];
+            //noinspection unchecked
+            Map<Long, String> names = (Map<Long, String>) result[1];
+            StringBuilder text = new StringBuilder();
+            for (JsonElement e : rules) {
+                if (!e.isJsonObject()) continue;
+                JsonObject rule = e.getAsJsonObject();
+                if (text.length() > 0) text.append('\n');
+                text.append("• ").append(ruleLabel(rule));
+                String name = names.get((long) Json.integer(rule, "ruleset_id"));
+                String from = !StringUtils.isBlank(name) ? name : Json.str(rule, "ruleset_source");
+                if (!StringUtils.isBlank(from)) text.append("  (").append(from).append(')');
+            }
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.branches_rules_title, branch))
+                    .setMessage(text.length() == 0 ? getString(R.string.branches_rules_none, branch) : text)
+                    .setPositiveButton(R.string.ok, null)
+                    .setNeutralButton(R.string.rulesets, (d, w) ->
+                            startActivity(RulesetsActivity.createIntent(this, owner, repo)));
+            dialog.show();
+        }, error -> dismissProgressDialog());
+    }
+
+    @NonNull
+    private String ruleLabel(@NonNull JsonObject rule) {
+        String type = Json.str(rule, "type");
+        switch (type) {
+            case RulesetForm.CREATION: return getString(R.string.ruleset_rule_creation);
+            case RulesetForm.UPDATE: return getString(R.string.ruleset_rule_update);
+            case RulesetForm.DELETION: return getString(R.string.ruleset_rule_deletion);
+            case RulesetForm.LINEAR_HISTORY: return getString(R.string.ruleset_rule_linear);
+            case RulesetForm.SIGNATURES: return getString(R.string.ruleset_rule_signatures);
+            case RulesetForm.NON_FAST_FORWARD: return getString(R.string.ruleset_rule_force_push);
+            case RulesetForm.PULL_REQUEST: {
+                int approvals = Json.integer(rule, "parameters.required_approving_review_count");
+                return getString(R.string.ruleset_rule_pull_request) + (approvals > 0
+                        ? " (" + getResources().getQuantityString(R.plurals.ruleset_approvals_count,
+                        approvals, approvals) + ")" : "");
+            }
+            case RulesetForm.STATUS_CHECKS: {
+                List<String> checks = new ArrayList<>();
+                JsonElement list = Json.get(rule, "parameters.required_status_checks");
+                if (list != null && list.isJsonArray()) {
+                    for (JsonElement c : list.getAsJsonArray()) {
+                        if (c.isJsonObject()) checks.add(Json.str(c.getAsJsonObject(), "context"));
+                    }
+                }
+                return getString(R.string.ruleset_rule_status_checks)
+                        + (checks.isEmpty() ? "" : ": " + String.join(", ", checks));
+            }
+            default:
+                return type.replace('_', ' ');
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, 1, 0, R.string.rulesets);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == 1) {
+            startActivity(RulesetsActivity.createIntent(this, owner, repo));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private static boolean enabled(@NonNull JsonObject protection, @NonNull String key) {

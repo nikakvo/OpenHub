@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Repository rulesets: list, editor, history, rules of a branch. -->
+<resources>
+
+    <!-- list -->
+    <string name="rulesets">Rulesets</string>
+    <string name="settings_rulesets_summary">Rules for branches and tags: pull requests, checks, force pushes and more</string>
+    <string name="rulesets_none">No rulesets yet.\n\nA ruleset protects branches or tags, like branch protection, but it can cover many branches at once, be switched off without losing its settings, and say who may bypass it.</string>
+    <string name="rulesets_new">New ruleset</string>
+    <string name="rulesets_from">from %1$s</string>
+    <string name="rulesets_view">View</string>
+    <string name="rulesets_enable">Switch on</string>
+    <string name="rulesets_disable">Switch off</string>
+    <string name="rulesets_enabled_done">%1$s is active</string>
+    <string name="rulesets_disabled_done">%1$s is switched off</string>
+    <string name="rulesets_delete_title">Delete ruleset</string>
+    <string name="rulesets_delete_message">Delete the ruleset %1$s? Its rules stop at once. This cannot be undone.</string>
+    <string name="rulesets_deleted">%1$s deleted</string>
+
+    <!-- editor -->
+    <string name="ruleset_edit_title">Edit ruleset</string>
+    <string name="ruleset_view_title">Ruleset</string>
+    <string name="ruleset_name">Ruleset name</string>
+    <string name="ruleset_enforcement">Enforcement</string>
+    <string name="ruleset_active">Active</string>
+    <string name="ruleset_disabled">Disabled</string>
+    <string name="ruleset_evaluate">Evaluate (only reports, Enterprise)</string>
+    <string name="ruleset_target_branch">Branch ruleset</string>
+    <string name="ruleset_target_tag">Tag ruleset</string>
+    <string name="ruleset_target_push">Push ruleset</string>
+    <string name="ruleset_targets">Target branches</string>
+    <string name="ruleset_targets_tags">Target tags</string>
+    <string name="ruleset_include">Include (one per line)</string>
+    <string name="ruleset_exclude">Exclude (one per line)</string>
+    <string name="ruleset_add_default">Default branch</string>
+    <string name="ruleset_add_all">All branches</string>
+    <string name="ruleset_add_all_tags">All tags</string>
+    <string name="ruleset_targets_note">A branch name or a pattern like release/* or feature/**. ~DEFAULT_BRANCH is the default branch, ~ALL every branch.</string>
+    <string name="ruleset_targets_note_tags">A tag name or a pattern like v* or v1.*. ~ALL is every tag.</string>
+    <string name="ruleset_bypass">Bypass list</string>
+    <string name="ruleset_bypass_admins">Repository admins may bypass these rules</string>
+    <string name="ruleset_bypass_always">Always</string>
+    <string name="ruleset_bypass_pull_request">Only through pull requests</string>
+    <plurals name="ruleset_bypass_others">
+        <item quantity="one">%1$d more actor may bypass (set on github.com, kept as it is).</item>
+        <item quantity="other">%1$d more actors may bypass (set on github.com, kept as they are).</item>
+    </plurals>
+    <string name="ruleset_rules">Rules</string>
+    <string name="ruleset_rule_creation">Restrict creations (only bypass actors can create matching refs)</string>
+    <string name="ruleset_rule_update">Restrict updates (only bypass actors can push)</string>
+    <string name="ruleset_rule_deletion">Restrict deletions</string>
+    <string name="ruleset_rule_linear">Require linear history</string>
+    <string name="ruleset_rule_signatures">Require signed commits</string>
+    <string name="ruleset_rule_pull_request">Require a pull request before merging</string>
+    <string name="ruleset_approvals">Required approvals (0-10)</string>
+    <string name="ruleset_dismiss_stale">Dismiss stale approvals when new commits are pushed</string>
+    <string name="ruleset_code_owner">Require review from code owners</string>
+    <string name="ruleset_last_push">Require approval of the most recent push</string>
+    <string name="ruleset_thread_resolution">Require conversation resolution before merging</string>
+    <string name="ruleset_merge_methods">Allowed merge methods</string>
+    <string name="ruleset_method_merge">Merge</string>
+    <string name="ruleset_method_squash">Squash</string>
+    <string name="ruleset_method_rebase">Rebase</string>
+    <string name="ruleset_rule_status_checks">Require status checks to pass</string>
+    <string name="ruleset_checks">Check names (one per line)</string>
+    <string name="ruleset_strict">Branches must be up to date before merging</string>
+    <string name="ruleset_rule_force_push">Block force pushes</string>
+    <string name="ruleset_other_rules">Also in this ruleset (edit these on github.com, they are kept as they are): %1$s</string>
+    <string name="ruleset_push_note">Push rulesets (file paths, sizes, extensions) can only be changed on github.com.</string>
+    <string name="ruleset_not_converted_conversation">The branch requires resolved conversations without requiring pull requests. In a ruleset this is part of "Require a pull request before merging"; tick it there if you want it.</string>
+    <string name="ruleset_not_converted_restrictions">Who may push to the branch (people, teams, apps) is not converted: add them to the bypass list on github.com.</string>
+    <string name="ruleset_readonly_source">This ruleset belongs to %1$s and can only be changed there.</string>
+    <string name="ruleset_readonly_admin">Only admins of the repository can change rulesets.</string>
+    <string name="ruleset_readonly_push">Push rulesets can only be changed on github.com.</string>
+    <string name="ruleset_problem_name">Give the ruleset a name</string>
+    <string name="ruleset_problem_include">Add at least one branch or tag</string>
+    <string name="ruleset_problem_checks">Add at least one check name</string>
+    <string name="ruleset_problem_merge">Allow at least one merge method</string>
+    <string name="ruleset_created">Ruleset %1$s created</string>
+    <string name="ruleset_saved">Ruleset %1$s saved</string>
+
+    <!-- history -->
+    <string name="ruleset_history">History</string>
+    <string name="ruleset_history_none">No earlier versions</string>
+    <string name="ruleset_history_current">Current</string>
+    <string name="ruleset_history_you">you</string>
+    <string name="ruleset_history_loaded">Loaded the version of %1$s. Save to restore it.</string>
+
+    <!-- rule types the editor does not show -->
+    <string name="ruleset_type_merge_queue">Require merge queue</string>
+    <string name="ruleset_type_deployments">Require deployments to succeed</string>
+    <string name="ruleset_type_code_scanning">Require code scanning results</string>
+    <string name="ruleset_type_workflows">Require workflows to pass</string>
+    <string name="ruleset_type_commit_message">Commit message pattern</string>
+    <string name="ruleset_type_author_email">Commit author email pattern</string>
+    <string name="ruleset_type_committer_email">Committer email pattern</string>
+    <string name="ruleset_type_branch_name">Branch name pattern</string>
+    <string name="ruleset_type_tag_name">Tag name pattern</string>
+    <string name="ruleset_type_file_path">Restrict file paths</string>
+    <string name="ruleset_type_path_length">Maximum file path length</string>
+    <string name="ruleset_type_file_extension">Restrict file extensions</string>
+    <string name="ruleset_type_file_size">Maximum file size</string>
+    <string name="ruleset_type_copilot">Copilot code review</string>
+
+    <!-- branches -->
+    <string name="branches_rules">Rules for this branch</string>
+    <string name="branches_rules_none">No ruleset applies to %1$s.</string>
+    <string name="branches_rules_title">Rules for %1$s</string>
+    <string name="protection_convert">Convert to ruleset</string>
+    <plurals name="ruleset_approvals_count">
+        <item quantity="one">%1$d approval</item>
+        <item quantity="other">%1$d approvals</item>
+    </plurals>
+</resources>
