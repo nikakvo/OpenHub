@@ -5,7 +5,6 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.orhanobut.logger.Logger;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.R;
@@ -27,12 +26,12 @@ import com.thirtydegreesray.openhub.mvp.model.filter.TrendingSince;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePagerPresenter;
 import com.thirtydegreesray.openhub.ui.fragment.RepositoriesFragment;
 import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.util.TrendingParser;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
@@ -375,67 +374,21 @@ public class RepositoriesPresenter extends BasePagerPresenter<IRepositoriesContr
     }
 
     private Repository parseTrendingRepositoryData(Element element) throws Exception{
-        String fullName = element.select("h2 > a").attr("href");
-        fullName = fullName.substring(1);
-        String owner = fullName.substring(0, fullName.lastIndexOf("/"));
-        String repoName = fullName.substring(fullName.lastIndexOf("/") + 1);
-
-        Element descElement = element.getElementsByClass("col-9 color-fg-muted my-1 pr-4").first();
-        Element numElement = element.getElementsByClass("f6 color-fg-muted mt-2").first();
-        StringBuilder desc = new StringBuilder();
-        String language = "unknown";
-        String starNumStr = "0";
-        String forkNumStr = "0";
-        String periodNumStr = "0";
-
-        try{
-            if(null != descElement){
-                for(TextNode textNode : descElement.textNodes()){
-                    desc.append(textNode.getWholeText());
-                }
-            }
-
-            if(null != numElement){
-                Elements languageElements = numElement.select("span > span");
-                if(null != languageElements && languageElements.size() > 0){
-                    language = numElement.select("span > span").get(1).textNodes().get(0).toString().trim();
-                }
-
-                for (Element e : numElement.getElementsByClass("Link Link--muted d-inline-block mr-3")) {
-                    if (e.attr("href").endsWith("stargazers")) {
-                        starNumStr = e.textNodes().get(0).toString()
-                                .replaceAll(" ", "").replaceAll(",", "");
-                    } else if (e.attr("href").endsWith("forks")) {
-                        forkNumStr = e.textNodes().get(0).toString()
-                                .replaceAll(" ", "").replaceAll(",", "");
-                    }
-                }
-
-                Element periodElement =  numElement.getElementsByClass("d-inline-block float-sm-right").first();
-                if(periodElement != null){
-                    periodNumStr = periodElement.childNodes().get(2).toString().trim();
-                    periodNumStr = periodNumStr.substring(0, periodNumStr.indexOf(" "))
-                            .replaceAll(",", "");
-                }
-            }
-        }catch (Exception e){
-            desc = new StringBuilder("desc parse error.");
-            Logger.e("Trending repo desc or num info parse error.", e);
-        }
+        TrendingParser.Item item = TrendingParser.parse(element);
+        if (item == null) throw new IllegalStateException("Trending row without a repository link");
 
         Repository repo = new Repository();
-        repo.setFullName(fullName);
-        repo.setName(repoName);
+        repo.setFullName(item.fullName);
+        repo.setName(item.name);
         User user = new User();
-        user.setLogin(owner);
+        user.setLogin(item.owner);
         repo.setOwner(user);
 
-        repo.setDescription(desc.toString().trim()
-                .replaceAll("\n", ""));
-        repo.setStargazersCount(Integer.parseInt(starNumStr));
-        repo.setForksCount(Integer.parseInt(forkNumStr));
-        repo.setSinceStargazersCount(Integer.parseInt(periodNumStr));
-        repo.setLanguage(language);
+        repo.setDescription(item.description.replaceAll("\n", ""));
+        repo.setStargazersCount(item.stars);
+        repo.setForksCount(item.forks);
+        repo.setSinceStargazersCount(item.periodStars);
+        repo.setLanguage(item.language);
         repo.setSince(since);
 
         return repo;
