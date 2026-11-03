@@ -11,10 +11,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Spanned;
+import android.text.style.ClickableSpan;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -491,8 +494,40 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             String text = Json.str(item, "body");
             if (text.isEmpty()) bodyView.setVisibility(View.GONE);
             else markwon.setMarkdown(bodyView, text);
+            if (Json.bool(item, "_line")) {
+                String path = Json.str(item, "path");
+                openOnTap(bodyView, () -> openDiff(path));
+            }
             timeline.addView(view);
         }
+    }
+
+    /**
+     * A tap on the text of a line comment opens its diff like a tap on the card; the text
+     * takes the touches for its links, so a tap on a link still only opens the link.
+     */
+    private void openOnTap(@NonNull TextView body, @NonNull Runnable open) {
+        final float[] at = new float[2];
+        body.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    at[0] = event.getX();
+                    at[1] = event.getY();
+                }
+                return false;
+            }
+        });
+        body.setOnClickListener(v -> {
+            CharSequence text = body.getText();
+            if (text instanceof Spanned) {
+                int offset = body.getOffsetForPosition(at[0], at[1]);
+                if (offset >= 0 && ((Spanned) text).getSpans(offset, offset, ClickableSpan.class).length > 0) {
+                    return;
+                }
+            }
+            open.run();
+        });
     }
 
     private void updateMergeBox(@Nullable String checks) {

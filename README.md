@@ -18,7 +18,7 @@ app goes to them; see [Credits](#credits).
 
 ## Compared with the original OpenHub
 
-* **Android 16 ready**: targets API 36, edge-to-edge, predictive back gesture.
+* **Android 17 ready**: targets API 37, edge-to-edge, predictive back gesture.
 * **Sign in with a personal access token**, so the app works without its own OAuth App.
   Browser login (OAuth) is still there when the build has one.
 * **GitHub Actions** for any repository: workflow runs with their status, artifacts with
@@ -44,7 +44,10 @@ app goes to them; see [Credits](#credits).
 ## Features
 
 ### App
-* Login with a personal access token or with the browser (OAuth); multiple accounts
+* Login with a personal access token or with the browser (OAuth); multiple accounts:
+  switch, add or log out from the side menu of any screen
+* A saved sign-in is never removed by itself: when GitHub stops accepting it, the app
+  asks you to sign in again and keeps the account
 * GitHub notifications on the phone (optional): Mark as read, Mark as done, Unsubscribe,
   and why each notification came
 * **Releases** of all your starred repositories in one list, newest first, with New
@@ -74,8 +77,9 @@ app goes to them; see [Credits](#credits).
 * GitHub collections and featured topics
 * Search repositories and users
 * Bookmarks and a trace of what you viewed (swipe to remove, or clear the trace)
-* Lists update themselves when you come back to them (after your own changes, or when
-  they are old); pulling down still reloads at once
+* **Pull down to reload** on every screen that shows GitHub data (repository, profile,
+  files, pull requests, discussions, releases, logs and more); lists also update
+  themselves when you come back to them
 * Launcher shortcuts
 * Option to skip loading images on mobile data
 
@@ -83,6 +87,9 @@ app goes to them; see [Credits](#credits).
 * Create repositories (README, .gitignore templates and your own lines, license);
   repository settings, transfer, archive and delete
 * Branches: browse their files, create, rename, delete, restore, and branch protection
+* **Rulesets** for branches and tags: create, edit, switch on and off, delete, the
+  history of a ruleset with restore, bypass for admins, and converting branch protection
+  into a ruleset; the rules that apply to a branch
 * **Compare** two branches or tags: commits ahead and behind, changed files and diffs, and
   a pull request from there
 * Create, upload, edit, rename and delete files as real commits, to the branch you
@@ -124,6 +131,8 @@ app goes to them; see [Credits](#credits).
 * List, conversation with reviews and checks, commits and files
 * Open pull requests (also from forks), edit, close and reopen, draft and ready
 * Merge, squash or rebase; delete and restore the branch
+* A blocked merge lists what the base branch asks for: the rules of its rulesets and
+  branch protection, approvals so far, and unresolved conversations
 * Line-by-line review of the diff: comment on one or several lines, suggest changes,
   reply, edit and delete your comments
 * **Pending reviews**: collect line comments and replies to threads and send them as one
@@ -158,6 +167,9 @@ OpenHub talks only to GitHub: no ads, no analytics, no servers of its own.
   it, whatever address they point to; each account's token is bound to its own HTTP client.
 * **Not in backups.** Accounts and tokens are excluded from Android backups and from
   phone-to-phone transfers; settings are kept.
+* **Short-lived browser sign-in.** A browser sign-in token lasts 8 hours and renews itself
+  with a refresh token, which is encrypted the same way; if GitHub refuses the renewal,
+  the app asks you to sign in again (one notification when it is in the background).
 * **Browser sign-in** uses a one-time `state` that must come back unchanged and PKCE
   (S256), so another app cannot push its own sign-in into OpenHub; the client secret and
   the code travel in the request body, never in a URL.
