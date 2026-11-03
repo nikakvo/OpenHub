@@ -195,7 +195,7 @@ Check a downloaded APK with `apksigner verify --print-certs OpenHub-<version>.ap
 
 ## Building
 
-You need JDK 17 and the Android SDK (platform 36). Then:
+You need JDK 17 and the Android SDK (platform 37). Then:
 
 ```bash
 ./gradlew assembleNormalDebug
