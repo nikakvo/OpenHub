@@ -79,6 +79,11 @@ public class CommitFilesFragment extends ListFragment<CommitFilesPresenter, Comm
             adapter.setData(mPresenter.getSortedList(commitFiles));
             postNotifyDataSetChanged();
         }
+        // the files are already here: no circle (ListFragment starts with one, which only
+        // disabling the pull used to hide); posted, a circle set before the first layout
+        // would otherwise stay
+        refreshLayout.setRefreshing(false);
+        refreshLayout.post(() -> refreshLayout.setRefreshing(false));
     }
 
     @Override
