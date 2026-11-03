@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.http;
 
+import com.thirtydegreesray.openhub.http.core.FreshTokenInterceptor;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -55,6 +56,7 @@ public final class GitHubExplore {
             Pattern.compile("^https?://(?:www\\.)?github\\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/?$");
 
     private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
+            .addInterceptor(FreshTokenInterceptor.INSTANCE)
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build();

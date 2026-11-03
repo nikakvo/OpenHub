@@ -29,6 +29,7 @@ public final class SignOut {
     /** @param token the token of the account that signs out (may be null) */
     public static void cleanUp(@Nullable String token) {
         AppRetrofit.INSTANCE.clearClients();
+        TokenRefresher.accountsChanged(null);
         new Thread(() -> {
             AppRetrofit.INSTANCE.clearCache();
             revoke(token);
@@ -43,6 +44,8 @@ public final class SignOut {
     }
 
     private static void revoke(@Nullable String token) {
+        // a refreshed sign-in: revoke the token it has now
+        if (token != null) token = TokenRefresher.current(token);
         if (!isRevocable(token)) return;
         try {
             OkHttpClient client = new OkHttpClient.Builder()

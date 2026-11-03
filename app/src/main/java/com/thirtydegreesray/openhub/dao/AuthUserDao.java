@@ -72,6 +72,17 @@ public abstract class AuthUserDao {
         storedDelete(TokenCrypto.seal(user.getAccessToken()));
     }
 
+    /**
+     * Stores a refreshed token pair: the token is the primary key, so the row of this
+     * login is replaced in one transaction (selection, name and avatar come with
+     * {@code user}).
+     */
+    @Transaction
+    public void replaceAccount(@NonNull AuthUser user) {
+        deleteByLogin(user.getLoginId());
+        storedInsert(sealed(user));
+    }
+
     /** Deletes the accounts of this login, whatever form their token has. */
     @Query("DELETE FROM AUTH_USER WHERE LOGIN_ID = :loginId")
     public abstract int deleteByLogin(String loginId);

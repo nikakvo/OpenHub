@@ -25,6 +25,7 @@ import com.thirtydegreesray.openhub.mvp.model.User;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.TokenLifetime;
+import com.thirtydegreesray.openhub.util.TokenRefresher;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -235,6 +236,7 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
         authUser.setName(userInfo.getName());
         authUser.setAvatar(userInfo.getAvatarUrl());
         db.authUserDao().insert(authUser);
+        TokenRefresher.accountsChanged(authUser.getLoginId());
 
         AppData.INSTANCE.setAuthUser(authUser);
         AppData.INSTANCE.setLoggedUser(userInfo);

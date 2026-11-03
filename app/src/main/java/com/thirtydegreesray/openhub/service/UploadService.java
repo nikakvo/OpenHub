@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.service;
 
+import com.thirtydegreesray.openhub.http.core.FreshTokenInterceptor;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -161,6 +162,7 @@ public class UploadService extends Service {
         // One upload at a time: parallel uploads only split the same uplink.
         executor = Executors.newSingleThreadExecutor();
         client = new OkHttpClient.Builder()
+                .addInterceptor(FreshTokenInterceptor.INSTANCE)
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(120, TimeUnit.SECONDS)
                 // GitHub processes the file before it answers

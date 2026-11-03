@@ -19,8 +19,8 @@ import java.lang.ref.WeakReference;
 
 /**
  * Notices, for every screen at once, that GitHub no longer accepts the signed-in account:
- * the HTTP layer reports each 401 of the GitHub API here, and the screen in front shows
- * "Sign in again". The screen itself handles the failed request as any other error (its
+ * the HTTP layer reports each 401 of the GitHub API here (after a refresh was tried, see
+ * {@link TokenRefresher}), and the screen in front shows "Sign in again". The screen itself handles the failed request as any other error (its
  * loading circle stops); the account is never removed.
  */
 public final class SignInWatch implements Application.ActivityLifecycleCallbacks {
@@ -42,7 +42,11 @@ public final class SignInWatch implements Application.ActivityLifecycleCallbacks
      */
     public static void report(@Nullable String token) {
         AuthUser user = AppData.INSTANCE.getAuthUser();
-        if (user == null || StringUtils.isBlank(token) || !token.equals(user.getAccessToken())) return;
+        if (user == null || StringUtils.isBlank(token)) return;
+        // an older token of this account that was refreshed meanwhile counts as its own
+        if (!TokenRefresher.current(token).equals(user.getAccessToken())) return;
+        // an expiring sign-in whose refresh only failed for now (no network) is not asked
+        if (!TokenRefresher.needsSignIn(token)) return;
         final String login = user.getLoginId();
         MAIN.post(() -> {
             Activity activity = resumed.get();

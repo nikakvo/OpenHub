@@ -20,7 +20,7 @@ public enum  AppData {
     INSTANCE;
 
     @AutoAccess(dataName = "appData_loggedUser") User loggedUser;
-    @AutoAccess(dataName = "appData_authUser") AuthUser authUser;
+    @AutoAccess(dataName = "appData_authUser") volatile AuthUser authUser;
     @AutoAccess(dataName = "appData_systemDefaultLocal") Locale systemDefaultLocal;
 
     public User getLoggedUser() {

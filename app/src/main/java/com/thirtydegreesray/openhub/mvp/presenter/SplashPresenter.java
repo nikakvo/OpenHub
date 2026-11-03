@@ -5,6 +5,7 @@ package com.thirtydegreesray.openhub.mvp.presenter;
 import com.thirtydegreesray.openhub.util.TokenCrypto;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.http.error.UnauthorizedError;
+import com.thirtydegreesray.openhub.util.TokenRefresher;
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.AppData;
@@ -81,8 +82,10 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
                     // just a failed refresh.
                     return;
                 }
-                if (error instanceof UnauthorizedError) {
-                    // GitHub rejected the token (revoked or expired): sign in again.
+                if (error instanceof UnauthorizedError && TokenRefresher.needsSignIn(accessToken)) {
+                    // GitHub rejected the token (revoked or expired) and it cannot be
+                    // refreshed: sign in again. (An expiring sign-in whose refresh only
+                    // failed for now gets "Try again" below.)
                     // The account is kept; it is never removed without the user.
                     AuthUser user = AppData.INSTANCE.getAuthUser();
                     AppData.INSTANCE.setAuthUser(null);

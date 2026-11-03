@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.service;
 
+import com.thirtydegreesray.openhub.http.core.FreshTokenInterceptor;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -69,6 +70,7 @@ public class ActionsCheckWorker extends Worker {
 
         token = ReleaseCheckWorker.loadToken();
         client = new OkHttpClient.Builder()
+                .addInterceptor(FreshTokenInterceptor.INSTANCE)
                 .connectTimeout(20, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .build();

@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.service;
 
+import com.thirtydegreesray.openhub.http.core.FreshTokenInterceptor;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -118,6 +119,7 @@ public class DownloadService extends Service {
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         executor = Executors.newFixedThreadPool(MAX_PARALLEL);
         client = new OkHttpClient.Builder()
+                .addInterceptor(FreshTokenInterceptor.INSTANCE)
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
                 .writeTimeout(60, TimeUnit.SECONDS)

@@ -14,6 +14,7 @@ import com.thirtydegreesray.openhub.util.FileUtil;
 import com.thirtydegreesray.openhub.util.NetHelper;
 import com.thirtydegreesray.openhub.util.SignInWatch;
 import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.util.TokenRefreshRules;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -74,6 +75,8 @@ public enum  AppRetrofit {
         OkHttpClient client = baseClient().newBuilder()
                 // first, so the network interceptor and the cache see the final request
                 .addInterceptor(new BaseInterceptor(token))
+                // then the newest token of the account, refreshed when it expires
+                .addInterceptor(FreshTokenInterceptor.INSTANCE)
                 .build();
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(baseUrl)
@@ -192,10 +195,12 @@ public enum  AppRetrofit {
             }
 
             Response response = chain.proceed(request);
-            // GitHub no longer accepts this token: the screen in front asks to sign in again
+            // GitHub no longer accepts this sign-in (even after a refresh): the screen in
+            // front asks to sign in again. The token that was really sent counts.
             if (response.code() == 401 && !StringUtils.isBlank(token)
                     && !token.startsWith("Basic") && sendsTokenTo(request.url())) {
-                SignInWatch.report(token);
+                String sent = TokenRefreshRules.tokenOf(response.request().header("Authorization"));
+                SignInWatch.report(sent != null ? sent : token);
             }
             return response;
         }
