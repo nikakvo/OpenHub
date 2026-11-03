@@ -197,6 +197,8 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
                 }
             }, 500);
             issueTimelineFragment.setListScrollListener(this);
+        } else {
+            issueTimelineFragment.issueReloaded(issue);
         }
 
         String loggedUser = AppData.INSTANCE.getLoggedUser().getLogin();
@@ -205,6 +207,11 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
         editBn.setVisibility(editAble ? View.VISIBLE : View.GONE);
         commentBn.setVisibility(View.VISIBLE);
 
+    }
+
+    /** Pull down on the timeline: the title, state and text of the issue too. */
+    public void reloadIssue() {
+        if (mPresenter != null) mPresenter.reloadIssue();
     }
 
     @Override

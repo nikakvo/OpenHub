@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -109,6 +110,7 @@ public class MilestonesActivity extends BaseActivity<IBaseContract.Presenter> {
         if (canWrite) newBn.show();
         else newBn.hide();
         updateTabs();
+        PullRefresh.wrap(findViewById(R.id.pulls_scroll), this::reload).follow(loader);
         reload();
     }
 

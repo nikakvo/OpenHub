@@ -47,7 +47,18 @@ public class ProfileInfoPresenter extends BasePagerPresenter<IProfileInfoContrac
         return user;
     }
 
+    /** Pull down: the organizations again from GitHub. */
+    public void reloadOrgs() {
+        if (user == null || !user.isUser()) return;
+        orgs = null;
+        loadOrgs(false);
+    }
+
     private void loadOrgs(){
+        loadOrgs(true);
+    }
+
+    private void loadOrgs(final boolean readCacheFirst){
         if(orgs != null && orgs.size() != 0){
             mView.showUserOrgs(orgs);
             return;
@@ -71,7 +82,7 @@ public class ProfileInfoPresenter extends BasePagerPresenter<IProfileInfoContrac
             public Observable<Response<ArrayList<User>>> createObservable(boolean forceNetWork) {
                 return getUserService().getUserOrgs(forceNetWork, user.getLogin());
             }
-        }, httpObserver, true);
+        }, httpObserver, readCacheFirst);
     }
 
     public void setUser(User user) {

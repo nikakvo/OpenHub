@@ -22,6 +22,8 @@ public interface IProfileContract {
         void followUser(boolean follow);
         boolean isBookmarked();
         void bookmark(boolean bookmark);
+        /** Loads the profile again from GitHub (pull down). */
+        void reloadProfile();
     }
 
 }

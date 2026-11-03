@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -137,6 +138,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         setToolbarTitle(getString(R.string.discussion_number, number), owner + "/" + repo);
         markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this,
                 () -> com.thirtydegreesray.openhub.util.MarkdownRenderer.refreshImages(getWindow().getDecorView()));
+        PullRefresh.wrap((View) content.getParent(), this::load).follow(loader);
         load();
     }
 

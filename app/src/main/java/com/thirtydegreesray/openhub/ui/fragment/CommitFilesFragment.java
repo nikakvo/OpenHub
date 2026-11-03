@@ -51,9 +51,18 @@ public class CommitFilesFragment extends ListFragment<CommitFilesPresenter, Comm
                 .inject(this);
     }
 
+    /** A screen whose file list can change (Compare) reloads it on a pull. */
+    public interface Host {
+        void reloadFiles();
+    }
+
     @Override
     protected void onReLoadData() {
-
+        if (getActivity() instanceof Host) {
+            ((Host) getActivity()).reloadFiles();
+        } else {
+            hideLoading();
+        }
     }
 
     @Override
@@ -65,7 +74,7 @@ public class CommitFilesFragment extends ListFragment<CommitFilesPresenter, Comm
     protected void initFragment(Bundle savedInstanceState) {
         super.initFragment(savedInstanceState);
         setLoadMoreEnable(false);
-        setRefreshEnable(false);
+        setRefreshEnable(getActivity() instanceof Host);
         if(commitFiles != null){
             adapter.setData(mPresenter.getSortedList(commitFiles));
             postNotifyDataSetChanged();

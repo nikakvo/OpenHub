@@ -22,6 +22,8 @@ public interface IIssueDetailContract {
     interface Presenter extends IBaseContract.Presenter<IIssueDetailContract.View> {
         void addComment(@NonNull String text);
         void toggleIssueState();
+        /** Loads the issue again from GitHub (pull down on the timeline). */
+        void reloadIssue();
     }
 
 }

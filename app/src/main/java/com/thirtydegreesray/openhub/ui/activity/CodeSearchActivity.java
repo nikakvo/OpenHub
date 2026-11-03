@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -89,6 +90,7 @@ public class CodeSearchActivity extends BaseActivity<IBaseContract.Presenter> {
         super.initView(savedInstanceState);
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.code_search_title), owner + "/" + repo);
+        PullRefresh.wrap(findViewById(R.id.results_scroll), this::search).follow(loader);
         if (!StringUtils.isBlank(query)) {
             searchEdit.setText(query);
             search();

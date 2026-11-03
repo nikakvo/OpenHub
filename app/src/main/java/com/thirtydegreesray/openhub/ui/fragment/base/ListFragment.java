@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.fragment.base;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.os.Bundle;
 import android.os.SystemClock;
 import androidx.annotation.NonNull;
@@ -237,6 +238,8 @@ public abstract class ListFragment <P extends IBaseContract.Presenter, A extends
 
     @Override
     public void onRefresh() {
+        // a reload shows what is on GitHub now, not a cached page from a minute ago
+        PullRefresh.freshFromNow();
         refreshLayout.setRefreshing(true);
         curPage = 1;
         onReLoadData();

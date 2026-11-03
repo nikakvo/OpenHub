@@ -554,6 +554,13 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
         }
     }
 
+    /** Loads the repository again from GitHub (pull down on the Info tab). */
+    public void reloadRepository() {
+        if (mPresenter == null) return;
+        repoStamp = RepoChanges.stamp();
+        mPresenter.refreshRepository();
+    }
+
     @Override
     public void onAttachFragment(Fragment fragment) {
         super.onAttachFragment(fragment);

@@ -48,7 +48,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
  * how far the second is ahead of and behind the first, its commits, and the changed files
  * with their diffs. With write access, an open pull request can be started from here.
  */
-public class CompareActivity extends BaseActivity<IBaseContract.Presenter> {
+public class CompareActivity extends BaseActivity<IBaseContract.Presenter>
+        implements CommitFilesFragment.Host {
 
     /** @param base the branch or tag to compare against (null: the default branch) */
     @NonNull
@@ -239,6 +240,12 @@ public class CompareActivity extends BaseActivity<IBaseContract.Presenter> {
                         })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
+    }
+
+    /** Pull down on the file list: compare again (the branches may have new commits). */
+    @Override
+    public void reloadFiles() {
+        compare();
     }
 
     private void compare() {

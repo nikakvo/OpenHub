@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -324,6 +325,7 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
                 mPresenter.getOwner().concat("/").concat(mPresenter.getRepoName()));
         downloadBn.setVisibility(View.GONE);
         setToolbarScrollAble(true);
+        PullRefresh.wrap(scrollView, () -> mPresenter.pullReload()).follow(loader);
     }
 
     @Override

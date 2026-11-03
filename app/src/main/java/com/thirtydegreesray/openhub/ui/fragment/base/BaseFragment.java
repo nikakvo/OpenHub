@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.fragment.base;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -79,9 +80,27 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
         AppUtils.updateAppLanguage(getActivity());
         View fragmentView = inflater.inflate(getLayoutId(), container, false);
         bindViews(fragmentView);
+        pullRefresh = createPullRefresh(fragmentView);
         initFragment(savedInstanceState);
         if (mPresenter != null) mPresenter.onViewInitialized();
-        return fragmentView;
+        return pullRefresh != null ? pullRefresh.layout() : fragmentView;
+    }
+
+    /** Set when {@link #createPullRefresh} wrapped the page for pull to reload. */
+    @Nullable protected PullRefresh pullRefresh;
+
+    /**
+     * Pages that can be pulled down to reload wrap their root here
+     * ({@code PullRefresh.wrap(root, this::reload)}) and return it. Default: no pull.
+     */
+    @Nullable
+    protected PullRefresh createPullRefresh(@NonNull View root) {
+        return null;
+    }
+
+    /** Stops the pull circle, if a pull is going. */
+    protected void pullDone() {
+        if (pullRefresh != null) pullRefresh.done();
     }
 
     @Override
@@ -232,6 +251,7 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
 
     @Override
     public void showErrorToast(String message) {
+        pullDone();
         Toasty.error(getActivity(), message).show();
     }
 

@@ -66,7 +66,16 @@ public class ProfilePresenter extends BasePresenter<IProfileContract.View>
         }, 500);
     }
 
+    @Override
+    public void reloadProfile() {
+        if (isTransitionComplete) getProfileInfo(false);
+    }
+
     private void getProfileInfo(){
+        getProfileInfo(true);
+    }
+
+    private void getProfileInfo(final boolean readCacheFirst){
         mView.showLoading();
         HttpObserver<User> httpObserver = new HttpObserver<User>() {
             @Override
@@ -92,7 +101,7 @@ public class ProfilePresenter extends BasePresenter<IProfileContract.View>
             public Observable<Response<User>> createObservable(boolean forceNetWork) {
                 return getUserService().getUser(forceNetWork, loginId);
             }
-        }, httpObserver, true);
+        }, httpObserver, readCacheFirst);
     }
 
     public String getLoginId() {

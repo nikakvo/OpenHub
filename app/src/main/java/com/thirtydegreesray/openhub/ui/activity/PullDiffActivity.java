@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -166,6 +167,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                 () -> com.thirtydegreesray.openhub.util.MarkdownRenderer.refreshImages(getWindow().getDecorView()));
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
+        PullRefresh.wrap(list, this::load).follow(loader);
         load();
     }
 

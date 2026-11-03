@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.fragment;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import com.thirtydegreesray.openhub.ui.activity.GistsActivity;
 
 import android.app.Activity;
@@ -180,6 +181,18 @@ public class ProfileInfoFragment extends BaseFragment<ProfileInfoPresenter>
         showProfileInfo(user);
     }
 
+
+    /** Pull down: the profile and the organizations from GitHub. */
+    @Override
+    protected PullRefresh createPullRefresh(@NonNull View root) {
+        View loader = getActivity() == null ? null : getActivity().findViewById(R.id.loader);
+        return PullRefresh.wrap(root, this::reloadFromPull).follow(loader);
+    }
+
+    private void reloadFromPull() {
+        if (getActivity() instanceof ProfileActivity) ((ProfileActivity) getActivity()).reloadProfile();
+        if (mPresenter != null && mPresenter.getUser() != null) mPresenter.reloadOrgs();
+    }
 
     @Override
     protected void bindViews(View root) {

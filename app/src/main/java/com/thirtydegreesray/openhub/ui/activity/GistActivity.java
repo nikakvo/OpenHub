@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -106,7 +107,7 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.gists));
         refreshLayout.setColorSchemeColors(ViewUtils.getRefreshLayoutColors(this));
-        refreshLayout.setOnRefreshListener(this::load);
+        refreshLayout.setOnRefreshListener(() -> { PullRefresh.freshFromNow(); load(); });
         addFileBn.setOnClickListener(v -> {
             if (gist != null) startActivity(GistEditActivity.addFileIntent(this, gistId, fileNames()));
         });

@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -101,7 +102,7 @@ public class ReleaseFeedActivity extends BaseActivity<IBaseContract.Presenter> {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
         refreshLayout.setColorSchemeColors(ViewUtils.getRefreshLayoutColors(this));
-        refreshLayout.setOnRefreshListener(this::refresh);
+        refreshLayout.setOnRefreshListener(() -> { PullRefresh.freshFromNow(); refresh(); });
 
         feed = ReleaseFeed.loadCache(this);
         render();

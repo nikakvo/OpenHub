@@ -131,6 +131,16 @@ public class ReleaseInfoPresenter extends BasePresenter<IReleaseInfoContract.Vie
         }, httpObserver, !byId);
     }
 
+    /** Pull down: the shown release again, or the newest one when the screen shows "Latest". */
+    public void pullReload() {
+        if (latest && tagName == null && StringUtils.isBlank(releaseId)) {
+            loadReleaseInfo();
+        } else {
+            reload();
+        }
+        if (release != null) loadLatestId();
+    }
+
     /** Fetches the current state of the shown release from the network. */
     public void reload() {
         if (release == null) {

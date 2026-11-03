@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -160,7 +161,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         if (settingsTabLayout != null) settingsTabLayout.addOnTabSelectedListener(rowListener(TAB_SECRETS));
 
         refreshLayout.setColorSchemeColors(ViewUtils.getRefreshLayoutColors(this));
-        refreshLayout.setOnRefreshListener(this::load);
+        refreshLayout.setOnRefreshListener(() -> { PullRefresh.freshFromNow(); load(); });
         addSecretBn.setOnClickListener(v -> {
             if (tab == TAB_VARIABLES) editVariable(null);
             else editSecret(null);

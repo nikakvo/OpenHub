@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
 import android.animation.ValueAnimator;
@@ -134,7 +135,7 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.actions), owner + "/" + repo);
         refreshLayout.setColorSchemeColors(ViewUtils.getRefreshLayoutColors(this));
-        refreshLayout.setOnRefreshListener(() -> load(true));
+        refreshLayout.setOnRefreshListener(() -> { PullRefresh.freshFromNow(); load(true); });
         load(true);
     }
 

@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -98,7 +99,7 @@ public class WikiPageActivity extends BaseActivity<IBaseContract.Presenter> {
         setToolbarTitle(isSidebar() ? getString(R.string.wiki_contents) : wiki().title(),
                 owner + "/" + repo);
         refreshLayout.setColorSchemeColors(ViewUtils.getRefreshLayoutColors(this));
-        refreshLayout.setOnRefreshListener(() -> load(true));
+        refreshLayout.setOnRefreshListener(() -> { PullRefresh.freshFromNow(); load(true); });
         // the WebView scrolls itself: pull to refresh only at its top
         refreshLayout.setOnChildScrollUpCallback((parent, child) -> webView.canScrollVertically(-1));
         findViewById(R.id.empty_browser_bn).setOnClickListener(v ->

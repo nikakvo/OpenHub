@@ -185,6 +185,11 @@ public class ProfileActivity extends PagerActivity<ProfilePresenter>
         }
     }
 
+    /** Loads the profile again from GitHub (pull down on the Info tab). */
+    public void reloadProfile() {
+        if (mPresenter != null) mPresenter.reloadProfile();
+    }
+
     private void notifyUserInfoUpdated(User user){
         for(Fragment fragment : getFragments()){
             if(fragment != null && fragment instanceof ProfileInfoFragment){

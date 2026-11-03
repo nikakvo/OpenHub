@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -88,6 +89,7 @@ public class PullRequestsActivity extends BaseActivity<IBaseContract.Presenter> 
         tabNormalColor = tabOpen.getTextColors();
         if (canCreate) newPullBn.show();
         updateTabs();
+        PullRefresh.wrap(findViewById(R.id.pulls_scroll), this::reload).follow(loader);
         reload();
     }
 

@@ -12,6 +12,7 @@ import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.BuildConfig;
 import com.thirtydegreesray.openhub.util.FileUtil;
 import com.thirtydegreesray.openhub.util.NetHelper;
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import com.thirtydegreesray.openhub.util.SignInWatch;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.TokenRefreshRules;
@@ -192,6 +193,13 @@ public enum  AppRetrofit {
                 request = request.newBuilder()
                         .cacheControl(CacheControl.FORCE_NETWORK)
                         .build();
+            } else if (PullRefresh.wantsFreshData() && "GET".equals(request.method())
+                    && NetHelper.INSTANCE.getNetEnabled()
+                    && request.cacheControl().toString().isEmpty()) {
+                // the user pulled a screen down: ask GitHub again, not the cache
+                request = request.newBuilder()
+                        .cacheControl(new CacheControl.Builder().noCache().build())
+                        .build();
             }
 
             Response response = chain.proceed(request);
@@ -237,6 +245,12 @@ public enum  AppRetrofit {
 
             //有forceNetWork时，强制更改缓存策略
             String forceNetWork = request.header("forceNetWork");
+            // a pull asked GitHub again (no-cache only): keep the answer under GitHub's own
+            // rules, so it can still be read offline later
+            if (StringUtils.isBlank(forceNetWork) && request.cacheControl().noCache()
+                    && !request.cacheControl().noStore()) {
+                return originalResponse.newBuilder().removeHeader("Pragma").build();
+            }
             if(!StringUtils.isBlank(forceNetWork)){
                 requestCacheControl = getCacheString();
             }

@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -125,6 +126,10 @@ public class JobLogActivity extends BaseActivity<IBaseContract.Presenter> {
         layoutManager = new LinearLayoutManager(this);
         list.setLayoutManager(layoutManager);
         list.setAdapter(adapter);
+        PullRefresh.wrap(list, () -> {
+            handler.removeCallbacks(poll);
+            load();
+        }).follow(loader);
         load();
     }
 

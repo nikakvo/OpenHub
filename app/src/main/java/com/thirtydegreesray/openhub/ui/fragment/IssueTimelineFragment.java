@@ -77,6 +77,22 @@ public class IssueTimelineFragment extends ListFragment<IssueTimelinePresenter, 
     @Override
     protected void onReLoadData() {
         mPresenter.loadTimeline(1, true);
+        if (getActivity() instanceof IssueDetailActivity) {
+            ((IssueDetailActivity) getActivity()).reloadIssue();
+        }
+    }
+
+    /** The issue was loaded again (pull down): its text at the top of the timeline. */
+    public void issueReloaded(@NonNull Issue issue) {
+        if (mPresenter == null) return;
+        mPresenter.setIssue(issue);
+        if (adapter == null || adapter.getData() == null || adapter.getData().isEmpty()) return;
+        IssueEvent first = adapter.getData().get(0);
+        if (first.getParentIssue() == null) return;
+        first.setBody(issue.getBody());
+        first.setBodyHtml(issue.getBodyHtml());
+        first.setParentIssue(issue);
+        adapter.notifyItemChanged(0);
     }
 
     @Override

@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.fragment;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -217,6 +218,16 @@ public class ViewerFragment extends BaseFragment<ViewerPresenter>
 
     public void refresh() {
         mPresenter.load(true);
+    }
+
+    /** Pull down reloads a file of a repository (other kinds of pages have nothing to reload). */
+    @Override
+    protected PullRefresh createPullRefresh(@NonNull View root) {
+        if (mPresenter == null
+                || !ViewerActivity.ViewerType.RepoFile.equals(mPresenter.getViewerType())) {
+            return null;
+        }
+        return PullRefresh.wrap(root, this::refresh).scrollTarget(webView).follow(loader);
     }
 
     @Override

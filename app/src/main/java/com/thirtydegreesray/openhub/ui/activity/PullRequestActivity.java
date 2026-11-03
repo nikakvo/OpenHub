@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -174,6 +175,15 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this,
                 () -> com.thirtydegreesray.openhub.util.MarkdownRenderer.refreshImages(getWindow().getDecorView()));
         showTab(tab);
+        PullRefresh.wrap(conversationScroll, this::pullReload).follow(loader);
+        PullRefresh.wrap(commitsScroll, this::pullReload).follow(loader);
+        PullRefresh.wrap(filesScroll, this::pullReload).follow(loader);
+        load();
+    }
+
+    /** Pull down on any tab: the pull request with its comments, commits and files again. */
+    private void pullReload() {
+        commitsLoaded = false;
         load();
     }
 

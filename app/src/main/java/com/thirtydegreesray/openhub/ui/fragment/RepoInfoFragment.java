@@ -35,6 +35,7 @@ import com.thirtydegreesray.openhub.ui.activity.ProfileActivity;
 import com.thirtydegreesray.openhub.ui.activity.PullRequestsActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepoListActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepositoryActivity;
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import com.thirtydegreesray.openhub.ui.activity.UserListActivity;
 import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
 import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
@@ -364,6 +365,24 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
     public void scrollToTop() {
         super.scrollToTop();
         nestedScrollView.scrollTo(0, 0);
+    }
+
+    /** Pull down: the repository, its README and the pull request count from GitHub. */
+    @Override
+    protected PullRefresh createPullRefresh(@NonNull View root) {
+        return PullRefresh.wrap(root, this::reloadFromPull).follow(readmeLoader);
+    }
+
+    private void reloadFromPull() {
+        if (mPresenter == null || mPresenter.getRepository() == null) {
+            pullDone();
+            return;
+        }
+        if (getActivity() instanceof RepositoryActivity) {
+            ((RepositoryActivity) getActivity()).reloadRepository();
+        }
+        mPresenter.reloadReadMe();
+        countPulls(mPresenter.getRepository());
     }
 
     @Override

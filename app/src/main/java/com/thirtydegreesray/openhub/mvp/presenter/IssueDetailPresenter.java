@@ -60,7 +60,18 @@ public class IssueDetailPresenter extends BasePresenter<IIssueDetailContract.Vie
         this.issue = issue;
     }
 
+    @Override
+    public void reloadIssue() {
+        if (StringUtils.isBlank(owner) || StringUtils.isBlank(repoName)) return;
+        loadIssueInfo(owner, repoName, issueNumber, false);
+    }
+
     private void loadIssueInfo(final String user, final String repo, final int issueNumber) {
+        loadIssueInfo(user, repo, issueNumber, true);
+    }
+
+    private void loadIssueInfo(final String user, final String repo, final int issueNumber,
+                               final boolean readCacheFirst) {
         HttpObserver<Issue> httpObserver = new HttpObserver<Issue>() {
             @Override
             public void onError(Throwable error) {
@@ -80,7 +91,7 @@ public class IssueDetailPresenter extends BasePresenter<IIssueDetailContract.Vie
             public Observable<Response<Issue>> createObservable(boolean forceNetWork) {
                 return getIssueService().getIssueInfo(forceNetWork, user, repo, issueNumber);
             }
-        }, httpObserver, true);
+        }, httpObserver, readCacheFirst);
         mView.showLoading();
     }
 
