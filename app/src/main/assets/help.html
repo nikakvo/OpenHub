@@ -302,12 +302,13 @@
   <ul>
     <li><span class="ui">+</span> makes a new <strong>branch ruleset</strong> or <strong>tag ruleset</strong>. Tap a ruleset to edit it; long-press it to <span class="ui">Switch on</span> / <span class="ui">Switch off</span> or <span class="ui">Delete</span> it.</li>
     <li><strong>Target branches</strong>: one name or pattern per line, e.g. <code>main</code>, <code>release/*</code>. <span class="ui">Default branch</span> adds <code>~DEFAULT_BRANCH</code>, <span class="ui">All branches</span> adds <code>~ALL</code>. <strong>Exclude</strong> takes branches out again.</li>
-    <li><strong>Bypass list</strong>: <span class="ui">Repository admins may bypass these rules</span>, <span class="ui">Always</span> or <span class="ui">Only through pull requests</span>. Other actors set on github.com are kept.</li>
+    <li><strong>Bypass list</strong>: <span class="ui">Repository admins may bypass these rules</span>, <span class="ui">Always</span> or <span class="ui">Only through pull requests</span> (tag rulesets have only Always, so there is no choice to make). Other actors set on github.com are kept.</li>
     <li><strong>Rules</strong>: restrict creations, updates and deletions, require linear history, signed commits, a pull request (approvals, dismiss stale approvals, code owners, approval of the latest push, resolved conversations, allowed merge methods), status checks (by name, optionally up to date), and block force pushes. Tag rulesets offer the rules that apply to tags.</li>
     <li>Rules OpenHub does not edit (merge queue, code scanning, workflows, name patterns, push rulesets and others) are named under the rules and kept exactly as they are when you save.</li>
     <li>⋮ → <span class="ui">History</span> lists the versions of a ruleset. Tap an older one to load it into the form; <span class="ui">Save</span> restores it.</li>
     <li>In <span class="ui">Branch protection</span> of a protected branch, <span class="ui">Convert to ruleset</span> opens a new ruleset with the same rules. Nothing is saved until you press <span class="ui">Save</span>; the classic protection stays until you remove it.</li>
     <li>Rulesets of the organization show "from" and the organization's name; they can only be changed there.</li>
+    <li>A blocked pull request shows the rules of its base branch in the merge box (<a href="#pulls">pull requests</a>).</li>
   </ul>
   <div class="note"><b class="lbl">Plans</b>Rulesets are free for public repositories. For private ones GitHub needs a paid plan and answers with a message saying so. "Evaluate" (rules that only report) is an Enterprise feature; OpenHub offers Active and Disabled.</div>
 </div>
@@ -401,6 +402,7 @@
     <li><span class="ui">Delete branch</span> after merging or closing, and <span class="ui">Restore branch</span> if you change your mind.</li>
     <li><span class="ui">Close pull request</span> / <span class="ui">Reopen pull request</span>.</li>
   </ul>
+  <p>When GitHub blocks the merge, the box lists what the base branch asks for: the rules of its rulesets (with the ruleset's name) and, for admins, its classic branch protection. A pull request rule also shows how far you are, for example <em>1 of 2 approved</em>, reviewers who asked for changes, and unresolved conversations when the rule wants them resolved.</p>
   <p>The ⋮ menu has <strong>Edit</strong> (title, description), Refresh, Share, Copy URL and Open in browser. Long-press a comment to edit or delete your own.</p>
   <div class="note warn"><b class="lbl">No merge button?</b>The box says why: <em>conflicts</em> (both branches changed the same lines; solve it on github.com or with git), a draft, failing required checks or missing approvals.</div>
   <h3>Opening a pull request</h3>
@@ -685,7 +687,7 @@
   <h3>Changing a workflow file is refused</h3>
   <p>The <code>workflow</code> permission is missing. Create a new token with <span class="ui">Create token</span>, or log in with the browser again.</p>
   <h3>No Merge button</h3>
-  <p>Read the merge box: conflicts, a draft, missing approvals or failing checks. Conflicts are solved on github.com or with git.</p>
+  <p>Read the merge box: conflicts, a draft, missing approvals or failing checks. When the merge is blocked it lists the rules of the base branch and what is still missing. Conflicts are solved on github.com or with git.</p>
   <h3>Create pull request stays grey</h3>
   <p>Base and compare are the same branch, or the compare branch has no new commits. Commit something to that branch first.</p>
   <h3>A github.com link opens the browser</h3>

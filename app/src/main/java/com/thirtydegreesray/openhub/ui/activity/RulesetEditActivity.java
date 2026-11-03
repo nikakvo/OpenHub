@@ -38,6 +38,7 @@ import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.PullRefresh;
+import com.thirtydegreesray.openhub.util.RuleLabels;
 import com.thirtydegreesray.openhub.util.RulesetForm;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
@@ -275,7 +276,7 @@ public class RulesetEditActivity extends BaseActivity<IBaseContract.Presenter> {
         List<String> other = f.otherRuleTypes();
         if (!other.isEmpty()) {
             List<String> names = new ArrayList<>();
-            for (String type : other) names.add(ruleName(type));
+            for (String type : other) names.add(RuleLabels.name(this, type));
             notes.add(getString(R.string.ruleset_other_rules, String.join(", ", names)));
         }
         for (String code : f.notConverted) {
@@ -486,27 +487,6 @@ public class RulesetEditActivity extends BaseActivity<IBaseContract.Presenter> {
             scroll.scrollTo(0, 0);
             showInfoToast(getString(R.string.ruleset_history_loaded, label));
         }, error -> dismissProgressDialog());
-    }
-
-    @NonNull
-    private String ruleName(@NonNull String type) {
-        switch (type) {
-            case "merge_queue": return getString(R.string.ruleset_type_merge_queue);
-            case "required_deployments": return getString(R.string.ruleset_type_deployments);
-            case "code_scanning": return getString(R.string.ruleset_type_code_scanning);
-            case "workflows": return getString(R.string.ruleset_type_workflows);
-            case "commit_message_pattern": return getString(R.string.ruleset_type_commit_message);
-            case "commit_author_email_pattern": return getString(R.string.ruleset_type_author_email);
-            case "committer_email_pattern": return getString(R.string.ruleset_type_committer_email);
-            case "branch_name_pattern": return getString(R.string.ruleset_type_branch_name);
-            case "tag_name_pattern": return getString(R.string.ruleset_type_tag_name);
-            case "file_path_restriction": return getString(R.string.ruleset_type_file_path);
-            case "max_file_path_length": return getString(R.string.ruleset_type_path_length);
-            case "file_extension_restriction": return getString(R.string.ruleset_type_file_extension);
-            case "max_file_size": return getString(R.string.ruleset_type_file_size);
-            case "copilot_code_review": return getString(R.string.ruleset_type_copilot);
-            default: return type.replace('_', ' ');
-        }
     }
 
     @Override

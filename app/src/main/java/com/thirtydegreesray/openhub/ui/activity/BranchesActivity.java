@@ -41,6 +41,7 @@ import com.thirtydegreesray.openhub.ui.widget.TextInputDialog;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.RepoChanges;
 import com.thirtydegreesray.openhub.util.RepoCommitter;
+import com.thirtydegreesray.openhub.util.RuleLabels;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 
@@ -444,7 +445,7 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
                 if (!e.isJsonObject()) continue;
                 JsonObject rule = e.getAsJsonObject();
                 if (text.length() > 0) text.append('\n');
-                text.append("• ").append(ruleLabel(rule));
+                text.append("• ").append(RuleLabels.label(this, rule));
                 String name = names.get((long) Json.integer(rule, "ruleset_id"));
                 String from = !StringUtils.isBlank(name) ? name : Json.str(rule, "ruleset_source");
                 if (!StringUtils.isBlank(from)) text.append("  (").append(from).append(')');
@@ -457,38 +458,6 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
                             startActivity(RulesetsActivity.createIntent(this, owner, repo)));
             dialog.show();
         }, error -> dismissProgressDialog());
-    }
-
-    @NonNull
-    private String ruleLabel(@NonNull JsonObject rule) {
-        String type = Json.str(rule, "type");
-        switch (type) {
-            case RulesetForm.CREATION: return getString(R.string.ruleset_rule_creation);
-            case RulesetForm.UPDATE: return getString(R.string.ruleset_rule_update);
-            case RulesetForm.DELETION: return getString(R.string.ruleset_rule_deletion);
-            case RulesetForm.LINEAR_HISTORY: return getString(R.string.ruleset_rule_linear);
-            case RulesetForm.SIGNATURES: return getString(R.string.ruleset_rule_signatures);
-            case RulesetForm.NON_FAST_FORWARD: return getString(R.string.ruleset_rule_force_push);
-            case RulesetForm.PULL_REQUEST: {
-                int approvals = Json.integer(rule, "parameters.required_approving_review_count");
-                return getString(R.string.ruleset_rule_pull_request) + (approvals > 0
-                        ? " (" + getResources().getQuantityString(R.plurals.ruleset_approvals_count,
-                        approvals, approvals) + ")" : "");
-            }
-            case RulesetForm.STATUS_CHECKS: {
-                List<String> checks = new ArrayList<>();
-                JsonElement list = Json.get(rule, "parameters.required_status_checks");
-                if (list != null && list.isJsonArray()) {
-                    for (JsonElement c : list.getAsJsonArray()) {
-                        if (c.isJsonObject()) checks.add(Json.str(c.getAsJsonObject(), "context"));
-                    }
-                }
-                return getString(R.string.ruleset_rule_status_checks)
-                        + (checks.isEmpty() ? "" : ": " + String.join(", ", checks));
-            }
-            default:
-                return type.replace('_', ' ');
-        }
     }
 
     @Override

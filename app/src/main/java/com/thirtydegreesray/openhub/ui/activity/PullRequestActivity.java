@@ -38,6 +38,7 @@ import com.thirtydegreesray.openhub.http.GitDataService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.PullService;
 import com.thirtydegreesray.openhub.http.RepoSettingsService;
+import com.thirtydegreesray.openhub.http.RulesetService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
@@ -48,12 +49,14 @@ import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
+import com.thirtydegreesray.openhub.util.MergeRules;
 import com.thirtydegreesray.openhub.util.ReviewDrafts;
 import com.thirtydegreesray.openhub.util.ReviewThreads;
 import com.thirtydegreesray.openhub.util.MarkdownHtml;
 import com.thirtydegreesray.openhub.util.PullChanges;
 import com.thirtydegreesray.openhub.util.RepoChanges;
 import com.thirtydegreesray.openhub.util.RepoCommitter;
+import com.thirtydegreesray.openhub.util.RuleLabels;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
@@ -156,6 +159,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     /** Review threads by the id of their first comment (resolved or not). */
     private Map<Long, ReviewThreads.Thread> reviewThreads = new HashMap<>();
     private long loadedStamp;
+    /** What the base branch asks for, loaded only while GitHub says merging is blocked. */
+    @Nullable private Blocked blocked;
 
     @Override
     protected void setupActivityComponent(AppComponent appComponent) {
@@ -285,13 +290,16 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             boolean branchExists = headBranchExists(p);
             Map<Long, ReviewThreads.Thread> threads = lineComments.isEmpty()
                     ? new HashMap<>() : ReviewThreads.fetch(owner, repo, number);
-            return new Object[]{p, r, items, checks, branchExists, lineComments, threads};
+            Blocked why = "open".equals(Json.str(p, "state"))
+                    && "blocked".equals(Json.str(p, "mergeable_state")) ? blockedBy(p, reviews) : null;
+            return new Object[]{p, r, items, checks, branchExists, lineComments, threads, why};
         }, (Object[] result) -> {
             loader.setVisibility(View.GONE);
             pull = (JsonObject) result[0];
             repoJson = (JsonObject) result[1];
             //noinspection unchecked
             reviewThreads = (Map<Long, ReviewThreads.Thread>) result[6];
+            blocked = (Blocked) result[7];
             updateReviewButton();
             //noinspection unchecked
             showConversation((List<JsonObject>) result[2], (String) result[3]);
@@ -536,7 +544,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         } else if (state.equals("dirty")) {
             mergeStatus.setText(R.string.pull_conflicts);
         } else if (state.equals("blocked")) {
-            mergeStatus.setText(R.string.pull_blocked);
+            mergeStatus.setText(blockedText());
         } else if (state.equals("behind")) {
             mergeStatus.setText(R.string.pull_behind);
         } else if (state.equals("unstable")) {
@@ -545,6 +553,140 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             mergeStatus.setText(R.string.pull_mergeable);
         }
         if (write && !state.equals("dirty")) mergeBn.setVisibility(View.VISIBLE);
+    }
+
+    /** The rules of the base branch that can stop a merge, with what is still missing. */
+    private static final class Blocked {
+        @NonNull final String base;
+        @NonNull final List<JsonObject> rules = new ArrayList<>();
+        @NonNull final Map<Long, String> rulesetNames = new HashMap<>();
+        /** Classic branch protection; null when the branch has none or we may not read it. */
+        @Nullable JsonObject protection;
+        int approvals;
+        int changesRequested;
+
+        Blocked(@NonNull String base) {
+            this.base = base;
+        }
+    }
+
+    /**
+     * Runs in the background. GitHub only says "blocked", so ask which rules apply to the
+     * base branch: the rulesets (GET rules/branches/{branch}, readable for everyone who can
+     * read the repository) and the classic protection (admins only; 403/404 are skipped).
+     */
+    @NonNull
+    private Blocked blockedBy(@NonNull JsonObject p, @Nullable JsonArray reviews) {
+        Blocked why = new Blocked(Json.str(p, "base.ref"));
+        why.approvals = MergeRules.approvals(reviews);
+        why.changesRequested = MergeRules.changesRequested(reviews);
+        String branch = RepoCommitter.encode(why.base);
+        RulesetService rulesets = GitHubApi.service(RulesetService.class);
+        try {
+            JsonArray rules = GitHubApi.call(rulesets.getBranchRules(owner, repo, branch));
+            if (rules != null) {
+                for (JsonElement e : rules) {
+                    if (!e.isJsonObject()) continue;
+                    JsonObject rule = e.getAsJsonObject();
+                    if (MergeRules.aboutMerging(Json.str(rule, "type"))) why.rules.add(rule);
+                }
+            }
+            if (!why.rules.isEmpty()) {
+                JsonArray all = GitHubApi.call(rulesets.getRulesets(owner, repo, 1));
+                if (all != null) {
+                    for (JsonElement e : all) {
+                        if (!e.isJsonObject()) continue;
+                        JsonObject r = e.getAsJsonObject();
+                        why.rulesetNames.put((long) Json.integer(r, "id"), Json.str(r, "name"));
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            // the merge box then shows GitHub's general "blocked" text only
+        }
+        try {
+            why.protection = GitHubApi.call(GitHubApi.service(RepoSettingsService.class)
+                    .getProtection(owner, repo, branch));
+        } catch (Exception ignored) {
+            why.protection = null;
+        }
+        return why;
+    }
+
+    /** "Merging is blocked..." plus one line per rule of the base branch that is about merging. */
+    @NonNull
+    private CharSequence blockedText() {
+        String general = getString(R.string.pull_blocked);
+        Blocked why = blocked;
+        if (why == null) return general;
+        int unresolved = 0;
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (ReviewThreads.Thread t : reviewThreads.values()) {
+            if (!t.resolved && seen.add(t.id)) unresolved++;
+        }
+        List<String> lines = new ArrayList<>();
+        for (JsonObject rule : why.rules) {
+            String line = "• " + RuleLabels.label(this, rule);
+            String name = why.rulesetNames.get((long) Json.integer(rule, "ruleset_id"));
+            String from = !StringUtils.isBlank(name) ? name : Json.str(rule, "ruleset_source");
+            if (!StringUtils.isBlank(from)) line += "  (" + from + ")";
+            if (com.thirtydegreesray.openhub.util.RulesetForm.PULL_REQUEST.equals(Json.str(rule, "type"))) {
+                line += pullRequestState(MergeRules.requiredApprovals(rule), why,
+                        MergeRules.requiresResolution(rule) ? unresolved : 0);
+            }
+            lines.add(line);
+        }
+        JsonObject protection = why.protection;
+        if (protection != null && protection.size() > 0) {
+            String from = "  (" + getString(R.string.pull_rules_classic) + ")";
+            JsonObject reviews = Json.obj(protection, "required_pull_request_reviews");
+            if (reviews != null) {
+                int needed = Json.integer(reviews, "required_approving_review_count");
+                String line = "• " + getString(R.string.ruleset_rule_pull_request) + (needed > 0
+                        ? " (" + getResources().getQuantityString(R.plurals.ruleset_approvals_count,
+                        needed, needed) + ")" : "") + from;
+                boolean resolution = Json.bool(protection, "required_conversation_resolution.enabled");
+                lines.add(line + pullRequestState(needed, why, resolution ? unresolved : 0));
+            } else if (Json.bool(protection, "required_conversation_resolution.enabled")) {
+                lines.add("• " + getString(R.string.ruleset_thread_resolution) + from
+                        + (unresolved > 0 ? ": " + getResources().getQuantityString(
+                        R.plurals.pull_rules_unresolved, unresolved, unresolved) : ""));
+            }
+            JsonObject checks = Json.obj(protection, "required_status_checks");
+            if (checks != null) {
+                List<String> names = new ArrayList<>();
+                JsonElement contexts = Json.get(checks, "contexts");
+                if (contexts != null && contexts.isJsonArray()) {
+                    for (JsonElement c : contexts.getAsJsonArray()) names.add(c.getAsString());
+                }
+                lines.add("• " + getString(R.string.ruleset_rule_status_checks)
+                        + (names.isEmpty() ? "" : ": " + String.join(", ", names)) + from);
+            }
+            if (Json.bool(protection, "required_linear_history.enabled")) {
+                lines.add("• " + getString(R.string.ruleset_rule_linear) + from);
+            }
+            if (Json.bool(protection, "required_signatures.enabled")) {
+                lines.add("• " + getString(R.string.ruleset_rule_signatures) + from);
+            }
+        }
+        if (lines.isEmpty()) return general;
+        return general + "\n\n" + getString(R.string.pull_rules_header, why.base) + "\n"
+                + String.join("\n", lines);
+    }
+
+    /** ": 1 of 2 approved, 1 reviewer asked for changes, 2 unresolved conversations". */
+    @NonNull
+    private String pullRequestState(int needed, @NonNull Blocked why, int unresolved) {
+        List<String> parts = new ArrayList<>();
+        if (needed > 0) parts.add(getString(R.string.pull_rules_approved, Math.min(why.approvals, needed), needed));
+        if (why.changesRequested > 0) {
+            parts.add(getResources().getQuantityString(R.plurals.pull_rules_changes_requested,
+                    why.changesRequested, why.changesRequested));
+        }
+        if (unresolved > 0) {
+            parts.add(getResources().getQuantityString(R.plurals.pull_rules_unresolved, unresolved, unresolved));
+        }
+        return parts.isEmpty() ? "" : ": " + String.join(", ", parts);
     }
 
     // ---------------------------------------------------------------------------------

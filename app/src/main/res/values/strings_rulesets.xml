@@ -111,4 +111,16 @@
         <item quantity="one">%1$d approval</item>
         <item quantity="other">%1$d approvals</item>
     </plurals>
+    <!-- merge box of a pull request -->
+    <string name="pull_rules_header">What %1$s asks for:</string>
+    <string name="pull_rules_classic">branch protection</string>
+    <string name="pull_rules_approved">%1$d of %2$d approved</string>
+    <plurals name="pull_rules_changes_requested">
+        <item quantity="one">%1$d reviewer asked for changes</item>
+        <item quantity="other">%1$d reviewers asked for changes</item>
+    </plurals>
+    <plurals name="pull_rules_unresolved">
+        <item quantity="one">%1$d unresolved conversation</item>
+        <item quantity="other">%1$d unresolved conversations</item>
+    </plurals>
 </resources>
