@@ -12,6 +12,7 @@ import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.BuildConfig;
 import com.thirtydegreesray.openhub.util.FileUtil;
 import com.thirtydegreesray.openhub.util.NetHelper;
+import com.thirtydegreesray.openhub.util.SignInWatch;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
 import java.io.IOException;
@@ -190,7 +191,13 @@ public enum  AppRetrofit {
                         .build();
             }
 
-            return chain.proceed(request);
+            Response response = chain.proceed(request);
+            // GitHub no longer accepts this token: the screen in front asks to sign in again
+            if (response.code() == 401 && !StringUtils.isBlank(token)
+                    && !token.startsWith("Basic") && sendsTokenTo(request.url())) {
+                SignInWatch.report(token);
+            }
+            return response;
         }
     }
 

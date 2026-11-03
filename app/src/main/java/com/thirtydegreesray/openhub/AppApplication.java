@@ -22,6 +22,7 @@ import com.thirtydegreesray.openhub.inject.module.AppModule;
 import com.thirtydegreesray.openhub.service.NetBroadcastReceiver;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.NetHelper;
+import com.thirtydegreesray.openhub.util.SignInWatch;
 
 /**
  * AppApplication
@@ -55,6 +56,8 @@ public class AppApplication extends Application {
                 .appModule(new AppModule(this))
                 .build();
         initNetwork();
+        // "Sign in again" on the screen in front when GitHub stops accepting the account
+        SignInWatch.install(this);
         // RxJava 3 sends errors that arrive after a request was cancelled (screen closed)
         // to this handler; without one they would crash the app.
         RxJavaPlugins.setErrorHandler(error -> Logger.t(TAG).w("Rx error after dispose: " + error));

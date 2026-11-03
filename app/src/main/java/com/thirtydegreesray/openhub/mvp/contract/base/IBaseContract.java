@@ -44,12 +44,6 @@ public interface IBaseContract {
 
         void showLoginPage();
 
-        /**
-         * GitHub no longer accepts the saved sign-in of {@code login}: ask to sign in again.
-         * The account stays on the phone; it is never removed without the user.
-         */
-        void showSignInAgain(@Nullable String login);
-
     }
 
     interface Presenter<V extends IBaseContract.View>{

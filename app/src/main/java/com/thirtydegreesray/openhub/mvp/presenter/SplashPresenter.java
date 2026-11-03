@@ -73,6 +73,14 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
         HttpObserver<User> httpObserver = new HttpObserver<User>() {
             @Override
             public void onError(@NonNull Throwable error) {
+                if (isMainPageShowwed) {
+                    // The start used the saved profile and the main screen is open; this is
+                    // the later check over the network. It must not touch the signed-in
+                    // account (it used to clear it, leaving the app half signed in): a 401
+                    // is shown by SignInWatch on the screen in front, anything else is
+                    // just a failed refresh.
+                    return;
+                }
                 if (error instanceof UnauthorizedError) {
                     // GitHub rejected the token (revoked or expired): sign in again.
                     // The account is kept; it is never removed without the user.

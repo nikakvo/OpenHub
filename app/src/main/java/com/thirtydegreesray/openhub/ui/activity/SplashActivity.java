@@ -58,11 +58,6 @@ public class SplashActivity extends BaseActivity<SplashPresenter> implements ISp
     }
 
     @Override
-    public void showSignInAgain(@Nullable String login) {
-        showSignInAgain(login, false);
-    }
-
-    @Override
     public void showLoginPage() {
         delayFinish();
         startActivity(new Intent(getActivity(), LoginActivity.class));

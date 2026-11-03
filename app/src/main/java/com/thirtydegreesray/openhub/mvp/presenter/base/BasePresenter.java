@@ -18,7 +18,6 @@ import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.common.AppEventBus;
 import com.thirtydegreesray.openhub.dao.AppDatabase;
-import com.thirtydegreesray.openhub.dao.AuthUser;
 import com.thirtydegreesray.openhub.http.CommitService;
 import com.thirtydegreesray.openhub.http.GitHubWebPageService;
 import com.thirtydegreesray.openhub.http.IssueService;
@@ -267,9 +266,9 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
         final HttpObserver<T> tempObserver = new HttpObserver<T>() {
             @Override
             public void onError(Throwable error) {
-                if(!checkIsUnauthorized(error)){
-                    httpObserver.onError(error);
-                }
+                // a 401 is handled like any error here (the loading circle stops); the
+                // HTTP layer has already asked to sign in again (SignInWatch)
+                httpObserver.onError(error);
             }
 
             @Override
@@ -314,17 +313,6 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
             return new HttpSubscriber<>(httpObserver);
         else
             return new HttpProgressSubscriber<>(progressDialog, httpObserver);
-    }
-
-    private boolean checkIsUnauthorized(Throwable error){
-        if(error instanceof UnauthorizedError){
-            // GitHub no longer accepts the token. The account is never removed here (it
-            // used to be, on any 401): it stays until the user signs in again or logs out.
-            AuthUser user = AppData.INSTANCE.getAuthUser();
-            mView.showSignInAgain(user == null ? null : user.getLoginId());
-            return true;
-        }
-        return false;
     }
 
     public void rxDBExecute(@NonNull Runnable runnable){

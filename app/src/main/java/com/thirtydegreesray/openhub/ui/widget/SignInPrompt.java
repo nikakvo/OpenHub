@@ -21,6 +21,13 @@ public final class SignInPrompt {
     /** One prompt at a time, however many requests fail together. */
     private static boolean showing;
 
+    /**
+     * After Close, a screen that refreshes itself would bring the prompt straight back:
+     * it waits this long before it is shown again (the start screen always asks).
+     */
+    private static final long QUIET_AFTER_CLOSE_MS = 20_000;
+    private static long closedAt;
+
     private SignInPrompt() {
     }
 
@@ -32,6 +39,8 @@ public final class SignInPrompt {
     public static void show(@NonNull Activity activity, @Nullable String login,
                             boolean unreadable, @Nullable Runnable leave) {
         if (showing || activity.isFinishing() || activity.isDestroyed()) return;
+        if (leave == null && android.os.SystemClock.elapsedRealtime() - closedAt < QUIET_AFTER_CLOSE_MS
+                && closedAt != 0) return;
         showing = true;
         String message;
         if (StringUtils.isBlank(login)) {
@@ -51,7 +60,9 @@ public final class SignInPrompt {
                 })
                 .setNegativeButton(R.string.close, (d, w) -> {
                     if (leave != null) leave.run();
+                    else closedAt = android.os.SystemClock.elapsedRealtime();
                 })
+                .setOnCancelListener(d -> closedAt = android.os.SystemClock.elapsedRealtime())
                 .setOnDismissListener(d -> showing = false)
                 .show();
     }

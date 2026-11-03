@@ -39,7 +39,6 @@ import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.LoginActivity;
 import com.thirtydegreesray.openhub.ui.activity.SplashActivity;
 import com.thirtydegreesray.openhub.ui.widget.DoubleClickHandler;
-import com.thirtydegreesray.openhub.ui.widget.SignInPrompt;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.EdgeToEdge;
 import com.thirtydegreesray.openhub.util.MatrixBar;
@@ -548,11 +547,6 @@ BaseActivity<P extends IBaseContract.Presenter>
         toolbar.setLayoutParams(layoutParams);
     }
 
-
-    @Override
-    public void showSignInAgain(@Nullable String login) {
-        if (isAlive) SignInPrompt.show(this, login, false, null);
-    }
 
     @Override
     public void showLoginPage() {
