@@ -26,7 +26,7 @@ import java.lang.ref.WeakReference;
 public final class SignInWatch implements Application.ActivityLifecycleCallbacks {
 
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
-    private static WeakReference<Activity> resumed = new WeakReference<>(null);
+    private static volatile WeakReference<Activity> resumed = new WeakReference<>(null);
 
     private SignInWatch() {
     }
@@ -40,6 +40,11 @@ public final class SignInWatch implements Application.ActivityLifecycleCallbacks
      * Only the token of the selected account counts: a request of another account, or one
      * still running with a replaced token, is ignored.
      */
+    /** True while a screen of OpenHub is in front. */
+    public static boolean isAppInFront() {
+        return resumed.get() != null;
+    }
+
     public static void report(@Nullable String token) {
         AuthUser user = AppData.INSTANCE.getAuthUser();
         if (user == null || StringUtils.isBlank(token)) return;

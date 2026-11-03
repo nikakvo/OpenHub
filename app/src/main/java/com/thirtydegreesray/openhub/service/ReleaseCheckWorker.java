@@ -27,6 +27,7 @@ import com.thirtydegreesray.openhub.dao.AuthUser;
 import com.thirtydegreesray.openhub.ui.activity.BrowserFilterActivity;
 import com.thirtydegreesray.openhub.util.ReleaseWatcher;
 import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.util.TokenRefresher;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -102,7 +103,10 @@ public class ReleaseCheckWorker extends Worker {
         try {
             AuthUser user = AppApplication.get().getAppComponent().getDatabase()
                     .authUserDao().loadSelectedOrFirst();
-            return user == null ? null : user.getAccessToken();
+            // GitHub refused this sign-in: background work runs without it (public data
+            // only) instead of asking GitHub again and again with a dead token
+            if (user == null || TokenRefresher.isRefused(user.getLoginId())) return null;
+            return user.getAccessToken();
         } catch (Exception e) {
             return null;
         }

@@ -54,8 +54,9 @@ public final class TokenRefresher {
     private static final Map<String, String> NEWER = new ConcurrentHashMap<>();
     /** Access token -> what is known about its account. */
     private static final Map<String, Account> KNOWN = new ConcurrentHashMap<>();
-    /** Logins whose refresh token GitHub refused (in memory). */
+    /** Logins whose refresh token GitHub refused; kept on the phone (SignInNotice). */
     private static final Set<String> REFUSED = ConcurrentHashMap.newKeySet();
+    private static volatile boolean refusedLoaded;
     /** Login -> time of the last temporary failure. */
     private static final Map<String, Long> FAILED_AT = new ConcurrentHashMap<>();
 
@@ -136,20 +137,54 @@ public final class TokenRefresher {
         if (StringUtils.isBlank(token)) return false;
         Account account = account(current(token));
         if (account == null || !account.canRefresh) return true;
-        return account.login != null && REFUSED.contains(account.login);
+        return account.login != null && refused().contains(account.login);
     }
 
-    /** True when GitHub refused the refresh token of this login (since the app started). */
+    /**
+     * True when GitHub refused the refresh token of this login. The mark survives restarts;
+     * only a new sign-in of the login removes it.
+     */
     public static boolean isRefused(@Nullable String login) {
-        return login != null && REFUSED.contains(login);
+        return login != null && refused().contains(login);
     }
 
-    /** After a sign-in or log out: forget what was read from the database. */
+    /** After a sign-in (login) or log out (null): forget what was read from the database. */
     public static void accountsChanged(@Nullable String login) {
         KNOWN.clear();
         if (login != null) {
-            REFUSED.remove(login);
             FAILED_AT.remove(login);
+            if (refused().remove(login)) saveRefused();
+            try {
+                SignInNotice.clear(AppApplication.get(), login);
+            } catch (Exception ignored) {
+                // no notification to remove
+            }
+        }
+    }
+
+    /** The marks, read from the phone the first time they are needed. */
+    @NonNull
+    private static Set<String> refused() {
+        if (!refusedLoaded) {
+            synchronized (REFUSED) {
+                if (!refusedLoaded) {
+                    try {
+                        REFUSED.addAll(SignInNotice.load(AppApplication.get()));
+                    } catch (Exception ignored) {
+                        // no stored marks
+                    }
+                    refusedLoaded = true;
+                }
+            }
+        }
+        return REFUSED;
+    }
+
+    private static void saveRefused() {
+        try {
+            SignInNotice.save(AppApplication.get(), REFUSED);
+        } catch (Exception ignored) {
+            // stays in memory
         }
     }
 
@@ -178,7 +213,7 @@ public final class TokenRefresher {
                 remember(token, stored);
                 return storedToken;
             }
-            if (!stored.canRefresh() || REFUSED.contains(login)) return null;
+            if (!stored.canRefresh() || refused().contains(login)) return null;
             long nowMs = System.currentTimeMillis();
             if (!after401 && !TokenRefreshRules.refreshSoon(stored.getAccessExpiresAt(), nowMs)) {
                 return null;
@@ -195,7 +230,16 @@ public final class TokenRefresher {
                 return null;
             }
             if (outcome == Outcome.REFUSED) {
-                REFUSED.add(login);
+                // kept on the phone: background checks stop using this sign-in; the
+                // account itself stays until the user signs in again or logs out
+                if (refused().add(login)) {
+                    saveRefused();
+                    try {
+                        SignInNotice.refused(AppApplication.get(), login);
+                    } catch (Exception ignored) {
+                        // no notification
+                    }
+                }
                 log("refresh token refused");
                 return null;
             }

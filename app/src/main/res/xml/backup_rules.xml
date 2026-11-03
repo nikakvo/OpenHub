@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Android 6-11 backups. Accounts (database with the encrypted GitHub tokens, which
-     cannot be opened on another phone anyway) and a running sign-in are never backed up;
+     cannot be opened on another phone anyway), a running sign-in and the "sign in again"
+     marks of accounts are never backed up;
      settings are. -->
 <full-backup-content>
     <exclude domain="database" path="."/>
     <exclude domain="sharedpref" path="oauth_session.xml"/>
+    <exclude domain="sharedpref" path="sign_in_state.xml"/>
 </full-backup-content>

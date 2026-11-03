@@ -5,9 +5,11 @@
     <cloud-backup>
         <exclude domain="database" path="."/>
         <exclude domain="sharedpref" path="oauth_session.xml"/>
+        <exclude domain="sharedpref" path="sign_in_state.xml"/>
     </cloud-backup>
     <device-transfer>
         <exclude domain="database" path="."/>
         <exclude domain="sharedpref" path="oauth_session.xml"/>
+        <exclude domain="sharedpref" path="sign_in_state.xml"/>
     </device-transfer>
 </data-extraction-rules>
