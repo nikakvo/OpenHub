@@ -583,6 +583,7 @@
     <string name="sign_in_again_button">Sign in again</string>
     <string name="sign_in_again_message">GitHub no longer accepts the sign-in of @%1$s: it has expired or was revoked.\n\nYour account is kept on this phone. Sign in again to go on.</string>
     <string name="sign_in_again_message_unknown">GitHub no longer accepts this sign-in: it has expired or was revoked.\n\nYour account is kept on this phone. Sign in again to go on.</string>
+    <string name="manage_accounts">Accounts: add, switch or log out</string>
     <string name="sign_in_channel">Sign-in</string>
     <string name="sign_in_notice_title">Sign in to GitHub again</string>
     <string name="sign_in_notice_text">GitHub no longer accepts the sign-in of @%1$s. Your account is kept; sign in again to keep notifications and checks coming.</string>

@@ -17,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.http.GitDataService;
@@ -120,7 +121,12 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
 //        repoDescText.setVisibility(View.GONE);
 
         issueLay.setVisibility(repository.isHasIssues() ? View.VISIBLE :View.GONE);
-        issuesNumText.setText(String.valueOf(repository.getOpenIssuesCount()));
+        // open_issues_count includes open pull requests: until they are counted, show the
+        // last known split for this repository, or "-" (it used to show 2, then 0)
+        int openIssues = repository.getOpenIssuesCount();
+        Integer knownPulls = repository.getFullName().equals(pullsRepo) ? pullsKnown : null;
+        issuesNumText.setText(openIssues == 0 ? "0" : knownPulls != null
+                ? String.valueOf(Math.max(0, openIssues - knownPulls)) : "-");
         countPulls(repository);
         updateReadmeEdit(isReadmeSetted);
         stargazersNumText.setText(String.valueOf(repository.getStargazersCount()));
@@ -242,6 +248,10 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
      * GitHub counts open pull requests as open issues too, so the Issues tile shows
      * open_issues_count minus the open pull requests, like the tabs on github.com.
      */
+    /** The last pull request count, and the repository it belongs to. */
+    @Nullable private String pullsRepo;
+    @Nullable private Integer pullsKnown;
+
     private void countPulls(@NonNull Repository repository) {
         if (pullsCount != null) pullsCount.dispose();
         pullsStamp = PullChanges.stamp();
@@ -253,10 +263,16 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(count -> {
+                    pullsRepo = fullName;
+                    pullsKnown = count;
                     if (pullsNumText == null) return;
                     pullsNumText.setText(String.valueOf(count));
                     issuesNumText.setText(String.valueOf(Math.max(0, openIssues - count)));
                 }, error -> {
+                    // no count (offline, search limit): the number GitHub gives
+                    if (issuesNumText != null && "-".contentEquals(issuesNumText.getText())) {
+                        issuesNumText.setText(String.valueOf(openIssues));
+                    }
                 });
     }
 

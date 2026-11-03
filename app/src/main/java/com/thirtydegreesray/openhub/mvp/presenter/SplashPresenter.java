@@ -60,6 +60,12 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
 
         // Saved sign-ins do not expire on the phone: only GitHub decides whether a token
         // is still good. (Older versions removed every account 360 days after its sign-in.)
+        if (selectedUser != null && TokenRefresher.isRefused(selectedUser.getLoginId())) {
+            // GitHub already refused this sign-in (kept on the phone): ask at once, also
+            // without a connection. The account stays.
+            mView.showSignInAgain(selectedUser.getLoginId(), false);
+            return;
+        }
         if (selectedUser != null) {
             AppData.INSTANCE.setAuthUser(selectedUser);
             getUserInfo(selectedUser.getAccessToken());

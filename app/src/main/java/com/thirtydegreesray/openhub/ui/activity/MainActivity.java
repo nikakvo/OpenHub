@@ -171,7 +171,9 @@ public class MainActivity extends BaseDrawerActivity<MainPresenter>
         TextView mail = navViewStart.getHeaderView(0).findViewById(R.id.mail);
 
         toggleAccountBn = navViewStart.getHeaderView(0).findViewById(R.id.toggle_account_bn);
+        com.thirtydegreesray.openhub.util.AccountToggle.install(toggleAccountBn, drawerLayout);
         toggleAccountBn.setOnClickListener(v -> {
+            com.thirtydegreesray.openhub.util.AccountToggle.tapped(toggleAccountBn);
             toggleAccountLay();
         });
 
