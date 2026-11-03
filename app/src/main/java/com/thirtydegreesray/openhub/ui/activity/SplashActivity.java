@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
@@ -14,6 +15,7 @@ import com.thirtydegreesray.openhub.inject.module.ActivityModule;
 import com.thirtydegreesray.openhub.mvp.contract.ISplashContract;
 import com.thirtydegreesray.openhub.mvp.presenter.SplashPresenter;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.SignInPrompt;
 
 /**
  * Created on 2017/7/12.
@@ -46,6 +48,18 @@ public class SplashActivity extends BaseActivity<SplashPresenter> implements ISp
                 .setPositiveButton(R.string.splash_try_again, (d, w) -> mPresenter.getUser())
                 .setNegativeButton(R.string.close, (d, w) -> finish())
                 .show();
+    }
+
+    @Override
+    public void showSignInAgain(@Nullable String login, boolean unreadable) {
+        // both buttons leave the start screen; after Close the account stays and is asked
+        // about again at the next start
+        SignInPrompt.show(this, login, unreadable, this::finish);
+    }
+
+    @Override
+    public void showSignInAgain(@Nullable String login) {
+        showSignInAgain(login, false);
     }
 
     @Override

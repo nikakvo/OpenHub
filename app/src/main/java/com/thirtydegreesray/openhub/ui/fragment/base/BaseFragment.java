@@ -26,6 +26,7 @@ import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.LoginActivity;
+import com.thirtydegreesray.openhub.ui.widget.SignInPrompt;
 import com.thirtydegreesray.openhub.util.AppUtils;
 
 import javax.inject.Inject;
@@ -285,6 +286,11 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
 
     public boolean isFragmentShowed() {
         return isFragmentShowed;
+    }
+
+    @Override
+    public void showSignInAgain(@Nullable String login) {
+        if (getActivity() != null) SignInPrompt.show(getActivity(), login, false, null);
     }
 
     @Override

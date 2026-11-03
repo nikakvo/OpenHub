@@ -18,6 +18,7 @@ import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.common.AppEventBus;
 import com.thirtydegreesray.openhub.dao.AppDatabase;
+import com.thirtydegreesray.openhub.dao.AuthUser;
 import com.thirtydegreesray.openhub.http.CommitService;
 import com.thirtydegreesray.openhub.http.GitHubWebPageService;
 import com.thirtydegreesray.openhub.http.IssueService;
@@ -317,12 +318,10 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
 
     private boolean checkIsUnauthorized(Throwable error){
         if(error instanceof UnauthorizedError){
-            mView.showErrorToast(error.getMessage());
-            db.authUserDao().delete(AppData.INSTANCE.getAuthUser());
-            AppData.INSTANCE.setAuthUser(null);
-            AppData.INSTANCE.setLoggedUser(null);
-            AppRetrofit.INSTANCE.clearClients();
-            mView.showLoginPage();
+            // GitHub no longer accepts the token. The account is never removed here (it
+            // used to be, on any 401): it stays until the user signs in again or logs out.
+            AuthUser user = AppData.INSTANCE.getAuthUser();
+            mView.showSignInAgain(user == null ? null : user.getLoginId());
             return true;
         }
         return false;

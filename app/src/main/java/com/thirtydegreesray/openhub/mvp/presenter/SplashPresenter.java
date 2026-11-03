@@ -51,16 +51,14 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
         AuthUser selectedUser = db.authUserDao().loadSelectedOrFirst();
 
         if (selectedUser != null && StringUtils.isBlank(selectedUser.getAccessToken())) {
-            // the token cannot be decrypted any more (Keystore keys gone): sign in again
-            db.authUserDao().deleteByLogin(selectedUser.getLoginId());
-            selectedUser = null;
+            // the token cannot be decrypted any more (Keystore keys gone): sign in again.
+            // The account stays; the new sign-in of this login replaces it.
+            mView.showSignInAgain(selectedUser.getLoginId(), true);
+            return;
         }
 
-        if (selectedUser != null && isExpired(selectedUser)) {
-            db.authUserDao().delete(selectedUser);
-            selectedUser = null;
-        }
-
+        // Saved sign-ins do not expire on the phone: only GitHub decides whether a token
+        // is still good. (Older versions removed every account 360 days after its sign-in.)
         if (selectedUser != null) {
             AppData.INSTANCE.setAuthUser(selectedUser);
             getUserInfo(selectedUser.getAccessToken());
@@ -76,11 +74,11 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
             @Override
             public void onError(@NonNull Throwable error) {
                 if (error instanceof UnauthorizedError) {
-                    // GitHub rejected the token (revoked or expired): sign in again
-                    db.authUserDao().delete(AppData.INSTANCE.getAuthUser());
+                    // GitHub rejected the token (revoked or expired): sign in again.
+                    // The account is kept; it is never removed without the user.
+                    AuthUser user = AppData.INSTANCE.getAuthUser();
                     AppData.INSTANCE.setAuthUser(null);
-                    mView.showErrorToast(getErrorTip(error));
-                    mView.showLoginPage();
+                    mView.showSignInAgain(user == null ? null : user.getLoginId(), false);
                     return;
                 }
                 // no network, roaming, GitHub down: the account stays, try again
@@ -105,11 +103,6 @@ public class SplashPresenter extends BasePresenter<ISplashContract.View>
             }
         }, httpObserver, true);
 
-    }
-
-    private boolean isExpired(AuthUser selectedUser){
-        return selectedUser.getAuthTime().getTime() + selectedUser.getExpireIn() * 1000
-                < System.currentTimeMillis();
     }
 
 }

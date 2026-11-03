@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,6 +10,8 @@ import android.text.InputType;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.thirtydegreesray.openhub.R;
@@ -70,6 +73,16 @@ public class LoginActivity extends BaseActivity<LoginPresenter>
         Toasty.error(getApplicationContext(), errorMsg).show();
     }
 
+    private static final String EXTRA_LOGIN_HINT = "loginHint";
+
+    /** The sign-in screen; {@code loginHint} is the account to sign in again, or null. */
+    @NonNull
+    public static Intent createIntent(@NonNull Context context, @Nullable String loginHint) {
+        Intent intent = new Intent(context, LoginActivity.class);
+        if (!StringUtils.isBlank(loginHint)) intent.putExtra(EXTRA_LOGIN_HINT, loginHint);
+        return intent;
+    }
+
     @Override
     public void onLoginComplete() {
         Intent intent = new Intent(getActivity(), MainActivity.class);
@@ -115,6 +128,7 @@ public class LoginActivity extends BaseActivity<LoginPresenter>
         if (StringUtils.isBlank(AppConfig.OPENHUB_CLIENT_ID)) {
             loginBn.setVisibility(View.GONE);
         }
+        if (getIntent() != null) mPresenter.setLoginHint(getIntent().getStringExtra(EXTRA_LOGIN_HINT));
         // the browser answered after Android had closed OpenHub: the sign-in it belongs to
         // was saved (OAuthSession), so it can still be finished here
         if (savedInstanceState == null && getIntent() != null && getIntent().getData() != null

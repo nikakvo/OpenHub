@@ -735,6 +735,7 @@
     <li><strong>Encrypted connections only</strong>, checked against the phone's system certificates. Certificates added by the user or by other apps are not trusted, so a proxy on the network cannot read your token. On Android 17 and newer the phone also checks that GitHub's certificates are publicly logged (Certificate Transparency) and, when GitHub's servers support it, hides the server name from the network (Encrypted Client Hello).</li>
     <li><strong>Sharing to OpenHub</strong> accepts files that other apps share; it never uploads OpenHub's own private files, whatever another app asks.</li>
     <li>No connection at start? Your account stays; OpenHub offers to try again.</li>
+    <li><strong>Your account is never removed by itself.</strong> When GitHub no longer accepts a sign-in (the token expired or was revoked), OpenHub asks you to <span class="ui">Sign in again</span> and suggests the same account on GitHub's page; until then the account stays on the phone. Only <span class="ui">Log out</span> removes it.</li>
   </ul>
   <p>You can see and revoke app access any time on github.com: Settings → Applications. This help page loads nothing from the internet.</p>
 </div>

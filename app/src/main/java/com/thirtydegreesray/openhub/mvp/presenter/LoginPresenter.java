@@ -7,6 +7,7 @@ import com.thirtydegreesray.openhub.http.core.AppRetrofit;
 import android.content.Intent;
 import android.net.Uri;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.AppData;
@@ -42,9 +43,16 @@ import io.reactivex.rxjava3.core.Observable;
 public class LoginPresenter extends BasePresenter<ILoginContract.View>
         implements ILoginContract.Presenter {
 
+    @Nullable private String loginHint;
+
     @Inject
     public LoginPresenter(AppDatabase db) {
         super(db);
+    }
+
+    @Override
+    public void setLoginHint(@Nullable String login) {
+        loginHint = StringUtils.isBlank(login) ? null : login.trim();
     }
 
     @Override
@@ -87,7 +95,9 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
                 "&scope=" + Uri.encode(AppConfig.OAUTH2_SCOPE) +
                 "&state=" + start.state +
                 "&code_challenge=" + start.codeChallenge +
-                "&code_challenge_method=S256";
+                "&code_challenge_method=S256" +
+                // "Sign in again": GitHub suggests this account on its sign-in page
+                (loginHint == null ? "" : "&login=" + Uri.encode(loginHint));
     }
 
     @Override

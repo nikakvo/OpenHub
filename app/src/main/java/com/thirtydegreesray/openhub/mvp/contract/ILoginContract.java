@@ -4,6 +4,8 @@ package com.thirtydegreesray.openhub.mvp.contract;
 
 import android.content.Intent;
 
+import androidx.annotation.Nullable;
+
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.mvp.model.BasicToken;
 
@@ -31,6 +33,9 @@ public interface ILoginContract {
         void getToken(String code, String codeVerifier);
 
         String getOAuth2Url();
+
+        /** The account to suggest on GitHub's sign-in page ("Sign in again"), or null. */
+        void setLoginHint(@Nullable String login);
 
         void basicLogin(String userName, String password);
 

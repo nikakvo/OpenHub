@@ -579,6 +579,11 @@
     <string name="splash_offline_title">Cannot reach GitHub</string>
     <string name="splash_offline_message">Your account is kept; nothing was deleted.\n\n%s</string>
     <string name="splash_try_again">Try again</string>
+    <string name="sign_in_again_title">Sign in again</string>
+    <string name="sign_in_again_button">Sign in again</string>
+    <string name="sign_in_again_message">GitHub no longer accepts the sign-in of @%1$s: it has expired or was revoked.\n\nYour account is kept on this phone. Sign in again to go on.</string>
+    <string name="sign_in_again_message_unknown">GitHub no longer accepts this sign-in: it has expired or was revoked.\n\nYour account is kept on this phone. Sign in again to go on.</string>
+    <string name="sign_in_again_message_unreadable">The saved sign-in of @%1$s cannot be read on this phone any more (the phone\'s key store was reset).\n\nYour account is kept. Sign in again to go on.</string>
 
     <!-- Code search -->
     <string name="code_search_title">Search code</string>
