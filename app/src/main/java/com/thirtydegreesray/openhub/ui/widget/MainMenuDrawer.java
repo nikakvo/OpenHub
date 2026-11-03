@@ -33,6 +33,7 @@ import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.common.GlideApp;
 import com.thirtydegreesray.openhub.mvp.model.User;
 import com.thirtydegreesray.openhub.ui.activity.MainActivity;
+import com.thirtydegreesray.openhub.util.AccountToggle;
 import com.thirtydegreesray.openhub.util.DrawerHeader;
 import com.thirtydegreesray.openhub.util.DrawerIcons;
 import com.thirtydegreesray.openhub.util.PrefUtils;
@@ -49,6 +50,8 @@ public final class MainMenuDrawer {
 
     /** Nav item id the start screen opens when it is brought back by this menu. */
     public static final String EXTRA_NAV_ID = "mainMenuNavId";
+    /** Opens the start screen's side menu with the accounts shown. */
+    public static final String EXTRA_ACCOUNTS = "mainMenuAccounts";
 
     private MainMenuDrawer() {
     }
@@ -76,6 +79,18 @@ public final class MainMenuDrawer {
         fillHeader(activity, nav.inflateHeaderView(R.layout.nav_header_main));
         DrawerIcons.apply(nav);
         DrawerHeader.apply(nav);
+        // the account arrow: accounts are managed in the start screen's side menu
+        ImageView toggle = nav.getHeaderView(0).findViewById(R.id.toggle_account_bn);
+        if (toggle != null) {
+            AccountToggle.style(toggle, nav.getHeaderView(0).findViewById(R.id.name));
+            toggle.setOnClickListener(v -> {
+                dialog.dismiss();
+                activity.startActivity(new Intent(activity, MainActivity.class)
+                        .putExtra(EXTRA_ACCOUNTS, true)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+            });
+            dialog.setOnShowListener(d -> AccountToggle.pulse(toggle));
+        }
         nav.setNavigationItemSelectedListener(item -> {
             dialog.dismiss();
             Intent intent = new Intent(activity, MainActivity.class)
@@ -168,8 +183,6 @@ public final class MainMenuDrawer {
     }
 
     private static void fillHeader(@NonNull AppCompatActivity activity, @NonNull View header) {
-        View toggle = header.findViewById(R.id.toggle_account_bn);
-        if (toggle != null) toggle.setVisibility(View.GONE);
         User user = AppData.INSTANCE.getLoggedUser();
         if (user == null) return;
         ImageView avatar = header.findViewById(R.id.avatar);

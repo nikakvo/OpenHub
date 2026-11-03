@@ -171,9 +171,25 @@ public class MainActivity extends BaseDrawerActivity<MainPresenter>
         TextView mail = navViewStart.getHeaderView(0).findViewById(R.id.mail);
 
         toggleAccountBn = navViewStart.getHeaderView(0).findViewById(R.id.toggle_account_bn);
-        com.thirtydegreesray.openhub.util.AccountToggle.install(toggleAccountBn, drawerLayout);
+        com.thirtydegreesray.openhub.util.AccountToggle.style(toggleAccountBn, name);
+        if (drawerLayout != null) {
+            // styled again on every opening (the header style may have changed), then a few pulses
+            drawerLayout.addDrawerListener(new androidx.drawerlayout.widget.DrawerLayout.SimpleDrawerListener() {
+                @Override
+                public void onDrawerOpened(@NonNull View drawerView) {
+                    if (drawerView != navViewStart) return;
+                    com.thirtydegreesray.openhub.util.AccountToggle.style(toggleAccountBn, name);
+                    com.thirtydegreesray.openhub.util.AccountToggle.pulse(toggleAccountBn);
+                }
+
+                @Override
+                public void onDrawerClosed(@NonNull View drawerView) {
+                    com.thirtydegreesray.openhub.util.AccountToggle.stop(toggleAccountBn);
+                }
+            });
+        }
         toggleAccountBn.setOnClickListener(v -> {
-            com.thirtydegreesray.openhub.util.AccountToggle.tapped(toggleAccountBn);
+            com.thirtydegreesray.openhub.util.AccountToggle.stop(toggleAccountBn);
             toggleAccountLay();
         });
 
@@ -274,6 +290,13 @@ public class MainActivity extends BaseDrawerActivity<MainPresenter>
     /** An item of the main menu of another screen: show that page (or open that screen). */
     private void openFromMainMenu(@Nullable Intent intent) {
         if (intent == null) return;
+        if (intent.getBooleanExtra(MainMenuDrawer.EXTRA_ACCOUNTS, false)) {
+            // the account arrow in the side menu of another screen: accounts in this menu
+            intent.removeExtra(MainMenuDrawer.EXTRA_ACCOUNTS);
+            if (!isManageAccount) toggleAccountLay();
+            openDrawer(true);
+            return;
+        }
         int id = intent.getIntExtra(MainMenuDrawer.EXTRA_NAV_ID, 0);
         if (id == 0) return;
         intent.removeExtra(MainMenuDrawer.EXTRA_NAV_ID);
