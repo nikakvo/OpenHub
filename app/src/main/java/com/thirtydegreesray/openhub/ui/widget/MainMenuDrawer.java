@@ -34,6 +34,9 @@ import com.thirtydegreesray.openhub.common.GlideApp;
 import com.thirtydegreesray.openhub.mvp.model.User;
 import com.thirtydegreesray.openhub.ui.activity.MainActivity;
 import com.thirtydegreesray.openhub.util.AccountToggle;
+import java.util.List;
+import com.thirtydegreesray.openhub.dao.AuthUser;
+import com.thirtydegreesray.openhub.util.AccountActions;
 import com.thirtydegreesray.openhub.util.DrawerHeader;
 import com.thirtydegreesray.openhub.util.DrawerIcons;
 import com.thirtydegreesray.openhub.util.PrefUtils;
@@ -83,11 +86,10 @@ public final class MainMenuDrawer {
         ImageView toggle = nav.getHeaderView(0).findViewById(R.id.toggle_account_bn);
         if (toggle != null) {
             AccountToggle.style(toggle, nav.getHeaderView(0).findViewById(R.id.name));
+            // accounts right here, without leaving the screen
             toggle.setOnClickListener(v -> {
-                dialog.dismiss();
-                activity.startActivity(new Intent(activity, MainActivity.class)
-                        .putExtra(EXTRA_ACCOUNTS, true)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                AccountToggle.stop(toggle);
+                showAccounts(activity, dialog, toggle);
             });
             dialog.setOnShowListener(d -> AccountToggle.pulse(toggle));
         }
@@ -122,6 +124,32 @@ public final class MainMenuDrawer {
         activity.getLifecycle().addObserver(closer);
         dialog.setOnDismissListener(d -> activity.getLifecycle().removeObserver(closer));
         dialog.show();
+    }
+
+    /** Switch to another account, add one, or log out (like the start screen's menu). */
+    private static void showAccounts(@NonNull AppCompatActivity activity, @NonNull Dialog dialog,
+                                     @NonNull View anchor) {
+        androidx.appcompat.widget.PopupMenu popup = new androidx.appcompat.widget.PopupMenu(
+                activity, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        List<AuthUser> others = AccountActions.others();
+        for (int i = 0; i < others.size(); i++) {
+            popup.getMenu().add(0, 100 + i, i, others.get(i).getLoginId());
+        }
+        popup.getMenu().add(1, 1, 100, R.string.add_account);
+        popup.getMenu().add(1, 2, 101, R.string.logout);
+        popup.setOnMenuItemClickListener(item -> {
+            dialog.dismiss();
+            int id = item.getItemId();
+            if (id == 1) {
+                AccountActions.addAccount(activity);
+            } else if (id == 2) {
+                AccountActions.confirmLogout(activity);
+            } else if (id >= 100 && id - 100 < others.size()) {
+                AccountActions.switchTo(activity, others.get(id - 100).getLoginId());
+            }
+            return true;
+        });
+        popup.show();
     }
 
     /**

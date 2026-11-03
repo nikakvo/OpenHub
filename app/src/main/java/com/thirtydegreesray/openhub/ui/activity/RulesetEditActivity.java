@@ -37,6 +37,7 @@ import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
+import com.thirtydegreesray.openhub.util.PullRefresh;
 import com.thirtydegreesray.openhub.util.RulesetForm;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
@@ -163,6 +164,10 @@ public class RulesetEditActivity extends BaseActivity<IBaseContract.Presenter> {
         setToolbarTitle(getString(isNew() ? R.string.rulesets_new : (canEdit
                         ? R.string.ruleset_edit_title : R.string.ruleset_view_title)),
                 owner + "/" + repo);
+        if (!isNew()) {
+            // pull down: the ruleset as it is on GitHub now (unsaved changes are dropped)
+            PullRefresh.wrap(scroll, () -> load(false)).follow(loader);
+        }
         if (!StringUtils.isBlank(formState)) {
             // after a rotation: the form as it was
             show(RulesetForm.parse(JsonParser.parseString(formState).getAsJsonObject()));
@@ -170,7 +175,7 @@ public class RulesetEditActivity extends BaseActivity<IBaseContract.Presenter> {
             show(StringUtils.isBlank(prefill) ? RulesetForm.create(target)
                     : RulesetForm.parse(JsonParser.parseString(prefill).getAsJsonObject()));
         } else {
-            load();
+            load(true);
         }
     }
 
@@ -193,9 +198,9 @@ public class RulesetEditActivity extends BaseActivity<IBaseContract.Presenter> {
         return GitHubApi.service(RulesetService.class);
     }
 
-    private void load() {
+    private void load(boolean firstTime) {
         loader.setVisibility(View.VISIBLE);
-        scroll.setVisibility(View.INVISIBLE);
+        if (firstTime) scroll.setVisibility(View.INVISIBLE);
         background(() -> GitHubApi.call(service().getRuleset(owner, repo, rulesetId)), ruleset -> {
             loader.setVisibility(View.GONE);
             String type = Json.str(ruleset, "source_type");
@@ -204,7 +209,7 @@ public class RulesetEditActivity extends BaseActivity<IBaseContract.Presenter> {
             show(RulesetForm.parse(ruleset));
         }, error -> {
             loader.setVisibility(View.GONE);
-            finish();
+            if (firstTime) finish();
         });
     }
 
