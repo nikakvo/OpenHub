@@ -50,6 +50,13 @@ public class AppConfig {
      */
     public final static String OAUTH2_SCOPE = "user,repo,workflow,delete_repo,gist,notifications";
 
+    /**
+     * Added to the browser sign-in only: GitHub then gives an expiring token (8 hours) and a
+     * refresh token (about 6 months) for this sign-in, without the OAuth App opting in for
+     * everyone. It is not a real scope: no extra question on GitHub's page.
+     */
+    public final static String OAUTH2_EXPIRING_SCOPE = "offline_access";
+
 
     public final static String OAUTH2_URL = GITHUB_BASE_URL + "login/oauth/authorize";
 

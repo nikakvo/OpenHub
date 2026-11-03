@@ -45,6 +45,21 @@ public class AuthUser implements Parcelable {
     @ColumnInfo(name = "AVATAR")
     private String avatar;
 
+    /**
+     * Refresh token of an expiring browser sign-in, stored sealed like the access token.
+     * Null for tokens that do not expire (personal access tokens, older sign-ins).
+     */
+    @ColumnInfo(name = "REFRESH_TOKEN")
+    private String refreshToken;
+
+    /** When the access token stops working (epoch ms); null = it does not expire. */
+    @ColumnInfo(name = "ACCESS_EXPIRES_AT")
+    private Long accessExpiresAt;
+
+    /** When the refresh token stops working (epoch ms); null = unknown or none. */
+    @ColumnInfo(name = "REFRESH_EXPIRES_AT")
+    private Long refreshExpiresAt;
+
     public AuthUser() {
     }
 
@@ -133,6 +148,35 @@ public class AuthUser implements Parcelable {
         this.avatar = avatar;
     }
 
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public Long getAccessExpiresAt() {
+        return accessExpiresAt;
+    }
+
+    public void setAccessExpiresAt(Long accessExpiresAt) {
+        this.accessExpiresAt = accessExpiresAt;
+    }
+
+    public Long getRefreshExpiresAt() {
+        return refreshExpiresAt;
+    }
+
+    public void setRefreshExpiresAt(Long refreshExpiresAt) {
+        this.refreshExpiresAt = refreshExpiresAt;
+    }
+
+    /** True when this sign-in has a refresh token (an expiring browser sign-in). */
+    public boolean canRefresh() {
+        return refreshToken != null && !refreshToken.isEmpty();
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -148,6 +192,18 @@ public class AuthUser implements Parcelable {
         dest.writeString(this.loginId);
         dest.writeString(this.name);
         dest.writeString(this.avatar);
+        dest.writeString(this.refreshToken);
+        writeTime(dest, this.accessExpiresAt);
+        writeTime(dest, this.refreshExpiresAt);
+    }
+
+    private static void writeTime(Parcel dest, Long time) {
+        dest.writeByte(time == null ? (byte) 0 : (byte) 1);
+        if (time != null) dest.writeLong(time);
+    }
+
+    private static Long readTime(Parcel in) {
+        return in.readByte() == 0 ? null : in.readLong();
     }
 
     @Ignore
@@ -161,6 +217,9 @@ public class AuthUser implements Parcelable {
         this.loginId = in.readString();
         this.name = in.readString();
         this.avatar = in.readString();
+        this.refreshToken = in.readString();
+        this.accessExpiresAt = readTime(in);
+        this.refreshExpiresAt = readTime(in);
     }
 
     public static final Parcelable.Creator<AuthUser> CREATOR = new Parcelable.Creator<AuthUser>() {

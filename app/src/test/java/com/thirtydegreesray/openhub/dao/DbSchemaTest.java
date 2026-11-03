@@ -41,18 +41,55 @@ public class DbSchemaTest {
 
     @Test
     public void migrationCreatesRoomsTables() throws Exception {
-        JsonObject database = loadSchema(DbSchema.VERSION);
-        assertEquals(DbSchema.VERSION, database.get("version").getAsInt());
+        assertSchema(DbSchema.VERSION, DbSchema.TABLES);
+    }
+
+    @Test
+    public void greenDaoUpgradeCreatesVersion6() throws Exception {
+        assertSchema(DbSchema.FIRST_ROOM_VERSION, DbSchema.TABLES_V6);
+    }
+
+    /** Version 6 plus the added columns (ALTER TABLE adds them at the end) is version 7. */
+    @Test
+    public void version7OnlyAddsColumns() {
+        assertEquals(7, DbSchema.VERSION);
+        DbSchema.Table v6 = DbSchema.AUTH_USER_V6;
+        DbSchema.Table v7 = DbSchema.AUTH_USER;
+        assertEquals(v6.name, v7.name);
+
+        String[] expected = new String[v6.columns.length + DbSchema.AUTH_USER_ADDED_7.length];
+        System.arraycopy(v6.columns, 0, expected, 0, v6.columns.length);
+        StringBuilder added = new StringBuilder();
+        for (int i = 0; i < DbSchema.AUTH_USER_ADDED_7.length; i++) {
+            String[] column = DbSchema.AUTH_USER_ADDED_7[i];
+            expected[v6.columns.length + i] = column[0];
+            added.append(", `").append(column[0]).append("` ").append(column[1]);
+            // nullable, no default: old rows read as "does not expire"
+            assertFalse(column[1].contains("NOT NULL"));
+            assertFalse(column[1].contains("DEFAULT"));
+        }
+        assertArrayEquals(expected, v7.columns);
+        String pk = ", PRIMARY KEY(";
+        String v6Sql = v6.createSql;
+        assertEquals(v6Sql.substring(0, v6Sql.indexOf(pk)) + added + v6Sql.substring(v6Sql.indexOf(pk)),
+                v7.createSql);
+        assertEquals("ALTER TABLE `AUTH_USER` ADD COLUMN `REFRESH_TOKEN` TEXT",
+                DbSchema.addColumnSql("AUTH_USER", DbSchema.AUTH_USER_ADDED_7[0]));
+    }
+
+    private static void assertSchema(int version, DbSchema.Table[] tables) throws Exception {
+        JsonObject database = loadSchema(version);
+        assertEquals(version, database.get("version").getAsInt());
 
         Map<String, JsonObject> entities = new HashMap<>();
         for (JsonElement e : database.getAsJsonArray("entities")) {
             JsonObject entity = e.getAsJsonObject();
             entities.put(entity.get("tableName").getAsString(), entity);
         }
-        assertEquals("every Room table is in DbSchema.TABLES",
-                entities.size(), DbSchema.TABLES.length);
+        assertEquals("every Room table of version " + version + " is in DbSchema",
+                entities.size(), tables.length);
 
-        for (DbSchema.Table table : DbSchema.TABLES) {
+        for (DbSchema.Table table : tables) {
             JsonObject entity = entities.get(table.name);
             assertNotNull("Room has no table " + table.name, entity);
             assertEquals("CREATE statement of " + table.name,
@@ -74,6 +111,9 @@ public class DbSchemaTest {
                 DbSchema.MY_TRENDING_LANGUAGE.createSql("X"));
         assertEquals("`SLUG`, `NAME`, `ORDER`", DbSchema.MY_TRENDING_LANGUAGE.columnList());
         for (DbSchema.Table table : DbSchema.TABLES) {
+            assertFalse(table.createSql(table.name).contains(DbSchema.TABLE_NAME));
+        }
+        for (DbSchema.Table table : DbSchema.TABLES_V6) {
             assertFalse(table.createSql(table.name).contains(DbSchema.TABLE_NAME));
         }
     }

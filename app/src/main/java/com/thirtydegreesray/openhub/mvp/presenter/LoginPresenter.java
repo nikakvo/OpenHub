@@ -24,6 +24,7 @@ import com.thirtydegreesray.openhub.mvp.model.OauthToken;
 import com.thirtydegreesray.openhub.mvp.model.User;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
 import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.util.TokenLifetime;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,9 +74,15 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
                             @Override
                             public void onSuccess(@NonNull HttpResponse<OauthToken> response) {
                                 OauthToken token = response.body();
-                                if (token != null) {
+                                if (token != null && !StringUtils.isBlank(token.getAccessToken())) {
                                     mView.onGetTokenSuccess(BasicToken.generateFromOauthToken(token));
+                                } else if (token != null && !StringUtils.isBlank(token.getError())) {
+                                    // e.g. bad_verification_code, answered with HTTP 200
+                                    mView.dismissProgressDialog();
+                                    mView.onGetTokenError(StringUtils.isBlank(token.getErrorDescription())
+                                            ? token.getError() : token.getErrorDescription());
                                 } else {
+                                    mView.dismissProgressDialog();
                                     mView.onGetTokenError(response.getOriResponse().message());
                                 }
                             }
@@ -92,7 +99,8 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
         OAuthSession.Start start = OAuthSession.begin(getContext());
         return AppConfig.OAUTH2_URL +
                 "?client_id=" + AppConfig.OPENHUB_CLIENT_ID +
-                "&scope=" + Uri.encode(AppConfig.OAUTH2_SCOPE) +
+                "&scope=" + Uri.encode(AppConfig.OAUTH2_SCOPE + ","
+                        + AppConfig.OAUTH2_EXPIRING_SCOPE) +
                 "&state=" + start.state +
                 "&code_challenge=" + start.codeChallenge +
                 "&code_challenge_method=S256" +
@@ -210,9 +218,18 @@ public class LoginPresenter extends BasePresenter<ILoginContract.View>
         String scope = StringUtils.listToString(basicToken.getScopes(), ",");
         Date date = new Date();
         authUser.setAccessToken(basicToken.getToken());
-        authUser.setScope(scope);
+        authUser.setScope(scope == null ? "" : scope);
         authUser.setAuthTime(date);
-        authUser.setExpireIn(360 * 24 * 60 * 60);
+        // seconds the access token lives; 0 = it does not expire (tokens, older sign-ins)
+        Long expiresIn = basicToken.getExpiresIn();
+        authUser.setExpireIn(expiresIn == null || expiresIn < 0 ? 0 : expiresIn);
+        if (!StringUtils.isBlank(basicToken.getRefreshToken())) {
+            // an expiring browser sign-in: keep the refresh token and when both end
+            authUser.setRefreshToken(basicToken.getRefreshToken());
+            authUser.setAccessExpiresAt(TokenLifetime.endsAt(date.getTime(), expiresIn));
+            authUser.setRefreshExpiresAt(TokenLifetime.endsAt(date.getTime(),
+                    basicToken.getRefreshTokenExpiresIn()));
+        }
         authUser.setSelected(true);
         authUser.setLoginId(userInfo.getLogin());
         authUser.setName(userInfo.getName());

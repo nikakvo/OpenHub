@@ -24,20 +24,35 @@ public final class DbMigrations {
      * ({@link DbSchema}) and its rows are copied over. Table and column names stay.
      */
     public static final Migration MIGRATION_5_6 =
-            new Migration(DbSchema.GREENDAO_VERSION, DbSchema.VERSION) {
+            new Migration(DbSchema.GREENDAO_VERSION, DbSchema.FIRST_ROOM_VERSION) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase db) {
                     rebuildTables(db);
                 }
             };
 
-    public static final Migration[] ALL = {MIGRATION_5_6};
+    /**
+     * 6 to 7: AUTH_USER gets the refresh token and the two expiry times of expiring
+     * browser sign-ins. Only new columns (empty = a token that does not expire, which is
+     * what every existing account has); nothing is copied or dropped.
+     */
+    public static final Migration MIGRATION_6_7 = new Migration(6, 7) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            for (String[] column : DbSchema.AUTH_USER_ADDED_7) {
+                if (columnExists(db, DbSchema.AUTH_USER.name, column[0])) continue;
+                db.execSQL(DbSchema.addColumnSql(DbSchema.AUTH_USER.name, column));
+            }
+        }
+    };
+
+    public static final Migration[] ALL = {MIGRATION_5_6, MIGRATION_6_7};
 
     static void rebuildTables(@NonNull SupportSQLiteDatabase db) {
         for (String legacy : DbSchema.LEGACY_TABLES) {
             db.execSQL("DROP TABLE IF EXISTS `" + legacy + "`");
         }
-        for (DbSchema.Table table : DbSchema.TABLES) {
+        for (DbSchema.Table table : DbSchema.TABLES_V6) {
             if (!tableExists(db, table.name)) {
                 db.execSQL(table.createSql(table.name));
                 continue;
@@ -50,6 +65,16 @@ public final class DbMigrations {
                     + " FROM `" + table.name + "`");
             db.execSQL("DROP TABLE `" + table.name + "`");
             db.execSQL("ALTER TABLE `" + temp + "` RENAME TO `" + table.name + "`");
+        }
+    }
+
+    private static boolean columnExists(SupportSQLiteDatabase db, String table, String column) {
+        try (Cursor cursor = db.query("PRAGMA table_info(`" + table + "`)")) {
+            int name = cursor.getColumnIndex("name");
+            while (cursor.moveToNext()) {
+                if (column.equalsIgnoreCase(cursor.getString(name))) return true;
+            }
+            return false;
         }
     }
 

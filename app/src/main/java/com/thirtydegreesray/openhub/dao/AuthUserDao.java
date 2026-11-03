@@ -99,25 +99,39 @@ public abstract class AuthUserDao {
     public void sealPlainTokens() {
         for (AuthUser stored : storedAll()) {
             String token = stored.getAccessToken();
-            if (token == null || token.isEmpty() || TokenCrypto.isSealed(token)) continue;
+            if (token == null || token.isEmpty()) continue;
+            String refresh = stored.getRefreshToken();
+            boolean plainToken = !TokenCrypto.isSealed(token);
+            boolean plainRefresh = refresh != null && !refresh.isEmpty()
+                    && !TokenCrypto.isSealed(refresh);
+            if (!plainToken && !plainRefresh) continue;
             String sealedToken = TokenCrypto.seal(token);
-            if (sealedToken.equals(token)) return; // no Keystore: keep everything plain
-            // the key changes, so the row is replaced: delete the plain one, insert sealed
+            String sealedRefresh = TokenCrypto.seal(refresh);
+            if (plainToken && sealedToken.equals(token)) return; // no Keystore: keep all plain
+            if (!plainToken && sealedRefresh != null && sealedRefresh.equals(refresh)) return;
+            // the key may change, so the row is replaced: delete the old one, insert sealed
             storedDelete(token);
-            storedInsert(copy(stored, sealedToken));
+            storedInsert(copy(stored, sealedToken, sealedRefresh));
         }
     }
 
     private static AuthUser sealed(AuthUser user) {
-        return copy(user, TokenCrypto.seal(user.getAccessToken()));
+        return copy(user, TokenCrypto.seal(user.getAccessToken()),
+                TokenCrypto.seal(user.getRefreshToken()));
     }
 
     private static AuthUser opened(AuthUser stored) {
-        return copy(stored, TokenCrypto.open(stored.getAccessToken()));
+        return copy(stored, TokenCrypto.open(stored.getAccessToken()),
+                TokenCrypto.open(stored.getRefreshToken()));
     }
 
-    private static AuthUser copy(AuthUser user, String token) {
-        return new AuthUser(token, user.getAuthTime(), user.getExpireIn(), user.getScope(),
-                user.getSelected(), user.getLoginId(), user.getName(), user.getAvatar());
+    private static AuthUser copy(AuthUser user, String token, String refreshToken) {
+        AuthUser copy = new AuthUser(token, user.getAuthTime(), user.getExpireIn(),
+                user.getScope(), user.getSelected(), user.getLoginId(), user.getName(),
+                user.getAvatar());
+        copy.setRefreshToken(refreshToken);
+        copy.setAccessExpiresAt(user.getAccessExpiresAt());
+        copy.setRefreshExpiresAt(user.getRefreshExpiresAt());
+        return copy;
     }
 }

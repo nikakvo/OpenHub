@@ -23,6 +23,11 @@ public class BasicToken {
     @SerializedName("updated_at") private Date updatedAt;
     private List<String> scopes;
 
+    /** Expiring browser sign-ins only (null otherwise); not part of the JSON. */
+    private transient String refreshToken;
+    private transient Long expiresIn;
+    private transient Long refreshTokenExpiresIn;
+
     public BasicToken() {
 
     }
@@ -30,8 +35,25 @@ public class BasicToken {
     public static BasicToken generateFromOauthToken(OauthToken oauthToken){
         BasicToken basicToken = new BasicToken();
         basicToken.setToken(oauthToken.getAccessToken());
-        basicToken.setScopes(Arrays.asList(oauthToken.getScope().split(",")));
+        String scope = oauthToken.getScope();
+        basicToken.setScopes(scope == null || scope.isEmpty()
+                ? new java.util.ArrayList<String>() : Arrays.asList(scope.split(",")));
+        basicToken.refreshToken = oauthToken.getRefreshToken();
+        basicToken.expiresIn = oauthToken.getExpiresIn();
+        basicToken.refreshTokenExpiresIn = oauthToken.getRefreshTokenExpiresIn();
         return basicToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public Long getExpiresIn() {
+        return expiresIn;
+    }
+
+    public Long getRefreshTokenExpiresIn() {
+        return refreshTokenExpiresIn;
     }
 
     public int getId() {

@@ -3,7 +3,8 @@ package com.thirtydegreesray.openhub.dao;
 /**
  * The tables of the Room database (version {@link #VERSION}), written the way Room creates
  * them. The migration from the old greenDAO database (version 5) rebuilds every table with
- * exactly this SQL and copies the rows over, so Room's schema check always passes.
+ * exactly the SQL of version 6 and copies the rows over; later versions only add columns,
+ * so Room's schema check always passes.
  *
  * Plain Java on purpose: the unit tests compare it with the schema Room exports at build
  * time (app/schemas), so a changed entity without a changed migration fails the tests.
@@ -14,7 +15,10 @@ public final class DbSchema {
     }
 
     /** Room schema version. greenDAO used 1-5. */
-    public static final int VERSION = 6;
+    public static final int VERSION = 7;
+
+    /** The first Room version (the greenDAO tables rebuilt). */
+    public static final int FIRST_ROOM_VERSION = 6;
 
     /** The last greenDAO schema version. */
     public static final int GREENDAO_VERSION = 5;
@@ -50,7 +54,8 @@ public final class DbSchema {
         }
     }
 
-    public static final Table AUTH_USER = new Table("AUTH_USER",
+    /** AUTH_USER of version 6, kept for the greenDAO upgrade (5 -> 6). */
+    public static final Table AUTH_USER_V6 = new Table("AUTH_USER",
             "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ACCESS_TOKEN` TEXT NOT NULL, "
                     + "`AUTH_TIME` INTEGER NOT NULL, `EXPIRE_IN` INTEGER NOT NULL, "
                     + "`SCOPE` TEXT NOT NULL, `SELECTED` INTEGER NOT NULL, "
@@ -58,6 +63,23 @@ public final class DbSchema {
                     + "PRIMARY KEY(`ACCESS_TOKEN`))",
             "ACCESS_TOKEN", "AUTH_TIME", "EXPIRE_IN", "SCOPE", "SELECTED", "LOGIN_ID",
             "NAME", "AVATAR");
+
+    /** Columns version 7 added to AUTH_USER (expiring sign-ins), in this order. */
+    public static final String[][] AUTH_USER_ADDED_7 = {
+            {"REFRESH_TOKEN", "TEXT"},
+            {"ACCESS_EXPIRES_AT", "INTEGER"},
+            {"REFRESH_EXPIRES_AT", "INTEGER"}
+    };
+
+    public static final Table AUTH_USER = new Table("AUTH_USER",
+            "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ACCESS_TOKEN` TEXT NOT NULL, "
+                    + "`AUTH_TIME` INTEGER NOT NULL, `EXPIRE_IN` INTEGER NOT NULL, "
+                    + "`SCOPE` TEXT NOT NULL, `SELECTED` INTEGER NOT NULL, "
+                    + "`LOGIN_ID` TEXT NOT NULL, `NAME` TEXT, `AVATAR` TEXT, "
+                    + "`REFRESH_TOKEN` TEXT, `ACCESS_EXPIRES_AT` INTEGER, "
+                    + "`REFRESH_EXPIRES_AT` INTEGER, PRIMARY KEY(`ACCESS_TOKEN`))",
+            "ACCESS_TOKEN", "AUTH_TIME", "EXPIRE_IN", "SCOPE", "SELECTED", "LOGIN_ID",
+            "NAME", "AVATAR", "REFRESH_TOKEN", "ACCESS_EXPIRES_AT", "REFRESH_EXPIRES_AT");
 
     public static final Table LOCAL_USER = new Table("LOCAL_USER",
             "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`LOGIN` TEXT NOT NULL, "
@@ -91,9 +113,20 @@ public final class DbSchema {
                     + "`NAME` TEXT NOT NULL, `ORDER` INTEGER NOT NULL, PRIMARY KEY(`SLUG`))",
             "SLUG", "NAME", "ORDER");
 
+    /** The tables of the current version. */
     public static final Table[] TABLES = {
             AUTH_USER, LOCAL_USER, LOCAL_REPO, TRACE, BOOKMARK, MY_TRENDING_LANGUAGE
     };
+
+    /** The tables of version 6, which the greenDAO upgrade creates. */
+    public static final Table[] TABLES_V6 = {
+            AUTH_USER_V6, LOCAL_USER, LOCAL_REPO, TRACE, BOOKMARK, MY_TRENDING_LANGUAGE
+    };
+
+    /** ALTER statement that adds one column of {@link #AUTH_USER_ADDED_7}. */
+    public static String addColumnSql(String table, String[] column) {
+        return "ALTER TABLE `" + table + "` ADD COLUMN `" + column[0] + "` " + column[1];
+    }
 
     /** greenDAO tables of schema 2-3, emptied and dropped by its 3 -> 4 upgrade. */
     public static final String[] LEGACY_TABLES = {
