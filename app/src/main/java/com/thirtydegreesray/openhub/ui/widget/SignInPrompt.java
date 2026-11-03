@@ -1,14 +1,18 @@
 package com.thirtydegreesray.openhub.ui.widget;
 
 import android.app.Activity;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.ui.activity.LoginActivity;
+import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.util.ThemeHelper;
 
 /**
  * "Sign in again": shown when GitHub no longer accepts the saved sign-in of an account
@@ -50,7 +54,10 @@ public final class SignInPrompt {
         } else {
             message = activity.getString(R.string.sign_in_again_message, login);
         }
-        new AlertDialog.Builder(activity)
+        // the user's theme, also over the start screen (its own theme is a plain light one)
+        Context themed = new ContextThemeWrapper(activity,
+                ThemeHelper.getTheme(PrefUtils.getTheme(), PrefUtils.getAccentColor()));
+        new AlertDialog.Builder(themed)
                 .setTitle(R.string.sign_in_again_title)
                 .setMessage(message)
                 .setCancelable(leave == null)
