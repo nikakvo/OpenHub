@@ -27,6 +27,13 @@ public class GitHubLinksTest {
     public void otherLinksStayAsTheyAre() {
         assertEquals("https://github.com/o/r/issues/3", GitHubLinks.normalize("https://github.com/o/r/issues/3"));
         assertEquals("https://github.com/search?q=x", GitHubLinks.normalize("https://github.com/search?q=x"));
+        assertEquals("https://github.com/nikakvo", GitHubLinks.normalize("https://github.com/nikakvo?tab=repositories"));
+        assertEquals("https://github.com/nikakvo", GitHubLinks.normalize("https://github.com/nikakvo/"));
+        assertEquals("repositories", GitHubLinks.profileTab("https://github.com/nikakvo?tab=repositories"));
+        assertEquals("stars", GitHubLinks.profileTab("https://github.com/nikakvo?tab=Stars&x=1"));
+        assertEquals(null, GitHubLinks.profileTab("https://github.com/nikakvo"));
+        assertEquals(null, GitHubLinks.profileTab("https://github.com/nikakvo/OpenHub?tab=readme-ov-file"));
+        assertEquals(null, GitHubLinks.profileTab("https://github.com/search?tab=x"));
         assertEquals("https://github.com/topics/android?l=java",
                 GitHubLinks.normalize("https://github.com/topics/android?l=java"));
         assertEquals("https://gitlab.com/o/r.git", GitHubLinks.normalize("https://gitlab.com/o/r.git"));

@@ -32,6 +32,9 @@ public class BrowserFilterActivity extends AppCompatActivity {
         return ACTIONS + fullName + (canRun ? ":run" : "");
     }
 
+    @Nullable private static String lastLink;
+    private static long lastLinkAt;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +43,16 @@ public class BrowserFilterActivity extends AppCompatActivity {
             finish();
             return;
         }
+        // some apps (Telegram's in-app browser) hand over the same link twice in a row:
+        // the page then opened twice and Back showed it again before returning to the app
+        String link = getIntent().getData().toString();
+        long now = android.os.SystemClock.elapsedRealtime();
+        if (link.equals(lastLink) && now - lastLinkAt < 3000) {
+            finish();
+            return;
+        }
+        lastLink = link;
+        lastLinkAt = now;
         if(AppData.INSTANCE.getLoggedUser() != null){
             handleBrowserUri(this, getIntent().getData());
         } else {

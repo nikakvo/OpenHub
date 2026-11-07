@@ -52,6 +52,10 @@ public final class GitHubLinks {
         URI uri = parse(trimmed);
         if (uri == null || !isGitHub(uri)) return trimmed;
         List<String> parts = segments(uri.getRawPath());
+        // a profile: github.com/user?tab=repositories, github.com/user/ -> github.com/user
+        if (parts.size() == 1 && !RESERVED.contains(parts.get(0).toLowerCase(Locale.ROOT))) {
+            return "https://github.com/" + parts.get(0);
+        }
         if (parts.size() != 2) return trimmed;
         String owner = parts.get(0);
         String repo = parts.get(1);
@@ -60,6 +64,23 @@ public final class GitHubLinks {
             repo = repo.substring(0, repo.length() - 4);
         }
         return "https://github.com/" + owner + "/" + repo;
+    }
+
+    /**
+     * The tab of a profile link ("repositories" for github.com/user?tab=repositories),
+     * lower case; null when the link is no profile or names no tab.
+     */
+    public static String profileTab(String url) {
+        URI uri = parse(url == null ? null : url.trim());
+        if (uri == null || !isGitHub(uri)) return null;
+        List<String> parts = segments(uri.getRawPath());
+        if (parts.size() != 1 || RESERVED.contains(parts.get(0).toLowerCase(Locale.ROOT))) return null;
+        String query = uri.getRawQuery();
+        if (query == null) return null;
+        for (String pair : query.split("&")) {
+            if (pair.startsWith("tab=") && pair.length() > 4) return pair.substring(4).toLowerCase(Locale.ROOT);
+        }
+        return null;
     }
 
     /**

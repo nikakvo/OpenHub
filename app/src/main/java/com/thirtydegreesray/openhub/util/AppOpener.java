@@ -32,6 +32,10 @@ import com.thirtydegreesray.openhub.ui.activity.CommitsListActivity;
 import com.thirtydegreesray.openhub.ui.activity.IssueDetailActivity;
 import com.thirtydegreesray.openhub.ui.activity.IssuesActivity;
 import com.thirtydegreesray.openhub.ui.activity.ProfileActivity;
+import com.thirtydegreesray.openhub.ui.activity.RepoListActivity;
+import com.thirtydegreesray.openhub.ui.activity.UserListActivity;
+import com.thirtydegreesray.openhub.ui.fragment.RepositoriesFragment;
+import com.thirtydegreesray.openhub.ui.fragment.UserListFragment;
 import com.thirtydegreesray.openhub.ui.activity.ReleaseInfoActivity;
 import com.thirtydegreesray.openhub.ui.activity.ReleasesActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepositoryActivity;
@@ -209,6 +213,8 @@ public class AppOpener {
 
     public static void launchUrl(@NonNull Context context, @NonNull Uri uri){
         if(StringUtils.isBlank(uri.toString())) return;
+        // github.com/user?tab=repositories (or stars, followers, following): that list
+        String profileTab = GitHubLinks.profileTab(uri.toString());
         // "github.com/owner/repo.git", "...repo#readme" and the like open the repository
         String url = GitHubLinks.normalize(uri.toString());
         uri = Uri.parse(url);
@@ -295,7 +301,9 @@ public class AppOpener {
             repoName = gitHubName.getRepoName();
         }
 
-        if(GitHubHelper.isUserUrl(url)){
+        if(GitHubHelper.isUserUrl(url) && profileTab != null && openProfileTab(context, userName, profileTab)){
+            return;
+        } else if(GitHubHelper.isUserUrl(url)){
             ProfileActivity.show((Activity) context, userName);
         } else if(GitHubHelper.isRepoUrl(url)){
             RepositoryActivity.show(context, userName, repoName);
@@ -314,6 +322,31 @@ public class AppOpener {
             CommitsListActivity.showForCompare((Activity) context, userName, repoName, compare[0], compare[1]);
         } else {
             openInCustomTabsOrBrowser(context, url);
+        }
+    }
+
+    /** The list a profile tab shows; false for tabs the app has no list for (the profile opens). */
+    private static boolean openProfileTab(@NonNull Context context, @NonNull String user, @NonNull String tab) {
+        com.thirtydegreesray.openhub.mvp.model.User me = com.thirtydegreesray.openhub.AppData.INSTANCE.getLoggedUser();
+        boolean own = me != null && user.equalsIgnoreCase(me.getLogin());
+        switch (tab) {
+            case "repositories":
+                RepoListActivity.show(context, own ? RepositoriesFragment.RepositoriesType.OWNED
+                        : RepositoriesFragment.RepositoriesType.PUBLIC, user);
+                return true;
+            case "stars":
+                RepoListActivity.show(context, RepositoriesFragment.RepositoriesType.STARRED, user);
+                return true;
+            case "followers":
+                if (!(context instanceof Activity)) return false;
+                UserListActivity.show((Activity) context, UserListFragment.UserListType.FOLLOWERS, user);
+                return true;
+            case "following":
+                if (!(context instanceof Activity)) return false;
+                UserListActivity.show((Activity) context, UserListFragment.UserListType.FOLLOWING, user);
+                return true;
+            default:
+                return false;
         }
     }
 

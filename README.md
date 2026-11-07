@@ -54,7 +54,7 @@ app goes to them; see [Credits](#credits).
   badges and download buttons; it can be the start page
 * Built-in updater with an on/off switch; GitHub links from other apps open in the app
   (repositories, also `.git` links, files, folders, wiki pages, issues, pull requests,
-  releases)
+  releases, profiles and their repositories, stars, followers and following)
 * The side menu on every screen (≡ always at the top left, Back right next to it), to jump
   anywhere without pressing Back many times
 * **Matrix rain** side menu: slowly falling green characters behind your account and down
