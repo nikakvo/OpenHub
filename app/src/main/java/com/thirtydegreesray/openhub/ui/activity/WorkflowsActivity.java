@@ -370,8 +370,13 @@ public class WorkflowsActivity extends BaseActivity<IBaseContract.Presenter> {
             cachePage = page + 1;
             loadMoreBn.setVisibility(count >= PER_PAGE ? View.VISIBLE : View.GONE);
             if (cacheRows == 0) {
-                emptyText.setText(R.string.caches_none);
-                emptyText.setVisibility(View.VISIBLE);
+                if (list.getChildCount() > 0) {
+                    // under GitHub's usage line, not drawn over it
+                    list.addView(note(getString(R.string.caches_none)));
+                } else {
+                    emptyText.setText(R.string.caches_none);
+                    emptyText.setVisibility(View.VISIBLE);
+                }
             }
             invalidateOptionsMenu();
         }, false);
