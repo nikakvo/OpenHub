@@ -76,6 +76,14 @@ public class IssuesAdapter extends BaseAdapter<IssuesAdapter.ViewHolder, Issue> 
         if (deps != null && deps.blockedBy > 0) {
             holder.repoFullName.append("  ·  " + context.getString(R.string.issue_list_blocked_by, deps.blockedBy));
         }
+        // the issue type first, with its color, like the issue list on github.com
+        com.thirtydegreesray.openhub.mvp.model.Issue.IssueType type = model.getType();
+        if (type != null && !com.thirtydegreesray.openhub.util.StringUtils.isBlank(type.name)) {
+            android.text.SpannableStringBuilder line = new android.text.SpannableStringBuilder(
+                    com.thirtydegreesray.openhub.ui.widget.IssueFieldsBox.dotted(type.name, type.color));
+            line.append("  ·  ").append(holder.repoFullName.getText());
+            holder.repoFullName.setText(line);
+        }
     }
 
     class ViewHolder extends BaseViewHolder {

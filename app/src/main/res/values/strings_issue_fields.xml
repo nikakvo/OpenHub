@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="issue_fields_title">Type and fields</string>
+    <string name="issue_type_title">Type</string>
+    <string name="issue_type_label">Type</string>
+    <string name="issue_field_none">None</string>
+    <string name="issue_fields_hint">Tap a row to change it.</string>
+    <string name="issue_type_pick">Issue type</string>
+    <string name="issue_type_none">No type</string>
+    <string name="issue_type_set">Type set to %1$s</string>
+    <string name="issue_type_removed">Type removed</string>
+    <string name="issue_type_not_changed">GitHub did not change the type (setting it needs write access).</string>
+    <string name="issue_field_remove">Remove</string>
+    <string name="issue_field_saved">%1$s saved</string>
+    <string name="issue_field_removed">%1$s removed</string>
+    <string name="issue_field_not_number">Not a number</string>
+</resources>

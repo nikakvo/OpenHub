@@ -46,7 +46,8 @@ import com.thirtydegreesray.openhub.util.ViewUtils;
 
 public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
         implements IIssueDetailContract.View,
-        ListFragment.ListScrollListener, SubIssuesBox.Host {
+        ListFragment.ListScrollListener, SubIssuesBox.Host,
+        com.thirtydegreesray.openhub.ui.widget.IssueFieldsBox.Host {
 
     public static void show(@NonNull Activity activity, @NonNull View avatarView,
                             @NonNull View titleView, @NonNull Issue issue) {
@@ -96,6 +97,7 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
 
     private IssueTimelineFragment issueTimelineFragment;
     private SubIssuesBox subIssuesBox;
+    private com.thirtydegreesray.openhub.ui.widget.IssueFieldsBox issueFieldsBox;
 
     private final int ADD_COMMENT_REQUEST_CODE = 100;
     public static final int EDIT_COMMENT_REQUEST_CODE = 101;
@@ -211,6 +213,21 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
         editBn.setVisibility(editAble ? View.VISIBLE : View.GONE);
         commentBn.setVisibility(View.VISIBLE);
         subIssuesBox().load(issue);
+        issueFieldsBox().load(issue);
+    }
+
+    /** The issue type and the issue field values shown in the first timeline item. */
+    @NonNull
+    public com.thirtydegreesray.openhub.ui.widget.IssueFieldsBox issueFieldsBox() {
+        if (issueFieldsBox == null) {
+            issueFieldsBox = new com.thirtydegreesray.openhub.ui.widget.IssueFieldsBox(this, this);
+        }
+        return issueFieldsBox;
+    }
+
+    @Override
+    public void issueFieldsChanged() {
+        if (issueTimelineFragment != null) issueTimelineFragment.subIssuesChanged();
     }
 
     /** The parent and the sub-issues shown in the first timeline item. */
@@ -251,6 +268,7 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
     @Override
     protected void onDestroy() {
         if (subIssuesBox != null) subIssuesBox.destroy();
+        if (issueFieldsBox != null) issueFieldsBox.destroy();
         super.onDestroy();
     }
 

@@ -56,6 +56,39 @@ public class Issue implements Parcelable {
     /** GitHub's count of issue dependencies; null when GitHub did not send it. */
     @SerializedName("issue_dependencies_summary") private DependenciesSummary dependenciesSummary;
 
+    /** The issue type (organization repositories only); null when it has none. */
+    @SerializedName("type") private IssueType type;
+
+    /** Values of the organization's issue fields set on this issue; null or empty when none. */
+    @SerializedName("issue_field_values") private ArrayList<FieldValue> fieldValues;
+
+    /** GitHub's issue type: name, description and one of its color names. */
+    public static class IssueType {
+        public long id;
+        public String name;
+        public String description;
+        /** gray, blue, green, yellow, orange, red, pink, purple or null. */
+        public String color;
+    }
+
+    /** One option of a single or multi select issue field. */
+    public static class FieldOption {
+        public long id;
+        public String name;
+        public String color;
+    }
+
+    /** A value of an issue field: text, number, date, single_select or multi_select. */
+    public static class FieldValue {
+        @SerializedName("issue_field_id") public long fieldId;
+        @SerializedName("issue_field_name") public String fieldName;
+        @SerializedName("data_type") public String dataType;
+        /** A string or a number; for selects the option names are in the option fields. */
+        public com.google.gson.JsonElement value;
+        @SerializedName("single_select_option") public FieldOption singleSelectOption;
+        @SerializedName("multi_select_options") public ArrayList<FieldOption> multiSelectOptions;
+    }
+
     /** Set only on pull requests: GET repos/o/r/issues and the issue search return them too. */
     @SerializedName("pull_request") private com.google.gson.JsonObject pullRequest;
 
@@ -72,6 +105,16 @@ public class Issue implements Parcelable {
         public int total;
         public int completed;
         @SerializedName("percent_completed") public int percentCompleted;
+    }
+
+    @androidx.annotation.Nullable
+    public IssueType getType() {
+        return type;
+    }
+
+    @androidx.annotation.Nullable
+    public ArrayList<FieldValue> getFieldValues() {
+        return fieldValues;
     }
 
     /** True when GitHub returned a pull request in an issue list (it has a "pull_request" object). */
@@ -315,6 +358,10 @@ public class Issue implements Parcelable {
             dest.writeInt(this.dependenciesSummary.totalBlockedBy);
             dest.writeInt(this.dependenciesSummary.totalBlocking);
         }
+        // type and field values travel as GitHub's JSON (appended at the end)
+        com.google.gson.Gson gson = new com.google.gson.Gson();
+        dest.writeString(this.type == null ? null : gson.toJson(this.type));
+        dest.writeString(this.fieldValues == null ? null : gson.toJson(this.fieldValues));
     }
 
     protected Issue(Parcel in) {
@@ -357,6 +404,14 @@ public class Issue implements Parcelable {
             this.dependenciesSummary.blocking = in.readInt();
             this.dependenciesSummary.totalBlockedBy = in.readInt();
             this.dependenciesSummary.totalBlocking = in.readInt();
+        }
+        com.google.gson.Gson gson = new com.google.gson.Gson();
+        String typeJson = in.readString();
+        if (typeJson != null) this.type = gson.fromJson(typeJson, IssueType.class);
+        String valuesJson = in.readString();
+        if (valuesJson != null) {
+            FieldValue[] values = gson.fromJson(valuesJson, FieldValue[].class);
+            this.fieldValues = values == null ? null : new ArrayList<>(java.util.Arrays.asList(values));
         }
     }
 
