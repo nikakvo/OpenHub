@@ -436,7 +436,9 @@
   <ul>
     <li><strong>Tap a line</strong> to comment on it.</li>
     <li><strong>Several lines</strong>: long-press the first line (it turns yellow), then tap the last one. Tap the same line again to cancel.</li>
-    <li><span class="ui">Suggest a change</span> (on added or unchanged lines) puts the code into a suggestion block. Edit it, and the author can apply it on github.com with one tap (<em>Commit suggestion</em>).</li>
+    <li><span class="ui">Suggest a change</span> (on added or unchanged lines) puts the code into a suggestion block. Edit it, and whoever can push to the pull request's branch can apply it with one tap.</li>
+    <li><strong>Applying suggestions:</strong> if you can push to the pull request's branch (your own repository, a fork that allows edits by maintainers, or your own fork), a suggested change in the diff screen has <span class="ui">Commit suggestion</span> and <span class="ui">Add to batch</span>. <span class="ui">Commit suggestion</span> asks for the commit message (<em>Apply suggestion from code review</em> by default) and commits it to the branch. <span class="ui">Add to batch</span> collects several (also from other files); the bar at the bottom shows how many, <span class="ui">Commit</span> applies them all in one commit and <span class="ui">Clear</span> empties the batch. The authors of the suggestions are credited with <code>Co-authored-by</code>, like on github.com.</li>
+    <li>Only suggestions on the current code can be applied (outdated ones have no buttons). If the lines or the branch changed meanwhile, nothing is written and the app asks you to reload.</li>
     <li>Comments appear under their line, with <span class="ui">Reply…</span> to answer. Long-press one to edit, delete or copy its link.</li>
     <li>Comments on code that changed since are listed at the top as outdated.</li>
   </ul>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="suggestion_commit">Commit suggestion</string>
+    <string name="suggestion_batch_add">Add to batch</string>
+    <string name="suggestion_batch_remove">Remove from batch</string>
+    <string name="suggestion_batch_commit">Commit</string>
+    <string name="suggestion_batch_clear">Clear</string>
+    <plurals name="suggestion_batch_text">
+        <item quantity="one">%1$d suggestion in the batch</item>
+        <item quantity="other">%1$d suggestions in the batch</item>
+    </plurals>
+    <plurals name="suggestion_commit_title">
+        <item quantity="one">Commit suggestion</item>
+        <item quantity="other">Commit %1$d suggestions</item>
+    </plurals>
+    <plurals name="suggestion_committed">
+        <item quantity="one">Suggestion committed</item>
+        <item quantity="other">%1$d suggestions committed</item>
+    </plurals>
+    <string name="suggestion_commit_message">Commit message</string>
+    <string name="suggestion_commit_description">Extended description (optional)</string>
+    <string name="suggestion_commit_button">Commit changes</string>
+    <string name="suggestion_removes_lines">(removes these lines)</string>
+</resources>

@@ -42,4 +42,13 @@
         android:textSize="@dimen/text_normal"
         android:textColor="?android:textColorPrimary"
         android:textIsSelectable="true"/>
+    <!-- suggested change: Commit suggestion / Add to batch (diff screen only) -->
+    <LinearLayout
+        android:id="@+id/comment_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/spacing_mini"
+        android:visibility="gone"/>
+
 </LinearLayout>

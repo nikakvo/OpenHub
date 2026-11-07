@@ -44,6 +44,8 @@ import com.thirtydegreesray.openhub.util.ReviewSender;
 import com.thirtydegreesray.openhub.util.ReviewThreads;
 import com.thirtydegreesray.openhub.util.PullChanges;
 import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.util.SuggestionBatch;
+import com.thirtydegreesray.openhub.util.Suggestions;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 
@@ -93,6 +95,12 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
     private ProgressBar loader;
     private View reviewBar;
     private TextView reviewBarText;
+    private View suggestBar;
+    private TextView suggestBarText;
+    /** The pull request as last loaded (state, head branch); null until then. */
+    @Nullable private JsonObject pull;
+    /** True when the user may push to the pull request's branch (suggestions can be committed). */
+    private boolean canPushHead;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
     private final List<Row> rows = new ArrayList<>();
@@ -218,7 +226,17 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
             }
             Map<Long, ReviewThreads.Thread> found2 = comments.isEmpty()
                     ? new HashMap<>() : ReviewThreads.fetch(owner, repo, number);
-            return new Object[]{found == null ? new JsonObject() : found, comments, found2};
+            // for suggested changes: the branch of the pull request and whether the user may push to it
+            JsonObject pr = null;
+            boolean push = false;
+            if (hasSuggestion(comments)) {
+                try {
+                    pr = GitHubApi.call(pulls().getPull(owner, repo, number));
+                    push = mayPushHead(pr);
+                } catch (Exception ignored) {
+                }
+            }
+            return new Object[]{found == null ? new JsonObject() : found, comments, found2, pr, push};
         }, (Object[] result) -> {
             loader.setVisibility(View.GONE);
             JsonObject found = (JsonObject) result[0];
@@ -227,6 +245,9 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
             threads = (Map<Long, ReviewThreads.Thread>) result[2];
             //noinspection unchecked
             lastComments = (List<JsonObject>) result[1];
+            pull = (JsonObject) result[3];
+            canPushHead = (Boolean) result[4];
+            if (pull != null && !Json.str(pull, "head.sha").isEmpty()) headSha = Json.str(pull, "head.sha");
             build(lastComments);
             invalidateOptionsMenu();
         }, error -> loader.setVisibility(View.GONE));
@@ -410,7 +431,14 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         return c;
     }
 
+    private void updateSuggestBar() {
+        int count = SuggestionBatch.count(owner, repo, number);
+        suggestBar.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        suggestBarText.setText(getResources().getQuantityString(R.plurals.suggestion_batch_text, count, count));
+    }
+
     private void updateReviewBar() {
+        updateSuggestBar();
         int pending = ReviewDrafts.count(this, owner, repo, number);
         reviewBar.setVisibility(pending > 0 ? View.VISIBLE : View.GONE);
         reviewBarText.setText(getResources().getQuantityString(R.plurals.review_bar_text, pending, pending));
@@ -736,6 +764,116 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     // ---------------------------------------------------------------------------------
+    // Suggested changes
+    // ---------------------------------------------------------------------------------
+
+    private static boolean hasSuggestion(@NonNull List<JsonObject> comments) {
+        for (JsonObject c : comments) if (Suggestions.parse(Json.str(c, "body")) != null) return true;
+        return false;
+    }
+
+    /** Push access to the head branch: same repository with push, a fork that allows maintainer edits, or own fork. */
+    @androidx.annotation.WorkerThread
+    private boolean mayPushHead(@Nullable JsonObject pr) {
+        if (pr == null || !"open".equals(Json.str(pr, "state"))) return false;
+        String me = AppData.INSTANCE.getLoggedUser() == null ? "" : AppData.INSTANCE.getLoggedUser().getLogin();
+        String headRepo = Json.str(pr, "head.repo.full_name");
+        if (headRepo.isEmpty()) return false;
+        if (headRepo.toLowerCase(java.util.Locale.ROOT).startsWith(me.toLowerCase(java.util.Locale.ROOT) + "/")) {
+            return true;
+        }
+        boolean sameRepo = headRepo.equalsIgnoreCase(owner + "/" + repo);
+        if (!sameRepo && !Json.bool(pr, "maintainer_can_modify")) return false;
+        try {
+            JsonObject json = GitHubApi.call(GitHubApi.service(com.thirtydegreesray.openhub.http.IssueService.class)
+                    .getRepoJson(owner, repo));
+            return Json.bool(json, "permissions.push") || Json.bool(json, "permissions.maintain")
+                    || Json.bool(json, "permissions.admin");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** The suggested change of a comment when it can be committed now, otherwise null. */
+    @Nullable
+    private Suggestions.Edit suggestionOf(@NonNull JsonObject c) {
+        if (!canPushHead || Json.bool(c, "_draft")) return null;
+        String text = Suggestions.parse(Json.str(c, "body"));
+        if (text == null) return null;
+        // outdated comments have no line any more; suggestions are made on the new side
+        int line = Json.str(c, "line").isEmpty() ? 0 : Json.integer(c, "line");
+        if (line <= 0 || "LEFT".equals(Json.str(c, "side"))) return null;
+        int start = line;
+        if (!Json.str(c, "start_line").isEmpty() && !"LEFT".equals(Json.str(c, "start_side"))) {
+            start = Math.min(line, Json.integer(c, "start_line"));
+        }
+        JsonElement uid = Json.get(c, "user.id");
+        long userId = uid != null && uid.isJsonPrimitive() ? uid.getAsLong() : 0;
+        return new Suggestions.Edit(longOf(c, "id"), Json.str(c, "path"), start, line, text,
+                Json.str(c, "user.login"), userId, Suggestions.lastHunkLine(Json.str(c, "diff_hunk")));
+    }
+
+    private void toggleBatch(@NonNull Suggestions.Edit edit) {
+        if (SuggestionBatch.contains(owner, repo, number, edit.commentId)) {
+            SuggestionBatch.remove(owner, repo, number, edit.commentId);
+        } else {
+            SuggestionBatch.add(owner, repo, number, edit);
+        }
+        updateSuggestBar();
+        adapter.notifyDataSetChanged();
+    }
+
+    private void commitSuggestions(@NonNull List<Suggestions.Edit> edits, boolean fromBatch) {
+        if (edits.isEmpty()) return;
+        StringBuilder preview = new StringBuilder();
+        for (Suggestions.Edit e : edits) {
+            if (preview.length() > 0) preview.append("\n\n");
+            preview.append(e.path).append(e.start == e.end ? ":" + e.start : ":" + e.start + "-" + e.end).append('\n');
+            preview.append(e.text.isEmpty() ? getString(R.string.suggestion_removes_lines) : e.text);
+        }
+        String me = AppData.INSTANCE.getLoggedUser() == null ? null : AppData.INSTANCE.getLoggedUser().getLogin();
+        new ComposeDialog.Builder(this)
+                .title(getResources().getQuantityString(R.plurals.suggestion_commit_title, edits.size(), edits.size()))
+                .repo(owner + "/" + repo)
+                .header(preview)
+                .titleField(getString(R.string.suggestion_commit_message), Suggestions.defaultMessage(edits.size()))
+                .body(getString(R.string.suggestion_commit_description), null)
+                .positive(getString(R.string.suggestion_commit_button))
+                .callback((choice, message, description) -> {
+                    showProgressDialog(getString(R.string.please_wait));
+                    background(() -> {
+                        SuggestionBatch.commit(getApplicationContext(), owner, repo, number, edits,
+                                message, description, me);
+                        return Boolean.TRUE;
+                    }, done -> {
+                        dismissProgressDialog();
+                        if (fromBatch) {
+                            SuggestionBatch.clear(owner, repo, number);
+                        } else {
+                            SuggestionBatch.remove(owner, repo, number, edits.get(0).commentId);
+                        }
+                        updateSuggestBar();
+                        showSuccessToast(getResources().getQuantityString(R.plurals.suggestion_committed,
+                                edits.size(), edits.size()));
+                        PullRefresh.freshFromNow();
+                        load();
+                    }, error -> dismissProgressDialog());
+                })
+                .show();
+    }
+
+    private void commitBatch() {
+        List<Suggestions.Edit> edits = SuggestionBatch.list(owner, repo, number);
+        commitSuggestions(edits, true);
+    }
+
+    private void clearBatch() {
+        SuggestionBatch.clear(owner, repo, number);
+        updateSuggestBar();
+        adapter.notifyDataSetChanged();
+    }
+
+    // ---------------------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------------------
 
@@ -769,6 +907,10 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         reviewBar = root.findViewById(R.id.review_bar);
         reviewBarText = root.findViewById(R.id.review_bar_text);
         root.findViewById(R.id.review_bar_bn).setOnClickListener(v -> finishReview());
+        suggestBar = root.findViewById(R.id.suggest_bar);
+        suggestBarText = root.findViewById(R.id.suggest_bar_text);
+        root.findViewById(R.id.suggest_bar_bn).setOnClickListener(v -> commitBatch());
+        root.findViewById(R.id.suggest_bar_clear).setOnClickListener(v -> clearBatch());
     }
 
     // ---------------------------------------------------------------------------------
@@ -945,6 +1087,34 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                 commentMenu(v, c);
                 return true;
             });
+            bindSuggestion(view, c);
+        }
+
+        /** "Commit suggestion" and "Add to batch" under a suggested change that can be applied now. */
+        private void bindSuggestion(@NonNull View view, @NonNull JsonObject c) {
+            LinearLayout actions = view.findViewById(R.id.comment_actions);
+            if (actions == null) return;
+            Suggestions.Edit edit = suggestionOf(c);
+            if (edit == null) {
+                actions.setVisibility(View.GONE);
+                return;
+            }
+            actions.setVisibility(View.VISIBLE);
+            if (actions.getChildCount() == 0) {
+                for (int i = 0; i < 2; i++) {
+                    TextView action = new TextView(view.getContext());
+                    com.thirtydegreesray.openhub.util.ButtonStyles.tonal(action);
+                    actions.addView(action);
+                    com.thirtydegreesray.openhub.util.ButtonStyles.spaceInRow(action);
+                }
+            }
+            TextView commit = (TextView) actions.getChildAt(0);
+            TextView batch = (TextView) actions.getChildAt(1);
+            commit.setText(R.string.suggestion_commit);
+            commit.setOnClickListener(v -> commitSuggestions(java.util.Collections.singletonList(edit), false));
+            boolean inBatch = SuggestionBatch.contains(owner, repo, number, edit.commentId);
+            batch.setText(inBatch ? R.string.suggestion_batch_remove : R.string.suggestion_batch_add);
+            batch.setOnClickListener(v -> toggleBatch(edit));
         }
     }
 

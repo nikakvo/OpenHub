@@ -28,6 +28,42 @@
             android:visibility="gone"/>
     </FrameLayout>
 
+    <!-- suggestions collected with "Add to batch" -->
+    <LinearLayout
+        android:id="@+id/suggest_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="?card_background"
+        android:elevation="8dp"
+        android:paddingStart="@dimen/spacing_large"
+        android:paddingEnd="@dimen/spacing_small"
+        android:paddingTop="@dimen/spacing_mini"
+        android:paddingBottom="@dimen/spacing_mini"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/suggest_bar_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="@dimen/text_small"
+            android:textColor="?android:textColorPrimary"/>
+        <Button
+            android:id="@+id/suggest_bar_clear"
+            style="@style/OpenHubButton.Tonal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/spacing_mini"
+            android:text="@string/suggestion_batch_clear"/>
+        <Button
+            android:id="@+id/suggest_bar_bn"
+            style="@style/OpenHubButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/suggestion_batch_commit"/>
+    </LinearLayout>
+
     <!-- pending review: comments collected with "Start a review" -->
     <LinearLayout
         android:id="@+id/review_bar"

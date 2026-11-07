@@ -103,6 +103,11 @@ public final class RepoCommitter {
         public final boolean openPullRequest;
         /** with no new branch: the branch a pull request from the current branch goes into */
         @Nullable public final String pullBase;
+        /**
+         * The commit the branch must still point to (the files were read there); when the branch
+         * moved meanwhile nothing is committed. Null: no check.
+         */
+        @Nullable public String expectedHead;
 
         public Options(@NonNull String message, @Nullable String description,
                        @Nullable String newBranch, boolean openPullRequest) {
@@ -160,6 +165,10 @@ public final class RepoCommitter {
                         + " yet. If it was just created, wait a few seconds and try again.");
             }
             throw e;
+        }
+        if (options.expectedHead != null && !options.expectedHead.equals(head)) {
+            throw new GitHubApi.ApiException(409, "The branch " + branch
+                    + " changed meanwhile. Reload and try again.");
         }
         JsonObject commit = GitHubApi.call(git.getCommit(owner, repo, head));
         String baseTree = commit.getAsJsonObject("tree").get("sha").getAsString();
