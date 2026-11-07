@@ -105,6 +105,7 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
     class HeadCommentViewHolder extends CommentViewHolder{
         TextView issueLabels;
         TextView issueMeta;
+        LinearLayout subIssues;
         public HeadCommentViewHolder(@NonNull View itemView) {
             super(itemView);
         }
@@ -113,6 +114,12 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
         void setData(IssueEvent model) {
             super.setData(model);
             showMeta(model.getParentIssue());
+            if (fragment.getActivity() instanceof com.thirtydegreesray.openhub.ui.activity.IssueDetailActivity) {
+                ((com.thirtydegreesray.openhub.ui.activity.IssueDetailActivity) fragment.getActivity())
+                        .subIssuesBox().bind(subIssues);
+            } else {
+                subIssues.setVisibility(View.GONE);
+            }
             ArrayList<Label> labels = model.getParentIssue().getLabels();
             if(labels == null || labels.size() == 0){
                 issueLabels.setVisibility(View.GONE);
@@ -128,6 +135,7 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
             super.bindViews(root);
             issueLabels = root.findViewById(R.id.issue_labels);
             issueMeta = root.findViewById(R.id.issue_meta);
+            subIssues = root.findViewById(R.id.issue_sub_issues);
         }
 
         /** "Assignees: a, b · Milestone: v1.0" */

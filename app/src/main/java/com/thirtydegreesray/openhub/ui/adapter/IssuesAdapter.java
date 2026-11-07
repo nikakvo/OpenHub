@@ -66,6 +66,12 @@ public class IssuesAdapter extends BaseAdapter<IssuesAdapter.ViewHolder, Issue> 
         } else {
             holder.repoFullName.setText(("#").concat(String.valueOf(model.getNumber())));
         }
+        // GitHub's own progress of the sub-issues, like the issue list on github.com
+        com.thirtydegreesray.openhub.mvp.model.Issue.SubIssuesSummary summary = model.getSubIssuesSummary();
+        if (summary != null && summary.total > 0) {
+            holder.repoFullName.append("  ·  " + context.getString(R.string.issue_list_sub_issues,
+                    summary.completed, summary.total));
+        }
     }
 
     class ViewHolder extends BaseViewHolder {

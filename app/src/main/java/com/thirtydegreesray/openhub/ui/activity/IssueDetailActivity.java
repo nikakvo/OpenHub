@@ -31,6 +31,7 @@ import com.thirtydegreesray.openhub.mvp.presenter.IssueDetailPresenter;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.fragment.IssueTimelineFragment;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
+import com.thirtydegreesray.openhub.ui.widget.SubIssuesBox;
 import com.thirtydegreesray.openhub.ui.widget.ZoomAbleFloatingActionButton;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
@@ -45,7 +46,7 @@ import com.thirtydegreesray.openhub.util.ViewUtils;
 
 public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
         implements IIssueDetailContract.View,
-        ListFragment.ListScrollListener{
+        ListFragment.ListScrollListener, SubIssuesBox.Host {
 
     public static void show(@NonNull Activity activity, @NonNull View avatarView,
                             @NonNull View titleView, @NonNull Issue issue) {
@@ -94,10 +95,12 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
     ProgressBar loader;
 
     private IssueTimelineFragment issueTimelineFragment;
+    private SubIssuesBox subIssuesBox;
 
     private final int ADD_COMMENT_REQUEST_CODE = 100;
     public static final int EDIT_COMMENT_REQUEST_CODE = 101;
     public static final int EDIT_ISSUE_REQUEST_CODE = 102;
+    private static final int NEW_SUB_ISSUE_REQUEST_CODE = 103;
 
     @Override
     protected void setupActivityComponent(AppComponent appComponent) {
@@ -116,6 +119,7 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
     @Override
     protected void initView(Bundle savedInstanceState) {
         super.initView(savedInstanceState);
+        if (subIssuesBox == null) subIssuesBox = new SubIssuesBox(this, this);
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.issue));
         commentBn.setVisibility(View.GONE);
@@ -206,7 +210,48 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
                 loggedUser.equals(issue.getRepoAuthorName());
         editBn.setVisibility(editAble ? View.VISIBLE : View.GONE);
         commentBn.setVisibility(View.VISIBLE);
+        subIssuesBox().load(issue);
+    }
 
+    /** The parent and the sub-issues shown in the first timeline item. */
+    @NonNull
+    public SubIssuesBox subIssuesBox() {
+        if (subIssuesBox == null) subIssuesBox = new SubIssuesBox(this, this);
+        return subIssuesBox;
+    }
+
+    @Override
+    public void subIssuesChanged() {
+        if (issueTimelineFragment != null) issueTimelineFragment.subIssuesChanged();
+    }
+
+    @Override
+    public void createSubIssue() {
+        if (mPresenter.getOwner() == null || mPresenter.getRepoName() == null) return;
+        EditIssueActivity.showForAdd(getActivity(), mPresenter.getOwner(), mPresenter.getRepoName(),
+                NEW_SUB_ISSUE_REQUEST_CODE);
+    }
+
+    @Override
+    public void reloadIssueFromNetwork() {
+        reloadIssue();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // a sub-issue was closed, added or removed on another screen: GitHub's new progress
+        if (subIssuesBox != null && subIssuesBox.isStale() && mPresenter != null
+                && mPresenter.getIssue() != null) {
+            com.thirtydegreesray.openhub.util.PullRefresh.freshFromNow();
+            reloadIssue();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (subIssuesBox != null) subIssuesBox.destroy();
+        super.onDestroy();
     }
 
     /** Pull down on the timeline: the title, state and text of the issue too. */
@@ -257,6 +302,10 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
             mPresenter.setIssue(issue);
             issueTitle.setText(issue.getTitle());
             issueTimelineFragment.onEditIssue(issue);
+        } else if (requestCode == NEW_SUB_ISSUE_REQUEST_CODE) {
+            Issue created = data == null ? null : data.getParcelableExtra("issue");
+            if (created != null) subIssuesBox().addCreated(created);
+            return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sub_issue_parent">Sub-issue of</string>
+    <string name="sub_issues_title">Sub-issues</string>
+    <string name="sub_issues_count">Sub-issues (%1$d)</string>
+    <string name="sub_issues_progress">Sub-issues: %1$d of %2$d done</string>
+    <string name="sub_issues_none">No sub-issues yet.</string>
+    <string name="sub_issue_not_planned">Not planned</string>
+    <string name="sub_issue_add">Add sub-issue</string>
+    <string name="sub_issue_add_existing">Add an existing issue</string>
+    <string name="sub_issue_create_new">Create a new sub-issue</string>
+    <string name="sub_issue_search_hint">Number, title or link</string>
+    <string name="sub_issue_loading_open">Loading open issues…</string>
+    <string name="sub_issue_pick_hint">Tap an issue to add it. Issues of another repository of the same owner: type owner/repo#number or paste the link.</string>
+    <string name="sub_issue_no_candidates">No open issue matches. Type a number, owner/repo#number or paste a link.</string>
+    <string name="sub_issue_add_ref">Add %1$s</string>
+    <string name="sub_issue_has_parent">(has a parent)</string>
+    <string name="sub_issue_is_pull">That is a pull request. Only issues can be sub-issues.</string>
+    <string name="sub_issue_is_self">An issue cannot be its own sub-issue.</string>
+    <string name="sub_issue_move_title">Move the sub-issue?</string>
+    <string name="sub_issue_move_message">%1$s is already a sub-issue of another issue. Move it to this issue? It leaves its current parent.</string>
+    <string name="sub_issue_move_button">Move here</string>
+    <string name="sub_issue_added">Added %1$s as a sub-issue</string>
+    <string name="sub_issue_move_up">Move up</string>
+    <string name="sub_issue_move_down">Move down</string>
+    <string name="sub_issue_remove">Remove sub-issue</string>
+    <string name="sub_issue_remove_message">Remove %1$s \"%2$s\" from the sub-issues? The issue itself stays as it is.</string>
+    <string name="sub_issue_remove_button">Remove</string>
+    <string name="sub_issue_removed">Removed %1$s from the sub-issues</string>
+    <string name="issue_list_sub_issues">Sub-issues %1$d/%2$d</string>
+</resources>

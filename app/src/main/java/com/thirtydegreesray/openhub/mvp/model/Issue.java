@@ -46,6 +46,19 @@ public class Issue implements Parcelable {
     private ArrayList<User> assignees;
     private Milestone milestone;
     @SerializedName("closed_by") private User closedBy;
+    /** "completed", "not_planned", "duplicate", "reopened" or null. */
+    @SerializedName("state_reason") private String stateReason;
+    /** API link of the parent issue when this one is a sub-issue, otherwise null. */
+    @SerializedName("parent_issue_url") private String parentIssueUrl;
+    /** GitHub's own count of the sub-issues; null when GitHub did not send it. */
+    @SerializedName("sub_issues_summary") private SubIssuesSummary subIssuesSummary;
+
+    /** GitHub's "sub_issues_summary": total, completed and percent completed. */
+    public static class SubIssuesSummary {
+        public int total;
+        public int completed;
+        @SerializedName("percent_completed") public int percentCompleted;
+    }
 
     public String getId() {
         return id;
@@ -166,6 +179,18 @@ public class Issue implements Parcelable {
                 repoUrl.substring(repoUrl.lastIndexOf("repos/") + 6, repoUrl.lastIndexOf("/")) : null;
     }
 
+    public String getStateReason() {
+        return stateReason;
+    }
+
+    public String getParentIssueUrl() {
+        return parentIssueUrl;
+    }
+
+    public SubIssuesSummary getSubIssuesSummary() {
+        return subIssuesSummary;
+    }
+
     public String getHtmlUrl() {
         return htmlUrl;
     }
@@ -252,6 +277,14 @@ public class Issue implements Parcelable {
         dest.writeTypedList(this.assignees);
         dest.writeParcelable(this.milestone, flags);
         dest.writeParcelable(this.closedBy, flags);
+        dest.writeString(this.stateReason);
+        dest.writeString(this.parentIssueUrl);
+        dest.writeByte(this.subIssuesSummary == null ? (byte) 0 : (byte) 1);
+        if (this.subIssuesSummary != null) {
+            dest.writeInt(this.subIssuesSummary.total);
+            dest.writeInt(this.subIssuesSummary.completed);
+            dest.writeInt(this.subIssuesSummary.percentCompleted);
+        }
     }
 
     protected Issue(Parcel in) {
@@ -280,6 +313,14 @@ public class Issue implements Parcelable {
         this.assignees = in.createTypedArrayList(User.CREATOR);
         this.milestone = in.readParcelable(Milestone.class.getClassLoader());
         this.closedBy = in.readParcelable(User.class.getClassLoader());
+        this.stateReason = in.readString();
+        this.parentIssueUrl = in.readString();
+        if (in.readByte() != 0) {
+            this.subIssuesSummary = new SubIssuesSummary();
+            this.subIssuesSummary.total = in.readInt();
+            this.subIssuesSummary.completed = in.readInt();
+            this.subIssuesSummary.percentCompleted = in.readInt();
+        }
     }
 
     public static final Creator<Issue> CREATOR = new Creator<Issue>() {

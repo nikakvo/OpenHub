@@ -95,6 +95,13 @@ public class IssueTimelineFragment extends ListFragment<IssueTimelinePresenter, 
         adapter.notifyItemChanged(0);
     }
 
+    /** The parent or the sub-issues changed: draw the first item again. */
+    public void subIssuesChanged() {
+        if (adapter == null || adapter.getData() == null || adapter.getData().isEmpty()) return;
+        if (adapter.getData().get(0).getParentIssue() == null) return;
+        adapter.notifyItemChanged(0);
+    }
+
     @Override
     protected String getEmptyTip() {
         return getString(R.string.no_comments);

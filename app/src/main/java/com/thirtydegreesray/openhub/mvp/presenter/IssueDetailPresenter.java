@@ -154,6 +154,8 @@ public class IssueDetailPresenter extends BasePresenter<IIssueDetailContract.Vie
 
                     @Override
                     public void onSuccess(HttpResponse<Issue> response) {
+                        // the parent's progress counts this issue
+                        com.thirtydegreesray.openhub.ui.widget.SubIssuesBox.markChanged();
                         mView.showIssue(issue);
                         String tip = issue.getState().equals(Issue.IssueState.open) ?
                                 getString(R.string.reopen_success) : getString(R.string.close_success);
