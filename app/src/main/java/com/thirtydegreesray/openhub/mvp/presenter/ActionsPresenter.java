@@ -14,6 +14,7 @@ import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
 import com.thirtydegreesray.openhub.mvp.contract.IActionsContract;
 import com.thirtydegreesray.openhub.mvp.model.ArtifactsResult;
 import com.thirtydegreesray.openhub.mvp.model.Workflow;
+import com.thirtydegreesray.openhub.util.WorkflowChanges;
 import com.thirtydegreesray.openhub.mvp.model.WorkflowRun;
 import com.thirtydegreesray.openhub.mvp.model.WorkflowRunsResult;
 import com.thirtydegreesray.openhub.mvp.model.WorkflowsResult;
@@ -47,6 +48,8 @@ public class ActionsPresenter extends BasePresenter<IActionsContract.View>
 
     private ArrayList<WorkflowRun> runs;
     private ArrayList<Workflow> workflows;
+    /** WorkflowChanges.stamp() when {@link #workflows} was loaded */
+    private long workflowsStamp;
 
     @Inject
     public ActionsPresenter(AppDatabase db) {
@@ -144,11 +147,12 @@ public class ActionsPresenter extends BasePresenter<IActionsContract.View>
 
     @Override
     public void pickWorkflow(final boolean forRun) {
-        if (workflows != null) {
+        if (workflows != null && workflowsStamp == WorkflowChanges.stamp()) {
             mView.showWorkflowPicker(workflows, forRun);
             return;
         }
         mView.showProgressDialog(getLoadTip());
+        final long stampAtStart = WorkflowChanges.stamp();
         HttpObserver<WorkflowsResult> observer = new HttpObserver<WorkflowsResult>() {
             @Override
             public void onError(Throwable error) {
@@ -160,6 +164,7 @@ public class ActionsPresenter extends BasePresenter<IActionsContract.View>
             public void onSuccess(HttpResponse<WorkflowsResult> response) {
                 mView.dismissProgressDialog();
                 workflows = response.body() == null ? new ArrayList<>() : response.body().getWorkflows();
+                workflowsStamp = stampAtStart;
                 mView.showWorkflowPicker(workflows, forRun);
             }
         };
@@ -168,10 +173,14 @@ public class ActionsPresenter extends BasePresenter<IActionsContract.View>
 
     @Override
     public void selectWorkflow(@Nullable Workflow workflow) {
-        long newId = workflow == null ? 0 : workflow.getId();
+        selectWorkflow(workflow == null ? 0 : workflow.getId(), workflow == null ? null : workflow.getName());
+    }
+
+    /** @param newId 0 = all workflows */
+    public void selectWorkflow(long newId, @Nullable String newName) {
         if (newId == workflowId) return;
         workflowId = newId;
-        workflowName = workflow == null ? null : workflow.getName();
+        workflowName = newId == 0 ? null : newName;
         mView.onWorkflowFilterChanged(workflowName);
         runs = null;
         loadRuns(1, true);

@@ -10,6 +10,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -49,6 +51,17 @@ public class ActionsActivity extends SingleFragmentActivity<IBaseContract.Presen
     @AutoAccess boolean canRun;
 
     private FloatingActionButton runButton;
+
+    /** Workflows screen: "Show runs" comes back with the workflow to filter by. */
+    private final ActivityResultLauncher<Intent> workflowsLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                Intent data = result.getData();
+                if (result.getResultCode() != RESULT_OK || data == null || getFragment() == null) return;
+                long id = data.getLongExtra(WorkflowsActivity.RESULT_WORKFLOW_ID, 0);
+                if (id != 0) {
+                    getFragment().selectWorkflow(id, data.getStringExtra(WorkflowsActivity.RESULT_WORKFLOW_NAME));
+                }
+            });
 
     @Override
     protected void initView(Bundle savedInstanceState) {
@@ -98,6 +111,10 @@ public class ActionsActivity extends SingleFragmentActivity<IBaseContract.Presen
             return true;
         } else if (itemId == R.id.action_run_workflow) {
             if (getFragment() != null) getFragment().pickWorkflow(true);
+            return true;
+        } else if (itemId == R.id.action_workflows || itemId == R.id.action_caches) {
+            workflowsLauncher.launch(WorkflowsActivity.createIntent(this, owner, repo, canRun,
+                    itemId == R.id.action_caches));
             return true;
         } else if (itemId == R.id.action_successful_only) {
             boolean checked = !item.isChecked();

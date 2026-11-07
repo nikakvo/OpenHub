@@ -584,6 +584,14 @@
     <li>Links to runs and jobs (from notifications, Telegram, issues) open here too.</li>
     <li><strong>Artifact to a release</strong>: tap an artifact (the arrow downloads it right away) → <span class="ui">Add to a release…</span>. OpenHub downloads and unpacks it, you tick the files you want (e.g. the AnyKernel zip and <code>boot.img</code>), and the upload screen opens for this repository: choose a release or <span class="ui">New release</span>, or commit the files to the repository instead.</li>
   </ul>
+  <h3>Workflows and caches</h3>
+  <ul>
+    <li>Menu → <span class="ui">Workflows</span>: every workflow of the repository with its state as GitHub reports it: <em>Active</em>, <em>Disabled</em>, <em>Disabled: no activity in the repository for 60 days</em> (GitHub stops scheduled workflows of quiet public repositories), <em>Disabled in this fork</em> or <em>Deleted</em> (the file is gone, its old runs remain).</li>
+    <li>Tap a workflow: <span class="ui">Show runs</span> (back to the runs, filtered by it), <span class="ui">Disable workflow</span> or <span class="ui">Enable workflow</span>, <span class="ui">Open the workflow file</span>, <span class="ui">Open in browser</span>. A disabled workflow does not start at all (no pushes, pull requests, schedules or play button) until you enable it again; its file and old runs stay. After the change OpenHub asks GitHub again and shows the real new state.</li>
+    <li>Menu → <span class="ui">Caches</span> (or the <span class="ui">Caches</span> tab): the dependency caches that workflows saved with <code>actions/cache</code> and similar steps: key, branch, size, last use. The line at the top is GitHub's own count, which it updates about every 5 minutes. The menu sorts them (<span class="ui">Last used</span>, <span class="ui">Size</span>, <span class="ui">Created</span>).</li>
+    <li>Tap a cache: <span class="ui">Copy key</span> or <span class="ui">Delete cache</span>; the menu has <span class="ui">Delete all caches…</span>, which first counts them on GitHub and asks. Useful when a broken cache makes builds fail, or to free the space. The next run builds a deleted cache again (once a bit slower).</li>
+    <li>Enabling, disabling and deleting need write access to the repository; everyone else sees the lists only.</li>
+  </ul>
   <h3>Notifications when a run finishes</h3>
   <ul>
     <li>Start a workflow with the play button and leave the app: when the run ends you get a notification (succeeded, failed or cancelled), with the branch and how long it took.</li>

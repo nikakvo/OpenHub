@@ -11,6 +11,14 @@
         android:title="@string/actions_run_workflow"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_workflows"
+        android:title="@string/actions_workflows"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_caches"
+        android:title="@string/actions_caches"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_successful_only"
         android:title="@string/actions_successful_only"
         android:checkable="true"

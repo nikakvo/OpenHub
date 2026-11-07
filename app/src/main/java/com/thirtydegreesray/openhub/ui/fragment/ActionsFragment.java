@@ -193,6 +193,11 @@ public class ActionsFragment extends ListFragment<ActionsPresenter, ActionsAdapt
 
     // ---- workflows ----
 
+    /** From the Workflows screen ("Show runs"). */
+    public void selectWorkflow(long workflowId, @Nullable String workflowName) {
+        if (mPresenter != null) mPresenter.selectWorkflow(workflowId, workflowName);
+    }
+
     public void pickWorkflow(boolean forRun) {
         if (mPresenter != null) mPresenter.pickWorkflow(forRun);
     }

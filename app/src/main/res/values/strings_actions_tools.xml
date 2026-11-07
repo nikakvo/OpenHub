@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Workflows and caches of GitHub Actions (WorkflowsActivity) -->
+    <string name="actions_workflows">Workflows</string>
+    <string name="actions_caches">Caches</string>
+    <string name="workflow_state_active">Active</string>
+    <string name="workflow_state_disabled_manually">Disabled</string>
+    <string name="workflow_state_disabled_inactivity">Disabled: no activity in the repository for 60 days</string>
+    <string name="workflow_state_disabled_fork">Disabled in this fork</string>
+    <string name="workflow_state_deleted">Deleted: the workflow file is gone, its old runs remain</string>
+    <string name="workflow_show_runs">Show runs</string>
+    <string name="workflow_enable">Enable workflow</string>
+    <string name="workflow_disable">Disable workflow</string>
+    <string name="workflow_disable_message">%s will not start any more: no runs by pushes, pull requests, schedules or by hand, until you enable it again. Its file and old runs stay.</string>
+    <string name="workflow_enabled_done">%s is enabled</string>
+    <string name="workflow_disabled_done">%s is disabled</string>
+    <string name="workflow_state_not_changed">GitHub did not change the state of %s</string>
+    <string name="workflow_open_file">Open the workflow file</string>
+    <string name="workflows_none">This repository has no workflows</string>
+    <string name="workflows_read_only">You can see the workflows. Enabling and disabling them needs write access to the repository.</string>
+
+    <string name="caches_none">This repository has no Actions caches</string>
+    <string name="caches_usage">In use: %1$s, %2$s. GitHub updates these two numbers about every 5 minutes.</string>
+    <plurals name="caches_count">
+        <item quantity="one">%d cache</item>
+        <item quantity="other">%d caches</item>
+    </plurals>
+    <string name="caches_meta">%1$s · %2$s</string>
+    <string name="caches_times">Last used %1$s · created %2$s</string>
+    <string name="caches_sort">Sort caches</string>
+    <string name="caches_sort_last_used">Last used</string>
+    <string name="caches_sort_size">Size</string>
+    <string name="caches_sort_created">Created</string>
+    <string name="caches_delete">Delete cache</string>
+    <string name="caches_delete_message">Delete the cache %1$s (%2$s)? The next run that needs it builds it again, which takes longer once.</string>
+    <string name="caches_deleted">Cache deleted</string>
+    <string name="caches_delete_all">Delete all caches…</string>
+    <string name="caches_delete_all_message">Delete all %1$s (%2$s)? The next runs build them again, which takes longer once.</string>
+    <string name="caches_deleting">Deleting %1$d of %2$d…</string>
+    <plurals name="caches_deleted_count">
+        <item quantity="one">%d cache deleted</item>
+        <item quantity="other">%d caches deleted</item>
+    </plurals>
+    <string name="caches_copy_key">Copy key</string>
+    <string name="caches_key_copied">Cache key copied</string>
+    <string name="caches_read_only">You can see the caches. Deleting them needs write access to the repository.</string>
+</resources>

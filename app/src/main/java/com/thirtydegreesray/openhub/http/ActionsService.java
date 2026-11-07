@@ -10,6 +10,9 @@ import retrofit2.Response;
 import java.util.Map;
 
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.PUT;
+import retrofit2.http.Query;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
@@ -107,5 +110,77 @@ public interface ActionsService {
             @Path("owner") String owner,
             @Path("repo") String repo,
             @Path("runId") long runId
+    );
+
+    // ---- workflows (Workflows screen) ----
+
+    /** {"total_count", "workflows": [{id, name, path, state, html_url, ...}]} */
+    @NonNull @GET("repos/{owner}/{repo}/actions/workflows")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonObject>> listWorkflows(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Query("per_page") int perPage,
+            @Query("page") int page
+    );
+
+    @NonNull @GET("repos/{owner}/{repo}/actions/workflows/{workflowId}")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonObject>> getWorkflow(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("workflowId") long workflowId
+    );
+
+    /** GitHub answers 204. */
+    @NonNull @PUT("repos/{owner}/{repo}/actions/workflows/{workflowId}/enable")
+    Observable<Response<ResponseBody>> enableWorkflow(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("workflowId") long workflowId
+    );
+
+    /** GitHub answers 204; the state becomes disabled_manually. */
+    @NonNull @PUT("repos/{owner}/{repo}/actions/workflows/{workflowId}/disable")
+    Observable<Response<ResponseBody>> disableWorkflow(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("workflowId") long workflowId
+    );
+
+    // ---- caches ----
+
+    /**
+     * {"total_count", "actions_caches": [{id, ref, key, version, last_accessed_at,
+     * created_at, size_in_bytes}]}. sort: last_accessed_at, created_at, size_in_bytes.
+     */
+    @NonNull @GET("repos/{owner}/{repo}/actions/caches")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonObject>> getCaches(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Query("sort") String sort,
+            @Query("direction") String direction,
+            @Query("per_page") int perPage,
+            @Query("page") int page
+    );
+
+    /**
+     * {"full_name", "active_caches_size_in_bytes", "active_caches_count"}; GitHub refreshes
+     * these numbers about every 5 minutes.
+     */
+    @NonNull @GET("repos/{owner}/{repo}/actions/cache/usage")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonObject>> getCacheUsage(
+            @Path("owner") String owner,
+            @Path("repo") String repo
+    );
+
+    /** GitHub answers 204. */
+    @NonNull @DELETE("repos/{owner}/{repo}/actions/caches/{cacheId}")
+    Observable<Response<ResponseBody>> deleteCache(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("cacheId") long cacheId
     );
 }

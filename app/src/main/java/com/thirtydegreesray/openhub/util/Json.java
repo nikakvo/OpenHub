@@ -42,6 +42,12 @@ public final class Json {
         return value == null || !value.isJsonPrimitive() ? 0 : value.getAsInt();
     }
 
+    /** For ids that do not fit an int (issue, cache and workflow ids). */
+    public static long lng(@Nullable JsonObject object, @NonNull String path) {
+        JsonElement value = get(object, path);
+        return value == null || !value.isJsonPrimitive() ? 0 : value.getAsLong();
+    }
+
     @Nullable
     public static JsonObject obj(@Nullable JsonObject object, @NonNull String path) {
         JsonElement value = get(object, path);
