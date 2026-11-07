@@ -3,6 +3,9 @@ package com.thirtydegreesray.openhub.util;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -130,6 +133,32 @@ public final class Suggestions {
         }
         if (endsWithBreak && !lines.isEmpty()) out.append(eol);
         return out.toString();
+    }
+
+    /**
+     * The suggested change of a REST review comment, or null when it has none or it cannot be
+     * applied any more (outdated: no line; or on removed lines).
+     */
+    @Nullable
+    public static Edit fromComment(@NonNull JsonObject c) {
+        String text = parse(Json.str(c, "body"));
+        if (text == null) return null;
+        int line = Json.str(c, "line").isEmpty() ? 0 : Json.integer(c, "line");
+        if (line <= 0 || "LEFT".equals(Json.str(c, "side"))) return null;
+        int start = line;
+        if (!Json.str(c, "start_line").isEmpty() && !"LEFT".equals(Json.str(c, "start_side"))) {
+            start = Math.min(line, Json.integer(c, "start_line"));
+        }
+        JsonElement id = Json.get(c, "id");
+        JsonElement uid = Json.get(c, "user.id");
+        return new Edit(id != null && id.isJsonPrimitive() ? id.getAsLong() : 0, Json.str(c, "path"),
+                start, line, text, Json.str(c, "user.login"),
+                uid != null && uid.isJsonPrimitive() ? uid.getAsLong() : 0, lastHunkLine(Json.str(c, "diff_hunk")));
+    }
+
+    /** True when both describe the same change (same file, lines and text). */
+    public static boolean sameChange(@NonNull Edit a, @NonNull Edit b) {
+        return a.path.equals(b.path) && a.start == b.start && a.end == b.end && a.text.equals(b.text);
     }
 
     /**

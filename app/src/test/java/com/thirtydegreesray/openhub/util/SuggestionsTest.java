@@ -78,6 +78,26 @@ public class SuggestionsTest {
     }
 
     @Test
+    public void readsCommentsAndComparesChanges() {
+        com.google.gson.JsonObject c = com.google.gson.JsonParser.parseString("{\"id\":5,\"path\":\"notes.txt\","
+                + "\"line\":5,\"start_line\":4,\"side\":\"RIGHT\",\"start_side\":\"RIGHT\","
+                + "\"body\":\"```suggestion\\nFOUR\\n```\",\"user\":{\"login\":\"bob\",\"id\":9},"
+                + "\"diff_hunk\":\"@@ -0,0 +1,5 @@\\n+a\\n+b\\n+c\\n+d\\n+e\"}").getAsJsonObject();
+        Suggestions.Edit e = Suggestions.fromComment(c);
+        assertEquals(4, e.start);
+        assertEquals(5, e.end);
+        assertEquals("FOUR", e.text);
+        assertEquals("e", e.expectedLast);
+        assertEquals(9L, e.authorId);
+        assertEquals(5L, e.commentId);
+        c.add("line", com.google.gson.JsonNull.INSTANCE);
+        assertNull(Suggestions.fromComment(c));
+        Suggestions.Edit edited = new Suggestions.Edit(5, "notes.txt", 4, 5, "FOUR!", "bob", 9);
+        org.junit.Assert.assertFalse(Suggestions.sameChange(e, edited));
+        org.junit.Assert.assertTrue(Suggestions.sameChange(e, new Suggestions.Edit(5, "notes.txt", 4, 5, "FOUR", "x", 1)));
+    }
+
+    @Test
     public void creditsAuthors() {
         List<Suggestions.Edit> edits = Arrays.asList(
                 new Suggestions.Edit(1, "a", 1, 1, "x", "alice", 42),

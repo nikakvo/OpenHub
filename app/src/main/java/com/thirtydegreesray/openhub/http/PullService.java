@@ -233,6 +233,15 @@ public interface PullService {
             @Body Map<String, Object> body
     );
 
+    /** One review comment as GitHub has it now (body, line, diff_hunk). */
+    @NonNull @GET("repos/{owner}/{repo}/pulls/comments/{id}")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonObject>> getReviewComment(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("id") long id
+    );
+
     /** Body: body. */
     @NonNull @PATCH("repos/{owner}/{repo}/pulls/comments/{id}")
     Observable<Response<JsonObject>> updateReviewComment(

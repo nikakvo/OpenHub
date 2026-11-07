@@ -128,6 +128,10 @@ public final class ComposeDialog {
                 TextView headerView = view.findViewById(R.id.compose_header);
                 headerView.setText(header);
                 headerView.setVisibility(View.VISIBLE);
+                // longer than its 6 lines: scroll inside the box instead of ending in "..."
+                headerView.setEllipsize(null);
+                headerView.setVerticalScrollBarEnabled(true);
+                headerView.setMovementMethod(new android.text.method.ScrollingMovementMethod());
             }
             if (noBody) view.findViewById(R.id.compose_body).setVisibility(View.GONE);
             android.widget.CheckBox check = view.findViewById(R.id.compose_check);

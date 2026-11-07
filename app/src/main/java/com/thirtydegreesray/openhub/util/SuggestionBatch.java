@@ -96,6 +96,26 @@ public final class SuggestionBatch {
         String headOwner = headRepo.substring(0, slash);
         String headName = headRepo.substring(slash + 1);
 
+        // the suggestions as GitHub has them now: a comment edited, deleted or outdated meanwhile
+        // must not be committed with the text the screen showed before
+        PullService pulls = GitHubApi.service(PullService.class);
+        for (Suggestions.Edit edit : edits) {
+            JsonObject comment;
+            try {
+                comment = GitHubApi.call(pulls.getReviewComment(owner, repo, edit.commentId));
+            } catch (GitHubApi.ApiException e) {
+                if (e.code == 404) throw new IOException("A suggestion was deleted on GitHub. Reload the pull request.");
+                throw e;
+            }
+            Suggestions.Edit now = comment == null ? null : Suggestions.fromComment(comment);
+            if (now == null) {
+                throw new IOException("A suggestion is outdated now. Reload the pull request.");
+            }
+            if (!Suggestions.sameChange(now, edit)) {
+                throw new IOException("A suggestion was changed on GitHub meanwhile. Reload and check it again.");
+            }
+        }
+
         List<RepoCommitter.Change> changes = new ArrayList<>();
         for (Map.Entry<String, List<Suggestions.Edit>> file : Suggestions.byFile(edits).entrySet()) {
             String text = readText(headOwner, headName, file.getKey(), headSha);

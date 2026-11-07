@@ -798,19 +798,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
     @Nullable
     private Suggestions.Edit suggestionOf(@NonNull JsonObject c) {
         if (!canPushHead || Json.bool(c, "_draft")) return null;
-        String text = Suggestions.parse(Json.str(c, "body"));
-        if (text == null) return null;
-        // outdated comments have no line any more; suggestions are made on the new side
-        int line = Json.str(c, "line").isEmpty() ? 0 : Json.integer(c, "line");
-        if (line <= 0 || "LEFT".equals(Json.str(c, "side"))) return null;
-        int start = line;
-        if (!Json.str(c, "start_line").isEmpty() && !"LEFT".equals(Json.str(c, "start_side"))) {
-            start = Math.min(line, Json.integer(c, "start_line"));
-        }
-        JsonElement uid = Json.get(c, "user.id");
-        long userId = uid != null && uid.isJsonPrimitive() ? uid.getAsLong() : 0;
-        return new Suggestions.Edit(longOf(c, "id"), Json.str(c, "path"), start, line, text,
-                Json.str(c, "user.login"), userId, Suggestions.lastHunkLine(Json.str(c, "diff_hunk")));
+        return Suggestions.fromComment(c);
     }
 
     private void toggleBatch(@NonNull Suggestions.Edit edit) {
@@ -826,7 +814,16 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
     private void commitSuggestions(@NonNull List<Suggestions.Edit> edits, boolean fromBatch) {
         if (edits.isEmpty()) return;
         StringBuilder preview = new StringBuilder();
-        for (Suggestions.Edit e : edits) {
+        if (edits.size() > 1) {
+            // several: one line each (file:lines  first new line), the box scrolls
+            for (Suggestions.Edit e : edits) {
+                if (preview.length() > 0) preview.append('\n');
+                String first = e.text.isEmpty() ? getString(R.string.suggestion_removes_lines)
+                        : e.text.split("\n", -1)[0];
+                preview.append(e.path).append(e.start == e.end ? ":" + e.start : ":" + e.start + "-" + e.end)
+                        .append("  ").append(first);
+            }
+        } else for (Suggestions.Edit e : edits) {
             if (preview.length() > 0) preview.append("\n\n");
             preview.append(e.path).append(e.start == e.end ? ":" + e.start : ":" + e.start + "-" + e.end).append('\n');
             preview.append(e.text.isEmpty() ? getString(R.string.suggestion_removes_lines) : e.text);
