@@ -174,6 +174,11 @@ public class ViewerActivity extends SingleFragmentActivity<IBaseContract.Present
         if (item != null) item.setVisible(edit && fileModel.getSha() != null);
         item = menu.findItem(R.id.action_delete_file);
         if (item != null) item.setVisible(edit);
+        // history and blame: everyone who can read the file
+        item = menu.findItem(R.id.action_file_history);
+        if (item != null) item.setVisible(fileRef != null);
+        item = menu.findItem(R.id.action_file_blame);
+        if (item != null) item.setVisible(fileRef != null);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -232,6 +237,12 @@ public class ViewerActivity extends SingleFragmentActivity<IBaseContract.Present
         } else if (fileRef != null && item.getItemId() == R.id.action_rename_file) {
             com.thirtydegreesray.openhub.ui.widget.RepoFileActions.rename(this, fileRef[0], fileRef[1],
                     fileRef[3], fileRef[2], fileModel.getSha(), this::finish);
+            return true;
+        } else if (fileRef != null && item.getItemId() == R.id.action_file_history) {
+            startActivity(CommitsListActivity.createIntentForFile(this, fileRef[0], fileRef[1], fileRef[3], fileRef[2]));
+            return true;
+        } else if (fileRef != null && item.getItemId() == R.id.action_file_blame) {
+            startActivity(BlameActivity.createIntent(this, fileRef[0], fileRef[1], fileRef[3], fileRef[2]));
             return true;
         } else if (fileRef != null && item.getItemId() == R.id.action_delete_file) {
             com.thirtydegreesray.openhub.ui.widget.RepoFileActions.delete(this, fileRef[0], fileRef[1],

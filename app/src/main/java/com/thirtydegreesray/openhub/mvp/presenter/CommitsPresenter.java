@@ -34,6 +34,8 @@ public class CommitsPresenter extends BasePagerPresenter<ICommitsContract.View>
     @AutoAccess String user ;
     @AutoAccess String repo ;
     @AutoAccess String branch ;
+    /** File history: only commits that changed this path (null: the whole repository) */
+    @AutoAccess String path ;
 
     @AutoAccess String before ;
     @AutoAccess String head ;
@@ -85,7 +87,7 @@ public class CommitsPresenter extends BasePagerPresenter<ICommitsContract.View>
         generalRxHttpExecute(new IObservableCreator<ArrayList<RepoCommit>>() {
             @Override
             public Observable<Response<ArrayList<RepoCommit>>> createObservable(boolean forceNetWork) {
-                return getCommitService().getRepoCommits(forceNetWork, user, repo, branch, page);
+                return getCommitService().getRepoCommits(forceNetWork, user, repo, branch, path, page);
             }
         }, httpObserver, readCacheFirst);
     }

@@ -30,6 +30,8 @@ public interface CommitService {
             @Path("repo") String repo,
             //SHA or branch to start listing commits from. Default: the repository’s default branch (usually master).
             @Query("sha") String branch,
+            // only commits that changed this file or folder (null: all)
+            @Query("path") String path,
             @Query("page") int page
     );
 

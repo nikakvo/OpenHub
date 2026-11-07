@@ -55,6 +55,13 @@ public class CommitsListActivity extends SingleFragmentActivity<IBaseContract.Pr
                         .build());
     }
 
+    /** History of one file (commits that changed it), newest first. */
+    public static Intent createIntentForFile(@NonNull Activity activity, @NonNull String user,
+                                             @NonNull String repo, @Nullable String branch,
+                                             @NonNull String path) {
+        return createIntentForRepo(activity, user, repo, branch).putExtra("path", path);
+    }
+
     public enum CommitsListType {
         Compare, Repo
     }
@@ -64,6 +71,7 @@ public class CommitsListActivity extends SingleFragmentActivity<IBaseContract.Pr
     @AutoAccess String repo;
 
     @AutoAccess String branch;
+    @AutoAccess String path;
 
     @AutoAccess String before;
     @AutoAccess String head;
@@ -72,6 +80,14 @@ public class CommitsListActivity extends SingleFragmentActivity<IBaseContract.Pr
     protected void initView(Bundle savedInstanceState) {
         super.initView(savedInstanceState);
         String repoFullName = user.concat("/").concat(repo);
+        if (path != null) {
+            // file history: "History of build.sh", "owner/repo · main"
+            String name = path.substring(path.lastIndexOf('/') + 1);
+            setToolbarTitle(getString(R.string.file_history_title, name),
+                    branch == null ? repoFullName : repoFullName + " · " + branch);
+            setToolbarScrollAble(true);
+            return;
+        }
         setToolbarTitle(getToolbarTitle(), repoFullName);
         setToolbarScrollAble(true);
     }
@@ -91,7 +107,7 @@ public class CommitsListActivity extends SingleFragmentActivity<IBaseContract.Pr
         if (CommitsListType.Compare.equals(type)) {
             return CommitsFragment.createForCompare(user, repo, before, head);
         } else if (CommitsListType.Repo.equals(type)) {
-            return CommitsFragment.createForRepo(user, repo, branch);
+            return CommitsFragment.createForRepo(user, repo, branch, path);
         } else {
             return null;
         }

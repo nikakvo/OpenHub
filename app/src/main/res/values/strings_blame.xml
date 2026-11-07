@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- File history (CommitsListActivity with a path) and Blame (BlameActivity) -->
+    <string name="file_history">History</string>
+    <string name="file_history_title">History of %s</string>
+    <string name="file_blame">Blame</string>
+    <string name="blame_title">Blame of %s</string>
+    <string name="blame_header_meta">%1$s · %2$s · %3$s</string>
+    <string name="blame_not_found">GitHub has no file %1$s on %2$s</string>
+    <string name="blame_binary">Blame is not shown for binary files</string>
+    <string name="blame_truncated">GitHub sent only the start of this large file; the blame shows the lines that arrived.</string>
+    <string name="blame_empty">This file is empty</string>
+    <string name="blame_open_commit">Open commit</string>
+    <string name="blame_copy_sha">Copy SHA</string>
+    <string name="blame_sha_copied">SHA copied</string>
+</resources>

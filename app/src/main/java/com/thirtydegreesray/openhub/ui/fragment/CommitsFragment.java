@@ -34,9 +34,15 @@ public class CommitsFragment extends ListFragment<CommitsPresenter, CommitAdapte
 
     public static CommitsFragment createForRepo(@NonNull String user, @NonNull String repo,
                                                 @Nullable String branch){
+        return createForRepo(user, repo, branch, null);
+    }
+
+    /** @param path not null: the history of this file */
+    public static CommitsFragment createForRepo(@NonNull String user, @NonNull String repo,
+                                                @Nullable String branch, @Nullable String path){
         CommitsFragment fragment = new CommitsFragment();
         fragment.setArguments(BundleHelper.builder().put("type", CommitsListActivity.CommitsListType.Repo)
-                .put("user", user).put("repo", repo).put("branch", branch).build());
+                .put("user", user).put("repo", repo).put("branch", branch).put("path", path).build());
         return fragment;
     }
 

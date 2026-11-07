@@ -127,7 +127,7 @@
   <a href="#start"><span>1</span>Getting started</a>
   <a href="#menu"><span>2</span>The side menu</a>
   <a href="#repo"><span>3</span>A repository</a>
-  <a href="#files"><span>4</span>Files: add, edit, upload</a>
+  <a href="#files"><span>4</span>Files: add, edit, upload, history</a>
   <a href="#branches"><span>5</span>Branches, protection and rulesets</a>
   <a href="#reposettings"><span>6</span>Repository settings</a>
   <a href="#newrepo"><span>7</span>New repository</a>
@@ -256,7 +256,7 @@
 
 <!-- 4 -->
 <div data-section>
-<div class="sec-title" id="files">4 · files: add, edit, upload</div>
+<div class="sec-title" id="files">4 · files: add, edit, upload, history</div>
 <div class="box">
   <p>In repositories where you can write, the <strong>Files</strong> tab works like github.com. Every change is a real <strong>commit</strong> with your name.</p>
   <h3>Adding</h3>
@@ -270,6 +270,12 @@
     <li>Long-press a file: <strong>Edit file</strong>, <strong>Rename or move</strong>, <strong>Delete file</strong>, <strong>Download</strong>. An open file has the same actions in its toolbar (pencil) and menu.</li>
     <li>The editor shows the file in a monospace font; Markdown files also get <span class="ui">Write</span> and <span class="ui">Preview</span>. Text files up to 512 KB can be edited.</li>
     <li>At the bottom: <span class="ui">Branch: main ▾</span>. Tap it to commit to another branch; an open file is then loaded again from that branch.</li>
+  </ul>
+  <h3>History and blame</h3>
+  <ul>
+    <li>Everyone can do this, also in other people's repositories. Long-press a file (or open it and use the menu): <span class="ui">History</span> lists the commits that changed it, newest first, on the branch you are looking at; tap one to see what it changed. Long-press a folder for the history of everything inside it.</li>
+    <li><span class="ui">Blame</span> shows the file with the commit that last changed each group of lines above it: message, short SHA, who and when. The colored bar on the left is the age: orange for the newest changes of the file, grey for the oldest. Tap a commit line to open the commit; long-press it for <span class="ui">Copy SHA</span>. The menu has <span class="ui">History</span> and <span class="ui">Open in browser</span>.</li>
+    <li>History follows the path: a file that was renamed shows its commits since the rename only. Binary files have no blame.</li>
   </ul>
   <h3>Commit changes</h3>
   <p>Asks for a short message (prefilled, e.g. <em>Update README.md</em>) and an optional longer description, then where the commit goes:</p>

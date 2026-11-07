@@ -36,6 +36,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.thirtydegreesray.openhub.mvp.presenter.ReleaseInfoPresenter;
+import com.thirtydegreesray.openhub.ui.activity.BlameActivity;
+import com.thirtydegreesray.openhub.ui.activity.CommitsListActivity;
 import com.thirtydegreesray.openhub.ui.activity.EditFileActivity;
 import com.thirtydegreesray.openhub.ui.widget.RepoFileActions;
 import com.thirtydegreesray.openhub.util.AppOpener;
@@ -185,11 +187,14 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
     private void showFileMenu(@NonNull View anchor, @NonNull FileModel file) {
         PopupMenu popup = new PopupMenu(requireContext(), anchor, android.view.Gravity.NO_GRAVITY,
                 R.attr.popup_menu_theme, 0);
-        boolean edit = canEdit();
+        boolean edit = canEdit() && !file.isDir();
         if (edit) popup.getMenu().add(0, 1, 0, R.string.file_edit);
         if (edit) popup.getMenu().add(0, 2, 1, R.string.file_rename);
         if (edit) popup.getMenu().add(0, 3, 2, R.string.file_delete);
-        if (file.getDownloadUrl() != null) popup.getMenu().add(0, 4, 3, R.string.download);
+        if (!file.isDir() && file.getDownloadUrl() != null) popup.getMenu().add(0, 4, 3, R.string.download);
+        // history works for folders too (commits that changed anything inside)
+        popup.getMenu().add(0, 5, 4, R.string.file_history);
+        if (!file.isDir()) popup.getMenu().add(0, 6, 5, R.string.file_blame);
         popup.setOnMenuItemClickListener(item -> {
             String branch = mPresenter.getBranch();
             if (item.getItemId() == 1) {
@@ -203,6 +208,12 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
                         this::reloadAfterChange);
             } else if (item.getItemId() == 4) {
                 AppOpener.startDownload(requireContext(), file.getDownloadUrl(), file.getName());
+            } else if (item.getItemId() == 5) {
+                startActivity(CommitsListActivity.createIntentForFile(requireActivity(), owner(), repoName(),
+                        branch, file.getPath()));
+            } else if (item.getItemId() == 6) {
+                startActivity(BlameActivity.createIntent(requireContext(), owner(), repoName(),
+                        branch, file.getPath()));
             }
             return true;
         });
@@ -223,7 +234,7 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
     @Override
     public boolean onItemLongClick(int position, @NonNull View view) {
         FileModel model = adapter.getData().get(position);
-        if (model.isDir() || model.isSubmodule()) return false;
+        if (model.isSubmodule()) return false;
         showFileMenu(view, model);
         return true;
     }
