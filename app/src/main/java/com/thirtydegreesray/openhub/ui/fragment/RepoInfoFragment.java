@@ -121,6 +121,9 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
 //        repoDescText.setVisibility(View.GONE);
 
         issueLay.setVisibility(repository.isHasIssues() ? View.VISIBLE :View.GONE);
+        // pull requests switched off in the repository settings: no Pulls tile, like github.com
+        View pullsTile = getView() == null ? null : getView().findViewById(R.id.pulls_lay);
+        if (pullsTile != null) pullsTile.setVisibility(repository.isHasPullRequests() ? View.VISIBLE : View.GONE);
         // open_issues_count includes open pull requests: until they are counted, show the
         // last known split for this repository, or "-" (it used to show 2, then 0)
         int openIssues = repository.getOpenIssuesCount();
@@ -300,10 +303,11 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
 
     private void openPulls() {
         Repository repository = mPresenter.getRepository();
-        boolean canCreate = repository.getPermissions() != null
+        boolean canCreate = repository.isHasPullRequests() && repository.getPermissions() != null
                 && (repository.getPermissions().isPush() || repository.getPermissions().isAdmin());
         startActivity(PullRequestsActivity.createIntent(requireContext(), repository.getOwner().getLogin(),
-                repository.getName(), canCreate));
+                repository.getName(), canCreate, repository.getPermissions() != null
+                        && repository.getPermissions().canTriage()));
     }
 
     public void onViewClicked(View view) {

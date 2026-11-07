@@ -56,6 +56,8 @@ public class Repository implements Parcelable {
     @SerializedName("has_wiki") private boolean hasWiki;
     @SerializedName("has_pages") private boolean hasPages;
     @SerializedName("has_discussions") private boolean hasDiscussions;
+    /** Null when GitHub did not send it (older answers): pull requests are on then. */
+    @SerializedName("has_pull_requests") private Boolean hasPullRequests;
 
     private int sinceStargazersCount ;
     private TrendingSince since;
@@ -323,6 +325,11 @@ public class Repository implements Parcelable {
         return hasDiscussions;
     }
 
+    /** Pull requests are switched on for the repository (true when GitHub did not say). */
+    public boolean isHasPullRequests() {
+        return hasPullRequests == null || hasPullRequests;
+    }
+
     public boolean isHasWiki() {
         return hasWiki;
     }
@@ -395,6 +402,7 @@ public class Repository implements Parcelable {
         dest.writeByte(this.hasDiscussions ? (byte) 1 : (byte) 0);
         dest.writeInt(this.sinceStargazersCount);
         dest.writeInt(this.since == null ? -1 : this.since.ordinal());
+        dest.writeByte(this.hasPullRequests == null ? (byte) -1 : this.hasPullRequests ? (byte) 1 : (byte) 0);
 
     }
 
@@ -436,6 +444,8 @@ public class Repository implements Parcelable {
         this.sinceStargazersCount = in.readInt();
         int tmpTrendingSince = in.readInt();
         this.since = tmpTrendingSince == -1 ? null : TrendingSince.values()[tmpTrendingSince];
+        byte tmpHasPulls = in.readByte();
+        this.hasPullRequests = tmpHasPulls == -1 ? null : tmpHasPulls == 1;
     }
 
     public static final Creator<Repository> CREATOR = new Creator<Repository>() {

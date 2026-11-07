@@ -52,6 +52,7 @@ import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
+import com.thirtydegreesray.openhub.util.ArchivedPulls;
 import com.thirtydegreesray.openhub.util.AsyncMerge;
 import com.thirtydegreesray.openhub.util.MergeRules;
 import com.thirtydegreesray.openhub.util.PullStacks;
@@ -172,6 +173,11 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     @Nullable private Blocked blocked;
     /** The stack this pull request belongs to, bottom first; null when it is not stacked. */
     @Nullable private List<PullStacks.Entry> stack;
+    /** GitHub's search lists this pull request as archived (is:archived; only triage+ can see that). */
+    private boolean archived;
+    /** After Archive / Unarchive: the state GitHub confirmed, until search shows it (it lags). */
+    @Nullable private Boolean expectArchived;
+    private boolean archiveRetried;
 
     @Override
     protected void setupActivityComponent(AppComponent appComponent) {
@@ -304,7 +310,16 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             Blocked why = "open".equals(Json.str(p, "state"))
                     && "blocked".equals(Json.str(p, "mergeable_state")) ? blockedBy(p, reviews) : null;
             List<PullStacks.Entry> stackEntries = loadStack(p);
-            return new Object[]{p, r, items, checks, branchExists, lineComments, threads, why, stackEntries};
+            boolean isArchived = false;
+            if ("closed".equals(Json.str(p, "state")) && canTriage(r)) {
+                try {
+                    isArchived = ArchivedPulls.numbers(owner, repo).contains(number);
+                } catch (Exception ignored) {
+                    // search not available: shown as not archived
+                }
+            }
+            return new Object[]{p, r, items, checks, branchExists, lineComments, threads, why, stackEntries,
+                    isArchived};
         }, (Object[] result) -> {
             loader.setVisibility(View.GONE);
             pull = (JsonObject) result[0];
@@ -314,6 +329,16 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             blocked = (Blocked) result[7];
             //noinspection unchecked
             stack = (List<PullStacks.Entry>) result[8];
+            archived = (Boolean) result[9];
+            if (expectArchived != null) {
+                if (expectArchived == archived) {
+                    expectArchived = null;
+                } else if (!archiveRetried) {
+                    // GitHub's search shows an archive a few seconds late
+                    archiveRetried = true;
+                    handler.postDelayed(this::load, 4000);
+                }
+            }
             updateReviewButton();
             //noinspection unchecked
             showConversation((List<JsonObject>) result[2], (String) result[3]);
@@ -519,6 +544,12 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         return Json.bool(pull, "draft");
     }
 
+    /** Triage role or higher (triage, push, maintain, admin): may archive and unarchive. */
+    private static boolean canTriage(@Nullable JsonObject repository) {
+        return Json.bool(repository, "permissions.triage") || Json.bool(repository, "permissions.push")
+                || Json.bool(repository, "permissions.maintain") || Json.bool(repository, "permissions.admin");
+    }
+
     private boolean canWrite() {
         return Json.bool(repoJson, "permissions.push") || Json.bool(repoJson, "permissions.admin");
     }
@@ -550,7 +581,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         pill.setCornerRadius(getResources().getDisplayMetrics().density * 12);
         pill.setColor(getResources().getColor(color, getTheme()));
         stateText.setBackground(pill);
-        stateText.setText(label);
+        stateText.setText(archived ? getString(label) + " · " + getString(R.string.pull_state_archived)
+                : getString(label));
 
         int commits = Json.integer(pull, "commits");
         String author = Json.str(pull, "user.login");
@@ -661,8 +693,11 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         mergeBn.setVisibility(View.GONE);
         readyBn.setVisibility(View.GONE);
         deleteBranchBn.setVisibility(View.GONE);
-        closeBn.setVisibility((write || author) && !isMerged() ? View.VISIBLE : View.GONE);
+        closeBn.setVisibility((write || author) && !isMerged() && !archived ? View.VISIBLE : View.GONE);
         closeBn.setText(isClosed() ? R.string.pull_reopen : R.string.pull_close);
+        // an archived conversation is read-only on GitHub: no comments or reviews
+        findViewById(R.id.comment_bn).setVisibility(archived ? View.GONE : View.VISIBLE);
+        findViewById(R.id.review_bn).setVisibility(archived ? View.GONE : View.VISIBLE);
 
         if (isMerged() || isClosed()) {
             String text = isMerged() ? getString(R.string.pull_merged_into, Json.str(pull, "base.ref"))
@@ -671,6 +706,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             if (ownBranch && !headBranchExists) {
                 text += "\n" + getString(R.string.pull_branch_deleted, Json.str(pull, "head.ref"));
             }
+            if (archived) text += "\n\n" + getString(R.string.pull_archived_status);
             mergeStatus.setText(text);
             if (write && ownBranch) {
                 deleteBranchBn.setText(headBranchExists ? R.string.pull_delete_branch : R.string.pull_restore_branch);
@@ -1080,20 +1116,45 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         String mutation = ready
                 ? "mutation($id:ID!){markPullRequestReadyForReview(input:{pullRequestId:$id}){pullRequest{isDraft}}}"
                 : "mutation($id:ID!){convertPullRequestToDraft(input:{pullRequestId:$id}){pullRequest{isDraft}}}";
+        run(() -> mutate(mutation), null);
+    }
+
+    /** A GraphQL mutation with $id = this pull request; GraphQL errors (HTTP 200) are thrown. */
+    @Nullable
+    private JsonObject mutate(@NonNull String mutation) throws java.io.IOException {
         Map<String, Object> variables = new HashMap<>();
         variables.put("id", Json.str(pull, "node_id"));
         Map<String, Object> data = new HashMap<>();
         data.put("query", mutation);
         data.put("variables", variables);
-        run(() -> {
-            JsonObject answer = GitHubApi.call(pulls().graphql(data));
-            if (answer != null && answer.has("errors") && answer.get("errors").isJsonArray()
-                    && answer.getAsJsonArray("errors").size() > 0) {
-                throw new GitHubApi.ApiException(422,
-                        Json.str(answer.getAsJsonArray("errors").get(0).getAsJsonObject(), "message"));
-            }
-            return answer;
-        }, null);
+        JsonObject answer = GitHubApi.call(pulls().graphql(data));
+        if (answer != null && answer.has("errors") && answer.get("errors").isJsonArray()
+                && answer.getAsJsonArray("errors").size() > 0) {
+            throw new GitHubApi.ApiException(422,
+                    Json.str(answer.getAsJsonArray("errors").get(0).getAsJsonObject(), "message"));
+        }
+        return answer;
+    }
+
+    /**
+     * Archive (closes it, read-only, visible only to triage and up) or unarchive (visible
+     * again, stays closed). GitHub's mutations; the screen then shows what search reports.
+     */
+    private void toggleArchived() {
+        boolean unarchive = archived;
+        new AlertDialog.Builder(this)
+                .setTitle(unarchive ? R.string.pull_unarchive : R.string.pull_archive)
+                .setMessage(unarchive ? R.string.pull_unarchive_message : R.string.pull_archive_message)
+                .setPositiveButton(unarchive ? R.string.pull_unarchive : R.string.pull_archive, (d, w) -> {
+                    expectArchived = !unarchive;
+                    archiveRetried = false;
+                    run(() -> mutate(unarchive
+                                    ? "mutation($id:ID!){unarchivePullRequest(input:{pullRequestId:$id}){clientMutationId}}"
+                                    : "mutation($id:ID!){archivePullRequest(input:{pullRequestId:$id}){clientMutationId}}"),
+                            getString(unarchive ? R.string.pull_unarchived_toast : R.string.pull_archived_toast));
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     private void deleteBranch() {
@@ -1220,6 +1281,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         menu.add(0, 4, 3, R.string.copy_url);
         menu.add(0, 5, 4, R.string.open_in_browser);
         menu.add(0, 6, 5, R.string.review_discard);
+        menu.add(0, 7, 6, R.string.pull_archive);
         return true;
     }
 
@@ -1229,6 +1291,11 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         if (edit != null) edit.setVisible(pull != null && (canWrite() || isAuthor()));
         MenuItem discard = menu.findItem(6);
         if (discard != null) discard.setVisible(ReviewDrafts.count(this, owner, repo, number) > 0);
+        MenuItem archive = menu.findItem(7);
+        if (archive != null) {
+            archive.setVisible(pull != null && canTriage(repoJson));
+            archive.setTitle(archived ? R.string.pull_unarchive : R.string.pull_archive);
+        }
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -1259,6 +1326,9 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                     updateReviewButton();
                     showInfoToast(getString(R.string.review_discarded));
                 });
+                return true;
+            case 7:
+                if (pull != null) toggleArchived();
                 return true;
         }
         return super.onOptionsItemSelected(item);

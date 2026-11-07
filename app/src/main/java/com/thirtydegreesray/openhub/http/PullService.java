@@ -55,6 +55,14 @@ public interface PullService {
             @Query("q") String query
     );
 
+    /** Issue search, newest first (e.g. "repo:o/r is:pr is:archived"); items are issues with a pull_request field. */
+    @NonNull @GET("search/issues?per_page=50&sort=created&order=desc")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonObject>> searchIssues(
+            @Query("q") String query,
+            @Query("page") int page
+    );
+
     /** Includes body_html, mergeable and mergeable_state. */
     @NonNull @GET("repos/{owner}/{repo}/pulls/{number}")
     @Headers({"Accept: application/vnd.github.full+json", "Cache-Control: no-cache, no-store"})

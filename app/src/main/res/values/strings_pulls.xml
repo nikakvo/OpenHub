@@ -135,4 +135,16 @@
     <string name="pull_merge_pending">GitHub is still merging. Pull down in a moment to see the result.</string>
     <string name="pull_merge_earlier">A merge was already requested for this pull request; that one was followed.</string>
     <string name="pull_merged_stack_toast">%1$d pull requests merged</string>
+    <!-- Archived pull requests (3.12.0) -->
+    <string name="pulls_archived">Archived</string>
+    <string name="pulls_none_archived">No archived pull requests</string>
+    <string name="pulls_meta_short">#%1$d opened %2$s by %3$s</string>
+    <string name="pull_state_archived">Archived</string>
+    <string name="pull_archived_status">Archived: only people with triage access or higher can see this pull request, and its conversation is read-only.</string>
+    <string name="pull_archive">Archive pull request</string>
+    <string name="pull_unarchive">Unarchive pull request</string>
+    <string name="pull_archive_message">The pull request is closed and taken out of public view: only people with triage access or higher can see it, and nobody can comment on it or react to it any more. You can unarchive it later.</string>
+    <string name="pull_unarchive_message">The pull request becomes visible to everyone again and its conversation opens for comments. It stays closed: reopen it separately if needed.</string>
+    <string name="pull_archived_toast">Pull request archived</string>
+    <string name="pull_unarchived_toast">Pull request unarchived</string>
 </resources>

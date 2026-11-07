@@ -21,6 +21,11 @@
             android:id="@+id/tab_closed"
             style="@style/MarkdownTab"
             android:text="@string/pulls_closed"/>
+        <TextView
+            android:id="@+id/tab_archived"
+            style="@style/MarkdownTab"
+            android:text="@string/pulls_archived"
+            android:visibility="gone"/>
     </LinearLayout>
 
     <View

@@ -142,6 +142,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
                     getString(R.string.remove_bookmark) : getString(R.string.bookmark));
             menu.findItem(R.id.action_wiki).setVisible(mPresenter.getRepository().isHasWiki());
             menu.findItem(R.id.action_discussions).setVisible(mPresenter.getRepository().isHasDiscussions());
+            menu.findItem(R.id.action_pulls).setVisible(mPresenter.getRepository().isHasPullRequests());
             Repository repository = mPresenter.getRepository();
             menu.findItem(R.id.action_repo_settings).setVisible(repository.getPermissions() != null
                     && repository.getPermissions().isAdmin());
@@ -271,10 +272,11 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
             return true;
         } else if (itemId == R.id.action_pulls) {
             Repository repository = mPresenter.getRepository();
-            boolean canCreate = repository.getPermissions() != null
+            boolean canCreate = repository.isHasPullRequests() && repository.getPermissions() != null
                     && (repository.getPermissions().isPush() || repository.getPermissions().isAdmin());
             startActivity(PullRequestsActivity.createIntent(this, repository.getOwner().getLogin(),
-                    repository.getName(), canCreate));
+                    repository.getName(), canCreate, repository.getPermissions() != null
+                            && repository.getPermissions().canTriage()));
             return true;
         } else if (itemId == R.id.action_search_code) {
             startActivity(CodeSearchActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),

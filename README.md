@@ -85,7 +85,8 @@ app goes to them; see [Credits](#credits).
 
 ### Repositories
 * Create repositories (README, .gitignore templates and your own lines, license);
-  repository settings, transfer, archive and delete
+  repository settings (also pull requests on or off and who may create them), transfer,
+  archive and delete
 * Branches: browse their files, create, rename, delete, restore, and branch protection
 * **Rulesets** for branches and tags: create, edit, switch on and off, delete, the
   history of a ruleset with restore, bypass for admins, and converting branch protection
@@ -132,6 +133,7 @@ app goes to them; see [Credits](#credits).
 * Open pull requests (also from forks), edit, close and reopen, draft and ready
 * Merge, squash or rebase with GitHub's asynchronous merge (also into a merge queue,
   with bypass of the rules when you may); delete and restore the branch
+* Archive and unarchive pull requests (triage access or higher), with an Archived tab
 * **Stacked pull requests**: the stack in the list and on the pull request, with links
   to every pull request in it; merging takes the open ones below along
 * A blocked merge lists what the base branch asks for: the rules of its rulesets and

@@ -31,6 +31,11 @@
     <string name="settings_discussions_summary">A forum for the community of the repository</string>
 
     <string name="settings_pull_requests">Pull requests</string>
+    <string name="settings_pulls_enabled">Pull requests</string>
+    <string name="settings_pulls_enabled_summary">Turned off, nobody can see the pull requests or open new ones. They come back when you turn it on again</string>
+    <string name="settings_pulls_policy">Who can create pull requests</string>
+    <string name="settings_pulls_policy_all">Everyone (also from forks)</string>
+    <string name="settings_pulls_policy_collaborators">Collaborators only</string>
     <string name="settings_allow_merge">Allow merge commits</string>
     <string name="settings_allow_merge_summary">Add all commits of the branch with a merge commit</string>
     <string name="settings_merge_message">Default merge commit message</string>

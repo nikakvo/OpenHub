@@ -322,7 +322,7 @@
   <div class="tw"><table>
     <tr><td>General</td><td>Name (renaming asks first), description, website and topics, then <span class="ui">Save</span>. Template repository and the default branch.</td></tr>
     <tr><td>Features</td><td>Issues, Wikis, Projects, Discussions on or off.</td></tr>
-    <tr><td>Pull requests</td><td>Which merge methods are allowed (at least one), their default commit messages, suggesting branch updates, auto-merge, deleting branches after a merge.</td></tr>
+    <tr><td>Pull requests</td><td>Pull requests on or off (off: nobody sees them or opens new ones), who can create them (everyone or collaborators only), which merge methods are allowed (at least one), their default commit messages, suggesting branch updates, auto-merge, deleting branches after a merge.</td></tr>
     <tr><td>Commits</td><td>Require sign-off on commits made on the website.</td></tr>
     <tr><td>Releases</td><td>Release immutability: published releases and their files can no longer change (when GitHub offers it).</td></tr>
   </table></div>
@@ -412,6 +412,9 @@
     <li>Inside it, the <strong>Stack</strong> box under the title lists the whole stack, top first, down to the branch it merges into. Your pull request is marked; tap another one to open it.</li>
     <li>A stack merges from the bottom up. Merging a pull request in the middle also merges the open ones below it, so the button says, for example, <span class="ui">Merge 3 pull requests</span> and the box names them. The ones above stay open and move onto the base branch.</li>
   </ul>
+  <h3>Archived pull requests</h3>
+  <p>People with triage access or higher can archive a pull request, for example spam: ⋮ <span class="ui">Archive pull request</span>. GitHub closes it, only people with triage access or higher can still see it, and its conversation becomes read-only. ⋮ <span class="ui">Unarchive pull request</span> makes it visible again; it stays closed until you reopen it.</p>
+  <p>Archived pull requests are in the <span class="ui">Archived</span> tab of the list and marked <span class="pill p-grey">Archived</span> in Closed. GitHub finds them with search, which can take a few seconds to catch up after a change.</p>
   <div class="note warn"><b class="lbl">No merge button?</b>The box says why: <em>conflicts</em> (both branches changed the same lines; solve it on github.com or with git), a draft, failing required checks or missing approvals.</div>
   <h3>Opening a pull request</h3>
   <ol class="steps">

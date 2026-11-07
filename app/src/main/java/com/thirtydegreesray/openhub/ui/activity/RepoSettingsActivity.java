@@ -195,6 +195,13 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
         switchRow("has_discussions", R.string.settings_discussions, R.string.settings_discussions_summary);
 
         section(R.string.settings_pull_requests);
+        switchRow("has_pull_requests", R.string.settings_pulls_enabled, R.string.settings_pulls_enabled_summary);
+        if (bool("has_pull_requests") && repoJson.has("pull_request_creation_policy")) {
+            boolean collaborators = "collaborators_only".equals(str("pull_request_creation_policy"));
+            actionRow(getString(R.string.settings_pulls_policy), getString(collaborators
+                            ? R.string.settings_pulls_policy_collaborators : R.string.settings_pulls_policy_all),
+                    false, v -> choosePullPolicy());
+        }
         switchRow("allow_merge_commit", R.string.settings_allow_merge, R.string.settings_allow_merge_summary);
         if (bool("allow_merge_commit")) {
             actionRow(getString(R.string.settings_merge_message), mergeMessageLabel(), false,
@@ -383,6 +390,25 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
         } else {
             save.run();
         }
+    }
+
+    /** Who may open pull requests: everyone (also from forks) or only collaborators. */
+    private void choosePullPolicy() {
+        String[] values = {"all", "collaborators_only"};
+        String[] labels = {getString(R.string.settings_pulls_policy_all),
+                getString(R.string.settings_pulls_policy_collaborators)};
+        int current = "collaborators_only".equals(str("pull_request_creation_policy")) ? 1 : 0;
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.settings_pulls_policy)
+                .setSingleChoiceItems(labels, current, (dialog, which) -> {
+                    dialog.dismiss();
+                    if (which == current) return;
+                    Map<String, Object> body = new HashMap<>();
+                    body.put("pull_request_creation_policy", values[which]);
+                    patch(body);
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     private void chooseDefaultBranch() {
