@@ -72,6 +72,10 @@ public class IssuesAdapter extends BaseAdapter<IssuesAdapter.ViewHolder, Issue> 
             holder.repoFullName.append("  ·  " + context.getString(R.string.issue_list_sub_issues,
                     summary.completed, summary.total));
         }
+        com.thirtydegreesray.openhub.mvp.model.Issue.DependenciesSummary deps = model.getDependenciesSummary();
+        if (deps != null && deps.blockedBy > 0) {
+            holder.repoFullName.append("  ·  " + context.getString(R.string.issue_list_blocked_by, deps.blockedBy));
+        }
     }
 
     class ViewHolder extends BaseViewHolder {

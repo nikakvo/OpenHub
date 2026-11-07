@@ -475,6 +475,13 @@
     <li>Long-press a sub-issue for <span class="ui">Move up</span>, <span class="ui">Move down</span> and <span class="ui">Remove sub-issue</span>. Removing only takes it out of the list; the issue itself stays.</li>
     <li>Closing or reopening a sub-issue updates the parent's count when you go back to it.</li>
   </ul>
+  <h3>Blocked by, blocking and related issues</h3>
+  <p>Under the sub-issues an issue shows its <strong>relationships</strong>: <span class="ui">Blocked by</span> (with how many of them are still open), <span class="ui">Blocking</span> and <span class="ui">Relates to</span>, each issue with its state; tap one to open it. In the issue list, <span class="ui">Blocked by 1</span> appears next to the number while a blocking issue is open.</p>
+  <ul>
+    <li>With triage or write access: <span class="ui">Add relationship</span> → <span class="ui">Blocked by…</span>, <span class="ui">Blocking…</span> or <span class="ui">Relates to…</span>, then pick the issue the same way as a sub-issue (list, number, <code>owner/repo#12</code> or a link).</li>
+    <li>Long-press an issue in one of these lists: <span class="ui">Remove relationship</span> asks, <span class="ui">Remove</span> removes it. Only the link goes; both issues stay as they are.</li>
+    <li>"Blocking" is the same link seen from the other side: if #7 blocks #10, #10 shows #7 under Blocked by.</li>
+  </ul>
   <h3>Milestones</h3>
   <p>Repository menu → <span class="ui">Milestones</span>: <span class="ui">Open</span> / <span class="ui">Closed</span>, sorted by due date. Each shows its due date (red when it is past), a bar with how many of its issues and pull requests are closed, and its description.</p>
   <ul>

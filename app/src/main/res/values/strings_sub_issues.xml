@@ -32,4 +32,27 @@
     <string name="sub_issue_remove_button">Remove</string>
     <string name="sub_issue_removed">Removed %1$s from the sub-issues</string>
     <string name="issue_list_sub_issues">Sub-issues %1$d/%2$d</string>
+    <string name="issue_relationships">Relationships</string>
+    <string name="issue_relationships_none">No blocked by, blocking or related issues.</string>
+    <string name="issue_relationship_add">Add relationship</string>
+    <string name="issue_relationship_remove">Remove relationship</string>
+    <string name="issue_blocked_by">Blocked by</string>
+    <string name="issue_blocked_by_open">Blocked by (%1$d open)</string>
+    <string name="issue_blocking">Blocking</string>
+    <string name="issue_relates_to">Relates to</string>
+    <string name="issue_add_blocked_by">Blocked by…</string>
+    <string name="issue_add_blocking">Blocking…</string>
+    <string name="issue_add_relates_to">Relates to…</string>
+    <string name="issue_added_blocked_by">This issue is now blocked by %1$s</string>
+    <string name="issue_added_blocking">This issue now blocks %1$s</string>
+    <string name="issue_added_relates">This issue now relates to %1$s</string>
+    <string name="issue_remove_blocked_by_message">This issue will no longer be blocked by %1$s \"%2$s\". Both issues stay as they are.</string>
+    <string name="issue_remove_blocking_message">This issue will no longer block %1$s \"%2$s\". Both issues stay as they are.</string>
+    <string name="issue_remove_relates_message">This issue will no longer relate to %1$s \"%2$s\". Both issues stay as they are.</string>
+    <string name="issue_relationship_removed">Removed the relationship with %1$s</string>
+    <string name="issue_ref_taken">%1$s is this issue or already in this list.</string>
+    <string name="issue_ref_is_pull">%1$s is a pull request. Only issues can be linked here.</string>
+    <string name="issue_is_pull">That is a pull request. Only issues can be linked here.</string>
+    <string name="issue_is_self">An issue cannot be linked to itself.</string>
+    <string name="issue_list_blocked_by">Blocked by %1$d</string>
 </resources>

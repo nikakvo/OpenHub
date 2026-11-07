@@ -53,6 +53,17 @@ public class Issue implements Parcelable {
     /** GitHub's own count of the sub-issues; null when GitHub did not send it. */
     @SerializedName("sub_issues_summary") private SubIssuesSummary subIssuesSummary;
 
+    /** GitHub's count of issue dependencies; null when GitHub did not send it. */
+    @SerializedName("issue_dependencies_summary") private DependenciesSummary dependenciesSummary;
+
+    /** GitHub's "issue_dependencies_summary": open and all blocked-by / blocking issues. */
+    public static class DependenciesSummary {
+        @SerializedName("blocked_by") public int blockedBy;
+        public int blocking;
+        @SerializedName("total_blocked_by") public int totalBlockedBy;
+        @SerializedName("total_blocking") public int totalBlocking;
+    }
+
     /** GitHub's "sub_issues_summary": total, completed and percent completed. */
     public static class SubIssuesSummary {
         public int total;
@@ -191,6 +202,10 @@ public class Issue implements Parcelable {
         return subIssuesSummary;
     }
 
+    public DependenciesSummary getDependenciesSummary() {
+        return dependenciesSummary;
+    }
+
     public String getHtmlUrl() {
         return htmlUrl;
     }
@@ -285,6 +300,13 @@ public class Issue implements Parcelable {
             dest.writeInt(this.subIssuesSummary.completed);
             dest.writeInt(this.subIssuesSummary.percentCompleted);
         }
+        dest.writeByte(this.dependenciesSummary == null ? (byte) 0 : (byte) 1);
+        if (this.dependenciesSummary != null) {
+            dest.writeInt(this.dependenciesSummary.blockedBy);
+            dest.writeInt(this.dependenciesSummary.blocking);
+            dest.writeInt(this.dependenciesSummary.totalBlockedBy);
+            dest.writeInt(this.dependenciesSummary.totalBlocking);
+        }
     }
 
     protected Issue(Parcel in) {
@@ -320,6 +342,13 @@ public class Issue implements Parcelable {
             this.subIssuesSummary.total = in.readInt();
             this.subIssuesSummary.completed = in.readInt();
             this.subIssuesSummary.percentCompleted = in.readInt();
+        }
+        if (in.readByte() != 0) {
+            this.dependenciesSummary = new DependenciesSummary();
+            this.dependenciesSummary.blockedBy = in.readInt();
+            this.dependenciesSummary.blocking = in.readInt();
+            this.dependenciesSummary.totalBlockedBy = in.readInt();
+            this.dependenciesSummary.totalBlocking = in.readInt();
         }
     }
 

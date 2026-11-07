@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import io.reactivex.rxjava3.core.Observable;
 import retrofit2.Response;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.HTTP;
 import retrofit2.http.Headers;
@@ -84,5 +85,73 @@ public interface SubIssueService {
             @Path("repo") String repo,
             @Path("number") int number,
             @Body JsonObject body
+    );
+
+    // ------------------------------------------------ dependencies and "relates to"
+
+    /** Issues that block this one. */
+    @NonNull @GET("repos/{owner}/{repo}/issues/{number}/dependencies/blocked_by")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonArray>> getBlockedBy(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Query("per_page") int perPage,
+            @Query("page") int page
+    );
+
+    /** Issues this one blocks. There is no "add blocking": add "blocked by" on the other issue. */
+    @NonNull @GET("repos/{owner}/{repo}/issues/{number}/dependencies/blocking")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonArray>> getBlocking(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Query("per_page") int perPage,
+            @Query("page") int page
+    );
+
+    /** Body: issue_id of the blocking issue. */
+    @NonNull @POST("repos/{owner}/{repo}/issues/{number}/dependencies/blocked_by")
+    Observable<Response<JsonObject>> addBlockedBy(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Body JsonObject body
+    );
+
+    @NonNull @DELETE("repos/{owner}/{repo}/issues/{number}/dependencies/blocked_by/{issueId}")
+    Observable<Response<JsonObject>> removeBlockedBy(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Path("issueId") long issueId
+    );
+
+    @NonNull @GET("repos/{owner}/{repo}/issues/{number}/relates_to")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonArray>> getRelatesTo(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Query("per_page") int perPage,
+            @Query("page") int page
+    );
+
+    /** Body: issue_id of the related issue. */
+    @NonNull @POST("repos/{owner}/{repo}/issues/{number}/relates_to")
+    Observable<Response<JsonObject>> addRelatesTo(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Body JsonObject body
+    );
+
+    @NonNull @DELETE("repos/{owner}/{repo}/issues/{number}/relates_to/{issueId}")
+    Observable<Response<JsonObject>> removeRelatesTo(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Path("issueId") long issueId
     );
 }

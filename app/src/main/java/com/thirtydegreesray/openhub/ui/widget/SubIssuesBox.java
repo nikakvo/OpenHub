@@ -85,6 +85,12 @@ public class SubIssuesBox {
 
     private static final int MAX_PAGES = 3;
 
+    /** What the issue picker adds. */
+    private static final int MODE_SUB = 0;
+    private static final int MODE_BLOCKED_BY = 1;
+    private static final int MODE_BLOCKING = 2;
+    private static final int MODE_RELATES = 3;
+
     private final BaseActivity<?> activity;
     private final Host host;
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -99,6 +105,11 @@ public class SubIssuesBox {
     /** Null until GitHub answered. */
     @Nullable private List<SubIssues.Entry> subs;
     @Nullable private SubIssues.Entry parent;
+    /** Relationships; null until GitHub answered (or when it could not be read). */
+    @Nullable private List<SubIssues.Entry> blockedBy;
+    @Nullable private List<SubIssues.Entry> blocking;
+    @Nullable private List<SubIssues.Entry> relates;
+    @Nullable private Issue.DependenciesSummary deps;
     private boolean canWrite;
     private boolean permissionsKnown;
     private long loadedStamp = -1;
@@ -123,6 +134,9 @@ public class SubIssuesBox {
         final boolean readSubs = summary == null || summary.total > 0;
         final boolean readParent = summary == null || !StringUtils.isBlank(issue.getParentIssueUrl());
         final boolean readPermissions = !permissionsKnown;
+        deps = issue.getDependenciesSummary();
+        final boolean readBlockedBy = deps == null || deps.totalBlockedBy > 0;
+        final boolean readBlocking = deps == null || deps.totalBlocking > 0;
         final String o = owner, r = repo;
         final int n = number;
         loadedStamp = changes;
@@ -155,14 +169,21 @@ public class SubIssuesBox {
                 } catch (Exception ignored) {
                 }
             }
-            return new Object[]{list, p, write};
+            List<SubIssues.Entry> by = readBlockedBy ? pages(page -> api().getBlockedBy(o, r, n, 100, page))
+                    : new ArrayList<>();
+            List<SubIssues.Entry> blocks = readBlocking ? pages(page -> api().getBlocking(o, r, n, 100, page))
+                    : new ArrayList<>();
+            List<SubIssues.Entry> rel = pages(page -> api().getRelatesTo(o, r, n, 100, page));
+            return new Object[]{list, p, write, by, blocks, rel};
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
-                    @SuppressWarnings("unchecked")
-                    List<SubIssues.Entry> list = (List<SubIssues.Entry>) result[0];
+                    List<SubIssues.Entry> list = cast(result[0]);
                     subs = list;
                     parent = (SubIssues.Entry) result[1];
+                    blockedBy = cast(result[3]);
+                    blocking = cast(result[4]);
+                    relates = cast(result[5]);
                     if (result[2] != null) {
                         canWrite = (Boolean) result[2];
                         permissionsKnown = true;
@@ -172,6 +193,26 @@ public class SubIssuesBox {
                     // the issue itself is still shown; the box stays as it was
                 });
         disposables.add(loading);
+    }
+
+    private interface Page {
+        io.reactivex.rxjava3.core.Observable<retrofit2.Response<JsonArray>> get(int page);
+    }
+
+    /** All pages of a relationship list; null when GitHub could not answer (the box then leaves it out). */
+    @Nullable
+    private static List<SubIssues.Entry> pages(Page page) {
+        List<SubIssues.Entry> list = new ArrayList<>();
+        try {
+            for (int i = 1; i <= MAX_PAGES; i++) {
+                List<SubIssues.Entry> part = SubIssues.entries(GitHubApi.call(page.get(i)));
+                list.addAll(part);
+                if (part.size() < 100) break;
+            }
+        } catch (Exception e) {
+            return null;
+        }
+        return list;
     }
 
     /** True when something changed sub-issues or issue states since the last load. */
@@ -186,7 +227,8 @@ public class SubIssuesBox {
         container.removeAllViews();
         Context ctx = container.getContext();
         boolean hasSubs = subs != null && !subs.isEmpty();
-        if (parent == null && !hasSubs && !(canWrite && subs != null)) {
+        boolean hasRel = notEmpty(blockedBy) || notEmpty(blocking) || notEmpty(relates);
+        if (parent == null && !hasSubs && !hasRel && !(canWrite && subs != null)) {
             container.setVisibility(View.GONE);
             return;
         }
@@ -194,7 +236,7 @@ public class SubIssuesBox {
         if (parent != null) {
             LinearLayout box = box(ctx);
             box.addView(heading(ctx, ctx.getString(R.string.sub_issue_parent)));
-            box.addView(row(ctx, parent, -1));
+            box.addView(row(ctx, parent, null));
             container.addView(box);
         }
         if (hasSubs || canWrite) {
@@ -207,7 +249,14 @@ public class SubIssuesBox {
             box.addView(heading(ctx, title));
             if (summary != null && summary.total > 0) box.addView(progress(ctx, summary.percentCompleted));
             if (hasSubs) {
-                for (int i = 0; i < subs.size(); i++) box.addView(row(ctx, subs.get(i), i));
+                for (int i = 0; i < subs.size(); i++) {
+                    final int index = i;
+                    final SubIssues.Entry e = subs.get(i);
+                    box.addView(row(ctx, e, canWrite ? v -> {
+                        showRowMenu(v, e, index);
+                        return true;
+                    } : null));
+                }
             } else {
                 TextView none = new TextView(ctx);
                 none.setText(R.string.sub_issues_none);
@@ -231,6 +280,65 @@ public class SubIssuesBox {
             }
             container.addView(box);
         }
+        if (hasRel || (canWrite && subs != null)) {
+            LinearLayout box = box(ctx);
+            boolean first = true;
+            if (notEmpty(blockedBy)) {
+                String title = deps != null && deps.blockedBy > 0
+                        ? ctx.getString(R.string.issue_blocked_by_open, deps.blockedBy)
+                        : ctx.getString(R.string.issue_blocked_by);
+                first = section(ctx, box, title, blockedBy, MODE_BLOCKED_BY, first);
+            }
+            if (notEmpty(blocking)) {
+                first = section(ctx, box, ctx.getString(R.string.issue_blocking), blocking, MODE_BLOCKING, first);
+            }
+            if (notEmpty(relates)) {
+                first = section(ctx, box, ctx.getString(R.string.issue_relates_to), relates, MODE_RELATES, first);
+            }
+            if (first) {
+                box.addView(heading(ctx, ctx.getString(R.string.issue_relationships)));
+                TextView none = new TextView(ctx);
+                none.setText(R.string.issue_relationships_none);
+                none.setTextSize(TypedValue.COMPLEX_UNIT_PX, ctx.getResources().getDimension(R.dimen.text_small));
+                none.setTextColor(secondary(ctx));
+                int pad = dp(ctx, 12);
+                none.setPadding(pad, dp(ctx, 2), pad, dp(ctx, 4));
+                box.addView(none);
+            }
+            if (canWrite) {
+                TextView add = new TextView(ctx);
+                add.setText(R.string.issue_relationship_add);
+                ButtonStyles.tonal(add);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.setMarginStart(dp(ctx, 12));
+                params.topMargin = dp(ctx, 6);
+                params.bottomMargin = dp(ctx, 4);
+                box.addView(add, params);
+                add.setOnClickListener(v -> chooseRelation());
+            }
+            container.addView(box);
+        }
+    }
+
+    private static boolean notEmpty(@Nullable List<SubIssues.Entry> list) {
+        return list != null && !list.isEmpty();
+    }
+
+    /** One relationship list with its heading; returns false (no longer the first section). */
+    private boolean section(Context ctx, LinearLayout box, String title, List<SubIssues.Entry> list,
+                            int mode, boolean first) {
+        TextView heading = heading(ctx, title);
+        if (!first) heading.setPadding(heading.getPaddingLeft(), dp(ctx, 8),
+                heading.getPaddingRight(), heading.getPaddingBottom());
+        box.addView(heading);
+        for (SubIssues.Entry e : list) {
+            box.addView(row(ctx, e, canWrite ? v -> {
+                confirmRemoveRelation(mode, e);
+                return true;
+            } : null));
+        }
+        return false;
     }
 
     private LinearLayout box(Context ctx) {
@@ -273,7 +381,7 @@ public class SubIssuesBox {
     }
 
     /** {@code index} is the place in the sub-issues list, -1 for the parent. */
-    private View row(Context ctx, SubIssues.Entry e, int index) {
+    private View row(Context ctx, SubIssues.Entry e, @Nullable View.OnLongClickListener longClick) {
         LinearLayout row = new LinearLayout(ctx);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
@@ -314,12 +422,7 @@ public class SubIssuesBox {
         ctx.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);
         row.setBackgroundResource(ripple.resourceId);
         row.setOnClickListener(v -> open(e));
-        if (index >= 0 && canWrite) {
-            row.setOnLongClickListener(v -> {
-                showRowMenu(v, e, index);
-                return true;
-            });
-        }
+        if (longClick != null) row.setOnLongClickListener(longClick);
         return row;
     }
 
@@ -384,10 +487,76 @@ public class SubIssuesBox {
         new AlertDialog.Builder(activity)
                 .setTitle(R.string.sub_issue_add)
                 .setItems(items, (d, which) -> {
-                    if (which == 0) pickExisting();
+                    if (which == 0) pickExisting(MODE_SUB);
                     else host.createSubIssue();
                 })
                 .show();
+    }
+
+    private void chooseRelation() {
+        String[] items = {activity.getString(R.string.issue_add_blocked_by),
+                activity.getString(R.string.issue_add_blocking),
+                activity.getString(R.string.issue_add_relates_to)};
+        new AlertDialog.Builder(activity)
+                .setTitle(R.string.issue_relationship_add)
+                .setItems(items, (d, which) -> pickExisting(which == 0 ? MODE_BLOCKED_BY
+                        : which == 1 ? MODE_BLOCKING : MODE_RELATES))
+                .show();
+    }
+
+    @Nullable
+    private List<SubIssues.Entry> listOf(int mode) {
+        return mode == MODE_SUB ? subs : mode == MODE_BLOCKED_BY ? blockedBy
+                : mode == MODE_BLOCKING ? blocking : relates;
+    }
+
+    private void confirmRemoveRelation(int mode, SubIssues.Entry e) {
+        String label = SubIssues.label(e, owner, repo);
+        int message = mode == MODE_BLOCKED_BY ? R.string.issue_remove_blocked_by_message
+                : mode == MODE_BLOCKING ? R.string.issue_remove_blocking_message
+                : R.string.issue_remove_relates_message;
+        new AlertDialog.Builder(activity)
+                .setTitle(R.string.issue_relationship_remove)
+                .setMessage(activity.getString(message, label, e.title))
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.sub_issue_remove_button, (d, w) -> write(() -> {
+                    if (mode == MODE_BLOCKED_BY) {
+                        GitHubApi.call(api().removeBlockedBy(owner, repo, number, e.id));
+                    } else if (mode == MODE_BLOCKING) {
+                        // "this blocks e" is stored on e as "e is blocked by this"
+                        GitHubApi.call(api().removeBlockedBy(otherOwner(e), otherRepo(e), e.number, selfId));
+                    } else {
+                        GitHubApi.call(api().removeRelatesTo(owner, repo, number, e.id));
+                    }
+                    return Boolean.TRUE;
+                }, activity.getString(R.string.issue_relationship_removed, label)))
+                .show();
+    }
+
+    private void addRelation(int mode, SubIssues.Entry e) {
+        String label = SubIssues.label(e, owner, repo);
+        int done = mode == MODE_BLOCKED_BY ? R.string.issue_added_blocked_by
+                : mode == MODE_BLOCKING ? R.string.issue_added_blocking : R.string.issue_added_relates;
+        write(() -> {
+            JsonObject body = new JsonObject();
+            if (mode == MODE_BLOCKING) {
+                body.addProperty("issue_id", selfId);
+                GitHubApi.call(api().addBlockedBy(otherOwner(e), otherRepo(e), e.number, body));
+            } else {
+                body.addProperty("issue_id", e.id);
+                if (mode == MODE_BLOCKED_BY) GitHubApi.call(api().addBlockedBy(owner, repo, number, body));
+                else GitHubApi.call(api().addRelatesTo(owner, repo, number, body));
+            }
+            return Boolean.TRUE;
+        }, activity.getString(done, label));
+    }
+
+    private String otherOwner(SubIssues.Entry e) {
+        return e.owner.isEmpty() ? owner : e.owner;
+    }
+
+    private String otherRepo(SubIssues.Entry e) {
+        return e.repo.isEmpty() ? repo : e.repo;
     }
 
     /** The editor created a new issue in this repository: make it a sub-issue. */
@@ -397,7 +566,7 @@ public class SubIssuesBox {
         add(id, false, "#" + created.getNumber(), true);
     }
 
-    private void pickExisting() {
+    private void pickExisting(int mode) {
         Context ctx = new AlertDialog.Builder(activity).getContext();
         LinearLayout layout = new LinearLayout(ctx);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -429,7 +598,9 @@ public class SubIssuesBox {
         listView.setAdapter(adapter);
 
         AlertDialog dialog = new AlertDialog.Builder(activity)
-                .setTitle(R.string.sub_issue_add_existing)
+                .setTitle(mode == MODE_SUB ? R.string.sub_issue_add_existing
+                        : mode == MODE_BLOCKED_BY ? R.string.issue_add_blocked_by
+                        : mode == MODE_BLOCKING ? R.string.issue_add_blocking : R.string.issue_add_relates_to)
                 .setView(layout)
                 .setNegativeButton(R.string.cancel, null)
                 .create();
@@ -447,9 +618,10 @@ public class SubIssuesBox {
             SubIssues.Ref ref = SubIssues.parse(filter, owner, repo);
             // "3" or "#3" also filters the list (#3, #30, titles with 3); owner/repo#3 and links do not
             boolean plain = SubIssues.isPlainNumber(filter);
-            List<SubIssues.Entry> current = subs == null ? new ArrayList<>() : subs;
+            List<SubIssues.Entry> current = listOf(mode) == null ? new ArrayList<>() : listOf(mode);
+            long excludedParent = mode == MODE_SUB && parent != null ? parent.id : 0;
             List<SubIssues.Entry> list = SubIssues.candidates(open, selfId,
-                    parent == null ? 0 : parent.id, current, ref != null && !plain ? "" : filter);
+                    excludedParent, current, ref != null && !plain ? "" : filter);
             String note = null;
             if (ref != null) {
                 if (!plain) {
@@ -469,15 +641,20 @@ public class SubIssuesBox {
                     if (known instanceof SubIssues.Entry) {
                         SubIssues.Entry e = (SubIssues.Entry) known;
                         if (e.isPullRequest) {
-                            note = activity.getString(R.string.sub_issue_ref_is_pull, refLabel);
-                        } else if (e.id == selfId || (parent != null && e.id == parent.id) || isSub(e.id)) {
-                            note = activity.getString(R.string.sub_issue_ref_taken, refLabel);
+                            note = activity.getString(mode == MODE_SUB ? R.string.sub_issue_ref_is_pull
+                                    : R.string.issue_ref_is_pull, refLabel);
+                        } else if (e.id == selfId || (excludedParent != 0 && e.id == excludedParent)
+                                || inList(listOf(mode), e.id)) {
+                            note = activity.getString(mode == MODE_SUB ? R.string.sub_issue_ref_taken
+                                    : R.string.issue_ref_taken, refLabel);
                         } else {
                             shown.add(e);
                             String text = refLabel + "  " + e.title;
                             if (!e.isOpen()) text += "  (" + activity.getString(e.isNotPlanned()
                                     ? R.string.sub_issue_not_planned : R.string.closed) + ")";
-                            if (e.hasParent) text += "  " + activity.getString(R.string.sub_issue_has_parent);
+                            if (mode == MODE_SUB && e.hasParent) {
+                                text += "  " + activity.getString(R.string.sub_issue_has_parent);
+                            }
                             adapter.add(text);
                         }
                     } else if (known instanceof String) {
@@ -512,13 +689,14 @@ public class SubIssuesBox {
                         }
                     }
                 } else if (state == SubIssues.RefState.PULL_REQUEST) {
-                    note = activity.getString(R.string.sub_issue_ref_is_pull, refLabel);
+                    note = activity.getString(mode == MODE_SUB ? R.string.sub_issue_ref_is_pull
+                            : R.string.issue_ref_is_pull, refLabel);
                 }
             }
             for (SubIssues.Entry e : list) {
                 shown.add(e);
                 String text = "#" + e.number + "  " + e.title;
-                if (e.hasParent) text += "  " + activity.getString(R.string.sub_issue_has_parent);
+                if (mode == MODE_SUB && e.hasParent) text += "  " + activity.getString(R.string.sub_issue_has_parent);
                 adapter.add(text);
             }
             if (loaded[0]) {
@@ -549,7 +727,7 @@ public class SubIssuesBox {
             dialog.dismiss();
             if (item instanceof SubIssues.Entry) {
                 SubIssues.Entry e = (SubIssues.Entry) item;
-                addChecked(e);
+                picked(mode, e);
             } else {
                 SubIssues.Ref ref = (SubIssues.Ref) item;
                 background(() -> {
@@ -557,11 +735,13 @@ public class SubIssuesBox {
                     return json == null ? new SubIssues.Entry() : SubIssues.entry(json);
                 }, e -> {
                     if (e.isPullRequest) {
-                        activity.showErrorToast(activity.getString(R.string.sub_issue_is_pull));
+                        activity.showErrorToast(activity.getString(mode == MODE_SUB
+                                ? R.string.sub_issue_is_pull : R.string.issue_is_pull));
                     } else if (e.id == selfId) {
-                        activity.showErrorToast(activity.getString(R.string.sub_issue_is_self));
+                        activity.showErrorToast(activity.getString(mode == MODE_SUB
+                                ? R.string.sub_issue_is_self : R.string.issue_is_self));
                     } else {
-                        addChecked(e);
+                        picked(mode, e);
                     }
                 });
             }
@@ -584,10 +764,15 @@ public class SubIssuesBox {
                 }));
     }
 
-    private boolean isSub(long id) {
-        if (subs == null) return false;
-        for (SubIssues.Entry e : subs) if (e.id == id) return true;
+    private static boolean inList(@Nullable List<SubIssues.Entry> list, long id) {
+        if (list == null) return false;
+        for (SubIssues.Entry e : list) if (e.id == id) return true;
         return false;
+    }
+
+    private void picked(int mode, SubIssues.Entry e) {
+        if (mode == MODE_SUB) addChecked(e);
+        else addRelation(mode, e);
     }
 
     /** An issue that already has a parent moves here only when the user says so. */
@@ -647,6 +832,12 @@ public class SubIssuesBox {
     }
 
     // ---------------------------------------------------------------- small helpers
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    private static List<SubIssues.Entry> cast(Object value) {
+        return (List<SubIssues.Entry>) value;
+    }
 
     private static SubIssueService api() {
         return GitHubApi.service(SubIssueService.class);
