@@ -119,4 +119,36 @@ public class SubIssuesTest {
         assertEquals(0, SubIssues.entries(empty).size());
         assertEquals(0, SubIssues.entries(null).size());
     }
+
+    @Test
+    public void typedRefOffersOnlyUnknownIssues() {
+        SubIssues.Entry pull = e(3, 3, "Stack PR");
+        pull.isPullRequest = true;
+        pull.owner = "nikakvo";
+        pull.repo = "test";
+        SubIssues.Entry issue = e(7, 7, "Seven");
+        issue.owner = "nikakvo";
+        issue.repo = "test";
+        List<SubIssues.Entry> open = Arrays.asList(pull, issue);
+        List<SubIssues.Entry> listed = Arrays.asList(issue);
+        List<SubIssues.Entry> none = new ArrayList<>();
+
+        assertTrue(SubIssues.isPlainNumber("#3"));
+        assertTrue(SubIssues.isPlainNumber(" 3"));
+        assertFalse(SubIssues.isPlainNumber("a/b#3"));
+
+        assertEquals(SubIssues.RefState.PULL_REQUEST,
+                SubIssues.refState(SubIssues.parse("3", "nikakvo", "test"), open, listed));
+        assertEquals(SubIssues.RefState.LISTED,
+                SubIssues.refState(SubIssues.parse("#7", "nikakvo", "test"), open, listed));
+        // #7 is open but cannot be picked here (e.g. it is the issue itself)
+        assertEquals(SubIssues.RefState.EXCLUDED,
+                SubIssues.refState(SubIssues.parse("7", "nikakvo", "test"), open, none));
+        // closed or unknown issue: GitHub decides
+        assertEquals(SubIssues.RefState.OFFER,
+                SubIssues.refState(SubIssues.parse("12", "nikakvo", "test"), open, listed));
+        // the same number in another repository is a different issue
+        assertEquals(SubIssues.RefState.OFFER,
+                SubIssues.refState(SubIssues.parse("nikakvo/OpenHub#3", "nikakvo", "test"), open, listed));
+    }
 }

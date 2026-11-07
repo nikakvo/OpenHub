@@ -14,6 +14,7 @@
     <string name="sub_issue_pick_hint">Tap an issue to add it. Issues of another repository of the same owner: type owner/repo#number or paste the link.</string>
     <string name="sub_issue_no_candidates">No open issue matches. Type a number, owner/repo#number or paste a link.</string>
     <string name="sub_issue_add_ref">Add %1$s</string>
+    <string name="sub_issue_ref_is_pull">%1$s is a pull request. Only issues can be sub-issues.</string>
     <string name="sub_issue_has_parent">(has a parent)</string>
     <string name="sub_issue_is_pull">That is a pull request. Only issues can be sub-issues.</string>
     <string name="sub_issue_is_self">An issue cannot be its own sub-issue.</string>

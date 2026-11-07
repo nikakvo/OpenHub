@@ -440,20 +440,29 @@ public class SubIssuesBox {
             shown.clear();
             adapter.clear();
             SubIssues.Ref ref = SubIssues.parse(filter, owner, repo);
+            // "3" or "#3" also filters the list (#3, #30, titles with 3); owner/repo#3 and links do not
+            boolean plain = SubIssues.isPlainNumber(filter);
             List<SubIssues.Entry> current = subs == null ? new ArrayList<>() : subs;
             List<SubIssues.Entry> list = SubIssues.candidates(open, selfId,
-                    parent == null ? 0 : parent.id, current, ref != null ? "" : filter);
+                    parent == null ? 0 : parent.id, current, ref != null && !plain ? "" : filter);
+            String note = null;
             if (ref != null) {
-                List<SubIssues.Entry> exact = new ArrayList<>();
-                for (SubIssues.Entry e : list) {
-                    if (e.number == ref.number && e.sameRepo(ref.owner, ref.repo)) exact.add(e);
+                if (!plain) {
+                    List<SubIssues.Entry> exact = new ArrayList<>();
+                    for (SubIssues.Entry e : list) {
+                        if (e.number == ref.number && e.sameRepo(ref.owner, ref.repo)) exact.add(e);
+                    }
+                    list = exact;
                 }
-                list = exact;
-                if (list.isEmpty()) {
+                String refLabel = ref.owner.equalsIgnoreCase(owner) && ref.repo.equalsIgnoreCase(repo)
+                        ? "#" + ref.number : ref.owner + "/" + ref.repo + "#" + ref.number;
+                SubIssues.RefState state = loaded[0] ? SubIssues.refState(ref, open, list)
+                        : SubIssues.RefState.LISTED;
+                if (state == SubIssues.RefState.OFFER) {
                     shown.add(ref);
-                    adapter.add(activity.getString(R.string.sub_issue_add_ref,
-                            ref.owner.equalsIgnoreCase(owner) && ref.repo.equalsIgnoreCase(repo)
-                                    ? "#" + ref.number : ref.owner + "/" + ref.repo + "#" + ref.number));
+                    adapter.add(activity.getString(R.string.sub_issue_add_ref, refLabel));
+                } else if (state == SubIssues.RefState.PULL_REQUEST) {
+                    note = activity.getString(R.string.sub_issue_ref_is_pull, refLabel);
                 }
             }
             for (SubIssues.Entry e : list) {
@@ -463,7 +472,8 @@ public class SubIssuesBox {
                 adapter.add(text);
             }
             if (loaded[0]) {
-                status.setText(shown.isEmpty() ? activity.getString(R.string.sub_issue_no_candidates)
+                status.setText(note != null ? note : shown.isEmpty()
+                        ? activity.getString(R.string.sub_issue_no_candidates)
                         : activity.getString(R.string.sub_issue_pick_hint));
             }
             adapter.notifyDataSetChanged();

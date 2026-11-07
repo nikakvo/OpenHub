@@ -194,6 +194,39 @@ public final class SubIssues {
         return new long[]{0, list.get(index + 1).id};
     }
 
+    /** What the picker does with a typed issue reference. */
+    public enum RefState {
+        /** It is already a row of the list: no extra row. */
+        LISTED,
+        /** It is an open pull request of the list: say so, no row. */
+        PULL_REQUEST,
+        /** It is an open issue that cannot be picked (itself, its parent, already a sub-issue). */
+        EXCLUDED,
+        /** Unknown here (closed or in another repository): offer "Add #N", GitHub decides. */
+        OFFER
+    }
+
+    /** True for "12" or "#12": a number of this repository, also a filter of the list. */
+    public static boolean isPlainNumber(@Nullable String input) {
+        return input != null && NUMBER.matcher(input.trim()).matches();
+    }
+
+    @NonNull
+    public static RefState refState(@NonNull Ref ref, @NonNull List<Entry> open, @NonNull List<Entry> shown) {
+        for (Entry e : shown) {
+            if (e.number == ref.number && matchesRepo(e, ref)) return RefState.LISTED;
+        }
+        for (Entry e : open) {
+            if (e.number != ref.number || !matchesRepo(e, ref)) continue;
+            return e.isPullRequest ? RefState.PULL_REQUEST : RefState.EXCLUDED;
+        }
+        return RefState.OFFER;
+    }
+
+    private static boolean matchesRepo(Entry e, Ref ref) {
+        return e.owner.isEmpty() || e.sameRepo(ref.owner, ref.repo);
+    }
+
     /** "#12" for the same repository, "owner/repo#12" for another one. */
     @NonNull
     public static String label(@NonNull Entry e, @NonNull String owner, @NonNull String repo) {
