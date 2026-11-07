@@ -71,6 +71,9 @@ public class IssuesFragment extends ListFragment<IssuePresenter, IssuesAdapter>
     protected void initFragment(Bundle savedInstanceState) {
         super.initFragment(savedInstanceState);
         setLoadMoreEnable(true);
+        // pull requests are left out, so a page is not always 30 rows: the presenter says
+        // when GitHub has no more (an empty load), not the row count
+        setAutoJudgeCanLoadMoreEnable(false);
         adapter.setUserIssues(mPresenter.getIssuesFilter().getType().equals(IssuesFilter.Type.User));
     }
 

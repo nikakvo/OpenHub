@@ -209,6 +209,7 @@ public class IssuePresenter extends BasePagerPresenter<IIssuesContract.View>
         if (resultIssues.size() == 0 && issues.size() != 0) {
             mView.setCanLoadMore(false);
         } else {
+            mView.setCanLoadMore(resultIssues.size() > 0);
             mView.showIssues(issues);
         }
     }
