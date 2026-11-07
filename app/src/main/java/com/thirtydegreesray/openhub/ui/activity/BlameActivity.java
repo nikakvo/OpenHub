@@ -278,8 +278,7 @@ public class BlameActivity extends BaseActivity<IBaseContract.Presenter> {
         getTheme().resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);
         row.setBackgroundResource(ripple.resourceId);
         int pad = WindowUtil.dipToPx(ctx, 8);
-        row.addView(bar(ctx), new LinearLayout.LayoutParams(WindowUtil.dipToPx(ctx, 4),
-                ViewGroup.LayoutParams.MATCH_PARENT));
+        row.addView(bar(ctx), barParams(ctx));
 
         LinearLayout texts = new LinearLayout(ctx);
         texts.setOrientation(LinearLayout.VERTICAL);
@@ -306,8 +305,7 @@ public class BlameActivity extends BaseActivity<IBaseContract.Presenter> {
     private View lineView(@NonNull Context ctx) {
         LinearLayout row = new LinearLayout(ctx);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        row.addView(bar(ctx), new LinearLayout.LayoutParams(WindowUtil.dipToPx(ctx, 4),
-                ViewGroup.LayoutParams.MATCH_PARENT));
+        row.addView(bar(ctx), barParams(ctx));
         int pad = WindowUtil.dipToPx(ctx, 8);
         TextView number = new TextView(ctx);
         number.setTag("number");
@@ -326,6 +324,15 @@ public class BlameActivity extends BaseActivity<IBaseContract.Presenter> {
         code.setPadding(0, 0, pad, 0);
         row.addView(code, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         return row;
+    }
+
+    /** 6 dp wide, a little away from the screen edge (curved edges hide the first pixels). */
+    @NonNull
+    private static LinearLayout.LayoutParams barParams(@NonNull Context ctx) {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(WindowUtil.dipToPx(ctx, 6),
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        params.setMarginStart(WindowUtil.dipToPx(ctx, 4));
+        return params;
     }
 
     @NonNull

@@ -140,12 +140,12 @@ public final class BlameLines {
     }
 
     /**
-     * Color of the age bar: orange for the newest changes (age 1) fading to a quiet grey
-     * for the oldest (10), like github.com's blame.
+     * Color of the age bar: orange for the newest changes (age 1) fading to grey for the
+     * oldest (10), like github.com's blame. The grey stays clearly visible on the background.
      */
     public static int ageColor(int age, boolean dark) {
         int newest = 0xFFF0883E;
-        int oldest = dark ? 0xFF3A3F45 : 0xFFD8DCE1;
+        int oldest = dark ? 0xFF5A636E : 0xFFB4BBC3;
         int clamped = Math.max(1, Math.min(10, age));
         float t = (clamped - 1) / 9f;
         return blend(newest, oldest, t);

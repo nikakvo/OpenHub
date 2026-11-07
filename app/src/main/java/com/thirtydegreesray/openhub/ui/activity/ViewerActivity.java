@@ -178,7 +178,8 @@ public class ViewerActivity extends SingleFragmentActivity<IBaseContract.Present
         item = menu.findItem(R.id.action_file_history);
         if (item != null) item.setVisible(fileRef != null);
         item = menu.findItem(R.id.action_file_blame);
-        if (item != null) item.setVisible(fileRef != null);
+        if (item != null) item.setVisible(fileRef != null
+                && !com.thirtydegreesray.openhub.util.GitHubHelper.isImage(fileRef[2]));
         return super.onPrepareOptionsMenu(menu);
     }
 

@@ -87,11 +87,11 @@ public class BlameLinesTest {
     @Test
     public void ageColors() {
         assertEquals(0xFFF0883E, BlameLines.ageColor(1, true));
-        assertEquals(0xFF3A3F45, BlameLines.ageColor(10, true));
-        assertEquals(0xFFD8DCE1, BlameLines.ageColor(10, false));
+        assertEquals(0xFF5A636E, BlameLines.ageColor(10, true));
+        assertEquals(0xFFB4BBC3, BlameLines.ageColor(10, false));
         assertEquals(BlameLines.ageColor(1, false), BlameLines.ageColor(0, false));
         assertEquals(BlameLines.ageColor(10, true), BlameLines.ageColor(42, true));
         int middle = BlameLines.ageColor(5, true);
-        assertTrue(((middle >> 16) & 0xFF) < 0xF0 && ((middle >> 16) & 0xFF) > 0x3A);
+        assertTrue(((middle >> 16) & 0xFF) < 0xF0 && ((middle >> 16) & 0xFF) > 0x5A);
     }
 }

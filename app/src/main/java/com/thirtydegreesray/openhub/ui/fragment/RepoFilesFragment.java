@@ -194,7 +194,10 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
         if (!file.isDir() && file.getDownloadUrl() != null) popup.getMenu().add(0, 4, 3, R.string.download);
         // history works for folders too (commits that changed anything inside)
         popup.getMenu().add(0, 5, 4, R.string.file_history);
-        if (!file.isDir()) popup.getMenu().add(0, 6, 5, R.string.file_blame);
+        // no blame for folders and pictures (GitHub has none for binary files)
+        if (!file.isDir() && !com.thirtydegreesray.openhub.util.GitHubHelper.isImage(file.getName())) {
+            popup.getMenu().add(0, 6, 5, R.string.file_blame);
+        }
         popup.setOnMenuItemClickListener(item -> {
             String branch = mPresenter.getBranch();
             if (item.getItemId() == 1) {
