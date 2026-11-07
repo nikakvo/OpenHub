@@ -435,6 +435,11 @@ public class SubIssuesBox {
                 .create();
 
         boolean[] loaded = {false};
+        // issues typed by number that the open list does not know: GitHub's answer per "owner/repo#n"
+        // (an Entry, or a String note when GitHub has no such issue); pending = being asked
+        java.util.Map<String, Object> lookups = new java.util.HashMap<>();
+        java.util.Set<String> pending = new java.util.HashSet<>();
+        Runnable[] self = new Runnable[1];
         Runnable refresh = () -> {
             String filter = search.getText().toString();
             shown.clear();
@@ -459,8 +464,53 @@ public class SubIssuesBox {
                 SubIssues.RefState state = loaded[0] ? SubIssues.refState(ref, open, list)
                         : SubIssues.RefState.LISTED;
                 if (state == SubIssues.RefState.OFFER) {
-                    shown.add(ref);
-                    adapter.add(activity.getString(R.string.sub_issue_add_ref, refLabel));
+                    String key = (ref.owner + "/" + ref.repo + "#" + ref.number).toLowerCase(java.util.Locale.ROOT);
+                    Object known = lookups.get(key);
+                    if (known instanceof SubIssues.Entry) {
+                        SubIssues.Entry e = (SubIssues.Entry) known;
+                        if (e.isPullRequest) {
+                            note = activity.getString(R.string.sub_issue_ref_is_pull, refLabel);
+                        } else if (e.id == selfId || (parent != null && e.id == parent.id) || isSub(e.id)) {
+                            note = activity.getString(R.string.sub_issue_ref_taken, refLabel);
+                        } else {
+                            shown.add(e);
+                            String text = refLabel + "  " + e.title;
+                            if (!e.isOpen()) text += "  (" + activity.getString(e.isNotPlanned()
+                                    ? R.string.sub_issue_not_planned : R.string.closed) + ")";
+                            if (e.hasParent) text += "  " + activity.getString(R.string.sub_issue_has_parent);
+                            adapter.add(text);
+                        }
+                    } else if (known instanceof String) {
+                        note = (String) known;
+                    } else if (Boolean.FALSE.equals(known)) {
+                        // GitHub could not be asked (network): let the tap try it
+                        shown.add(ref);
+                        adapter.add(activity.getString(R.string.sub_issue_add_ref, refLabel));
+                    } else {
+                        note = activity.getString(R.string.sub_issue_looking_up, refLabel);
+                        if (pending.add(key)) {
+                            disposables.add(Single.<Object>fromCallable(() -> {
+                                try {
+                                    JsonObject json = GitHubApi.call(api().getIssue(ref.owner, ref.repo, ref.number));
+                                    return json == null ? (Object) Boolean.FALSE : SubIssues.entry(json);
+                                } catch (GitHubApi.ApiException e) {
+                                    if (e.code == 404 || e.code == 410) {
+                                        return activity.getString(R.string.sub_issue_ref_not_found, refLabel);
+                                    }
+                                    return Boolean.FALSE;
+                                } catch (java.io.IOException e) {
+                                    return Boolean.FALSE;
+                                }
+                            }).delay(350, java.util.concurrent.TimeUnit.MILLISECONDS)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(answer -> {
+                                        pending.remove(key);
+                                        lookups.put(key, answer);
+                                        if (dialog.isShowing() && self[0] != null) self[0].run();
+                                    }, error -> pending.remove(key)));
+                        }
+                    }
                 } else if (state == SubIssues.RefState.PULL_REQUEST) {
                     note = activity.getString(R.string.sub_issue_ref_is_pull, refLabel);
                 }
@@ -478,6 +528,7 @@ public class SubIssuesBox {
             }
             adapter.notifyDataSetChanged();
         };
+        self[0] = refresh;
         search.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -531,6 +582,12 @@ public class SubIssuesBox {
                     loaded[0] = true;
                     status.setText(message(error));
                 }));
+    }
+
+    private boolean isSub(long id) {
+        if (subs == null) return false;
+        for (SubIssues.Entry e : subs) if (e.id == id) return true;
+        return false;
     }
 
     /** An issue that already has a parent moves here only when the user says so. */
