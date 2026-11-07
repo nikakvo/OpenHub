@@ -40,9 +40,18 @@
             android:layout_marginTop="@dimen/spacing_micro"
             android:textSize="@dimen/text_small"
             android:textColor="?android:textColorSecondary"/>
-        <TextView
-            android:id="@+id/pull_badge"
-            style="@style/ReleaseBadge"
-            android:layout_marginTop="@dimen/spacing_mini"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/pull_badge"
+                style="@style/ReleaseBadge"
+                android:layout_marginTop="@dimen/spacing_mini"/>
+            <TextView
+                android:id="@+id/pull_stack_badge"
+                style="@style/ReleaseBadge"
+                android:layout_marginTop="@dimen/spacing_mini"/>
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

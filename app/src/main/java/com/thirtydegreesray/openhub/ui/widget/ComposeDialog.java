@@ -48,6 +48,10 @@ public final class ComposeDialog {
         @Nullable private CharSequence header;
         @Nullable private CharSequence insertLabel;
         @Nullable private String insertText;
+        private boolean noBody;
+        @Nullable private CharSequence checkLabel;
+        private boolean checkDefault;
+        @Nullable private boolean[] checkResult;
 
         public Builder(@NonNull Context context) {
             this.context = context;
@@ -87,6 +91,19 @@ public final class ComposeDialog {
             return this;
         }
 
+        /** No text editor: only the choice, the title (if any) and the check box. */
+        public Builder noBody() {
+            this.noBody = true;
+            return this;
+        }
+        /** A check box under the editor; its state is written to {@code result[0]} before the callback. */
+        public Builder checkbox(@NonNull CharSequence label, boolean checked, @NonNull boolean[] result) {
+            this.checkLabel = label;
+            this.checkDefault = checked;
+            this.checkResult = result;
+            return this;
+        }
+
         public void show() {
             View view = LayoutInflater.from(new AlertDialog.Builder(context).getContext()).inflate(R.layout.dialog_pr_compose, null);
             RadioGroup group = view.findViewById(R.id.choice_group);
@@ -111,6 +128,13 @@ public final class ComposeDialog {
                 TextView headerView = view.findViewById(R.id.compose_header);
                 headerView.setText(header);
                 headerView.setVisibility(View.VISIBLE);
+            }
+            if (noBody) view.findViewById(R.id.compose_body).setVisibility(View.GONE);
+            android.widget.CheckBox check = view.findViewById(R.id.compose_check);
+            if (checkLabel != null) {
+                check.setText(checkLabel);
+                check.setChecked(checkDefault);
+                check.setVisibility(View.VISIBLE);
             }
             if (titleHint != null) {
                 titleLayout.setVisibility(View.VISIBLE);
@@ -151,11 +175,12 @@ public final class ComposeDialog {
                         return;
                     }
                     boolean optional = bodyOptional != null && selected < bodyOptional.length && bodyOptional[selected];
-                    if (bodyRequired && !optional && body.isEmpty()) {
+                    if (bodyRequired && !noBody && !optional && body.isEmpty()) {
                         editor.showWrite();
                         editor.getEditText().setError(context.getString(R.string.field_required));
                         return;
                     }
+                    if (checkResult != null && checkResult.length > 0) checkResult[0] = check.isChecked();
                     dialog.dismiss();
                     if (callback != null) callback.onDone(selected, title, body);
                 });

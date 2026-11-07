@@ -45,6 +45,16 @@
                 android:maxLines="3"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <include layout="@layout/layout_markdown_write_preview"/>
+        <include
+            android:id="@+id/compose_body"
+            layout="@layout/layout_markdown_write_preview"/>
+
+        <CheckBox
+            android:id="@+id/compose_check"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:textSize="@dimen/text_normal"
+            android:visibility="gone"/>
     </LinearLayout>
 </ScrollView>

@@ -130,7 +130,10 @@ app goes to them; see [Credits](#credits).
 ### Pull requests
 * List, conversation with reviews and checks, commits and files
 * Open pull requests (also from forks), edit, close and reopen, draft and ready
-* Merge, squash or rebase; delete and restore the branch
+* Merge, squash or rebase with GitHub's asynchronous merge (also into a merge queue,
+  with bypass of the rules when you may); delete and restore the branch
+* **Stacked pull requests**: the stack in the list and on the pull request, with links
+  to every pull request in it; merging takes the open ones below along
 * A blocked merge lists what the base branch asks for: the rules of its rulesets and
   branch protection, approvals so far, and unresolved conversations
 * Line-by-line review of the diff: comment on one or several lines, suggest changes,

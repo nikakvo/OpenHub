@@ -52,7 +52,9 @@ import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
+import com.thirtydegreesray.openhub.util.AsyncMerge;
 import com.thirtydegreesray.openhub.util.MergeRules;
+import com.thirtydegreesray.openhub.util.PullStacks;
 import com.thirtydegreesray.openhub.util.ReviewDrafts;
 import com.thirtydegreesray.openhub.util.ReviewThreads;
 import com.thirtydegreesray.openhub.util.MarkdownHtml;
@@ -146,6 +148,10 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     private LinearLayout filesList;
     private TextView filesSummary;
     private ProgressBar loader;
+    private View stackBox;
+    private TextView stackTitle;
+    private LinearLayout stackRows;
+    private TextView stackBase;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -164,6 +170,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     private long loadedStamp;
     /** What the base branch asks for, loaded only while GitHub says merging is blocked. */
     @Nullable private Blocked blocked;
+    /** The stack this pull request belongs to, bottom first; null when it is not stacked. */
+    @Nullable private List<PullStacks.Entry> stack;
 
     @Override
     protected void setupActivityComponent(AppComponent appComponent) {
@@ -295,7 +303,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                     ? new HashMap<>() : ReviewThreads.fetch(owner, repo, number);
             Blocked why = "open".equals(Json.str(p, "state"))
                     && "blocked".equals(Json.str(p, "mergeable_state")) ? blockedBy(p, reviews) : null;
-            return new Object[]{p, r, items, checks, branchExists, lineComments, threads, why};
+            List<PullStacks.Entry> stackEntries = loadStack(p);
+            return new Object[]{p, r, items, checks, branchExists, lineComments, threads, why, stackEntries};
         }, (Object[] result) -> {
             loader.setVisibility(View.GONE);
             pull = (JsonObject) result[0];
@@ -303,9 +312,12 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             //noinspection unchecked
             reviewThreads = (Map<Long, ReviewThreads.Thread>) result[6];
             blocked = (Blocked) result[7];
+            //noinspection unchecked
+            stack = (List<PullStacks.Entry>) result[8];
             updateReviewButton();
             //noinspection unchecked
             showConversation((List<JsonObject>) result[2], (String) result[3]);
+            showStack();
             headBranchExists = (Boolean) result[4];
             commentsPerFile.clear();
             //noinspection unchecked
@@ -379,6 +391,116 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * The stack of a stacked pull request (REST "stack" object on the pull request, then
+     * GET stacks/{number}), bottom first. Null when the pull request is not stacked or the
+     * stack cannot be read; the screen then works as for a plain pull request.
+     */
+    @Nullable
+    private List<PullStacks.Entry> loadStack(@NonNull JsonObject p) {
+        int stackNumber = Json.integer(p, "stack.number");
+        if (stackNumber <= 0) return null;
+        try {
+            JsonObject s = GitHubApi.call(pulls().getStack(owner, repo, stackNumber));
+            if (s == null || !s.has("pull_requests") || !s.get("pull_requests").isJsonArray()) return null;
+            List<PullStacks.Entry> entries = new ArrayList<>();
+            for (JsonElement e : s.getAsJsonArray("pull_requests")) {
+                JsonObject item = e.getAsJsonObject();
+                entries.add(new PullStacks.Entry(Json.integer(item, "number"), Json.str(item, "title"),
+                        Json.str(item, "base.ref"), Json.str(item, "head.ref"),
+                        "open".equals(Json.str(item, "state")), !Json.str(item, "merged_at").isEmpty(),
+                        Json.bool(item, "draft")));
+            }
+            if (entries.size() < 2) return null;
+            String base = Json.str(s, "base.ref");
+            if (base.isEmpty()) base = Json.str(p, "stack.base.ref");
+            return PullStacks.order(entries, base, number, Json.integer(p, "stack.position"));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** The stack, top first like github.com's stack map, this pull request marked; tap another to open it. */
+    private void showStack() {
+        stackRows.removeAllViews();
+        if (stack == null) {
+            stackBox.setVisibility(View.GONE);
+            return;
+        }
+        int position = 0;
+        for (int i = 0; i < stack.size(); i++) if (stack.get(i).number == number) position = i + 1;
+        stackTitle.setText(getString(R.string.pull_stack_title, position, stack.size()));
+        String base = Json.str(pull, "stack.base.ref");
+        if (base.isEmpty() && !stack.isEmpty()) base = stack.get(0).baseRef;
+        stackBase.setText(getString(R.string.pull_stack_base, base));
+        float density = getResources().getDisplayMetrics().density;
+        TypedValue ripple = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);
+        for (int i = stack.size() - 1; i >= 0; i--) {
+            PullStacks.Entry entry = stack.get(i);
+            boolean current = entry.number == number;
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            int pad = (int) (8 * density);
+            row.setPadding(pad + (int) (4 * density), (int) (6 * density), pad + (int) (4 * density), (int) (6 * density));
+
+            @ColorRes int color = entry.merged ? R.color.pull_merged : !entry.open ? R.color.pull_closed
+                    : entry.draft ? R.color.pull_draft : R.color.pull_open;
+            ImageView icon = new ImageView(this);
+            icon.setImageResource(R.drawable.ic_pull);
+            androidx.core.widget.ImageViewCompat.setImageTintList(icon,
+                    ColorStateList.valueOf(getResources().getColor(color, getTheme())));
+            int size = (int) (16 * density);
+            row.addView(icon, new LinearLayout.LayoutParams(size, size));
+
+            TextView text = new TextView(this);
+            text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,
+                    getResources().getDimension(R.dimen.text_normal));
+            text.setMaxLines(2);
+            text.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            String label = "#" + entry.number + "  " + entry.title;
+            if (current) {
+                text.setText(label + "  (" + getString(R.string.pull_stack_this) + ")");
+                text.setTypeface(null, Typeface.BOLD);
+                text.setTextColor(ViewUtils.getAccentColor(this));
+            } else {
+                text.setText(label);
+                text.setTextColor(tabNormalColor);
+            }
+            LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            textParams.setMarginStart(pad);
+            row.addView(text, textParams);
+
+            if (entry.merged || !entry.open || entry.draft) {
+                TextView state = new TextView(this);
+                state.setText(entry.merged ? R.string.pull_state_merged : !entry.open
+                        ? R.string.pull_state_closed : R.string.pull_state_draft);
+                state.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,
+                        getResources().getDimension(R.dimen.text_small));
+                state.setTextColor(getResources().getColor(color, getTheme()));
+                LinearLayout.LayoutParams stateParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                stateParams.setMarginStart(pad);
+                row.addView(state, stateParams);
+            }
+            if (!current) {
+                row.setBackgroundResource(ripple.resourceId);
+                int target = entry.number;
+                row.setOnClickListener(v -> startActivity(createIntent(this, owner, repo, target)));
+            }
+            stackRows.addView(row);
+        }
+        stackBox.setVisibility(View.VISIBLE);
+    }
+
+    /** The pull requests a merge of this one lands: the open ones below it in the stack plus itself. */
+    @NonNull
+    private List<PullStacks.Entry> mergedWithThis() {
+        return stack == null ? new ArrayList<>() : PullStacks.mergedWith(stack, number);
     }
 
     // ---------------------------------------------------------------------------------
@@ -586,6 +708,13 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             mergeStatus.setText(R.string.pull_unstable);
         } else {
             mergeStatus.setText(R.string.pull_mergeable);
+        }
+        int together = mergedWithThis().size();
+        mergeBn.setText(together > 1 ? getString(R.string.pull_stack_merge_count, together)
+                : getString(R.string.pull_merge));
+        if (together > 1) {
+            mergeStatus.append("\n\n" + getString(R.string.pull_stack_merge_note,
+                    PullStacks.numbers(mergedWithThis(), number, getString(R.string.pull_stack_and))));
         }
         if (write && !state.equals("dirty")) mergeBn.setVisibility(View.VISIBLE);
     }
@@ -852,32 +981,79 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             methods.add("rebase");
             labels.add(getString(R.string.pull_merge_rebase));
         }
+        if (methods.isEmpty()) {
+            methods.add("merge");
+            labels.add(getString(R.string.pull_merge_commit));
+        }
+        List<PullStacks.Entry> together = mergedWithThis();
+        boolean several = together.size() > 1;
+        // the old merge endpoint bypassed rules for admins by itself; the asynchronous one
+        // only does so when asked, like the check box on github.com
+        boolean blockedNow = "blocked".equals(Json.str(pull, "mergeable_state"));
+        boolean[] bypass = {false};
         String title = Json.str(pull, "title");
         String head = Json.str(pull, "head.label");
         String mergeTitle = getString(R.string.pull_merge_default_title, number, head);
         String squashTitle = title + " (#" + number + ")";
-        new ComposeDialog.Builder(this)
-                .title(getString(R.string.pull_merge))
+        ComposeDialog.Builder dialog = new ComposeDialog.Builder(this)
                 .repo(owner + "/" + repo)
                 .choices(labels.toArray(new CharSequence[0]), 0)
-                .titleField(getString(R.string.pull_merge_commit_title),
-                        methods.get(0).equals("squash") ? squashTitle : mergeTitle)
-                .body(getString(R.string.pull_merge_commit_message),
-                        methods.get(0).equals("merge") ? title : Json.str(pull, "body"))
-                .positive(getString(R.string.pull_merge_confirm))
-                .callback((choice, commitTitle, message) -> {
-                    String method = methods.get(choice);
-                    Map<String, Object> data = new HashMap<>();
-                    data.put("merge_method", method);
-                    data.put("sha", Json.str(pull, "head.sha"));
-                    if (!method.equals("rebase")) {
-                        data.put("commit_title", commitTitle);
-                        data.put("commit_message", message);
-                    }
-                    run(() -> GitHubApi.call(pulls().merge(owner, repo, number, data)),
-                            getString(R.string.pull_merged_toast));
-                })
-                .show();
+                .positive(getString(R.string.pull_merge_confirm));
+        if (several) {
+            String base = Json.str(pull, "stack.base.ref");
+            if (base.isEmpty()) base = together.get(0).baseRef;
+            dialog.title(getString(R.string.pull_stack_merge_title, together.size()))
+                    .header(getString(R.string.pull_stack_merge_header,
+                            PullStacks.numbers(together, -1, getString(R.string.pull_stack_and)), base))
+                    .noBody();
+        } else {
+            dialog.title(getString(R.string.pull_merge))
+                    .titleField(getString(R.string.pull_merge_commit_title),
+                            methods.get(0).equals("squash") ? squashTitle : mergeTitle)
+                    .body(getString(R.string.pull_merge_commit_message),
+                            methods.get(0).equals("merge") ? title : Json.str(pull, "body"));
+        }
+        if (blockedNow) dialog.checkbox(getString(R.string.pull_merge_bypass), false, bypass);
+        dialog.callback((choice, commitTitle, message) -> {
+            String method = methods.get(choice);
+            Map<String, Object> data = new HashMap<>();
+            data.put("merge_method", method);
+            data.put("sha", Json.str(pull, "head.sha"));
+            if (bypass[0]) data.put("bypass_rules", true);
+            if (!several && !method.equals("rebase")) {
+                data.put("commit_title", commitTitle);
+                data.put("commit_message", message);
+            }
+            runMerge(data, together.size());
+        }).show();
+    }
+
+    /** The asynchronous merge with a waiting dialog; the toast tells what GitHub did. */
+    private void runMerge(@NonNull Map<String, Object> data, int count) {
+        showProgressDialog(getString(R.string.pull_merge_waiting));
+        background(() -> AsyncMerge.run(owner, repo, number, data), result -> {
+            dismissProgressDialog();
+            PullChanges.markChanged();
+            String text;
+            if (result.outcome == AsyncMerge.Outcome.MERGED) {
+                text = count > 1 ? getString(R.string.pull_merged_stack_toast, count)
+                        : getString(R.string.pull_merged_toast);
+            } else if (result.outcome == AsyncMerge.Outcome.ENQUEUED) {
+                text = getString(R.string.pull_merge_enqueued);
+            } else {
+                text = getString(R.string.pull_merge_pending);
+            }
+            if (result.earlierRequest) text = getString(R.string.pull_merge_earlier) + "\n" + text;
+            if (result.outcome == AsyncMerge.Outcome.PENDING) showInfoToast(text);
+            else showSuccessToast(text);
+            mergeableRetried = false;
+            commitsLoaded = false;
+            filesLoaded = false;
+            load();
+        }, error -> {
+            dismissProgressDialog();
+            load();
+        });
     }
 
     private void toggleClosed() {
@@ -1127,6 +1303,10 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         filesList = root.findViewById(R.id.files_list);
         filesSummary = root.findViewById(R.id.files_summary);
         loader = root.findViewById(R.id.loader);
+        stackBox = root.findViewById(R.id.stack_box);
+        stackTitle = root.findViewById(R.id.stack_title);
+        stackRows = root.findViewById(R.id.stack_rows);
+        stackBase = root.findViewById(R.id.stack_base);
         tabConversation.setOnClickListener(v -> showTab(0));
         tabCommits.setOnClickListener(v -> showTab(1));
         tabFiles.setOnClickListener(v -> showTab(2));

@@ -90,6 +90,41 @@ public interface PullService {
             @Body Map<String, Object> body
     );
 
+    /**
+     * The asynchronous merge, the only one that can merge stacked pull requests. Body:
+     * merge_method, merge_action (default / direct_merge / merge_queue), sha, bypass_rules,
+     * commit_title, commit_message. 202 = pending with a uuid, 200 = already merged or
+     * queued, 409 = another request is pending (its uuid), 400 = not mergeable; all of them
+     * answer {status, details}.
+     */
+    @NonNull @PUT("repos/{owner}/{repo}/pulls/{number}/merge-async")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonObject>> mergeAsync(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Body Map<String, Object> body
+    );
+
+    /** Result of an asynchronous merge: status pending / merged / enqueued / failed. */
+    @NonNull @GET("repos/{owner}/{repo}/pulls/{number}/merge-async/{uuid}")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonObject>> getMergeAsync(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("number") int number,
+            @Path("uuid") String uuid
+    );
+
+    /** A stack of pull requests: base.ref, open, pull_requests (number, title, state, draft, merged_at, head, base). */
+    @NonNull @GET("repos/{owner}/{repo}/stacks/{stack}")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<JsonObject>> getStack(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path("stack") int stack
+    );
+
     @NonNull @GET("repos/{owner}/{repo}/pulls/{number}/commits?per_page=100")
     @Headers("Cache-Control: no-cache, no-store")
     Observable<Response<JsonArray>> getCommits(

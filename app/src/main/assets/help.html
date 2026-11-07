@@ -397,13 +397,21 @@
   <h3>The merge box</h3>
   <p>If you can write to the repository:</p>
   <ul>
-    <li><span class="ui">Merge pull request</span> with any method the repository allows: <strong>merge commit</strong>, <strong>squash</strong> (all commits become one) or <strong>rebase</strong>, with your own title and message.</li>
+    <li><span class="ui">Merge pull request</span> with any method the repository allows: <strong>merge commit</strong>, <strong>squash</strong> (all commits become one) or <strong>rebase</strong>, with your own title and message. GitHub runs the merge in the background and OpenHub waits for its answer: merged, added to the merge queue, or the reason it failed (a rule of the base branch, for example).</li>
+    <li>When the merge is blocked, the merge dialog offers <span class="ui">Merge without waiting for the requirements (bypass rules)</span>. It works only if GitHub lets you bypass those rules (usually repository admins).</li>
     <li><span class="ui">Ready for review</span> for a draft, or <span class="ui">Convert to draft</span>.</li>
     <li><span class="ui">Delete branch</span> after merging or closing, and <span class="ui">Restore branch</span> if you change your mind.</li>
     <li><span class="ui">Close pull request</span> / <span class="ui">Reopen pull request</span>.</li>
   </ul>
   <p>When GitHub blocks the merge, the box lists what the base branch asks for: the rules of its rulesets (with the ruleset's name) and, for admins, its classic branch protection. A pull request rule also shows how far you are, for example <em>1 of 2 approved</em>, reviewers who asked for changes, and unresolved conversations when the rule wants them resolved.</p>
   <p>The ⋮ menu has <strong>Edit</strong> (title, description), Refresh, Share, Copy URL and Open in browser. Long-press a comment to edit or delete your own.</p>
+  <h3>Stacked pull requests</h3>
+  <p>A <strong>stack</strong> is a chain of pull requests where each one builds on the branch of the one below it, so a big change can be reviewed in small parts. Stacks are made on github.com or with the GitHub CLI; OpenHub shows them:</p>
+  <ul>
+    <li>The list marks a stacked pull request with <span class="pill p-grey">Stack 2/4</span>: its place in the stack, counted from the bottom.</li>
+    <li>Inside it, the <strong>Stack</strong> box under the title lists the whole stack, top first, down to the branch it merges into. Your pull request is marked; tap another one to open it.</li>
+    <li>A stack merges from the bottom up. Merging a pull request in the middle also merges the open ones below it, so the button says, for example, <span class="ui">Merge 3 pull requests</span> and the box names them. The ones above stay open and move onto the base branch.</li>
+  </ul>
   <div class="note warn"><b class="lbl">No merge button?</b>The box says why: <em>conflicts</em> (both branches changed the same lines; solve it on github.com or with git), a draft, failing required checks or missing approvals.</div>
   <h3>Opening a pull request</h3>
   <ol class="steps">

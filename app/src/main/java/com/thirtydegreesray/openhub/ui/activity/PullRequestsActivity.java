@@ -189,6 +189,16 @@ public class PullRequestsActivity extends BaseActivity<IBaseContract.Presenter> 
             stateColor = R.color.pull_open;
         }
         badge.setVisibility(badge.getText().length() == 0 ? View.GONE : View.VISIBLE);
+        // stacked pull request: "Stack 2/4" (position 1 = the bottom, next to the base branch)
+        TextView stackBadge = row.findViewById(R.id.pull_stack_badge);
+        int stackSize = Json.integer(pull, "stack.size");
+        int stackPosition = Json.integer(pull, "stack.position");
+        if (stackSize > 1 && stackPosition > 0) {
+            stackBadge.setText(getString(R.string.pulls_stack_badge, stackPosition, stackSize));
+            stackBadge.setVisibility(View.VISIBLE);
+        } else {
+            stackBadge.setVisibility(View.GONE);
+        }
         ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(getResources().getColor(stateColor, getTheme())));
         row.setOnClickListener(v -> startActivity(PullRequestActivity.createIntent(this, owner, repo, number)));
         return row;

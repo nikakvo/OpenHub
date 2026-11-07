@@ -89,6 +89,46 @@
                         android:textColor="?android:textColorSecondary"/>
                 </LinearLayout>
 
+                <!-- Stacked pull requests: the whole stack, top first, this one marked -->
+                <LinearLayout
+                    android:id="@+id/stack_box"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="@dimen/spacing_large"
+                    android:layout_marginEnd="@dimen/spacing_large"
+                    android:layout_marginTop="@dimen/spacing_normal"
+                    android:paddingTop="@dimen/spacing_small"
+                    android:paddingBottom="@dimen/spacing_small"
+                    android:background="@drawable/bg_box"
+                    android:visibility="gone">
+                    <TextView
+                        android:id="@+id/stack_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="@dimen/spacing_normal"
+                        android:paddingEnd="@dimen/spacing_normal"
+                        android:paddingBottom="@dimen/spacing_mini"
+                        android:textSize="@dimen/text_small"
+                        android:textStyle="bold"
+                        android:textColor="?android:textColorSecondary"/>
+                    <LinearLayout
+                        android:id="@+id/stack_rows"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"/>
+                    <TextView
+                        android:id="@+id/stack_base"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="@dimen/spacing_normal"
+                        android:paddingEnd="@dimen/spacing_normal"
+                        android:paddingTop="@dimen/spacing_mini"
+                        android:fontFamily="monospace"
+                        android:textSize="@dimen/text_small"
+                        android:textColor="?android:textColorSecondary"/>
+                </LinearLayout>
+
                 <com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView
                     android:id="@+id/pr_body"
                     android:layout_width="match_parent"

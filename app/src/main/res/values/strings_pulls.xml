@@ -119,4 +119,20 @@
         <item quantity="other">%d comments</item>
     </plurals>
     <string name="copy_path">Copy path</string>
+    <!-- Stacked pull requests and the asynchronous merge (3.12.0) -->
+    <string name="pull_stack_title">Stack · pull request %1$d of %2$d</string>
+    <string name="pull_stack_base">into %1$s</string>
+    <string name="pull_stack_this">this pull request</string>
+    <string name="pull_stack_and">and</string>
+    <string name="pull_stack_merge_count">Merge %1$d pull requests</string>
+    <string name="pull_stack_merge_note">Merging this also merges %1$s below it in the stack, bottom first.</string>
+    <string name="pull_stack_merge_title">Merge %1$d stacked pull requests</string>
+    <string name="pull_stack_merge_header">%1$s merge into %2$s, bottom first. GitHub writes the commit messages.</string>
+    <string name="pulls_stack_badge">Stack %1$d/%2$d</string>
+    <string name="pull_merge_bypass">Merge without waiting for the requirements (bypass rules)</string>
+    <string name="pull_merge_waiting">GitHub is merging…</string>
+    <string name="pull_merge_enqueued">Added to the merge queue</string>
+    <string name="pull_merge_pending">GitHub is still merging. Pull down in a moment to see the result.</string>
+    <string name="pull_merge_earlier">A merge was already requested for this pull request; that one was followed.</string>
+    <string name="pull_merged_stack_toast">%1$d pull requests merged</string>
 </resources>
