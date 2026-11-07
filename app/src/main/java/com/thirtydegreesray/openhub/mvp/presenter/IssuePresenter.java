@@ -110,6 +110,21 @@ public class IssuePresenter extends BasePagerPresenter<IIssuesContract.View>
         }, httpObserver, readCacheFirst);
     }
 
+    /**
+     * GET repos/o/r/issues returns pull requests too. They are left out of the issue lists
+     * (milestones keep them: "Issues and pull requests"). A page that loses most of its items
+     * would end the list early or look empty, so the next pages of GitHub are read at once until
+     * enough issues are there; GitHub's page to go on with is kept here.
+     */
+    private static final int GITHUB_PAGE_SIZE = 30;
+    private static final int MIN_ISSUES_PER_LOAD = 10;
+    private static final int MAX_PAGES_PER_LOAD = 20;
+    private int nextGitHubPage = 1;
+
+    private boolean keepsPullRequests() {
+        return issuesFilter.getMilestone() != null;
+    }
+
     private void loadRepoIssues(final int page, final boolean isReload, final boolean readCacheFirst){
         mView.showLoading();
         HttpObserver<ArrayList<Issue>> httpObserver =
@@ -129,14 +144,50 @@ public class IssuePresenter extends BasePagerPresenter<IIssuesContract.View>
         final String statusStr = issuesFilter.getIssueState().name().toLowerCase();
         final String sortStr = issuesFilter.getSortType().name().toLowerCase();
         final String sortDirectionStr = issuesFilter.getSortDirection().name().toLowerCase();
+        final int firstGitHubPage = page == 1 ? 1 : nextGitHubPage;
+        final boolean keepPulls = keepsPullRequests();
 
         generalRxHttpExecute(new IObservableCreator<ArrayList<Issue>>() {
             @Override
             public Observable<Response<ArrayList<Issue>>> createObservable(boolean forceNetWork) {
-                return getIssueService().getRepoIssues(forceNetWork, userId, repoName, statusStr,
-                        sortStr, sortDirectionStr, page, issuesFilter.getMilestone());
+                return repoIssuesFrom(forceNetWork, statusStr, sortStr, sortDirectionStr,
+                        firstGitHubPage, keepPulls, new ArrayList<>(), null, 0);
             }
         }, httpObserver, readCacheFirst);
+    }
+
+    /**
+     * Reads GitHub's page {@code gitHubPage} and, while fewer than MIN_ISSUES_PER_LOAD issues are
+     * collected and GitHub has more, the following ones. The answer carries the first page's
+     * response (cache or network, used by the cache-first reload) with all collected issues.
+     */
+    private Observable<Response<ArrayList<Issue>>> repoIssuesFrom(final boolean forceNetWork,
+            final String statusStr, final String sortStr, final String sortDirectionStr,
+            final int gitHubPage, final boolean keepPulls, final ArrayList<Issue> collected,
+            final Response<ArrayList<Issue>> first, final int pagesRead) {
+        return getIssueService().getRepoIssues(forceNetWork, userId, repoName, statusStr,
+                sortStr, sortDirectionStr, gitHubPage, issuesFilter.getMilestone())
+                .flatMap(response -> {
+                    Response<ArrayList<Issue>> head = first == null ? response : first;
+                    if (!response.isSuccessful() || response.body() == null) {
+                        // the first page failing is the screen's error; a later one ends this load
+                        if (first == null) return Observable.just(response);
+                        nextGitHubPage = gitHubPage;
+                        return Observable.just(Response.success(collected, head.raw()));
+                    }
+                    ArrayList<Issue> items = response.body();
+                    for (Issue issue : items) {
+                        if (keepPulls || !issue.isPullRequest()) collected.add(issue);
+                    }
+                    nextGitHubPage = gitHubPage + 1;
+                    boolean gitHubHasMore = items.size() >= GITHUB_PAGE_SIZE;
+                    if (gitHubHasMore && collected.size() < MIN_ISSUES_PER_LOAD
+                            && pagesRead + 1 < MAX_PAGES_PER_LOAD) {
+                        return repoIssuesFrom(forceNetWork, statusStr, sortStr, sortDirectionStr,
+                                gitHubPage + 1, keepPulls, collected, head, pagesRead + 1);
+                    }
+                    return Observable.just(Response.success(collected, head.raw()));
+                });
     }
 
     private void handleError(Throwable error){
@@ -183,8 +234,10 @@ public class IssuePresenter extends BasePagerPresenter<IIssuesContract.View>
                 action = "mentions";
                 break;
         }
+        // without is:issue the issue search returns pull requests too
         queryStr = queryStr + action + ":" + AppData.INSTANCE.getLoggedUser().getLogin()
-                + "+" + "state:" + issuesFilter.getIssueState().name().toLowerCase();
+                + "+" + "state:" + issuesFilter.getIssueState().name().toLowerCase()
+                + "+is:issue";
         return queryStr;
     }
 

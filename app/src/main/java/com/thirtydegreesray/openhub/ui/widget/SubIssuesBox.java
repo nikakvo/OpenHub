@@ -691,6 +691,10 @@ public class SubIssuesBox {
                 } else if (state == SubIssues.RefState.PULL_REQUEST) {
                     note = activity.getString(mode == MODE_SUB ? R.string.sub_issue_ref_is_pull
                             : R.string.issue_ref_is_pull, refLabel);
+                } else if (state == SubIssues.RefState.EXCLUDED) {
+                    // an open issue that cannot be picked: itself, the parent or already listed
+                    note = activity.getString(mode == MODE_SUB ? R.string.sub_issue_ref_taken
+                            : R.string.issue_ref_taken, refLabel);
                 }
             }
             for (SubIssues.Entry e : list) {

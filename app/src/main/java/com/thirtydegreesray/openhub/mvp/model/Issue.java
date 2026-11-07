@@ -56,6 +56,9 @@ public class Issue implements Parcelable {
     /** GitHub's count of issue dependencies; null when GitHub did not send it. */
     @SerializedName("issue_dependencies_summary") private DependenciesSummary dependenciesSummary;
 
+    /** Set only on pull requests: GET repos/o/r/issues and the issue search return them too. */
+    @SerializedName("pull_request") private com.google.gson.JsonObject pullRequest;
+
     /** GitHub's "issue_dependencies_summary": open and all blocked-by / blocking issues. */
     public static class DependenciesSummary {
         @SerializedName("blocked_by") public int blockedBy;
@@ -69,6 +72,11 @@ public class Issue implements Parcelable {
         public int total;
         public int completed;
         @SerializedName("percent_completed") public int percentCompleted;
+    }
+
+    /** True when GitHub returned a pull request in an issue list (it has a "pull_request" object). */
+    public boolean isPullRequest() {
+        return pullRequest != null;
     }
 
     public String getId() {
