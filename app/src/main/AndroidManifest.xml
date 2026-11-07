@@ -168,6 +168,7 @@
         <activity
             android:name=".ui.activity.BrowserFilterActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:excludeFromRecents="true"
             android:taskAffinity=""
             android:theme="@style/SplashTheme">

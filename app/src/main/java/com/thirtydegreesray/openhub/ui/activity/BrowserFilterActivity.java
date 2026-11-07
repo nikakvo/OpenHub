@@ -38,29 +38,38 @@ public class BrowserFilterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        handle(getIntent());
+        finish();
+    }
+
+    /**
+     * Telegram hands the same link over twice within a few milliseconds. Android stacked
+     * both in one task: the first opened the page, the second waited below it unstarted
+     * and opened the page again on the first Back. With launchMode singleTop the second
+     * link reaches this screen here instead, while it is still on top, and is dropped.
+     */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handle(intent);
+        finish();
+    }
+
+    private void handle(@Nullable Intent intent) {
         // exported: other apps may start it with anything, or with nothing
-        if (getIntent() == null || getIntent().getData() == null) {
-            finish();
-            return;
-        }
-        // some apps (Telegram's in-app browser) hand over the same link twice in a row:
-        // the page then opened twice and Back showed it again before returning to the app
-        String link = getIntent().getData().toString();
+        if (intent == null || intent.getData() == null) return;
+        String link = intent.getData().toString();
         long now = android.os.SystemClock.elapsedRealtime();
-        if (link.equals(lastLink) && now - lastLinkAt < 3000) {
-            finish();
-            return;
-        }
+        if (link.equals(lastLink) && now - lastLinkAt < 3000) return;
         lastLink = link;
         lastLinkAt = now;
         if(AppData.INSTANCE.getLoggedUser() != null){
-            handleBrowserUri(this, getIntent().getData());
+            handleBrowserUri(this, intent.getData());
         } else {
-            Intent intent = new Intent(this, SplashActivity.class);
-            intent.setData(getIntent().getData());
-            startActivity(intent);
+            Intent splash = new Intent(this, SplashActivity.class);
+            splash.setData(intent.getData());
+            startActivity(splash);
         }
-        finish();
     }
 
     public static void handleBrowserUri(@NonNull Activity activity, @NonNull Uri uri){
