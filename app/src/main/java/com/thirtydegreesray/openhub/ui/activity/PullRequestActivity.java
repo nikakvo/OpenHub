@@ -1293,7 +1293,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         if (discard != null) discard.setVisible(ReviewDrafts.count(this, owner, repo, number) > 0);
         MenuItem archive = menu.findItem(7);
         if (archive != null) {
-            archive.setVisible(pull != null && canTriage(repoJson));
+            // GitHub refuses to archive a merged pull request ("Cannot archive a merged pull request")
+            archive.setVisible(pull != null && canTriage(repoJson) && (!isMerged() || archived));
             archive.setTitle(archived ? R.string.pull_unarchive : R.string.pull_archive);
         }
         return super.onPrepareOptionsMenu(menu);
