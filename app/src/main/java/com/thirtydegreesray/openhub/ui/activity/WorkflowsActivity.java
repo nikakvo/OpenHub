@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.net.Uri;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -283,7 +284,7 @@ public class WorkflowsActivity extends BaseActivity<IBaseContract.Presenter> {
                     return true;
                 case 4:
                     // a blob link: opens in the app's file viewer
-                    AppOpener.launchUrl(this, Json.str(workflow, "html_url"));
+                    AppOpener.launchUrl(this, Uri.parse(Json.str(workflow, "html_url")));
                     return true;
                 case 5:
                     AppOpener.openInCustomTabsOrBrowser(this, WorkflowStates.actionsUrl(owner, repo, path));
