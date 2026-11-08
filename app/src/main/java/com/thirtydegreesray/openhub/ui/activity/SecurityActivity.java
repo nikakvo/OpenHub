@@ -42,6 +42,7 @@ import com.thirtydegreesray.openhub.util.ActionsScopes;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.DependabotDetails;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.SealedBox;
 import com.thirtydegreesray.openhub.util.SecretNames;
@@ -626,6 +627,21 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
                         + " / " + Json.str(alert, "dependency.package.name")));
                 String manifest = Json.str(alert, "dependency.manifest_path");
                 if (!manifest.isEmpty()) lines.add(getString(R.string.security_manifest, manifest));
+                String used = DependabotDetails.versionRequirement(alert);
+                if (used != null) {
+                    lines.add(used.isEmpty() ? getString(R.string.security_your_version_any)
+                            : getString(R.string.security_your_version, used));
+                }
+                String relationship = DependabotDetails.relationship(alert);
+                String depScope = DependabotDetails.scope(alert);
+                if (relationship != null || depScope != null) {
+                    List<String> kind = new ArrayList<>();
+                    if (relationship != null) kind.add(getString("direct".equals(relationship)
+                            ? R.string.security_dep_direct : R.string.security_dep_transitive));
+                    if (depScope != null) kind.add(getString("runtime".equals(depScope)
+                            ? R.string.security_dep_runtime : R.string.security_dep_development));
+                    lines.add(getString(R.string.security_dependency, String.join(", ", kind)));
+                }
                 String range = Json.str(alert, "security_vulnerability.vulnerable_version_range");
                 if (!range.isEmpty()) lines.add(getString(R.string.security_vulnerable, range));
                 String patched = Json.str(alert, "security_vulnerability.first_patched_version.identifier");
@@ -635,6 +651,23 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
                 addIfSet(ids, Json.str(alert, "security_advisory.cve_id"));
                 addIfSet(ids, Json.str(alert, "security_advisory.ghsa_id"));
                 if (!ids.isEmpty()) lines.add(String.join(" · ", ids));
+                for (String version : new String[]{"cvss_v4", "cvss_v3"}) {
+                    String score = DependabotDetails.cvss(alert, version);
+                    if (score == null) continue;
+                    String vector = DependabotDetails.cvssVector(alert, version);
+                    lines.add(getString("cvss_v4".equals(version) ? R.string.security_cvss4 : R.string.security_cvss3,
+                            score) + (vector.isEmpty() ? "" : "\n" + vector));
+                }
+                String[] epss = DependabotDetails.epss(alert);
+                if (epss != null) {
+                    lines.add(epss[1] == null ? getString(R.string.security_epss, epss[0])
+                            : getString(R.string.security_epss_rank, epss[0], epss[1]));
+                }
+                String reach = DependabotDetails.reachability(alert);
+                if (reach != null) {
+                    lines.add(getString("reachable".equals(reach) ? R.string.security_reach_yes
+                            : "unreachable".equals(reach) ? R.string.security_reach_no : R.string.security_reach_maybe));
+                }
                 break;
             }
             case TAB_CODE_SCANNING: {
