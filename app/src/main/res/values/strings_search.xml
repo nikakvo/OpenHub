@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Search history in the drop-down of the Search screen -->
+    <string name="search_history_remove">Remove from the search history</string>
+    <string name="search_history_clear">Clear search history</string>
+    <plurals name="search_history_clear_message">
+        <item quantity="one">Forget the %d earlier search saved on this phone?</item>
+        <item quantity="other">Forget all %d earlier searches saved on this phone?</item>
+    </plurals>
+    <string name="search_history_clear_bn">Clear</string>
+    <string name="search_history_cleared">Search history cleared</string>
+</resources>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One earlier search in the drop-down of the Search screen, with × to forget it. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall">
+
+    <TextView
+        android:id="@android:id/text1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textAppearance="?android:attr/textAppearanceListItemSmall"
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        android:paddingEnd="@dimen/spacing_small"
+        android:maxLines="2"
+        android:ellipsize="end"/>
+
+    <ImageButton
+        android:id="@+id/history_remove"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="@dimen/spacing_mini"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/search_history_remove"
+        android:src="@drawable/ic_close"
+        android:scaleType="center"
+        android:alpha="0.7"
+        android:focusable="false"
+        android:focusableInTouchMode="false"/>
+</LinearLayout>

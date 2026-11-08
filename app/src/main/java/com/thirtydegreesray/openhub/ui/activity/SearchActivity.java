@@ -18,6 +18,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
+import androidx.appcompat.app.AlertDialog;
+
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.common.AppEventBus;
@@ -29,6 +31,7 @@ import com.thirtydegreesray.openhub.mvp.contract.ISearchContract;
 import com.thirtydegreesray.openhub.mvp.model.SearchModel;
 import com.thirtydegreesray.openhub.mvp.presenter.SearchPresenter;
 import com.thirtydegreesray.openhub.ui.activity.base.PagerActivity;
+import com.thirtydegreesray.openhub.ui.adapter.SearchHistoryAdapter;
 import com.thirtydegreesray.openhub.ui.adapter.base.FragmentPagerModel;
 import com.thirtydegreesray.openhub.ui.fragment.RepositoriesFragment;
 import com.thirtydegreesray.openhub.ui.fragment.UserListFragment;
@@ -112,14 +115,59 @@ public class SearchActivity extends PagerActivity<SearchPresenter>
         AutoCompleteTextView autoCompleteTextView = searchView
                 .findViewById(androidx.appcompat.R.id.search_src_text);
         autoCompleteTextView.setThreshold(0);
-        autoCompleteTextView.setAdapter(new ArrayAdapter<>(this,
-                R.layout.layout_item_simple_list, mPresenter.getSearchRecordList()));
+        historyBox = autoCompleteTextView;
+        historyAdapter = new SearchHistoryAdapter(this, mPresenter.getSearchRecordList(),
+                new SearchHistoryAdapter.Host() {
+                    @Override
+                    public void onRemoveSearch(@NonNull String search) {
+                        removeSearch(search);
+                    }
+
+                    @Override
+                    public void onClearSearches() {
+                        confirmClearSearches();
+                    }
+                });
+        autoCompleteTextView.setAdapter(historyAdapter);
         autoCompleteTextView.setDropDownBackgroundDrawable(new ColorDrawable(ViewUtils.getWindowBackground(getActivity())));
         autoCompleteTextView.setOnItemClickListener((parent, view, position, id) -> {
-            onQueryTextSubmit(parent.getAdapter().getItem(position).toString());
+            Object item = parent.getAdapter().getItem(position);
+            if (item != null && !item.toString().isEmpty()) onQueryTextSubmit(item.toString());
         });
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Nullable private SearchHistoryAdapter historyAdapter;
+    @Nullable private AutoCompleteTextView historyBox;
+
+    /** Forgets one search; the drop-down stays open with the rest that match the typed text. */
+    private void removeSearch(@NonNull String search) {
+        ArrayList<String> rest = mPresenter.removeSearchRecord(search);
+        if (historyAdapter == null || historyBox == null) return;
+        historyAdapter.clear();
+        historyAdapter.addAll(rest);
+        if (rest.isEmpty()) {
+            historyBox.dismissDropDown();
+        } else {
+            historyAdapter.getFilter().filter(historyBox.getText());
+        }
+    }
+
+    private void confirmClearSearches() {
+        int count = mPresenter.getSearchRecordList().size();
+        if (count == 0) return;
+        if (historyBox != null) historyBox.dismissDropDown();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.search_history_clear)
+                .setMessage(getResources().getQuantityString(R.plurals.search_history_clear_message, count, count))
+                .setPositiveButton(R.string.search_history_clear_bn, (dialog, which) -> {
+                    mPresenter.clearSearchRecords();
+                    if (historyAdapter != null) historyAdapter.clear();
+                    showSuccessToast(getString(R.string.search_history_cleared));
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     @Override
