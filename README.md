@@ -75,7 +75,8 @@ app goes to them; see [Credits](#credits).
 * Offline mode (cached pages); Clear cache in the settings
 * Trending repositories for all languages, by day, week or month
 * GitHub collections and featured topics
-* Search repositories and users
+* Search repositories and users, with a search history (× forgets one search, or clear
+  all)
 * Bookmarks and a trace of what you viewed (swipe to remove, or clear the trace)
 * **Pull down to reload** on every screen that shows GitHub data (repository, profile,
   files, pull requests, discussions, releases, logs and more); lists also update
@@ -88,6 +89,9 @@ app goes to them; see [Credits](#credits).
   repository settings (also pull requests on or off and who may create them), transfer,
   archive and delete
 * Branches: browse their files, create, rename, delete, restore, and branch protection
+* **Tags**: every tag with its commit, date and release; find by name, browse the files
+  of a tag, compare with the tag before it, download its source code, make a release from
+  it, delete tags
 * **Rulesets** for branches and tags: create, edit, switch on and off, delete, the
   history of a ruleset with restore, bypass for admins, and converting branch protection
   into a ruleset; the rules that apply to a branch
@@ -96,6 +100,8 @@ app goes to them; see [Credits](#credits).
 * Create, upload, edit, rename and delete files as real commits, to the branch you
   choose or a new branch with a pull request; files shared from other apps can be
   committed to a folder of a repository; submodules open the repository they point to
+* **History** of a file or folder, and **blame**: who last changed each line and when,
+  with age colors
 * **Search code** in a repository, with the matches marked; file name search where
   GitHub's code search has nothing
 * Repository info, README (with a pencil to edit it), files, commits, activity, branches
@@ -113,9 +119,16 @@ app goes to them; see [Credits](#credits).
   release in a few taps), starting workflows by hand (the new run opens right away),
   and a notification
   when a run finishes, with buttons to download its artifacts
-* **Security**: Dependabot, code scanning and secret scanning alerts with details;
+* **Workflows**: enable and disable them, show their runs, open their files; **caches**:
+  storage used, sorted lists, delete one or all
+* **Security**: Dependabot, code scanning and secret scanning alerts with details
+  (for Dependabot also your version, CVSS 4.0 and 3.x scores, the EPSS exploit chance);
   dismiss, close and reopen them; admins turn Dependabot alerts and security updates,
   secret scanning, push protection and private vulnerability reporting on or off
+* **Deploy keys**: add (paste the key or pick a .pub file; private keys are refused on the
+  phone) and delete, with SHA256 fingerprints and when each key was last used
+* **Webhooks**: how the last delivery went, turn off and on, ping, delete; recent
+  deliveries with the receiver's answer and the payload, and redeliver
 * **Secrets**: add, update and delete the secrets of Actions, Dependabot and environments;
   values are encrypted on the phone as GitHub requires
 * **Actions variables** of the repository and of environments: add, edit, rename, copy and
@@ -140,12 +153,18 @@ app goes to them; see [Credits](#credits).
   branch protection, approvals so far, and unresolved conversations
 * Line-by-line review of the diff: comment on one or several lines, suggest changes,
   reply, edit and delete your comments
+* **Commit suggestions** from a review, one by one or several as one commit, with their
+  authors as co-authors
 * **Pending reviews**: collect line comments and replies to threads and send them as one
   review (Comment, Approve or Request changes)
 * Resolve and unresolve conversations
 
 ### Issues and commits
-* Issues with comments and events; create, edit, close and reopen
+* Issues with comments and events; create, edit, close and reopen; issue lists show only
+  issues (pull requests have their own list)
+* **Sub-issues**: the parent, progress, add an existing or a new issue, reorder, remove
+* **Relationships**: blocked by, blocking and relates to
+* Issue types and issue fields (organization repositories)
 * **Issue templates** (Markdown templates and issue forms) when creating an issue
 * Labels, assignees and milestone for people with triage or write access
 * **Milestones**: open and closed, due dates and progress, their issues; create, edit,
