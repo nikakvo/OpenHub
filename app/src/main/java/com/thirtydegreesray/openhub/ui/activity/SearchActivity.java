@@ -4,6 +4,7 @@ package com.thirtydegreesray.openhub.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.core.view.MenuItemCompat;
 import androidx.appcompat.widget.SearchView;
 import android.text.InputType;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -147,29 +149,45 @@ public class SearchActivity extends PagerActivity<SearchPresenter>
     @Nullable private ViewTreeObserver.OnGlobalLayoutListener historyFitter;
 
     /**
-     * The history drop-down gets only the room between the search box and the keyboard.
-     * Taller than that, Android put it over the search box itself and nobody could type.
-     * Measured again whenever the window changes (keyboard shown or hidden).
+     * The history drop-down is as tall as its rows, but never taller than the room between
+     * the search box and the keyboard: taller, Android drew it over the search box itself
+     * and nobody could type. Measured again when the keyboard shows or hides and when the
+     * typed text filters the rows.
      */
     private void fitHistoryBelow(@NonNull AutoCompleteTextView box) {
         final View root = getWindow().getDecorView();
         removeHistoryFitter();
-        final int minHeight = Math.round(96 * getResources().getDisplayMetrics().density);
-        final int gap = Math.round(8 * getResources().getDisplayMetrics().density);
-        historyFitter = () -> {
-            if (!box.isShown()) return;
-            Rect frame = new Rect();
-            root.getWindowVisibleDisplayFrame(frame);
-            int[] location = new int[2];
-            box.getLocationOnScreen(location);
-            int room = frame.bottom - (location[1] + box.getHeight()) - gap;
-            int height = Math.max(minHeight, room);
-            if (box.getDropDownHeight() != height) {
-                box.setDropDownHeight(height);
-                if (box.isPopupShowing()) box.showDropDown();
-            }
-        };
+        historyFitter = this::fitHistory;
         root.getViewTreeObserver().addOnGlobalLayoutListener(historyFitter);
+        if (historyAdapter != null) {
+            historyAdapter.registerDataSetObserver(new DataSetObserver() {
+                @Override
+                public void onChanged() {
+                    fitHistory();
+                }
+            });
+        }
+    }
+
+    private void fitHistory() {
+        AutoCompleteTextView box = historyBox;
+        if (box == null || historyAdapter == null || !box.isShown()) return;
+        float density = getResources().getDisplayMetrics().density;
+        Rect frame = new Rect();
+        getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
+        int[] location = new int[2];
+        box.getLocationOnScreen(location);
+        int room = frame.bottom - (location[1] + box.getHeight()) - Math.round(8 * density);
+        TypedValue value = new TypedValue();
+        int rowHeight = getTheme().resolveAttribute(android.R.attr.listPreferredItemHeightSmall, value, true)
+                ? (int) value.getDimension(getResources().getDisplayMetrics()) : Math.round(48 * density);
+        int rows = historyAdapter.getCount();
+        if (rows == 0) return;
+        int height = Math.max(Math.min(rowHeight * 2, rows * rowHeight), Math.min(rows * rowHeight, room));
+        if (box.getDropDownHeight() != height) {
+            box.setDropDownHeight(height);
+            if (box.isPopupShowing()) box.showDropDown();
+        }
     }
 
     private void removeHistoryFitter() {
@@ -251,6 +269,11 @@ public class SearchActivity extends PagerActivity<SearchPresenter>
 
     @Override
     public boolean onMenuItemActionCollapse(MenuItem item) {
+        if (pagerAdapter.getCount() == 0) {
+            // Back before anything was searched: leave the screen instead of showing it empty
+            finish();
+            return true;
+        }
         isInputMode = false;
         invalidateOptionsMenu();
         return true;
