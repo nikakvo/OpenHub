@@ -4,6 +4,7 @@ package com.thirtydegreesray.openhub.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
@@ -129,6 +131,7 @@ public class SearchActivity extends PagerActivity<SearchPresenter>
                     }
                 });
         autoCompleteTextView.setAdapter(historyAdapter);
+        fitHistoryBelow(autoCompleteTextView);
         autoCompleteTextView.setDropDownBackgroundDrawable(new ColorDrawable(ViewUtils.getWindowBackground(getActivity())));
         autoCompleteTextView.setOnItemClickListener((parent, view, position, id) -> {
             Object item = parent.getAdapter().getItem(position);
@@ -140,6 +143,46 @@ public class SearchActivity extends PagerActivity<SearchPresenter>
 
     @Nullable private SearchHistoryAdapter historyAdapter;
     @Nullable private AutoCompleteTextView historyBox;
+
+    @Nullable private ViewTreeObserver.OnGlobalLayoutListener historyFitter;
+
+    /**
+     * The history drop-down gets only the room between the search box and the keyboard.
+     * Taller than that, Android put it over the search box itself and nobody could type.
+     * Measured again whenever the window changes (keyboard shown or hidden).
+     */
+    private void fitHistoryBelow(@NonNull AutoCompleteTextView box) {
+        final View root = getWindow().getDecorView();
+        removeHistoryFitter();
+        final int minHeight = Math.round(96 * getResources().getDisplayMetrics().density);
+        final int gap = Math.round(8 * getResources().getDisplayMetrics().density);
+        historyFitter = () -> {
+            if (!box.isShown()) return;
+            Rect frame = new Rect();
+            root.getWindowVisibleDisplayFrame(frame);
+            int[] location = new int[2];
+            box.getLocationOnScreen(location);
+            int room = frame.bottom - (location[1] + box.getHeight()) - gap;
+            int height = Math.max(minHeight, room);
+            if (box.getDropDownHeight() != height) {
+                box.setDropDownHeight(height);
+                if (box.isPopupShowing()) box.showDropDown();
+            }
+        };
+        root.getViewTreeObserver().addOnGlobalLayoutListener(historyFitter);
+    }
+
+    private void removeHistoryFitter() {
+        if (historyFitter == null) return;
+        getWindow().getDecorView().getViewTreeObserver().removeOnGlobalLayoutListener(historyFitter);
+        historyFitter = null;
+    }
+
+    @Override
+    protected void onDestroy() {
+        removeHistoryFitter();
+        super.onDestroy();
+    }
 
     /** Forgets one search; the drop-down stays open with the rest that match the typed text. */
     private void removeSearch(@NonNull String search) {
