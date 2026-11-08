@@ -333,6 +333,14 @@
     <tr><td>Commits</td><td>Require sign-off on commits made on the website.</td></tr>
     <tr><td>Releases</td><td>Release immutability: published releases and their files can no longer change (when GitHub offers it).</td></tr>
   </table></div>
+  <h3 id="deploykeys">Deploy keys</h3>
+  <p>A <strong>deploy key</strong> is an SSH key that gives one server, device or script access to this one repository, without your account: for example a build server, a backup job or Termux on another phone. <span class="ui">Deploy keys</span> in the repository settings (under Rulesets) lists them, like github.com.</p>
+  <ul>
+    <li>Each row shows the key's title, its fingerprint (<code>SHA256:…</code>, the same as <code>ssh-keygen -lf key.pub</code> prints), <span class="ui">Read-only</span> or <span class="ui">Read and write</span>, when and by whom it was added and when it was last used.</li>
+    <li><strong>+</strong> adds a key: paste the public key (one line starting with <code>ssh-ed25519</code>, <code>ssh-rsa</code> or <code>ecdsa-sha2-</code>) or tap <span class="ui">Choose a .pub file</span>. The fingerprint appears while you type, so you can compare it with the one on the other device. Without a title, the key's comment is used. <span class="ui">Allow write access</span> lets the key push too; leave it off when the key only needs to download.</li>
+    <li>Only the <strong>public</strong> key (the file ending in <code>.pub</code>) goes to GitHub. A private key is recognized and refused on the phone, before anything is sent.</li>
+    <li>Tap a key: <span class="ui">Copy fingerprint</span>, <span class="ui">Copy public key</span>, <span class="ui">Delete key</span>. GitHub does not let a key be changed: delete it and add it again. Whatever uses a deleted key loses access at once.</li>
+  </ul>
   <h3>Security</h3>
   <p><strong>Security</strong> in the repository menu (repositories you can push to) has the tabs of the Security page on github.com:</p>
   <div class="tw"><table>

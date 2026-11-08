@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Deploy keys of a repository (DeployKeysActivity) -->
+    <string name="deploy_keys">Deploy keys</string>
+    <string name="settings_deploy_keys_summary">SSH keys that give one server or device access to this repository only</string>
+    <string name="deploy_keys_none">No deploy keys yet. A deploy key lets one server, device or script (a CI, a backup job, Termux) pull this repository over SSH, without your account. Tap + to add one.</string>
+    <string name="deploy_keys_add">Add deploy key</string>
+    <string name="deploy_keys_title_hint">Title (optional)</string>
+    <string name="deploy_keys_key_hint">Public key: ssh-ed25519 AAAA… (the contents of a .pub file)</string>
+    <string name="deploy_keys_pick_file">Choose a .pub file</string>
+    <string name="deploy_keys_write">Allow write access</string>
+    <string name="deploy_keys_write_note">With write access, anyone who has the private key can push to this repository and delete branches.</string>
+    <string name="deploy_keys_fingerprint">Fingerprint %s</string>
+    <string name="deploy_keys_problem_private">This is a PRIVATE key. Never share it: paste the public key instead (the file that ends in .pub).</string>
+    <string name="deploy_keys_problem_not_key">This is not an SSH public key. It starts with ssh-ed25519, ssh-rsa or ecdsa-sha2-….</string>
+    <string name="deploy_keys_problem_type">GitHub does not accept this key type. Use ssh-ed25519, ssh-rsa or ecdsa.</string>
+    <string name="deploy_keys_problem_broken">The key is damaged or incomplete; copy the whole line again.</string>
+    <string name="deploy_keys_file_too_big">This file is too big for a public key</string>
+    <string name="deploy_keys_added">Deploy key added: %s</string>
+    <string name="deploy_keys_read_only">Read-only</string>
+    <string name="deploy_keys_read_write">Read and write</string>
+    <string name="deploy_keys_unverified">Unverified</string>
+    <string name="deploy_keys_disabled">Turned off by an organization policy</string>
+    <string name="deploy_keys_added_by">Added %1$s by %2$s</string>
+    <string name="deploy_keys_added_on">Added %s</string>
+    <string name="deploy_keys_last_used">last used %s</string>
+    <string name="deploy_keys_never_used">never used</string>
+    <string name="deploy_keys_copy_fingerprint">Copy fingerprint</string>
+    <string name="deploy_keys_copy_key">Copy public key</string>
+    <string name="deploy_keys_copied">Copied</string>
+    <string name="deploy_keys_delete">Delete key</string>
+    <string name="deploy_keys_delete_message">Delete the deploy key \"%1$s\" (%2$s)? Whatever uses it loses access to this repository at once. A key cannot be changed; to change one, delete it and add it again.</string>
+    <string name="deploy_keys_deleted">Deploy key \"%s\" deleted</string>
+    <string name="deploy_keys_still_there">GitHub still lists the key \"%s\"</string>
+</resources>

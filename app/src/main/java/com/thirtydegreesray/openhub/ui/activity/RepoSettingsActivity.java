@@ -187,6 +187,8 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
                 false, v -> startActivity(BranchesActivity.createIntent(this, owner, repo)));
         actionRow(getString(R.string.rulesets), getString(R.string.settings_rulesets_summary),
                 false, v -> startActivity(RulesetsActivity.createIntent(this, owner, repo)));
+        actionRow(getString(R.string.deploy_keys), getString(R.string.settings_deploy_keys_summary),
+                false, v -> startActivity(DeployKeysActivity.createIntent(this, owner, repo)));
 
         section(R.string.settings_features);
         switchRow("has_issues", R.string.settings_issues, R.string.settings_issues_summary);
