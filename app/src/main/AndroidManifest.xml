@@ -204,6 +204,7 @@
         <activity android:name=".ui.activity.ActionsActivity" android:label="@string/actions"/>
         <activity android:name=".ui.activity.WorkflowRunActivity"/>
         <activity android:name=".ui.activity.WorkflowsActivity"/>
+        <activity android:name=".ui.activity.TagsActivity"/>
         <activity android:name=".ui.activity.BlameActivity"/>
         <activity android:name=".ui.activity.JobLogActivity"/>
         <activity android:name=".ui.activity.GistActivity"/>

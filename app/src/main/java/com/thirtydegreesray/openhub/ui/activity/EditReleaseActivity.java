@@ -95,6 +95,15 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
         return intent;
     }
 
+    /** A new release from a tag that already exists (Tags screen). */
+    @NonNull
+    public static Intent createForTag(@NonNull Context context, @NonNull String owner, @NonNull String repo,
+                                      @NonNull String tag) {
+        Intent intent = createIntent(context, owner, repo);
+        intent.putExtra("presetTag", tag);
+        return intent;
+    }
+
     @NonNull
     public static Intent editIntent(@NonNull Context context, @NonNull String owner, @NonNull String repo,
                                     @NonNull Release release) {
@@ -113,6 +122,8 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
     /** branch or commit a new tag is created from */
     @AutoAccess String target;
     @AutoAccess ArrayList<String> tags;
+    /** an existing tag the new release is made from (GitHub listed it on the Tags screen) */
+    @AutoAccess String presetTag;
     @AutoAccess ArrayList<UploadItem> pendingFiles;
     @AutoAccess ArrayList<String> deletedAssetIds;
     @AutoAccess HashMap<String, String> renamedAssets;
@@ -220,6 +231,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
         filling = true;
         if (source == null) {
             latestCheck.setChecked(true);
+            if (!StringUtils.isBlank(presetTag)) tagEdit.setText(presetTag);
         } else {
             tagEdit.setText(source.getTagName());
             titleEdit.setText(source.getName());
@@ -295,6 +307,8 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
                 ArrayList<String> names = new ArrayList<>();
                 List<Branch> list = GitHubApi.call(releaseService().getTags(true, owner, repo, 1));
                 if (list != null) for (Branch branch : list) names.add(branch.getName());
+                // the first page holds only the newest tags; this one exists for sure
+                if (!StringUtils.isBlank(presetTag) && !names.contains(presetTag)) names.add(presetTag);
                 return names;
             }, (ArrayList<String> names) -> {
                 tags = names;

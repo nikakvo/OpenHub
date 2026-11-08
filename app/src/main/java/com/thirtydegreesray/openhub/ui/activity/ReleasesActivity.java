@@ -96,6 +96,8 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, R.id.action_tags, Menu.NONE, R.string.tags_title)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         if (canCreate) {
             menu.add(Menu.NONE, R.id.action_clean_up_releases, Menu.NONE, R.string.releases_clean_up)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
@@ -105,6 +107,10 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_tags) {
+            startActivity(TagsActivity.createIntent(this, owner, repo));
+            return true;
+        }
         if (item.getItemId() == R.id.action_clean_up_releases) {
             loadForCleanUp();
             return true;

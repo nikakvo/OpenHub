@@ -257,6 +257,10 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
         } else if (itemId == R.id.action_releases) {
             showReleases();
             return true;
+        } else if (itemId == R.id.action_tags) {
+            startActivity(TagsActivity.createIntent(this, mPresenter.getRepository().getOwner().getLogin(),
+                    mPresenter.getRepository().getName()));
+            return true;
         } else if (itemId == R.id.action_actions) {
             Repository repository = mPresenter.getRepository();
             boolean canRun = repository.getPermissions() != null

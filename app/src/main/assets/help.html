@@ -134,7 +134,7 @@
   <a href="#pulls"><span>8</span>Pull requests</a>
   <a href="#review"><span>9</span>Reviewing code line by line</a>
   <a href="#issues"><span>10</span>Issues</a>
-  <a href="#releases"><span>11</span>Releases and downloads</a>
+  <a href="#releases"><span>11</span>Releases, tags and downloads</a>
   <a href="#publish"><span>12</span>Publishing releases</a>
   <a href="#actions"><span>13</span>GitHub Actions</a>
   <a href="#notifications"><span>14</span>Notifications</a>
@@ -238,6 +238,7 @@
     <tr><td>Latest release</td><td>Open the newest stable release directly</td></tr>
     <tr><td>Notify about new releases</td><td>A phone notification when a new release comes out (<a href="#relnotify">15</a>)</td></tr>
     <tr><td>Releases</td><td>All releases (<a href="#releases">11</a>)</td></tr>
+    <tr><td>Tags</td><td>Every tag with its commit, date and release (<a href="#tags">11</a>)</td></tr>
     <tr><td>Actions</td><td>Builds and automations (<a href="#actions">13</a>)</td></tr>
     <tr><td>Security</td><td>Security alerts and, for admins, the secrets of GitHub Actions; in repositories you can push to (<a href="#reposettings">6</a>)</td></tr>
     <tr><td>Pull requests</td><td>Open and closed pull requests (<a href="#pulls">8</a>)</td></tr>
@@ -522,7 +523,7 @@
 
 <!-- 11 -->
 <div data-section>
-<div class="sec-title" id="releases">11 · releases and downloads</div>
+<div class="sec-title" id="releases">11 · releases, tags and downloads</div>
 <div class="box">
   <p>A <strong>release</strong> is a published version of a project, usually with files to download (APKs, zip modules, binaries).</p>
   <p><span class="pill p-green">Latest</span> newest stable &nbsp; <span class="pill p-amber">Pre-release</span> test version &nbsp; <span class="pill p-grey">Draft</span> not published (only people with write access see it)</p>
@@ -539,6 +540,14 @@
     <li>Tap a release to open it, the download button for its files and source code, the avatar for the repository. Long-press for <span class="ui">Open repository</span>, <span class="ui">Download</span>, <span class="ui">Open in browser</span> and <span class="ui">Share</span>.</li>
     <li><span class="ui">Filter repositories</span> narrows the list by name. <span class="ui">Show pre-releases</span> in the menu (on by default) shows a newer test version instead of the latest stable one.</li>
     <li>The last list opens at once; pull down or tap <span class="ui">Refresh</span> to load it again.</li>
+  </ul>
+  <h3 id="tags">Tags</h3>
+  <p>A <strong>tag</strong> is a name for one commit, usually a version such as <code>v1.2.0</code>; every release is made from a tag. <span class="ui">Tags</span> in the repository menu (also in the menu of the releases list) shows all of them, the newest commit first, like the tags page of github.com.</p>
+  <ul>
+    <li>Each row shows the tag name, the short commit SHA with the commit's first line (or the tag's own message), when it was made, <span class="ui">Annotated</span> for a tag with its own message and author, and the release made from it: <span class="ui">Latest release</span>, <span class="ui">Release</span>, <span class="ui">Pre-release</span> or <span class="ui">Draft release</span>. The line at the top counts the tags.</li>
+    <li><span class="ui">Find a tag by name</span> asks GitHub for the tags whose name matches what you type. <span class="ui">Load more tags</span> loads the next 50.</li>
+    <li>Tap a tag: <span class="ui">Open the release</span>, or <span class="ui">Create a release from this tag</span> when it has none (people with write access; the release editor opens with the tag filled in), <span class="ui">Browse files</span> (the files as they were at this tag), <span class="ui">Open the commit</span>, <span class="ui">Compare with</span> the tag below it (what changed between two versions; only without a search), <span class="ui">Download source code (zip)</span> or <span class="ui">(tar.gz)</span>, <span class="ui">Copy tag name</span>, <span class="ui">Delete tag</span> and <span class="ui">Open in browser</span>.</li>
+    <li><span class="ui">Delete tag</span> (people with write access) removes only the name; the commit stays. When a release is made from the tag, the question says so: to remove a published release and its tag together, open the release, tap <span class="ui">Delete release</span> and tick <span class="ui">Also delete the tag</span>. A draft release is not deleted with its tag. The tag of an immutable release cannot be deleted, and rulesets can protect tags too; then GitHub refuses and the app shows its reason. After a delete the list is read from GitHub again.</li>
   </ul>
 </div>
 </div>

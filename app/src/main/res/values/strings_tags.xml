@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tags of a repository (TagsActivity) -->
+    <string name="tags_title">Tags</string>
+    <string name="tags_repo_not_found">GitHub does not show this repository</string>
+    <string name="tags_filter_hint">Find a tag by name</string>
+    <plurals name="tags_count">
+        <item quantity="one">%d tag</item>
+        <item quantity="other">%d tags</item>
+    </plurals>
+    <plurals name="tags_count_match">
+        <item quantity="one">%1$d tag matches \"%2$s\"</item>
+        <item quantity="other">%1$d tags match \"%2$s\"</item>
+    </plurals>
+    <string name="tags_none">This repository has no tags yet. A tag is made when a release is published, or with git tag and git push --tags.</string>
+    <string name="tags_none_match">No tag matches \"%s\"</string>
+    <string name="tags_load_more">Load more tags</string>
+    <string name="tags_annotated">Annotated</string>
+    <string name="tags_release_latest">Latest release</string>
+    <string name="tags_release">Release</string>
+    <string name="tags_release_pre">Pre-release</string>
+    <string name="tags_release_draft">Draft release</string>
+    <string name="tags_no_commit">Points at a folder or file, not a commit</string>
+    <string name="tags_open_release">Open the release</string>
+    <string name="tags_create_release">Create a release from this tag</string>
+    <string name="tags_browse_files">Browse files</string>
+    <string name="tags_open_commit">Open the commit</string>
+    <string name="tags_compare_previous">Compare with %s</string>
+    <string name="tags_download_zip">Download source code (zip)</string>
+    <string name="tags_download_tar">Download source code (tar.gz)</string>
+    <string name="tags_copy_name">Copy tag name</string>
+    <string name="tags_name_copied">Tag name copied</string>
+    <string name="tags_delete">Delete tag</string>
+    <string name="tags_delete_message">Delete the tag %s from GitHub? The commit stays; only the name pointing at it is removed.</string>
+    <string name="tags_delete_release_note">The release \"%s\" is made from this tag. To remove both, open the release, tap Delete release and tick \"Also delete the tag\".</string>
+    <string name="tags_delete_draft_note">The draft release \"%s\" uses this tag name. Deleting the tag does not delete the draft.</string>
+    <string name="tags_delete_immutable">The release \"%s\" of this tag is immutable: GitHub does not let anyone delete or move its tag.</string>
+    <string name="tags_deleted">Tag %s deleted</string>
+    <string name="tags_still_there">GitHub still lists the tag %s</string>
+</resources>

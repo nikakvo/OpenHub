@@ -54,6 +54,10 @@
         android:title="@string/releases"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_tags"
+        android:title="@string/tags_title"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_actions"
         android:title="@string/actions"
         app:showAsAction="never"/>
