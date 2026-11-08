@@ -30,4 +30,16 @@ public class AppRetrofitTest {
         assertFalse(AppRetrofit.sendsTokenTo(HttpUrl.get("https://objects.githubusercontent.com/x")));
         assertFalse(AppRetrofit.sendsTokenTo(null));
     }
+
+    @Test
+    public void accountTagOnlyOnCachedReads() {
+        assertTrue(AppRetrofit.tagsAccount("GET", null));
+        assertTrue(AppRetrofit.tagsAccount("get", "max-age=60"));
+        assertFalse(AppRetrofit.tagsAccount("GET", "no-cache, no-store"));
+        assertFalse(AppRetrofit.tagsAccount("GET", "No-Store"));
+        assertFalse(AppRetrofit.tagsAccount("POST", null));
+        assertFalse(AppRetrofit.tagsAccount("PATCH", null));
+        assertFalse(AppRetrofit.tagsAccount("DELETE", null));
+        assertFalse(AppRetrofit.tagsAccount("PUT", null));
+    }
 }

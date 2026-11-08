@@ -139,6 +139,17 @@ public enum  AppRetrofit {
     }
 
     /**
+     * Whether a request gets the login name as ?uniqueLoginId=: only cached reads need
+     * it (it keeps the caches of several accounts apart). Requests that are never cached
+     * (POST, PATCH, PUT, DELETE, or "Cache-Control: no-store") go without it, because some
+     * GitHub endpoints refuse unknown parameters (webhook deliveries answer 422).
+     */
+    static boolean tagsAccount(@NonNull String method, @Nullable String cacheControl) {
+        if (!"GET".equalsIgnoreCase(method)) return false;
+        return cacheControl == null || !cacheControl.toLowerCase(Locale.ROOT).contains("no-store");
+    }
+
+    /**
      * Adds the token of its own client (only for the GitHub API) and the cache rules.
      */
     private static class BaseInterceptor implements Interceptor {
@@ -155,6 +166,7 @@ public enum  AppRetrofit {
 
             // the login name in the URL keeps the caches of several accounts apart
             if (isGitHubHost(host) && AppData.INSTANCE.getLoggedUser() != null
+                    && tagsAccount(request.method(), request.header("Cache-Control"))
                     && !AppConfig.isCommonPageUrl(request.url().toString())) {
                 HttpUrl url = request.url().newBuilder()
                         .addQueryParameter("uniqueLoginId",
