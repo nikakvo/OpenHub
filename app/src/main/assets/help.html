@@ -341,6 +341,13 @@
     <li>Only the <strong>public</strong> key (the file ending in <code>.pub</code>) goes to GitHub. A private key is recognized and refused on the phone, before anything is sent.</li>
     <li>Tap a key: <span class="ui">Copy fingerprint</span>, <span class="ui">Copy public key</span>, <span class="ui">Delete key</span>. GitHub does not let a key be changed: delete it and add it again. Whatever uses a deleted key loses access at once.</li>
   </ul>
+  <h3 id="webhooks">Webhooks</h3>
+  <p>A <strong>webhook</strong> makes GitHub send a message to a web address whenever something happens in the repository, for example a push or a new issue: a chat bot, a build server or a deploy script listens there. <span class="ui">Webhooks</span> in the repository settings (under Deploy keys) shows them. New webhooks are created on github.com.</p>
+  <ul>
+    <li>Each row shows the address, the events it gets (<span class="ui">All events</span> or their names), <span class="ui">Active</span> or <span class="ui">Inactive</span>, and how the last delivery went (the answer code of the receiver, or why it failed).</li>
+    <li>Tap a webhook: <span class="ui">Recent deliveries</span>, <span class="ui">Turn off</span> / <span class="ui">Turn on</span> (an inactive webhook keeps its settings, GitHub just sends nothing), <span class="ui">Send a ping</span> (a test message, its result appears under Recent deliveries), <span class="ui">Copy URL</span>, <span class="ui">Delete webhook</span> and <span class="ui">Open in browser</span>.</li>
+    <li><span class="ui">Recent deliveries</span> lists the last 50 messages GitHub sent, newest first: the event (e.g. <code>push</code> or <code>issues.opened</code>), the receiver's answer (green when it was accepted, red when it failed or GitHub <span class="ui">could not connect</span>), how long it took and when. Tap one for <span class="ui">Details</span> (the receiver's answer and the payload GitHub sent, with <span class="ui">Copy payload</span>) or <span class="ui">Redeliver</span> to send it again, e.g. after fixing the receiver; the new attempt appears at the top, marked <span class="ui">Redelivery</span>.</li>
+  </ul>
   <h3>Security</h3>
   <p><strong>Security</strong> in the repository menu (repositories you can push to) has the tabs of the Security page on github.com:</p>
   <div class="tw"><table>

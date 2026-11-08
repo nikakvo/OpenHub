@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Webhooks of a repository (WebhooksActivity) -->
+    <string name="webhooks">Webhooks</string>
+    <string name="settings_webhooks_summary">Addresses GitHub notifies when something happens in this repository</string>
+    <string name="webhooks_none">No webhooks. A webhook makes GitHub send a message to a web address (a chat bot, a build server) whenever something happens here, e.g. a push. They are created on github.com; here you can watch, test and turn them off.</string>
+    <string name="webhooks_all_events">All events</string>
+    <string name="webhooks_no_events">No events</string>
+    <string name="webhooks_active">Active</string>
+    <string name="webhooks_inactive">Inactive</string>
+    <string name="webhooks_never_delivered">nothing sent yet</string>
+    <string name="webhooks_last_ok">last delivery %s</string>
+    <string name="webhooks_last_failed">last delivery failed: %s</string>
+    <string name="webhooks_updated">updated %s</string>
+    <string name="webhooks_deliveries">Recent deliveries</string>
+    <string name="webhooks_turn_off">Turn off</string>
+    <string name="webhooks_turn_on">Turn on</string>
+    <string name="webhooks_turn_off_message">GitHub stops sending to %s until you turn it on again. Nothing else changes.</string>
+    <string name="webhooks_turned_off">Webhook turned off</string>
+    <string name="webhooks_turned_on">Webhook turned on</string>
+    <string name="webhooks_state_not_changed">GitHub did not change the webhook</string>
+    <string name="webhooks_ping">Send a ping</string>
+    <string name="webhooks_pinged">GitHub sent a ping; its result is under Recent deliveries</string>
+    <string name="webhooks_copy_url">Copy URL</string>
+    <string name="webhooks_url_copied">URL copied</string>
+    <string name="webhooks_delete">Delete webhook</string>
+    <string name="webhooks_delete_message">Delete the webhook to %s? GitHub stops sending to it and its delivery history is gone. It can only be created again on github.com.</string>
+    <string name="webhooks_deleted">Webhook deleted</string>
+    <string name="webhooks_still_there">GitHub still lists the webhook</string>
+    <string name="webhooks_deliveries_none">No deliveries in the last days. Send a ping from the webhook\'s menu to try it.</string>
+    <string name="webhooks_redelivery">Redelivery</string>
+    <string name="webhooks_could_not_connect">could not connect</string>
+    <string name="webhooks_details">Details</string>
+    <string name="webhooks_redeliver">Redeliver</string>
+    <string name="webhooks_redelivering">GitHub is sending it again; the new attempt appears at the top</string>
+    <string name="webhooks_response">Response %1$s · %2$s</string>
+    <string name="webhooks_response_empty">(empty answer)</string>
+    <string name="webhooks_request_payload">Payload GitHub sent</string>
+    <string name="webhooks_copy_payload">Copy payload</string>
+    <string name="webhooks_payload_copied">Payload copied</string>
+</resources>

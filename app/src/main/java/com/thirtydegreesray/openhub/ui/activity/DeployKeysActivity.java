@@ -305,6 +305,8 @@ public class DeployKeysActivity extends BaseActivity<IBaseContract.Presenter> {
         Button pickBn = new Button(ctx);
         pickBn.setText(R.string.deploy_keys_pick_file);
         ButtonStyles.tonal(pickBn);
+        // sentence case like every other button (a dialog's theme would make it upper case)
+        pickBn.setAllCaps(false);
         LinearLayout.LayoutParams pickParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         pickParams.topMargin = pad / 2;
