@@ -26,6 +26,7 @@ import com.google.gson.JsonObject;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.http.ActionsService;
 import com.thirtydegreesray.openhub.http.ForkSyncService;
+import com.thirtydegreesray.openhub.http.IssueService;
 import com.thirtydegreesray.openhub.http.GitDataService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.PullService;
@@ -321,6 +322,11 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                 && mPresenter.getRepository() != null) {
             mPresenter.reloadReadMe();
         }
+        // back from github.com after turning a fork's workflows on: ask GitHub again
+        if (forkState != null && forkState.gatedFiles > 0 && mPresenter != null
+                && mPresenter.getRepository() != null) {
+            checkFork(mPresenter.getRepository());
+        }
         if (pullsStamp != 0 && PullChanges.changedSince(pullsStamp) && mPresenter != null
                 && mPresenter.getRepository() != null) {
             countPulls(mPresenter.getRepository());
@@ -479,7 +485,8 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         forkEnableWorkflowsBn = root.findViewById(R.id.fork_enable_workflows_bn);
         forkEnableWorkflowsBn.setOnClickListener(v -> {
             ForkState state = forkState;
-            if (state != null) enableForkWorkflows(state, false);
+            if (state == null) return;
+            if (state.gatedFiles > 0) openForkActionsPage(state); else enableForkWorkflows(state, false);
         });
     }
 
@@ -501,6 +508,12 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         Repository parent;
         /** Workflows GitHub reports as disabled_fork (only read for users who can push). */
         final List<Long> forkDisabled = new ArrayList<>();
+        /**
+         * A new fork: GitHub lists no workflows at all (total_count 0) although the fork has
+         * workflow files, until "I understand my workflows" is pressed on github.com. There is
+         * no API for that button (checked in the REST and GraphQL schemas).
+         */
+        int gatedFiles;
 
         String label() {
             return ForkSync.label(parentFullName, upstream);
@@ -556,7 +569,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                     String basehead = ForkSync.basehead(ForkSync.ownerOf(parentFullName), state.upstream, state.branch);
                     JsonObject compare = GitHubApi.call(GitHubApi.service(PullService.class)
                             .compare(state.owner, state.repo, basehead));
-                    if (state.canPush) state.forkDisabled.addAll(forkDisabledWorkflows(state.owner, state.repo));
+                    if (state.canPush) readWorkflows(state);
                     return compare;
                 })
                 .subscribeOn(Schedulers.io())
@@ -621,12 +634,13 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         forkSyncText.setText(spannable);
 
         forkSyncButtons.setVisibility(state.canPush ? View.VISIBLE : View.GONE);
-        boolean workflowsOff = state.canPush && !state.forkDisabled.isEmpty();
-        forkWorkflowsNote.setVisibility(workflowsOff ? View.VISIBLE : View.GONE);
-        forkEnableWorkflowsBn.setVisibility(workflowsOff ? View.VISIBLE : View.GONE);
-        if (workflowsOff) {
-            forkWorkflowsNote.setText(getResources().getQuantityString(R.plurals.fork_workflows_off,
-                    state.forkDisabled.size(), state.forkDisabled.size()));
+        String workflowsNote = state.canPush ? workflowsNote(state) : null;
+        forkWorkflowsNote.setVisibility(workflowsNote != null ? View.VISIBLE : View.GONE);
+        forkEnableWorkflowsBn.setVisibility(workflowsNote != null ? View.VISIBLE : View.GONE);
+        if (workflowsNote != null) {
+            forkWorkflowsNote.setText(workflowsNote);
+            forkEnableWorkflowsBn.setText(state.gatedFiles > 0
+                    ? R.string.fork_turn_on_on_github : R.string.fork_enable_workflows);
         }
         if (state.behind > 0) {
             ButtonStyles.filled(forkSyncBn);
@@ -798,10 +812,15 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
                 .setTitle(R.string.fork_synced_title)
                 .setNegativeButton(R.string.close, null);
-        if (!state.forkDisabled.isEmpty()) {
-            // a new fork: its workflows are still off, turn them on right here
-            builder.setMessage(message + "\n\n" + getResources().getQuantityString(R.plurals.fork_workflows_off,
-                    state.forkDisabled.size(), state.forkDisabled.size()))
+        String note = workflowsNote(state);
+        if (note != null && state.gatedFiles > 0) {
+            // a new fork: only github.com can turn its workflows on
+            builder.setMessage(message + "\n\n" + note)
+                    .setPositiveButton(R.string.fork_turn_on_on_github, (d, w) -> openForkActionsPage(state))
+                    .setNeutralButton(R.string.fork_open_actions, (d, w) -> openActions(state));
+        } else if (note != null) {
+            // workflows GitHub reports as disabled_fork: the API can turn them on
+            builder.setMessage(message + "\n\n" + note)
                     .setPositiveButton(R.string.fork_enable_workflows, (d, w) -> enableForkWorkflows(state, true))
                     .setNeutralButton(R.string.fork_open_actions, (d, w) -> openActions(state));
         } else {
@@ -816,14 +835,18 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         ActionsActivity.show(requireActivity(), state.owner, state.repo, state.defaultBranch, state.canPush);
     }
 
-    /** Ids of the workflows GitHub keeps off because the repository is a new fork. */
-    @NonNull
-    private static List<Long> forkDisabledWorkflows(@NonNull String owner, @NonNull String repo) {
-        List<Long> ids = new ArrayList<>();
+    /**
+     * Reads the fork's workflows: ids of disabled_fork ones (the API can enable them), and when
+     * GitHub lists none at all, how many workflow files the fork has (the github.com gate).
+     * Errors leave both empty: no note, the sync still works.
+     */
+    private static void readWorkflows(@NonNull ForkState state) {
         try {
+            int total = 0;
             for (int page = 1; page <= 3; page++) {
                 JsonObject answer = GitHubApi.call(GitHubApi.service(ActionsService.class)
-                        .listWorkflows(owner, repo, 100, page));
+                        .listWorkflows(state.owner, state.repo, 100, page));
+                if (page == 1) total = Json.integer(answer, "total_count");
                 com.google.gson.JsonElement items = Json.get(answer, "workflows");
                 int count = 0;
                 if (items != null && items.isJsonArray()) {
@@ -831,16 +854,54 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                         if (!e.isJsonObject()) continue;
                         count++;
                         if (WorkflowStates.DISABLED_FORK.equals(Json.str(e.getAsJsonObject(), "state"))) {
-                            ids.add(Json.lng(e.getAsJsonObject(), "id"));
+                            state.forkDisabled.add(Json.lng(e.getAsJsonObject(), "id"));
                         }
                     }
                 }
                 if (count < 100) break;
             }
+            if (total == 0) state.gatedFiles = workflowFiles(state.owner, state.repo);
         } catch (java.io.IOException ignored) {
-            // Actions not reachable (turned off, no access): no note, the sync still works
+            // Actions not reachable (turned off, no access)
         }
-        return ids;
+    }
+
+    /** .yml / .yaml files in .github/workflows of the default branch (404 = none). */
+    private static int workflowFiles(@NonNull String owner, @NonNull String repo) {
+        try {
+            com.google.gson.JsonElement folder = GitHubApi.call(GitHubApi.service(IssueService.class)
+                    .getContents(owner, repo, ".github/workflows"));
+            if (folder == null || !folder.isJsonArray()) return 0;
+            int files = 0;
+            for (com.google.gson.JsonElement e : folder.getAsJsonArray()) {
+                if (!e.isJsonObject() || !"file".equals(Json.str(e.getAsJsonObject(), "type"))) continue;
+                String name = Json.str(e.getAsJsonObject(), "name");
+                if (name != null && (name.endsWith(".yml") || name.endsWith(".yaml"))) files++;
+            }
+            return files;
+        } catch (java.io.IOException e) {
+            return 0;
+        }
+    }
+
+    /** The note under the buttons, or null when nothing is off. */
+    @Nullable
+    private String workflowsNote(@NonNull ForkState state) {
+        if (state.gatedFiles > 0) {
+            return getResources().getQuantityString(R.plurals.fork_workflows_gated,
+                    state.gatedFiles, state.gatedFiles);
+        }
+        if (!state.forkDisabled.isEmpty()) {
+            return getResources().getQuantityString(R.plurals.fork_workflows_off,
+                    state.forkDisabled.size(), state.forkDisabled.size());
+        }
+        return null;
+    }
+
+    /** github.com/{fork}/actions in the browser (OpenHub may own github.com links). */
+    private void openForkActionsPage(@NonNull ForkState state) {
+        if (!isAdded()) return;
+        AppOpener.openInBrowser(requireContext(), "https://github.com/" + state.owner + "/" + state.repo + "/actions");
     }
 
     /**

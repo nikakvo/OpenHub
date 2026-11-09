@@ -61,6 +61,11 @@
         <item quantity="one">%d workflow of this fork is turned off. GitHub keeps the workflows of a new fork off until they are turned on once.</item>
         <item quantity="other">%d workflows of this fork are turned off. GitHub keeps the workflows of a new fork off until they are turned on once.</item>
     </plurals>
+    <plurals name="fork_workflows_gated">
+        <item quantity="one">This fork has %d workflow file, but GitHub does not run it: GitHub keeps the workflows of a new fork off until they are turned on once, and allows that only on github.com (no app can do it). Tap below, then "I understand my workflows, go ahead and enable them".</item>
+        <item quantity="other">This fork has %d workflow files, but GitHub does not run them: GitHub keeps the workflows of a new fork off until they are turned on once, and allows that only on github.com (no app can do it). Tap below, then "I understand my workflows, go ahead and enable them".</item>
+    </plurals>
+    <string name="fork_turn_on_on_github">Turn on on github.com</string>
     <string name="fork_enable_workflows">Enable workflows</string>
     <string name="fork_enabling_workflows">Turning on the workflows…</string>
     <!-- %1$d = workflows GitHub now reports as active, %2$d = workflows we tried -->
