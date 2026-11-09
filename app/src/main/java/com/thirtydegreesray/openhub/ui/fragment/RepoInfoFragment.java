@@ -12,14 +12,17 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.http.ForkSyncService;
 import com.thirtydegreesray.openhub.http.GitDataService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.PullService;
@@ -30,8 +33,11 @@ import com.thirtydegreesray.openhub.mvp.contract.IRepoInfoContract;
 import com.thirtydegreesray.openhub.mvp.model.Branch;
 import com.thirtydegreesray.openhub.mvp.model.Repository;
 import com.thirtydegreesray.openhub.mvp.presenter.RepoInfoPresenter;
+import com.thirtydegreesray.openhub.ui.activity.ActionsActivity;
+import com.thirtydegreesray.openhub.ui.activity.CommitsListActivity;
 import com.thirtydegreesray.openhub.ui.activity.EditFileActivity;
 import com.thirtydegreesray.openhub.ui.activity.IssuesActivity;
+import com.thirtydegreesray.openhub.ui.activity.NewPullRequestActivity;
 import com.thirtydegreesray.openhub.ui.activity.ProfileActivity;
 import com.thirtydegreesray.openhub.ui.activity.PullRequestsActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepoListActivity;
@@ -40,10 +46,14 @@ import com.thirtydegreesray.openhub.util.PullRefresh;
 import com.thirtydegreesray.openhub.ui.activity.UserListActivity;
 import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
 import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
+import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.ButtonStyles;
+import com.thirtydegreesray.openhub.util.ForkSync;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.PullChanges;
 import com.thirtydegreesray.openhub.util.RepoChanges;
+import com.thirtydegreesray.openhub.util.RepoCommitter;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 
@@ -51,6 +61,9 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -91,6 +104,16 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
     CodeWebView webView;
 
     private boolean isReadmeSetted = false;
+
+    View forkSyncBox;
+    TextView forkSyncText;
+    View forkSyncButtons;
+    Button forkContributeBn;
+    Button forkSyncBn;
+    private Disposable forkCheck;
+    private Disposable forkAction;
+    /** The last comparison of the shown fork branch with upstream (GitHub's numbers). */
+    @Nullable private ForkState forkState;
 
     @Override
     public void onAttach(Context context) {
@@ -159,6 +182,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         } else {
             forkInfoText.setVisibility(View.GONE);
         }
+        checkFork(repository);
 
         String fullName = repository.getFullName();
         SpannableStringBuilder spannable = new SpannableStringBuilder(fullName);
@@ -297,7 +321,10 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
     public void onDestroyView() {
         if (pullsCount != null) pullsCount.dispose();
         if (readmeLookup != null) readmeLookup.dispose();
+        if (forkCheck != null) forkCheck.dispose();
+        if (forkAction != null) forkAction.dispose();
         readmeEdit = null;
+        forkSyncBox = null;
         super.onDestroyView();
     }
 
@@ -403,6 +430,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         }
         mPresenter.reloadReadMe();
         countPulls(mPresenter.getRepository());
+        checkFork(mPresenter.getRepository());
     }
 
     @Override
@@ -429,5 +457,333 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         ViewUtils.setOnClick(root, R.id.froks_lay, v -> onViewClicked(v));
         ViewUtils.setOnClick(root, R.id.watchers_lay, v -> onViewClicked(v));
         ViewUtils.setOnClick(root, R.id.fork_info_text, v -> onViewClicked(v));
+        forkSyncBox = root.findViewById(R.id.fork_sync_box);
+        forkSyncText = root.findViewById(R.id.fork_sync_text);
+        forkSyncText.setMovementMethod(LinkMovementMethod.getInstance());
+        forkSyncButtons = root.findViewById(R.id.fork_sync_buttons);
+        forkContributeBn = root.findViewById(R.id.fork_contribute_bn);
+        forkSyncBn = root.findViewById(R.id.fork_sync_bn);
+        forkContributeBn.setOnClickListener(v -> onContributeClicked());
+        forkSyncBn.setOnClickListener(v -> onSyncClicked());
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Sync fork
+    // ---------------------------------------------------------------------------------
+
+    /** A fork branch and its upstream branch, with GitHub's ahead / behind numbers. */
+    private static final class ForkState {
+        String owner;
+        String repo;
+        String branch;
+        String defaultBranch;
+        String parentFullName;
+        String upstream;
+        int ahead;
+        int behind;
+        boolean canPush;
+        Repository parent;
+
+        String label() {
+            return ForkSync.label(parentFullName, upstream);
+        }
+
+        String upstreamRef() {
+            return ForkSync.ownerOf(parentFullName) + ":" + upstream;
+        }
+    }
+
+    private static boolean canPush(@NonNull Repository repository) {
+        return repository.getPermissions() != null
+                && (repository.getPermissions().isPush() || repository.getPermissions().isAdmin());
+    }
+
+    /** Compares the shown branch of a fork with its upstream branch (always from GitHub). */
+    private void checkFork(@Nullable Repository repository) {
+        if (forkSyncBox == null) return;
+        if (forkCheck != null) forkCheck.dispose();
+        Repository parent = repository == null ? null : repository.getParent();
+        if (repository == null || !repository.isFork() || parent == null
+                || StringUtils.isBlank(parent.getFullName()) || mPresenter == null) {
+            forkState = null;
+            forkSyncBox.setVisibility(View.GONE);
+            return;
+        }
+        ForkState state = new ForkState();
+        state.owner = repository.getOwner().getLogin();
+        state.repo = repository.getName();
+        state.branch = mPresenter.getBranch();
+        state.defaultBranch = repository.getDefaultBranch();
+        state.parentFullName = parent.getFullName();
+        state.parent = parent;
+        state.upstream = ForkSync.upstreamBranch(state.branch, repository.getDefaultBranch(),
+                parent.getDefaultBranch());
+        state.canPush = canPush(repository);
+        forkSyncBox.setVisibility(View.VISIBLE);
+        forkSyncButtons.setVisibility(View.GONE);
+        forkSyncText.setText(getString(R.string.fork_checking, state.label()));
+        String basehead = ForkSync.basehead(ForkSync.ownerOf(state.parentFullName), state.upstream, state.branch);
+        forkCheck = Single.fromCallable(() -> GitHubApi.call(GitHubApi.service(PullService.class)
+                        .compare(state.owner, state.repo, basehead)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    state.ahead = Json.integer(result, "ahead_by");
+                    state.behind = Json.integer(result, "behind_by");
+                    forkState = state;
+                    showForkState(state);
+                }, error -> {
+                    forkState = null;
+                    if (forkSyncBox == null) return;
+                    if (error instanceof GitHubApi.ApiException && ((GitHubApi.ApiException) error).code == 404) {
+                        // no branch with this name upstream: nothing to compare or sync
+                        forkSyncText.setText(getString(R.string.fork_no_upstream_branch,
+                                state.parentFullName, state.upstream));
+                    } else {
+                        forkSyncBox.setVisibility(View.GONE);
+                    }
+                });
+    }
+
+    /** "This branch is 4 commits ahead of and 8 commits behind owner/repo:main.", with links. */
+    private void showForkState(@NonNull ForkState state) {
+        if (forkSyncBox == null || !isAdded()) return;
+        String label = state.label();
+        String aheadText = state.ahead > 0 ? getResources().getQuantityString(R.plurals.fork_ahead,
+                state.ahead, state.ahead) : null;
+        String behindText = state.behind > 0 ? getResources().getQuantityString(R.plurals.fork_behind,
+                state.behind, state.behind) : null;
+        String text;
+        switch (ForkSync.state(state.ahead, state.behind)) {
+            case DIVERGED:
+                text = getString(R.string.fork_status_both, aheadText, behindText, label);
+                break;
+            case AHEAD:
+                text = getString(R.string.fork_status_one, aheadText, label);
+                break;
+            case BEHIND:
+                text = getString(R.string.fork_status_one, behindText, label);
+                break;
+            default:
+                text = getString(R.string.fork_up_to_date, label);
+        }
+        SpannableStringBuilder spannable = new SpannableStringBuilder(text);
+        if (aheadText != null) {
+            // the fork's own commits
+            link(spannable, aheadText, () -> CommitsListActivity.showForCompare(requireActivity(),
+                    state.owner, state.repo, state.upstreamRef(), state.branch));
+        }
+        if (behindText != null) {
+            // the new commits upstream
+            link(spannable, behindText, () -> CommitsListActivity.showForCompare(requireActivity(),
+                    state.owner, state.repo, state.branch, state.upstreamRef()));
+        }
+        link(spannable, label, () -> RepositoryActivity.show(requireContext(), state.parent));
+        forkSyncText.setText(spannable);
+
+        forkSyncButtons.setVisibility(state.canPush ? View.VISIBLE : View.GONE);
+        if (state.behind > 0) {
+            ButtonStyles.filled(forkSyncBn);
+        } else {
+            ButtonStyles.tonal(forkSyncBn);
+        }
+    }
+
+    private void link(@NonNull SpannableStringBuilder spannable, @NonNull String part, @NonNull Runnable onClick) {
+        int start = spannable.toString().lastIndexOf(part);
+        if (start < 0) return;
+        int accent = ViewUtils.getAccentColor(requireContext());
+        spannable.setSpan(new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                onClick.run();
+            }
+
+            @Override
+            public void updateDrawState(@NonNull TextPaint ds) {
+                ds.setColor(accent);
+                ds.setUnderlineText(false);
+            }
+        }, start, start + part.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
+    private void onSyncClicked() {
+        ForkState state = forkState;
+        if (state == null) return;
+        String label = state.label();
+        if (state.behind == 0) {
+            new AlertDialog.Builder(requireActivity())
+                    .setTitle(R.string.fork_sync_title)
+                    .setMessage(getString(R.string.fork_not_behind, label))
+                    .setPositiveButton(R.string.close, null)
+                    .show();
+            return;
+        }
+        String newCommits = getResources().getQuantityString(R.plurals.fork_new_commits,
+                state.behind, state.behind);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.fork_sync_title)
+                .setPositiveButton(R.string.fork_update_branch, (d, w) -> syncFork(state))
+                .setNegativeButton(R.string.cancel, null);
+        if (state.ahead == 0) {
+            builder.setMessage(getString(R.string.fork_sync_fast_forward, label, newCommits, state.branch));
+        } else {
+            String own = getResources().getQuantityString(R.plurals.fork_own_commits, state.ahead, state.ahead);
+            builder.setMessage(getString(R.string.fork_sync_diverged, label, newCommits, state.branch, own));
+            builder.setNeutralButton(getResources().getQuantityString(R.plurals.fork_discard,
+                    state.ahead, state.ahead), (d, w) -> confirmDiscard(state));
+        }
+        builder.show();
+    }
+
+    /** POST merge-upstream: GitHub fast-forwards or merges, or answers 409 for a conflict. */
+    private void syncFork(@NonNull ForkState state) {
+        if (forkAction != null) forkAction.dispose();
+        showProgressDialog(getString(R.string.fork_syncing, state.label()));
+        Map<String, Object> body = new HashMap<>();
+        body.put("branch", state.branch);
+        forkAction = Single.fromCallable(() -> GitHubApi.call(GitHubApi.service(ForkSyncService.class)
+                        .mergeUpstream(state.owner, state.repo, body)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    hideProgress();
+                    if (!isAdded()) return;
+                    String message;
+                    switch (ForkSync.result(Json.str(result, "merge_type"))) {
+                        case FAST_FORWARD:
+                            message = getString(R.string.fork_synced_fast_forward, state.branch, state.label());
+                            break;
+                        case MERGE:
+                            message = getString(R.string.fork_synced_merge, state.branch, state.label());
+                            break;
+                        case NONE:
+                            message = getString(R.string.fork_synced_none, state.branch, state.label());
+                            break;
+                        default:
+                            String said = Json.str(result, "message");
+                            message = getString(R.string.fork_synced_other,
+                                    StringUtils.isBlank(said) ? result.toString() : said);
+                    }
+                    afterSync(state, message);
+                }, error -> {
+                    hideProgress();
+                    if (!isAdded()) return;
+                    if (error instanceof GitHubApi.ApiException && ((GitHubApi.ApiException) error).code == 409) {
+                        showConflict(state);
+                    } else {
+                        showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                    }
+                });
+    }
+
+    private void showConflict(@NonNull ForkState state) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.fork_conflict_title)
+                .setMessage(getString(R.string.fork_conflict_message, state.label(), state.branch))
+                .setPositiveButton(R.string.fork_open_on_github, (d, w) -> AppOpener.openInBrowser(requireContext(),
+                        ForkSync.conflictUrl(state.owner + "/" + state.repo, state.branch,
+                                state.parentFullName, state.upstream)))
+                .setNegativeButton(R.string.close, null);
+        if (state.ahead > 0) {
+            builder.setNeutralButton(getResources().getQuantityString(R.plurals.fork_discard,
+                    state.ahead, state.ahead), (d, w) -> confirmDiscard(state));
+        }
+        builder.show();
+    }
+
+    private void confirmDiscard(@NonNull ForkState state) {
+        new AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.fork_discard_title)
+                .setMessage(getResources().getQuantityString(R.plurals.fork_discard_message,
+                        state.ahead, state.ahead, state.branch, state.label()))
+                .setPositiveButton(getResources().getQuantityString(R.plurals.fork_discard,
+                        state.ahead, state.ahead), (d, w) -> discard(state))
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    /**
+     * Discard: the branch is set to the upstream branch's newest commit (forks share their
+     * objects with upstream), like github.com and "gh repo sync --force". The commit is read
+     * again right before, so the branch gets what upstream has NOW.
+     */
+    private void discard(@NonNull ForkState state) {
+        if (forkAction != null) forkAction.dispose();
+        showProgressDialog(getString(R.string.fork_syncing, state.label()));
+        String basehead = ForkSync.basehead(ForkSync.ownerOf(state.parentFullName), state.upstream, state.branch);
+        forkAction = Single.fromCallable(() -> {
+                    String sha = Json.str(GitHubApi.call(GitHubApi.service(PullService.class)
+                            .compare(state.owner, state.repo, basehead)), "base_commit.sha");
+                    if (StringUtils.isBlank(sha)) throw new java.io.IOException("GitHub did not name the upstream commit.");
+                    Map<String, Object> body = new HashMap<>();
+                    body.put("sha", sha);
+                    body.put("force", true);
+                    return GitHubApi.call(GitHubApi.service(GitDataService.class)
+                            .updateBranchRef(state.owner, state.repo, RepoCommitter.encode(state.branch), body));
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    hideProgress();
+                    if (!isAdded()) return;
+                    afterSync(state, getString(R.string.fork_synced_discard, state.branch, state.label()));
+                }, error -> {
+                    hideProgress();
+                    if (!isAdded()) return;
+                    showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                });
+    }
+
+    /** After a sync: everything reloads from GitHub, then Actions is one tap away (builds). */
+    private void afterSync(@NonNull ForkState state, @NonNull String message) {
+        RepoChanges.markChanged();
+        PullRefresh.freshFromNow();
+        if (getActivity() instanceof RepositoryActivity) {
+            ((RepositoryActivity) getActivity()).reloadRepository();
+        }
+        if (mPresenter != null) {
+            mPresenter.reloadReadMe();
+            checkFork(mPresenter.getRepository());
+        }
+        new AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.fork_synced_title)
+                .setMessage(message)
+                .setPositiveButton(R.string.fork_open_actions, (d, w) -> ActionsActivity.show(requireActivity(),
+                        state.owner, state.repo, state.defaultBranch, state.canPush))
+                .setNegativeButton(R.string.close, null)
+                .show();
+    }
+
+    private void onContributeClicked() {
+        ForkState state = forkState;
+        if (state == null) return;
+        if (state.ahead == 0) {
+            new AlertDialog.Builder(requireActivity())
+                    .setTitle(R.string.fork_contribute)
+                    .setMessage(getString(R.string.fork_not_ahead, state.label()))
+                    .setPositiveButton(R.string.close, null)
+                    .show();
+            return;
+        }
+        String own = getResources().getQuantityString(R.plurals.fork_own_commits, state.ahead, state.ahead);
+        new AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.fork_contribute)
+                .setMessage(getString(R.string.fork_contribute_message, state.branch, own, state.label()))
+                .setPositiveButton(R.string.fork_open_pull, (d, w) -> startActivity(
+                        NewPullRequestActivity.createIntent(requireContext(), state.owner, state.repo)
+                                .putExtra("targetFullName", state.parentFullName)
+                                .putExtra("base", state.upstream)
+                                .putExtra("head", state.branch)))
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void hideProgress() {
+        try {
+            dismissProgressDialog();
+        } catch (RuntimeException ignored) {
+            // the fragment was rebuilt: no dialog to close
+        }
     }
 }

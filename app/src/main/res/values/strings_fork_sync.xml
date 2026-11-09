@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fork_contribute">Contribute</string>
+    <string name="fork_sync">Sync fork</string>
+    <string name="fork_checking">Comparing with %1$s…</string>
+    <string name="fork_up_to_date">This branch is up to date with %1$s.</string>
+    <!-- %1$s = "4 commits ahead of" or "8 commits behind", %2$s = upstream label -->
+    <string name="fork_status_one">This branch is %1$s %2$s.</string>
+    <!-- %1$s = "4 commits ahead of", %2$s = "8 commits behind", %3$s = upstream label -->
+    <string name="fork_status_both">This branch is %1$s and %2$s %3$s.</string>
+    <plurals name="fork_ahead">
+        <item quantity="one">%d commit ahead of</item>
+        <item quantity="other">%d commits ahead of</item>
+    </plurals>
+    <plurals name="fork_behind">
+        <item quantity="one">%d commit behind</item>
+        <item quantity="other">%d commits behind</item>
+    </plurals>
+    <string name="fork_no_upstream_branch">%1$s has no branch \"%2$s\" to compare with.</string>
+
+    <string name="fork_sync_title">Sync fork</string>
+    <string name="fork_not_behind">This branch is not behind %1$s. There are no new commits to fetch.</string>
+    <string name="fork_sync_fast_forward">%1$s has %2$s.\n\nUpdate branch brings them into %3$s. Your branch has no commits of its own, so it simply moves forward.</string>
+    <string name="fork_sync_diverged">%1$s has %2$s, and %3$s has %4$s of its own.\n\nUpdate branch keeps your commits and adds the new ones with a merge commit.\n\nDiscard removes your commits from %3$s and makes it exactly like %1$s.</string>
+    <plurals name="fork_new_commits">
+        <item quantity="one">%d new commit</item>
+        <item quantity="other">%d new commits</item>
+    </plurals>
+    <plurals name="fork_own_commits">
+        <item quantity="one">%d commit</item>
+        <item quantity="other">%d commits</item>
+    </plurals>
+    <string name="fork_update_branch">Update branch</string>
+    <plurals name="fork_discard">
+        <item quantity="one">Discard %d commit</item>
+        <item quantity="other">Discard %d commits</item>
+    </plurals>
+    <string name="fork_discard_title">Discard your commits?</string>
+    <plurals name="fork_discard_message">
+        <item quantity="one">%2$s will be set to %3$s. Its %1$d own commit will no longer be on the branch. This cannot be undone in the app.</item>
+        <item quantity="other">%2$s will be set to %3$s. Its %1$d own commits will no longer be on the branch. This cannot be undone in the app.</item>
+    </plurals>
+    <string name="fork_syncing">Syncing with %1$s…</string>
+    <string name="fork_conflict_title">The changes conflict</string>
+    <string name="fork_conflict_message">GitHub cannot merge %1$s into %2$s by itself, because both changed the same lines.\n\nYou can resolve the conflicts on github.com with a pull request, or discard your commits.</string>
+    <string name="fork_open_on_github">Open on github.com</string>
+
+    <string name="fork_synced_title">Fork synced</string>
+    <string name="fork_synced_fast_forward">%1$s now matches %2$s.</string>
+    <string name="fork_synced_merge">%2$s was merged into %1$s with a merge commit.</string>
+    <string name="fork_synced_none">%1$s was already up to date with %2$s.</string>
+    <string name="fork_synced_discard">%1$s is now exactly like %2$s.</string>
+    <string name="fork_synced_other">GitHub answered: %1$s</string>
+    <string name="fork_open_actions">Open Actions</string>
+
+    <string name="fork_not_ahead">This branch is not ahead of %1$s. There are no commits of your own to send yet.</string>
+    <string name="fork_contribute_message">%1$s has %2$s that %3$s does not have.\n\nOpen a pull request to propose them to %3$s.</string>
+    <string name="fork_open_pull">Open pull request</string>
+</resources>

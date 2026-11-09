@@ -228,6 +228,14 @@
   <h3>The numbers on Info</h3>
   <p><span class="ui">Issues</span> and <span class="ui">Pulls</span> open the issue and pull request lists (they count only open ones). <span class="ui">Stargazers</span>, <span class="ui">Forks</span> and <span class="ui">Watchers</span> show who starred, forked or watches it.</p>
   <div class="note"><b class="lbl">Note</b>Since July 2026 GitHub shows stargazers and watchers only to the repository's owners and collaborators. For other repositories you see a note instead of the list. Not a bug.</div>
+  <h3>Forks: Sync fork and Contribute</h3>
+  <p>In a fork, Info shows how the branch you look at stands against the original repository, like github.com: <em>This branch is 4 commits ahead of and 8 commits behind owner/repo:main.</em> The numbers come from GitHub each time the page loads or you pull down. Tap <em>ahead</em> for your own commits, <em>behind</em> for the new commits of the original, and the name to open the original repository. The default branch of a fork is compared with the default branch of the original, any other branch with the branch of the same name.</p>
+  <p>If you can push to the fork, two buttons follow:</p>
+  <ul>
+    <li><span class="ui">Sync fork</span> (filled when there are new commits): <span class="ui">Update branch</span> brings the new commits into your branch. Without commits of your own the branch simply moves forward; with commits of your own GitHub keeps them and adds a merge commit. <span class="ui">Discard N commits</span> makes your branch exactly like the original and removes your own commits from it (it asks again first). If both changed the same lines, GitHub cannot merge by itself: <span class="ui">Open on github.com</span> opens the page where a pull request can resolve the conflicts, or discard your commits.</li>
+    <li>After a sync the page reloads from GitHub and <span class="ui">Open Actions</span> takes you to the workflows, for example to start a build of the updated fork. GitHub does not run the workflows of a new fork until they are turned on once in the fork's Actions tab on github.com.</li>
+    <li><span class="ui">Contribute</span>: with commits of your own, <span class="ui">Open pull request</span> starts a pull request into the original repository.</li>
+  </ul>
   <h3>Top buttons</h3>
   <p><strong>Star</strong> (like or save it) and <strong>Branches or tags</strong> (switch the branch you look at; files, commits and README follow it).</p>
   <h3>The ⋮ menu</h3>

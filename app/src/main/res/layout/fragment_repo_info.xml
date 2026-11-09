@@ -44,6 +44,47 @@
                     android:textColor="?colorAccent"
                     android:layout_marginTop="@dimen/spacing_mini"/>
 
+                <!-- Fork: how the branch stands against upstream, Contribute and Sync fork -->
+                <LinearLayout
+                    android:id="@+id/fork_sync_box"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_small"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/fork_sync_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="?android:textColorSecondary"
+                        android:textSize="@dimen/text_small"/>
+
+                    <LinearLayout
+                        android:id="@+id/fork_sync_buttons"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <Button
+                            android:id="@+id/fork_contribute_bn"
+                            style="@style/OpenHubButton.Tonal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/fork_contribute"/>
+
+                        <Button
+                            android:id="@+id/fork_sync_bn"
+                            style="@style/OpenHubButton.Tonal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_small"
+                            android:text="@string/fork_sync"/>
+                    </LinearLayout>
+                </LinearLayout>
+
                 <TextView
                     android:id="@+id/repo_desc_text"
                     android:layout_width="wrap_content"
