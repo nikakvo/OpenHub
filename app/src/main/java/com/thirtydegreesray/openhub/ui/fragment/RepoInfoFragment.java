@@ -21,11 +21,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
+import com.google.gson.JsonObject;
+
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.http.ForkSyncService;
 import com.thirtydegreesray.openhub.http.GitDataService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.PullService;
+import com.thirtydegreesray.openhub.http.RepoSettingsService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.inject.component.DaggerFragmentComponent;
 import com.thirtydegreesray.openhub.inject.module.FragmentModule;
@@ -498,7 +501,12 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                 && (repository.getPermissions().isPush() || repository.getPermissions().isAdmin());
     }
 
-    /** Compares the shown branch of a fork with its upstream branch (always from GitHub). */
+    /**
+     * Compares the shown branch of a fork with its upstream branch (always from GitHub).
+     * The default branches are read from GitHub too: the branch switcher of the repository
+     * screen overwrites Repository.defaultBranch with the chosen branch (old OpenHub code),
+     * so tears looked like the default branch and was compared with upstream main.
+     */
     private void checkFork(@Nullable Repository repository) {
         if (forkSyncBox == null) return;
         if (forkCheck != null) forkCheck.dispose();
@@ -513,18 +521,25 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         state.owner = repository.getOwner().getLogin();
         state.repo = repository.getName();
         state.branch = mPresenter.getBranch();
-        state.defaultBranch = repository.getDefaultBranch();
         state.parentFullName = parent.getFullName();
         state.parent = parent;
-        state.upstream = ForkSync.upstreamBranch(state.branch, repository.getDefaultBranch(),
-                parent.getDefaultBranch());
         state.canPush = canPush(repository);
         forkSyncBox.setVisibility(View.VISIBLE);
         forkSyncButtons.setVisibility(View.GONE);
-        forkSyncText.setText(getString(R.string.fork_checking, state.label()));
-        String basehead = ForkSync.basehead(ForkSync.ownerOf(state.parentFullName), state.upstream, state.branch);
-        forkCheck = Single.fromCallable(() -> GitHubApi.call(GitHubApi.service(PullService.class)
-                        .compare(state.owner, state.repo, basehead)))
+        forkSyncText.setText(getString(R.string.fork_checking, state.parentFullName));
+        forkCheck = Single.fromCallable(() -> {
+                    JsonObject repoJson = GitHubApi.call(GitHubApi.service(RepoSettingsService.class)
+                            .getRepo(state.owner, state.repo));
+                    String parentFullName = Json.str(repoJson, "parent.full_name");
+                    if (StringUtils.isBlank(parentFullName)) throw new NotAForkException();
+                    state.parentFullName = parentFullName;
+                    state.defaultBranch = Json.str(repoJson, "default_branch");
+                    state.upstream = ForkSync.upstreamBranch(state.branch, state.defaultBranch,
+                            Json.str(repoJson, "parent.default_branch"));
+                    String basehead = ForkSync.basehead(ForkSync.ownerOf(parentFullName), state.upstream, state.branch);
+                    return GitHubApi.call(GitHubApi.service(PullService.class)
+                            .compare(state.owner, state.repo, basehead));
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
@@ -535,7 +550,8 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                 }, error -> {
                     forkState = null;
                     if (forkSyncBox == null) return;
-                    if (error instanceof GitHubApi.ApiException && ((GitHubApi.ApiException) error).code == 404) {
+                    if (state.upstream != null && error instanceof GitHubApi.ApiException
+                            && ((GitHubApi.ApiException) error).code == 404) {
                         // no branch with this name upstream: nothing to compare or sync
                         forkSyncText.setText(getString(R.string.fork_no_upstream_branch,
                                 state.parentFullName, state.upstream));
@@ -543,6 +559,10 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                         forkSyncBox.setVisibility(View.GONE);
                     }
                 });
+    }
+
+    /** GitHub no longer names a parent (the original was deleted or the fork detached). */
+    private static final class NotAForkException extends java.io.IOException {
     }
 
     /** "This branch is 4 commits ahead of and 8 commits behind owner/repo:main.", with links. */
@@ -650,15 +670,18 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                     hideProgress();
                     if (!isAdded()) return;
                     String message;
+                    // GitHub names the branch it synced from ("owner:branch")
+                    String from = Json.str(result, "base_branch");
+                    String source = StringUtils.isBlank(from) ? state.label() : from;
                     switch (ForkSync.result(Json.str(result, "merge_type"))) {
                         case FAST_FORWARD:
-                            message = getString(R.string.fork_synced_fast_forward, state.branch, state.label());
+                            message = getString(R.string.fork_synced_fast_forward, state.branch, source);
                             break;
                         case MERGE:
-                            message = getString(R.string.fork_synced_merge, state.branch, state.label());
+                            message = getString(R.string.fork_synced_merge, state.branch, source);
                             break;
                         case NONE:
-                            message = getString(R.string.fork_synced_none, state.branch, state.label());
+                            message = getString(R.string.fork_synced_none, state.branch, source);
                             break;
                         default:
                             String said = Json.str(result, "message");
