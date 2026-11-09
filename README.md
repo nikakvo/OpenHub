@@ -108,7 +108,8 @@ app goes to them; see [Credits](#credits).
   and tags
 * Star, watch and fork; **Sync fork** like on github.com: how far a fork branch is ahead of
   and behind the original, update it (fast-forward or merge commit) or discard its own
-  commits, and **Contribute** a pull request to the original
+  commits, turn on the workflows GitHub keeps off in a new fork, and **Contribute** a pull
+  request to the original
 * Releases: create, edit, publish and delete, upload APKs and zips (also by sharing from
   other apps such as Termux), rename and delete files, Latest and Pre-release badges,
   file sizes and download counts; downloads are checked against GitHub's SHA-256

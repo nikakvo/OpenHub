@@ -83,6 +83,25 @@
                             android:layout_marginStart="@dimen/spacing_small"
                             android:text="@string/fork_sync"/>
                     </LinearLayout>
+
+                    <!-- workflows GitHub keeps off in a new fork -->
+                    <TextView
+                        android:id="@+id/fork_workflows_note"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:textColor="?android:textColorSecondary"
+                        android:textSize="@dimen/text_small"
+                        android:visibility="gone"/>
+
+                    <Button
+                        android:id="@+id/fork_enable_workflows_bn"
+                        style="@style/OpenHubButton.Tonal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:text="@string/fork_enable_workflows"
+                        android:visibility="gone"/>
                 </LinearLayout>
 
                 <TextView

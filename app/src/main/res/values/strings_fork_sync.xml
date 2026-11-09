@@ -56,4 +56,13 @@
     <string name="fork_not_ahead">This branch is not ahead of %1$s. There are no commits of your own to send yet.</string>
     <string name="fork_contribute_message">%1$s has %2$s that %3$s does not have.\n\nOpen a pull request to propose them to %3$s.</string>
     <string name="fork_open_pull">Open pull request</string>
+
+    <plurals name="fork_workflows_off">
+        <item quantity="one">%d workflow of this fork is turned off. GitHub keeps the workflows of a new fork off until they are turned on once.</item>
+        <item quantity="other">%d workflows of this fork are turned off. GitHub keeps the workflows of a new fork off until they are turned on once.</item>
+    </plurals>
+    <string name="fork_enable_workflows">Enable workflows</string>
+    <string name="fork_enabling_workflows">Turning on the workflows…</string>
+    <!-- %1$d = workflows GitHub now reports as active, %2$d = workflows we tried -->
+    <string name="fork_workflows_enabled">GitHub reports %1$d of %2$d workflows as active now.</string>
 </resources>

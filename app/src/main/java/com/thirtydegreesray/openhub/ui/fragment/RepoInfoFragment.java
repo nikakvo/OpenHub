@@ -24,6 +24,7 @@ import androidx.appcompat.app.AlertDialog;
 import com.google.gson.JsonObject;
 
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.http.ActionsService;
 import com.thirtydegreesray.openhub.http.ForkSyncService;
 import com.thirtydegreesray.openhub.http.GitDataService;
 import com.thirtydegreesray.openhub.http.GitHubApi;
@@ -59,13 +60,17 @@ import com.thirtydegreesray.openhub.util.RepoChanges;
 import com.thirtydegreesray.openhub.util.RepoCommitter;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
+import com.thirtydegreesray.openhub.util.WorkflowChanges;
+import com.thirtydegreesray.openhub.util.WorkflowStates;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -113,6 +118,8 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
     View forkSyncButtons;
     Button forkContributeBn;
     Button forkSyncBn;
+    TextView forkWorkflowsNote;
+    Button forkEnableWorkflowsBn;
     private Disposable forkCheck;
     private Disposable forkAction;
     /** The last comparison of the shown fork branch with upstream (GitHub's numbers). */
@@ -468,6 +475,12 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         forkSyncBn = root.findViewById(R.id.fork_sync_bn);
         forkContributeBn.setOnClickListener(v -> onContributeClicked());
         forkSyncBn.setOnClickListener(v -> onSyncClicked());
+        forkWorkflowsNote = root.findViewById(R.id.fork_workflows_note);
+        forkEnableWorkflowsBn = root.findViewById(R.id.fork_enable_workflows_bn);
+        forkEnableWorkflowsBn.setOnClickListener(v -> {
+            ForkState state = forkState;
+            if (state != null) enableForkWorkflows(state, false);
+        });
     }
 
     // ---------------------------------------------------------------------------------
@@ -486,6 +499,8 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         int behind;
         boolean canPush;
         Repository parent;
+        /** Workflows GitHub reports as disabled_fork (only read for users who can push). */
+        final List<Long> forkDisabled = new ArrayList<>();
 
         String label() {
             return ForkSync.label(parentFullName, upstream);
@@ -526,6 +541,8 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         state.canPush = canPush(repository);
         forkSyncBox.setVisibility(View.VISIBLE);
         forkSyncButtons.setVisibility(View.GONE);
+        forkWorkflowsNote.setVisibility(View.GONE);
+        forkEnableWorkflowsBn.setVisibility(View.GONE);
         forkSyncText.setText(getString(R.string.fork_checking, state.parentFullName));
         forkCheck = Single.fromCallable(() -> {
                     JsonObject repoJson = GitHubApi.call(GitHubApi.service(RepoSettingsService.class)
@@ -537,8 +554,10 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                     state.upstream = ForkSync.upstreamBranch(state.branch, state.defaultBranch,
                             Json.str(repoJson, "parent.default_branch"));
                     String basehead = ForkSync.basehead(ForkSync.ownerOf(parentFullName), state.upstream, state.branch);
-                    return GitHubApi.call(GitHubApi.service(PullService.class)
+                    JsonObject compare = GitHubApi.call(GitHubApi.service(PullService.class)
                             .compare(state.owner, state.repo, basehead));
+                    if (state.canPush) state.forkDisabled.addAll(forkDisabledWorkflows(state.owner, state.repo));
+                    return compare;
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -602,6 +621,13 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         forkSyncText.setText(spannable);
 
         forkSyncButtons.setVisibility(state.canPush ? View.VISIBLE : View.GONE);
+        boolean workflowsOff = state.canPush && !state.forkDisabled.isEmpty();
+        forkWorkflowsNote.setVisibility(workflowsOff ? View.VISIBLE : View.GONE);
+        forkEnableWorkflowsBn.setVisibility(workflowsOff ? View.VISIBLE : View.GONE);
+        if (workflowsOff) {
+            forkWorkflowsNote.setText(getResources().getQuantityString(R.plurals.fork_workflows_off,
+                    state.forkDisabled.size(), state.forkDisabled.size()));
+        }
         if (state.behind > 0) {
             ButtonStyles.filled(forkSyncBn);
         } else {
@@ -769,13 +795,90 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
             mPresenter.reloadReadMe();
             checkFork(mPresenter.getRepository());
         }
-        new AlertDialog.Builder(requireActivity())
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
                 .setTitle(R.string.fork_synced_title)
-                .setMessage(message)
-                .setPositiveButton(R.string.fork_open_actions, (d, w) -> ActionsActivity.show(requireActivity(),
-                        state.owner, state.repo, state.defaultBranch, state.canPush))
-                .setNegativeButton(R.string.close, null)
-                .show();
+                .setNegativeButton(R.string.close, null);
+        if (!state.forkDisabled.isEmpty()) {
+            // a new fork: its workflows are still off, turn them on right here
+            builder.setMessage(message + "\n\n" + getResources().getQuantityString(R.plurals.fork_workflows_off,
+                    state.forkDisabled.size(), state.forkDisabled.size()))
+                    .setPositiveButton(R.string.fork_enable_workflows, (d, w) -> enableForkWorkflows(state, true))
+                    .setNeutralButton(R.string.fork_open_actions, (d, w) -> openActions(state));
+        } else {
+            builder.setMessage(message)
+                    .setPositiveButton(R.string.fork_open_actions, (d, w) -> openActions(state));
+        }
+        builder.show();
+    }
+
+    private void openActions(@NonNull ForkState state) {
+        if (!isAdded()) return;
+        ActionsActivity.show(requireActivity(), state.owner, state.repo, state.defaultBranch, state.canPush);
+    }
+
+    /** Ids of the workflows GitHub keeps off because the repository is a new fork. */
+    @NonNull
+    private static List<Long> forkDisabledWorkflows(@NonNull String owner, @NonNull String repo) {
+        List<Long> ids = new ArrayList<>();
+        try {
+            for (int page = 1; page <= 3; page++) {
+                JsonObject answer = GitHubApi.call(GitHubApi.service(ActionsService.class)
+                        .listWorkflows(owner, repo, 100, page));
+                com.google.gson.JsonElement items = Json.get(answer, "workflows");
+                int count = 0;
+                if (items != null && items.isJsonArray()) {
+                    for (com.google.gson.JsonElement e : items.getAsJsonArray()) {
+                        if (!e.isJsonObject()) continue;
+                        count++;
+                        if (WorkflowStates.DISABLED_FORK.equals(Json.str(e.getAsJsonObject(), "state"))) {
+                            ids.add(Json.lng(e.getAsJsonObject(), "id"));
+                        }
+                    }
+                }
+                if (count < 100) break;
+            }
+        } catch (java.io.IOException ignored) {
+            // Actions not reachable (turned off, no access): no note, the sync still works
+        }
+        return ids;
+    }
+
+    /**
+     * PUT .../enable for every disabled_fork workflow, then each one is read again: the toast
+     * says how many GitHub reports as active (never assumed).
+     */
+    private void enableForkWorkflows(@NonNull ForkState state, boolean thenOpenActions) {
+        if (state.forkDisabled.isEmpty()) return;
+        if (forkAction != null) forkAction.dispose();
+        showProgressDialog(getString(R.string.fork_enabling_workflows));
+        List<Long> ids = new ArrayList<>(state.forkDisabled);
+        forkAction = Single.fromCallable(() -> {
+                    ActionsService service = GitHubApi.service(ActionsService.class);
+                    for (long id : ids) GitHubApi.call(service.enableWorkflow(state.owner, state.repo, id));
+                    int active = 0;
+                    for (long id : ids) {
+                        String now = Json.str(GitHubApi.call(service.getWorkflow(state.owner, state.repo, id)), "state");
+                        if ("active".equals(now)) active++;
+                    }
+                    return active;
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(active -> {
+                    hideProgress();
+                    WorkflowChanges.markChanged();
+                    if (!isAdded()) return;
+                    String text = getString(R.string.fork_workflows_enabled, active, ids.size());
+                    if (active == ids.size()) showSuccessToast(text); else showWarningToast(text);
+                    if (mPresenter != null) checkFork(mPresenter.getRepository());
+                    if (thenOpenActions && active > 0) openActions(state);
+                }, error -> {
+                    hideProgress();
+                    WorkflowChanges.markChanged();
+                    if (!isAdded()) return;
+                    showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                    if (mPresenter != null) checkFork(mPresenter.getRepository());
+                });
     }
 
     private void onContributeClicked() {
