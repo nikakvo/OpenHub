@@ -5,40 +5,57 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
-import android.widget.MediaController;
-import android.widget.ProgressBar;
-import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.DefaultDataSource;
+import androidx.media3.datasource.okhttp.OkHttpDataSource;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
+import androidx.media3.ui.AspectRatioFrameLayout;
+import androidx.media3.ui.PlayerView;
 
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.http.core.MediaHttp;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.Attachments;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 /**
  * Plays a video attached to an issue, a comment or a post (GitHub's
- * {@code github.com/user-attachments/assets/<uuid>} link) inside the app, with Android's
- * own player. A file uploaded in this run of the app is played from the phone: GitHub
- * keeps it private until the comment is sent. Afterwards GitHub's link leads to the file.
- * When it cannot be played, the link can be opened in the browser.
+ * {@code github.com/user-attachments/assets/<uuid>} link) inside the app with Media3
+ * ExoPlayer: its own decoders and extractors (MP4, MOV, WebM, ...), seek bar, the video's
+ * proportions in every orientation, and the reason when a video cannot be played. The
+ * network goes through the app's OkHttp ({@link MediaHttp}). A file uploaded in this run
+ * of the app is played from the phone: GitHub keeps it private until the comment is sent.
  */
+@OptIn(markerClass = UnstableApi.class)
 public class VideoPlayerActivity extends AppCompatActivity {
 
     private static final String EXTRA_URL = "url";
     private static final String STATE_POSITION = "position";
 
-    private FitVideoView video;
-    private ProgressBar loader;
+    private PlayerView view;
+    @Nullable private ExoPlayer player;
     private String url;
-    private int startAt;
-    @Nullable private io.reactivex.rxjava3.disposables.Disposable checking;
+    private long startAt;
+    @Nullable private Disposable checking;
+    /** the file type check is still running: a player error waits for its answer */
+    private boolean typeUnknown;
+    @Nullable private PlaybackException waitingError;
 
     public static void show(@NonNull Context context, @NonNull String url) {
         Intent intent = new Intent(context, VideoPlayerActivity.class).putExtra(EXTRA_URL, url.trim());
@@ -56,76 +73,93 @@ public class VideoPlayerActivity extends AppCompatActivity {
         }
         if (getSupportActionBar() != null) getSupportActionBar().hide();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        startAt = savedInstanceState == null ? 0 : savedInstanceState.getInt(STATE_POSITION, 0);
+        startAt = savedInstanceState == null ? 0 : savedInstanceState.getLong(STATE_POSITION, 0);
 
-        FrameLayout root = new FrameLayout(this);
-        root.setBackgroundColor(Color.BLACK);
-        video = new FitVideoView(this);
-        root.addView(video, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT, Gravity.CENTER));
-        loader = new ProgressBar(this);
-        root.addView(loader, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
-        setContentView(root);
+        view = new PlayerView(this);
+        view.setBackgroundColor(Color.BLACK);
+        view.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+        view.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS);
+        view.setKeepScreenOn(true);
+        setContentView(view);
 
-        MediaController controls = new MediaController(this);
-        controls.setAnchorView(video);
-        video.setMediaController(controls);
-        video.setOnPreparedListener(player -> {
-            loader.setVisibility(android.view.View.GONE);
-            video.setVideoSize(player.getVideoWidth(), player.getVideoHeight());
-            player.setOnVideoSizeChangedListener((p, w, h) -> video.setVideoSize(w, h));
-            if (startAt > 0) video.seekTo(startAt);
-            video.start();
-            controls.show(3000);
+        // content:// and file:// from the phone, http(s) through the app's OkHttp
+        DefaultDataSource.Factory dataSource = new DefaultDataSource.Factory(this,
+                new OkHttpDataSource.Factory(MediaHttp.client()));
+        ExoPlayer exo = new ExoPlayer.Builder(this)
+                .setMediaSourceFactory(new DefaultMediaSourceFactory(dataSource))
+                .build();
+        player = exo;
+        view.setPlayer(exo);
+        exo.addListener(new Player.Listener() {
+            @Override
+            public void onPlayerError(@NonNull PlaybackException error) {
+                if (typeUnknown) {
+                    waitingError = error;
+                } else {
+                    showCannotPlay(error);
+                }
+            }
+
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                // at the end the controls stay, so it can be played again
+                if (state == Player.STATE_ENDED) view.showController();
+            }
         });
-        video.setOnErrorListener((player, what, extra) -> {
-            loader.setVisibility(android.view.View.GONE);
-            showCannotPlay();
-            return true;
-        });
-        video.setOnCompletionListener(player -> controls.show(0));
 
         String local = Attachments.localCopy(url);
-        if (local != null) {
-            video.setVideoURI(Uri.parse(local));
+        play(local != null ? Uri.parse(local) : Uri.parse(url));
+        if (local != null) return;
+
+        // a bare link of a picture (pasted instead of ![..](..)) is not a video: GitHub is
+        // asked what the file is while the player already loads it
+        typeUnknown = true;
+        checking = Single.fromCallable(() -> contentType(url))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::typeKnown, error -> typeKnown(""));
+    }
+
+    private void play(@NonNull Uri uri) {
+        if (player == null) return;
+        player.setMediaItem(MediaItem.fromUri(uri), startAt);
+        player.setPlayWhenReady(true);
+        player.prepare();
+    }
+
+    private void typeKnown(@NonNull String type) {
+        typeUnknown = false;
+        if (type.startsWith("image/")) {
+            releasePlayer();
+            ViewerActivity.showImage(this, url);
+            finish();
             return;
         }
-        // a bare link of a picture (pasted instead of ![..](..)) is not a video: ask GitHub
-        // what the file is before playing it
-        checking = io.reactivex.rxjava3.core.Single.fromCallable(() -> contentType(url))
-                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
-                .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
-                .subscribe(type -> {
-                    if (type.startsWith("image/")) {
-                        ViewerActivity.showImage(this, url);
-                        finish();
-                    } else {
-                        video.setVideoURI(Uri.parse(url));
-                    }
-                }, error -> video.setVideoURI(Uri.parse(url)));
+        if (waitingError != null) {
+            PlaybackException error = waitingError;
+            waitingError = null;
+            showCannotPlay(error);
+        }
     }
 
     /** The Content-Type of the file behind a link ("" when unknown); reads one byte. */
     @NonNull
     private static String contentType(@NonNull String url) throws java.io.IOException {
-        okhttp3.OkHttpClient client = new okhttp3.OkHttpClient.Builder()
-                .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
-                .build();
         okhttp3.Request request = new okhttp3.Request.Builder().url(url)
-                .header("Range", "bytes=0-0").header("User-Agent", "OpenHub").build();
-        try (okhttp3.Response response = client.newCall(request).execute()) {
+                .header("Range", "bytes=0-0").build();
+        try (okhttp3.Response response = MediaHttp.client().newCall(request).execute()) {
             String type = response.header("Content-Type");
             return type == null ? "" : type.toLowerCase(java.util.Locale.ROOT);
         }
     }
 
-    private void showCannotPlay() {
+    private void showCannotPlay(@NonNull PlaybackException error) {
         if (isFinishing()) return;
+        // the reason in Media3's words, e.g. ERROR_CODE_DECODING_FORMAT_UNSUPPORTED
+        String message = getString(R.string.video_cannot_play, error.getErrorCodeName());
         new AlertDialog.Builder(this)
                 .setTitle(R.string.video_cannot_play_title)
-                .setMessage(R.string.video_cannot_play)
+                .setMessage(message)
                 .setPositiveButton(R.string.open_in_browser, (d, w) -> {
                     AppOpener.openInBrowser(this, url);
                     finish();
@@ -135,59 +169,30 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 .show();
     }
 
-    /**
-     * Fits the video into the screen with its own proportions (black bars at the sides or
-     * at the top and bottom), also after a rotation. VideoView with a fixed width and a
-     * limited height cut the height and stretched the picture.
-     */
-    private static final class FitVideoView extends VideoView {
-
-        private int videoWidth;
-        private int videoHeight;
-
-        FitVideoView(@NonNull Context context) {
-            super(context);
-        }
-
-        void setVideoSize(int width, int height) {
-            if (width <= 0 || height <= 0 || (width == videoWidth && height == videoHeight)) return;
-            videoWidth = width;
-            videoHeight = height;
-            requestLayout();
-        }
-
-        @Override
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            int maxWidth = MeasureSpec.getSize(widthMeasureSpec);
-            int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
-            if (videoWidth <= 0 || videoHeight <= 0 || maxWidth <= 0 || maxHeight <= 0) {
-                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-                return;
-            }
-            float scale = Math.min(maxWidth / (float) videoWidth, maxHeight / (float) videoHeight);
-            setMeasuredDimension(Math.round(videoWidth * scale), Math.round(videoHeight * scale));
-        }
-    }
-
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (video != null) outState.putInt(STATE_POSITION, video.getCurrentPosition());
+        if (player != null) outState.putLong(STATE_POSITION, player.getCurrentPosition());
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (video != null && video.isPlaying()) {
-            startAt = video.getCurrentPosition();
-            video.pause();
+        if (player != null) player.pause();
+    }
+
+    private void releasePlayer() {
+        if (player != null) {
+            if (view != null) view.setPlayer(null);
+            player.release();
+            player = null;
         }
     }
 
     @Override
     protected void onDestroy() {
         if (checking != null) checking.dispose();
-        if (video != null) video.stopPlayback();
+        releasePlayer();
         super.onDestroy();
     }
 }
