@@ -70,29 +70,34 @@ public class AttachmentsTest {
     }
 
     @Test
-    public void insertOnALineOfItsOwn() {
+    public void insertAsAParagraphOfItsOwn() {
         Attachments.Insertion empty = Attachments.insert("", 0, 0, "X");
-        assertEquals("X\n", empty.text);
-        assertEquals(2, empty.cursor);
+        assertEquals("X\n\n", empty.text);
+        assertEquals(3, empty.cursor);
 
         Attachments.Insertion end = Attachments.insert("Hello", 5, 5, "X");
-        assertEquals("Hello\nX\n", end.text);
-        assertEquals(8, end.cursor);
+        assertEquals("Hello\n\nX\n\n", end.text);
+        assertEquals(10, end.cursor);
 
-        Attachments.Insertion middle = Attachments.insert("Hello world", 5, 5, "X");
-        assertEquals("Hello\nX\n world", middle.text);
+        assertEquals("Hello\n\nX\n\n world", Attachments.insert("Hello world", 5, 5, "X").text);
 
+        // one line break before: one more; an empty line before: nothing more
         Attachments.Insertion lineStart = Attachments.insert("a\nb", 2, 2, "X");
-        assertEquals("a\nX\nb", lineStart.text);
-        assertEquals(4, lineStart.cursor);
+        assertEquals("a\n\nX\n\nb", lineStart.text);
+        assertEquals(6, lineStart.cursor);
+        assertEquals("a\n\nX\n\nb", Attachments.insert("a\n\nb", 3, 3, "X").text);
 
+        // line breaks after are counted, the cursor goes past them
         Attachments.Insertion beforeBreak = Attachments.insert("a\n", 1, 1, "X");
-        assertEquals("a\nX\n", beforeBreak.text);
-        assertEquals(4, beforeBreak.cursor);
+        assertEquals("a\n\nX\n\n", beforeBreak.text);
+        assertEquals(6, beforeBreak.cursor);
+        Attachments.Insertion beforeEmptyLine = Attachments.insert("a\n\nb", 1, 1, "X");
+        assertEquals("a\n\nX\n\nb", beforeEmptyLine.text);
+        assertEquals(6, beforeEmptyLine.cursor);
 
         // a selection is replaced; no cursor (-1) means the end
-        assertEquals("a\nX\nc", Attachments.insert("abc", 1, 2, "X").text);
-        assertEquals("abc\nX\n", Attachments.insert("abc", -1, -1, "X").text);
+        assertEquals("a\n\nX\n\nc", Attachments.insert("abc", 1, 2, "X").text);
+        assertEquals("abc\n\nX\n\n", Attachments.insert("abc", -1, -1, "X").text);
     }
 
     @Test

@@ -21,7 +21,27 @@ public final class Attachments {
     /** Videos: 10 MB on Free plans, 100 MB on paid plans; GitHub decides between the two. */
     public static final long VIDEO_LIMIT = 100L * 1024 * 1024;
 
+    /**
+     * GitHub's link of a file uploaded in this run of the app -> the file on the phone
+     * (content:// URI). A new upload is not public until a comment that uses it is sent, so
+     * GitHub answers 404 for it in the preview; the preview (and the comment just sent)
+     * shows the same file from the phone instead.
+     */
+    private static final java.util.Map<String, String> LOCAL_COPIES =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
     private Attachments() {
+    }
+
+    public static void rememberLocalCopy(String url, String localUri) {
+        if (url == null || localUri == null) return;
+        if (LOCAL_COPIES.size() > 200) LOCAL_COPIES.clear();
+        LOCAL_COPIES.put(url, localUri);
+    }
+
+    /** The file on the phone for an uploaded link, or null. */
+    public static String localCopy(String url) {
+        return url == null ? null : LOCAL_COPIES.get(url);
     }
 
     /**
@@ -118,8 +138,10 @@ public final class Attachments {
     }
 
     /**
-     * Puts {@code block} in place of the selection, on a line of its own: a line break is
-     * added before it unless it starts a line, and after it unless a line break follows.
+     * Puts {@code block} in place of the selection as a paragraph of its own: an empty line
+     * before it (unless it starts the text) and after it. One line break does not end a
+     * paragraph in Markdown, and GitHub shows a video as a player only when its link stands
+     * alone. The cursor goes after the empty line that follows, ready to write on.
      */
     public static Insertion insert(String text, int selectionStart, int selectionEnd, String block) {
         String current = text == null ? "" : text;
@@ -132,14 +154,15 @@ public final class Attachments {
         String before = current.substring(0, start);
         String after = current.substring(end);
         StringBuilder middle = new StringBuilder();
-        if (!before.isEmpty() && !before.endsWith("\n")) middle.append('\n');
-        middle.append(block);
-        // the cursor goes to the start of the next line, ready to write on
-        if (after.startsWith("\n")) {
-            return new Insertion(before + middle + after, before.length() + middle.length() + 1);
+        if (!before.isEmpty()) {
+            if (!before.endsWith("\n")) middle.append("\n\n");
+            else if (!before.endsWith("\n\n")) middle.append('\n');
         }
-        middle.append('\n');
-        return new Insertion(before + middle + after, before.length() + middle.length());
+        middle.append(block);
+        int breaks = after.startsWith("\n\n") ? 2 : after.startsWith("\n") ? 1 : 0;
+        for (int i = breaks; i < 2; i++) middle.append('\n');
+        int cursor = before.length() + middle.length() + breaks;
+        return new Insertion(before + middle + after, cursor);
     }
 
     /** The message for a refused upload: GitHub's own text where it gives one. */

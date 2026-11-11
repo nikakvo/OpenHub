@@ -119,7 +119,11 @@ public final class MarkdownRenderer {
                     @Override
                     public RequestBuilder<Drawable> load(@NonNull AsyncDrawable drawable) {
                         // big screenshots are decoded at most as wide as the screen
-                        return glide.load(drawable.getDestination())
+                        // a file uploaded just now: GitHub keeps it private until the comment is
+                        // sent, so the preview shows the same file from the phone
+                        String local = Attachments.localCopy(drawable.getDestination());
+                        Object source = local != null ? android.net.Uri.parse(local) : drawable.getDestination();
+                        return glide.load(source)
                                 .override(maxWidth, Target.SIZE_ORIGINAL)
                                 .fitCenter()
                                 .addListener(new RequestListener<Drawable>() {

@@ -169,6 +169,8 @@ public final class AttachFlow {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(url -> {
                     activity.dismissProgressDialog();
+                    ContentFiles.keepReadAccess(activity, uri);
+                    Attachments.rememberLocalCopy(url, uri.toString());
                     host.insertAttachment(Attachments.markdown(name, url, type));
                     Toasty.success(activity, activity.getString(R.string.attach_done, name)).show();
                 }, error -> {
