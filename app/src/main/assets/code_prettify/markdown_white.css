@@ -119,15 +119,15 @@ li {
 
 /* blockquote */
 .markdown-body blockquote {
-    padding: 0 1em;
-    color: #6a737d;
-    border-left: 0.25em solid #dfe2e5;
+    padding: 0 0 0 12px;
+    color: #59636E;
+    border-left: 4px solid #B4BBC3;
 }
 
 blockquote {
-    padding: 0 1em;
-    color: #6a737d;
-    border-left: 0.25em solid #dfe2e5;
+    padding: 0 0 0 12px;
+    color: #59636E;
+    border-left: 4px solid #B4BBC3;
 }
 
 blockquote {

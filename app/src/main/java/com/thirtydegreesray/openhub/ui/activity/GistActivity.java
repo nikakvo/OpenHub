@@ -286,8 +286,8 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
             if (StringUtils.isBlank(html)) {
                 body.setText(Json.str(comment, "body"));
             } else {
-                body.setText(linksInApp(android.text.Html.fromHtml(html,
-                        android.text.Html.FROM_HTML_MODE_COMPACT)));
+                body.setText(com.thirtydegreesray.openhub.util.QuoteStyle.apply(this,
+                        linksInApp(android.text.Html.fromHtml(html, android.text.Html.FROM_HTML_MODE_COMPACT))));
                 body.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
             }
             View.OnLongClickListener menu = v -> {

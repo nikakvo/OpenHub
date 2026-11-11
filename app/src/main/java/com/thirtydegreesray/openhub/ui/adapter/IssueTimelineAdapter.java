@@ -22,6 +22,7 @@ import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
 import com.thirtydegreesray.openhub.ui.widget.CircleBackgroundImageView;
 import com.thirtydegreesray.openhub.ui.widget.IssueLabelSpan;
 import com.thirtydegreesray.openhub.util.PrefUtils;
+import com.thirtydegreesray.openhub.util.QuoteStyle;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 import com.thirtydegreesray.openhub.util.WindowUtil;
@@ -189,7 +190,7 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
             userName.setText(model.getUser().getLogin());
             time.setText(StringUtils.getNewsTimeStr(context, model.getCreatedAt()));
             if (!StringUtils.isBlank(model.getBodyHtml())) {
-                commentDesc.setText(Html.fromHtml(model.getBodyHtml()));
+                commentDesc.setText(QuoteStyle.apply(context, Html.fromHtml(model.getBodyHtml())));
             } else if (!StringUtils.isBlank(model.getBody())) {
                 commentDesc.setText(model.getBody());
             } else {

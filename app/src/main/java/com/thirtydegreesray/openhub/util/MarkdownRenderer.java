@@ -20,7 +20,10 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
+import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.Markwon;
+import io.noties.markwon.MarkwonSpansFactory;
+import io.noties.markwon.core.MarkwonTheme;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.noties.markwon.ext.tables.TablePlugin;
 import io.noties.markwon.ext.tasklist.TaskListPlugin;
@@ -29,6 +32,8 @@ import io.noties.markwon.image.AsyncDrawable;
 import io.noties.markwon.image.AsyncDrawableSpan;
 import io.noties.markwon.image.glide.GlideImagesPlugin;
 import io.noties.markwon.linkify.LinkifyPlugin;
+
+import org.commonmark.node.BlockQuote;
 
 /**
  * The Markdown renderer of comments and posts (discussions, pull requests, line comments,
@@ -62,7 +67,24 @@ public final class MarkdownRenderer {
             main.postDelayed(onImageLoaded, 120);
         };
         final int maxWidth = context.getResources().getDisplayMetrics().widthPixels;
+        final int quoteBar = QuoteStyle.barColor(context);
+        final int quoteText = QuoteStyle.textColor(context);
+        final int quoteWidth = QuoteStyle.px(context, QuoteStyle.BAR_DP);
         return Markwon.builder(context)
+                .usePlugin(new AbstractMarkwonPlugin() {
+                    // quotes: a 4 dp grey bar and grey text, like QuoteStyle (the default bar
+                    // is the text color at 10 %, hard to see)
+                    @Override
+                    public void configureTheme(@NonNull MarkwonTheme.Builder builder) {
+                        builder.blockQuoteWidth(quoteWidth).blockQuoteColor(quoteBar);
+                    }
+
+                    @Override
+                    public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
+                        builder.appendFactory(BlockQuote.class,
+                                (configuration, props) -> new android.text.style.ForegroundColorSpan(quoteText));
+                    }
+                })
                 .usePlugin(StrikethroughPlugin.create())
                 .usePlugin(TablePlugin.create(context))
                 .usePlugin(TaskListPlugin.create(context))

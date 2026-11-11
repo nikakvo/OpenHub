@@ -63,7 +63,7 @@ public class ReleasesAdapter extends BaseAdapter<ReleasesAdapter.ViewHolder, Rel
         holder.time.setText(model.getDisplayDate() == null ? ""
                 : StringUtils.getNewsTimeStr(context, model.getDisplayDate()));
         if(!StringUtils.isBlank(model.getBodyHtml())){
-            holder.body.setText(Html.fromHtml(model.getBodyHtml()));
+            holder.body.setText(com.thirtydegreesray.openhub.util.QuoteStyle.apply(context, Html.fromHtml(model.getBodyHtml())));
             holder.body.setVisibility(View.VISIBLE);
         } else {
             holder.body.setText("");
