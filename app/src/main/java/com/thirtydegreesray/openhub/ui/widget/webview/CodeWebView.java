@@ -290,6 +290,14 @@ public class CodeWebView extends WebView {
             scrollToAnchor(uri.getSchemeSpecificPart());
             return;
         }
+        // a video of the page started: the app's player, with the page's own source
+        if (HtmlHelper.VIDEO_SCHEME.equalsIgnoreCase(uri.getScheme())) {
+            String source = Uri.decode(uri.getEncodedSchemeSpecificPart());
+            if (source != null && source.startsWith("https://")) {
+                com.thirtydegreesray.openhub.ui.activity.VideoPlayerActivity.show(getContext(), source);
+            }
+            return;
+        }
         if ("file".equalsIgnoreCase(uri.getScheme())) {
             scrollToAnchor(uri.getFragment());
             return;
