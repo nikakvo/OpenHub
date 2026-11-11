@@ -174,6 +174,17 @@ class HtmlHelper {
             + "location.href='" + ANCHOR_SCHEME + ":'+encodeURIComponent(a.getAttribute('href').substring(1));"
             + "});</script>\n";
 
+    /**
+     * A video in GitHub's HTML (an attached video is a {@code <video>} element) opens in the
+     * app's player when it is started: the page's own player stopped on every rotation (the
+     * page is loaded again) and stayed small in landscape. GitHub's link of the file is in
+     * data-canonical-src, else in src; AppOpener.launchUrl sends it to the player.
+     */
+    private static final String VIDEO_SCRIPT = "<script>document.addEventListener('play',function(ev){"
+            + "var v=ev.target;if(!v||v.tagName!=='VIDEO')return;v.pause();"
+            + "var s=v.getAttribute('data-canonical-src')||v.getAttribute('src')||v.currentSrc;"
+            + "if(s)location.href=s;},true);</script>\n";
+
     static String generateMdHtml(@NonNull String mdSource, @Nullable String baseUrl,
                                  boolean isDark, @NonNull String backgroundColor,
                                  @NonNull String accentColor, boolean wrapCode) {
@@ -205,6 +216,7 @@ class HtmlHelper {
                     "<body>\n" +
                         mdSource +
                         ANCHOR_SCRIPT +
+                        VIDEO_SCRIPT +
                     "</body>\n" +
                 "</html>";
     }
