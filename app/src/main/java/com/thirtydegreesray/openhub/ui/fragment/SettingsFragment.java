@@ -41,7 +41,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.List;
 
-import es.dmoral.toasty.Toasty;
+import com.thirtydegreesray.openhub.util.Toasts;
 
 /**
  * Created on 2017/8/3.
@@ -264,7 +264,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             if (getActivity() == null) return;
             getActivity().runOnUiThread(() -> {
                 if (!isAdded()) return;
-                Toasty.success(app, getString(R.string.clear_cache_done), Toast.LENGTH_SHORT).show();
+                Toasts.success(app, getString(R.string.clear_cache_done), Toast.LENGTH_SHORT).show();
                 updateCacheSummary();
             });
         }, "cache-clear").start();
@@ -346,7 +346,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app));
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Toasty.info(getContext(), getString(R.string.open_links_hint), android.widget.Toast.LENGTH_LONG).show();
+            Toasts.info(getContext(), getString(R.string.open_links_hint), android.widget.Toast.LENGTH_LONG).show();
         }
     }
 
@@ -415,7 +415,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     private void applyReleaseInterval(int minutes) {
         ReleaseWatcher.setIntervalMinutes(getContext(), minutes);
         updateWatchedReleasesSummary();
-        Toasty.success(getContext(), getString(R.string.release_check_interval_set,
+        Toasts.success(getContext(), getString(R.string.release_check_interval_set,
                 ReleaseWatcher.formatInterval(ReleaseWatcher.getIntervalMinutes(getContext())))).show();
     }
 
@@ -423,7 +423,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     private void showWatchedReleases() {
         final List<String> repos = ReleaseWatcher.getWatched(getContext());
         if (repos.isEmpty()) {
-            Toasty.info(getContext(), getString(R.string.watched_releases_summary_none)).show();
+            Toasts.info(getContext(), getString(R.string.watched_releases_summary_none)).show();
             return;
         }
         final String[] items = repos.toArray(new String[0]);

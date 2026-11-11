@@ -50,7 +50,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import es.dmoral.toasty.Toasty;
+import com.thirtydegreesray.openhub.util.Toasts;
 import com.thirtydegreesray.openhub.R;
 
 /**
@@ -387,27 +387,27 @@ BaseActivity<P extends IBaseContract.Presenter>
 
     @Override
     public void showToast(String message){
-        Toasty.normal(getActivity(), message).show();
+        Toasts.normal(getActivity(), message).show();
     }
 
     @Override
     public void showInfoToast(String message) {
-        Toasty.info(getActivity(), message).show();
+        Toasts.info(getActivity(), message).show();
     }
 
     @Override
     public void showSuccessToast(String message) {
-        Toasty.success(getActivity(), message).show();
+        Toasts.success(getActivity(), message).show();
     }
 
     @Override
     public void showErrorToast(String message) {
-        Toasty.error(getActivity(), message).show();
+        Toasts.error(getActivity(), message).show();
     }
 
     @Override
     public void showWarningToast(String message) {
-        Toasty.warning(getActivity(), message).show();
+        Toasts.warning(getActivity(), message).show();
     }
 
     @Override

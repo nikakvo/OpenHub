@@ -24,7 +24,7 @@ import com.thirtydegreesray.openhub.util.StringUtils;
 
 import java.util.ArrayList;
 
-import es.dmoral.toasty.Toasty;
+import com.thirtydegreesray.openhub.util.Toasts;
 
 /**
  * Created by ThirtyDegreesRay on 2017/9/29 11:43:25
@@ -154,7 +154,7 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
 
     private void commit(){
         if(StringUtils.isBlank(getText())){
-            Toasty.warning(getActivity(), getString(R.string.comment_null_warning)).show();
+            Toasts.warning(getActivity(), getString(R.string.comment_null_warning)).show();
             return;
         }
         Intent data = new Intent();

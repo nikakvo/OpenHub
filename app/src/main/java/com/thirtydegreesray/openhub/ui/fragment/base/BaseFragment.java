@@ -31,7 +31,7 @@ import com.thirtydegreesray.openhub.util.AppUtils;
 
 import javax.inject.Inject;
 
-import es.dmoral.toasty.Toasty;
+import com.thirtydegreesray.openhub.util.Toasts;
 
 /**
  * Created on 2017/7/18.
@@ -236,28 +236,28 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
 
     @Override
     public void showToast(String message) {
-        Toasty.normal(getActivity(), message).show();
+        Toasts.normal(getActivity(), message).show();
     }
 
     @Override
     public void showInfoToast(String message) {
-        Toasty.info(getActivity(), message).show();
+        Toasts.info(getActivity(), message).show();
     }
 
     @Override
     public void showSuccessToast(String message) {
-        Toasty.success(getActivity(), message).show();
+        Toasts.success(getActivity(), message).show();
     }
 
     @Override
     public void showErrorToast(String message) {
         pullDone();
-        Toasty.error(getActivity(), message).show();
+        Toasts.error(getActivity(), message).show();
     }
 
     @Override
     public void showWarningToast(String message) {
-        Toasty.warning(getActivity(), message).show();
+        Toasts.warning(getActivity(), message).show();
     }
 
     @Override

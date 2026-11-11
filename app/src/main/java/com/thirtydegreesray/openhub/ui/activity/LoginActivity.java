@@ -27,7 +27,7 @@ import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import androidx.appcompat.widget.AppCompatButton;
 
-import es.dmoral.toasty.Toasty;
+import com.thirtydegreesray.openhub.util.Toasts;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 import android.view.View;
 
@@ -70,7 +70,7 @@ public class LoginActivity extends BaseActivity<LoginPresenter>
         loginBn.setEnabled(true);
         if (tokenLoginBn != null) tokenLoginBn.setEnabled(true);
 
-        Toasty.error(getApplicationContext(), errorMsg).show();
+        Toasts.error(getApplicationContext(), errorMsg).show();
     }
 
     private static final String EXTRA_LOGIN_HINT = "loginHint";

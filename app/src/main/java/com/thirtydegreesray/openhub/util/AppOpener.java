@@ -46,7 +46,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import es.dmoral.toasty.Toasty;
 
 /**
  * Created by ThirtyDegreesRay on 2017/10/30 11:18:57
@@ -56,7 +55,7 @@ public class AppOpener {
 
     public static void openInCustomTabsOrBrowser(@NonNull Context context, @NonNull String url){
         if(StringUtils.isBlank(url)){
-            Toasty.warning(context, context.getString(R.string.invalid_url), Toast.LENGTH_LONG).show();
+            Toasts.warning(context, context.getString(R.string.invalid_url), Toast.LENGTH_LONG).show();
             return;
         }
         //check http prefix
@@ -92,7 +91,7 @@ public class AppOpener {
             customTabsIntent.launchUrl(context, Uri.parse(url));
 
             if(PrefUtils.isCustomTabsTipsEnable()){
-                Toasty.info(context, context.getString(R.string.use_custom_tabs_tips), Toast.LENGTH_LONG).show();
+                Toasts.info(context, context.getString(R.string.use_custom_tabs_tips), Toast.LENGTH_LONG).show();
                 PrefUtils.set(PrefUtils.CUSTOM_TABS_TIPS_ENABLE, false);
             }
 
@@ -110,7 +109,7 @@ public class AppOpener {
         if(intent != null){
             context.startActivity(intent);
         } else {
-            Toasty.warning(context, context.getString(R.string.no_browser_clients), Toast.LENGTH_LONG).show();
+            Toasts.warning(context, context.getString(R.string.no_browser_clients), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -130,7 +129,7 @@ public class AppOpener {
             return;
         }
         if(StringUtils.isBlank(url) || StringUtils.isBlank(fileName)){
-            Toasty.error(context, context.getString(R.string.download_empty_tip)).show();
+            Toasts.error(context, context.getString(R.string.download_empty_tip)).show();
             return;
         }
         final Context appContext = context.getApplicationContext();
@@ -142,7 +141,7 @@ public class AppOpener {
                 ActivityCompat.requestPermissions(activity,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
             }
-            Toasty.warning(appContext, appContext.getString(R.string.permission_storage_denied),
+            Toasts.warning(appContext, appContext.getString(R.string.permission_storage_denied),
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -158,7 +157,7 @@ public class AppOpener {
 
     public static void openDownloader(@NonNull Context context, @NonNull String url) {
         if(StringUtils.isBlank(url)){
-            Toasty.warning(context, context.getString(R.string.invalid_url), Toast.LENGTH_LONG).show();
+            Toasts.warning(context, context.getString(R.string.invalid_url), Toast.LENGTH_LONG).show();
             return;
         }
         Uri uri = Uri.parse(url);
@@ -168,7 +167,7 @@ public class AppOpener {
         if(intent != null){
             context.startActivity(intent);
         } else {
-            Toasty.warning(context, context.getString(R.string.no_download_clients), Toast.LENGTH_LONG).show();
+            Toasts.warning(context, context.getString(R.string.no_download_clients), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -182,7 +181,7 @@ public class AppOpener {
             context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_to))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }catch (ActivityNotFoundException e){
-            Toasty.warning(context, context.getString(R.string.no_share_clients)).show();
+            Toasts.warning(context, context.getString(R.string.no_share_clients)).show();
         }
     }
 
@@ -195,7 +194,7 @@ public class AppOpener {
             context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_email))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }catch (ActivityNotFoundException e){
-            Toasty.warning(context, context.getString(R.string.no_email_clients)).show();
+            Toasts.warning(context, context.getString(R.string.no_email_clients)).show();
         }
     }
 
@@ -207,7 +206,7 @@ public class AppOpener {
             context.startActivity(Intent.createChooser(intent, context.getString(R.string.open_in_market))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }catch (ActivityNotFoundException e){
-            Toasty.warning(context, context.getString(R.string.no_market_clients)).show();
+            Toasts.warning(context, context.getString(R.string.no_market_clients)).show();
         }
     }
 

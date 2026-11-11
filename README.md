@@ -297,8 +297,6 @@ Never commit keys or passwords: `public.properties` is in git and must stay empt
 * [Glide](https://github.com/bumptech/glide) An image loading and caching library for Android focused on smooth scrolling.
 * [code-prettify](https://github.com/google/code-prettify) An embeddable script that makes source-code snippets in HTML prettier.
 * [DataAutoAccess](https://github.com/ThirtyDegreesRay/DataAutoAccess) A simple way to access android bundle data.
-* [CircleImageView](https://github.com/hdodenhof/CircleImageView) A circular ImageView for Android.
-* [Toasty](https://github.com/GrenderG/Toasty) The usual Toast, but with steroids 💪.
 * [GitHub-Trending](https://github.com/thedillonb/GitHub-Trending) Scrapes GitHub's Trending Pages.
 * [Markwon](https://github.com/noties/Markwon) Markdown for Android (and commonmark-java underneath).
 * [jsoup](https://github.com/jhy/jsoup) Java HTML Parser, with best of DOM, CSS, and jquery.

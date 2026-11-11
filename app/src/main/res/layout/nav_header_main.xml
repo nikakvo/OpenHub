@@ -22,7 +22,7 @@
             android:layout_height="64dp"
             android:layout_marginTop="@dimen/spacing_small">
 
-            <de.hdodenhof.circleimageview.CircleImageView
+            <com.thirtydegreesray.openhub.ui.widget.CircleImageView
                 android:id="@+id/avatar"
                 android:layout_width="50dp"
                 android:layout_height="50dp"

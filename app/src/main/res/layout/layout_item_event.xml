@@ -21,7 +21,7 @@
         android:src="@drawable/ic_dot"
         app:background_color="@color/material_green_900"/>
 
-    <de.hdodenhof.circleimageview.CircleImageView
+    <com.thirtydegreesray.openhub.ui.widget.CircleImageView
         android:id="@+id/user_avatar"
         android:layout_width="32dp"
         android:layout_height="32dp"

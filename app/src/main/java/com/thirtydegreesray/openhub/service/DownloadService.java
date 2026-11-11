@@ -51,7 +51,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import es.dmoral.toasty.Toasty;
+import com.thirtydegreesray.openhub.util.Toasts;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -290,9 +290,9 @@ public class DownloadService extends Service {
     private void toast(final String text, final boolean success) {
         mainHandler.post(() -> {
             if (success) {
-                Toasty.success(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+                Toasts.success(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
             } else {
-                Toasty.error(getApplicationContext(), text, Toast.LENGTH_LONG).show();
+                Toasts.error(getApplicationContext(), text, Toast.LENGTH_LONG).show();
             }
         });
     }

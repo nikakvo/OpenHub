@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-import es.dmoral.toasty.Toasty;
+import com.thirtydegreesray.openhub.util.Toasts;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -178,7 +178,7 @@ public final class AttachFlow {
                     ContentFiles.keepReadAccess(activity, uri);
                     Attachments.rememberLocalCopy(url, uri.toString(), type);
                     host.insertAttachment(Attachments.markdown(name, url, type));
-                    Toasty.success(activity, activity.getString(R.string.attach_done, name)).show();
+                    Toasts.success(activity, activity.getString(R.string.attach_done, name)).show();
                 }, error -> {
                     activity.dismissProgressDialog();
                     if (error instanceof UploadRefused) {

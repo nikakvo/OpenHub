@@ -23,7 +23,6 @@ import com.thirtydegreesray.openhub.R;
 
 import java.util.Locale;
 
-import es.dmoral.toasty.Toasty;
 
 /**
  * Created on 2017/10/30 11:23:03
@@ -106,7 +105,7 @@ public class AppUtils {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(context.getString(R.string.app_name), uri);
         clipboard.setPrimaryClip(clip);
-        Toasty.success(AppApplication.get(), context.getString(R.string.success_copied)).show();
+        Toasts.success(AppApplication.get(), context.getString(R.string.success_copied)).show();
     }
 
     public static boolean isLandscape(@NonNull Resources resources) {

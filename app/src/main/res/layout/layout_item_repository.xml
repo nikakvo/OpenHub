@@ -20,7 +20,7 @@
         android:orientation="horizontal"
         android:padding="@dimen/spacing_normal">
 
-        <de.hdodenhof.circleimageview.CircleImageView
+        <com.thirtydegreesray.openhub.ui.widget.CircleImageView
             android:id="@+id/iv_user_avatar"
             android:layout_width="36dp"
             android:layout_height="36dp"

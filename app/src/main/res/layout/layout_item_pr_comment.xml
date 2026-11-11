@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical">
-        <de.hdodenhof.circleimageview.CircleImageView
+        <com.thirtydegreesray.openhub.ui.widget.CircleImageView
             android:id="@+id/comment_avatar"
             android:layout_width="24dp"
             android:layout_height="24dp"/>

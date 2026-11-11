@@ -20,7 +20,6 @@ import com.thirtydegreesray.openhub.mvp.model.ReleaseAsset;
 
 import java.util.Locale;
 
-import es.dmoral.toasty.Toasty;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.noties.markwon.ext.tables.TablePlugin;
@@ -73,7 +72,7 @@ public final class AppUpdater {
      * @param manual from Settings: also says "up to date", and ignores "Skip this version"
      */
     public static void check(@NonNull Activity activity, boolean manual) {
-        if (manual) Toasty.info(activity, activity.getString(R.string.update_checking)).show();
+        if (manual) Toasts.info(activity, activity.getString(R.string.update_checking)).show();
         Single.fromCallable(() -> GitHubApi.call(GitHubApi.service(ReleaseService.class)
                         .getLatestRelease(true, OWNER, REPO)))
                 .subscribeOn(Schedulers.io())
@@ -84,7 +83,7 @@ public final class AppUpdater {
                     onLatest(activity, release, manual);
                 }, error -> {
                     if (manual && !activity.isFinishing()) {
-                        Toasty.error(activity, activity.getString(R.string.update_check_failed,
+                        Toasts.error(activity, activity.getString(R.string.update_check_failed,
                                 StringUtils.isBlank(error.getMessage()) ? error.toString()
                                         : error.getMessage())).show();
                     }
@@ -96,7 +95,7 @@ public final class AppUpdater {
         String current = currentVersion();
         if (compare(latest, current) <= 0) {
             if (manual) {
-                Toasty.success(activity, activity.getString(R.string.update_up_to_date, current)).show();
+                Toasts.success(activity, activity.getString(R.string.update_up_to_date, current)).show();
             }
             return;
         }
@@ -131,7 +130,7 @@ public final class AppUpdater {
                         (d, w) -> {
                             if (apk != null) {
                                 AppOpener.startDownload(activity, apk.getDownloadUrl(), apk.getName(), apk.getDigest());
-                                Toasty.info(activity, activity.getString(R.string.update_downloading)).show();
+                                Toasts.info(activity, activity.getString(R.string.update_downloading)).show();
                             } else {
                                 AppOpener.openInCustomTabsOrBrowser(activity, releaseUrl(release));
                             }

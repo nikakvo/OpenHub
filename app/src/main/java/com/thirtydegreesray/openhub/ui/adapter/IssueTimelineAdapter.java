@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import de.hdodenhof.circleimageview.CircleImageView;
+import com.thirtydegreesray.openhub.ui.widget.CircleImageView;
 import io.noties.markwon.Markwon;
 
 /**

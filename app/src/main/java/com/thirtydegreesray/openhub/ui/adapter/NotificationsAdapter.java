@@ -31,7 +31,7 @@ import com.thirtydegreesray.openhub.util.WindowUtil;
 
 import javax.inject.Inject;
 
-import de.hdodenhof.circleimageview.CircleImageView;
+import com.thirtydegreesray.openhub.ui.widget.CircleImageView;
 
 /**
  * Created by ThirtyDegreesRay on 2017/11/6 20:05:32

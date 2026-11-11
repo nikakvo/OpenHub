@@ -11,8 +11,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // only for Toasty (removed in the next step)
-        maven { url = 'https://jitpack.io' }
     }
 }
 

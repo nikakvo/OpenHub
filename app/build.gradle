@@ -157,8 +157,6 @@ dependencies {
     implementation libs.glide
     annotationProcessor libs.glide.compiler
 
-    implementation libs.circleimageview
-    implementation libs.toasty
 
     // Markdown in comments, posts and the editor preview
     implementation libs.markwon.core

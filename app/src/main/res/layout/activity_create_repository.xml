@@ -35,7 +35,7 @@
                     android:gravity="center_vertical"
                     android:minHeight="56dp"
                     android:background="?android:selectableItemBackground">
-                    <de.hdodenhof.circleimageview.CircleImageView
+                    <com.thirtydegreesray.openhub.ui.widget.CircleImageView
                         android:id="@+id/owner_avatar"
                         android:layout_width="32dp"
                         android:layout_height="32dp"

@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import es.dmoral.toasty.Toasty;
+import com.thirtydegreesray.openhub.util.Toasts;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -79,12 +79,12 @@ public final class RepoFileActions {
         List<String> replaced = new ArrayList<>();
         for (UploadItem item : items) {
             if (item.getSize() > RepoCommitter.MAX_FILE_SIZE) {
-                Toasty.error(activity, activity.getString(R.string.file_upload_too_big, item.getName(),
+                Toasts.error(activity, activity.getString(R.string.file_upload_too_big, item.getName(),
                         StringUtils.getSizeString(RepoCommitter.MAX_FILE_SIZE))).show();
                 return;
             }
             if (!names.add(item.getName())) {
-                Toasty.error(activity, activity.getString(R.string.upload_name_exists, item.getName())).show();
+                Toasts.error(activity, activity.getString(R.string.upload_name_exists, item.getName())).show();
                 return;
             }
             if (existing.contains(item.getName())) replaced.add(item.getName());
@@ -137,7 +137,7 @@ public final class RepoFileActions {
                 .subscribe(result -> {
                     if (!activity.isFinishing()) dialog.dismiss();
                     RepoChanges.markChanged();
-                    Toasty.success(activity.getApplicationContext(),
+                    Toasts.success(activity.getApplicationContext(),
                             activity.getString(R.string.commit_done, result.branch)).show();
                     if (result.pullRequestUrl != null && !activity.isFinishing()) {
                         AppOpener.launchUrl(activity, Uri.parse(result.pullRequestUrl));
@@ -145,7 +145,7 @@ public final class RepoFileActions {
                     if (done != null) done.onDone();
                 }, error -> {
                     if (!activity.isFinishing()) dialog.dismiss();
-                    Toasty.error(activity.getApplicationContext(), StringUtils.isBlank(error.getMessage())
+                    Toasts.error(activity.getApplicationContext(), StringUtils.isBlank(error.getMessage())
                             ? error.toString() : error.getMessage()).show();
                 });
     }

@@ -32,7 +32,7 @@ import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
-import de.hdodenhof.circleimageview.CircleImageView;
+import com.thirtydegreesray.openhub.ui.widget.CircleImageView;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 
 /**
