@@ -65,6 +65,7 @@ import com.thirtydegreesray.openhub.util.RepoChanges;
 import com.thirtydegreesray.openhub.util.RepoCommitter;
 import com.thirtydegreesray.openhub.util.RuleLabels;
 import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.util.richtext.RichText;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 
@@ -78,11 +79,6 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.noties.markwon.Markwon;
-import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
-import io.noties.markwon.ext.tables.TablePlugin;
-import io.noties.markwon.ext.tasklist.TaskListPlugin;
-import io.noties.markwon.linkify.LinkifyPlugin;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -165,7 +161,6 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     private final CompositeDisposable disposables = new CompositeDisposable();
     private final Handler handler = new Handler(Looper.getMainLooper());
     private ColorStateList tabNormalColor;
-    private Markwon markwon;
 
     private JsonObject pull;
     private JsonObject repoJson;
@@ -202,8 +197,6 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.pull_title_number, number), owner + "/" + repo);
         tabNormalColor = tabConversation.getTextColors();
-        markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this,
-                () -> com.thirtydegreesray.openhub.util.MarkdownRenderer.refreshImages(getWindow().getDecorView()));
         showTab(tab);
         PullRefresh.wrap(conversationScroll, this::pullReload).follow(loader);
         PullRefresh.wrap(commitsScroll, this::pullReload).follow(loader);
@@ -656,7 +649,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             TextView bodyView = view.findViewById(R.id.comment_body);
             String text = Json.str(item, "body");
             if (text.isEmpty()) bodyView.setVisibility(View.GONE);
-            else markwon.setMarkdown(bodyView, text);
+            else RichText.show(bodyView, Json.str(item, "body_html"), text);
             if (Json.bool(item, "_line")) {
                 String path = Json.str(item, "path");
                 openOnTap(bodyView, () -> openDiff(path));

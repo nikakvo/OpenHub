@@ -32,7 +32,7 @@ dagger = "2.60.1"
 glide = "5.0.9"
 gson = "2.15.0"
 jsoup = "1.24.1"
-markwon = "4.6.2"
+commonmark = "0.32.0"
 media3 = "1.11.1"
 # Retrofit 3.0.0 brings OkHttp 4.12; OkHttp 5 is binary compatible and is set explicitly
 okhttp = "5.5.1"
@@ -74,13 +74,11 @@ glide-compiler = { module = "com.github.bumptech.glide:compiler", version.ref = 
 glide-okhttp = { module = "com.github.bumptech.glide:okhttp3-integration", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
-markwon-core = { module = "io.noties.markwon:core", version.ref = "markwon" }
-markwon-strikethrough = { module = "io.noties.markwon:ext-strikethrough", version.ref = "markwon" }
-markwon-tables = { module = "io.noties.markwon:ext-tables", version.ref = "markwon" }
-markwon-tasklist = { module = "io.noties.markwon:ext-tasklist", version.ref = "markwon" }
-markwon-linkify = { module = "io.noties.markwon:linkify", version.ref = "markwon" }
-markwon-image-glide = { module = "io.noties.markwon:image-glide", version.ref = "markwon" }
-markwon-html = { module = "io.noties.markwon:html", version.ref = "markwon" }
+commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
+commonmark-tables = { module = "org.commonmark:commonmark-ext-gfm-tables", version.ref = "commonmark" }
+commonmark-strikethrough = { module = "org.commonmark:commonmark-ext-gfm-strikethrough", version.ref = "commonmark" }
+commonmark-alerts = { module = "org.commonmark:commonmark-ext-gfm-alerts", version.ref = "commonmark" }
+commonmark-tasklist = { module = "org.commonmark:commonmark-ext-task-list-items", version.ref = "commonmark" }
 media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
 media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
 media3-okhttp = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "media3" }

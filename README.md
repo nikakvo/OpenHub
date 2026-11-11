@@ -297,7 +297,8 @@ Never commit keys or passwords: `public.properties` is in git and must stay empt
 * [code-prettify](https://github.com/google/code-prettify) An embeddable script that makes source-code snippets in HTML prettier.
 * [DataAutoAccess](https://github.com/ThirtyDegreesRay/DataAutoAccess) A simple way to access android bundle data.
 * [GitHub-Trending](https://github.com/thedillonb/GitHub-Trending) Scrapes GitHub's Trending Pages.
-* [Markwon](https://github.com/noties/Markwon) Markdown for Android (and commonmark-java underneath).
+* [commonmark-java](https://github.com/commonmark/commonmark-java) Markdown on the phone, for drafts and when GitHub cannot be reached.
+* [Media3 ExoPlayer](https://github.com/androidx/media) The video player for attached videos.
 * [jsoup](https://github.com/jhy/jsoup) Java HTML Parser, with best of DOM, CSS, and jquery.
 * [OctoDroid](https://github.com/slapperwan/gh4a) This application provides access to GitHub and lets you stay connected with your network.
 * [FastHub](https://github.com/k0shk0sh/FastHub) FastHub the ultimate GitHub client for Android.

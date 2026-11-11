@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- the RichDoc shown in a text view, and its width listener -->
+    <item name="rich_text_doc" type="id"/>
+    <item name="rich_text_width" type="id"/>
+</resources>

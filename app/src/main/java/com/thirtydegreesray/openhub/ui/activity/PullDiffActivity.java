@@ -45,6 +45,7 @@ import com.thirtydegreesray.openhub.util.ReviewSender;
 import com.thirtydegreesray.openhub.util.ReviewThreads;
 import com.thirtydegreesray.openhub.util.PullChanges;
 import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.util.richtext.RichText;
 import com.thirtydegreesray.openhub.util.SuggestionBatch;
 import com.thirtydegreesray.openhub.util.Suggestions;
 import com.thirtydegreesray.openhub.util.ViewUtils;
@@ -61,11 +62,6 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.noties.markwon.Markwon;
-import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
-import io.noties.markwon.ext.tables.TablePlugin;
-import io.noties.markwon.ext.tasklist.TaskListPlugin;
-import io.noties.markwon.linkify.LinkifyPlugin;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -113,7 +109,6 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
     private final CompositeDisposable disposables = new CompositeDisposable();
     private final List<Row> rows = new ArrayList<>();
     private final DiffAdapter adapter = new DiffAdapter();
-    private Markwon markwon;
     @Nullable private JsonObject file;
     /** row index of the first line of a range comment, -1 when none */
     private int rangeStart = -1;
@@ -179,8 +174,6 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         super.initView(savedInstanceState);
         setToolbarBackEnable();
         setToolbarTitle(fileName(), getString(R.string.pull_title_number, number) + " · " + owner + "/" + repo);
-        markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this,
-                () -> com.thirtydegreesray.openhub.util.MarkdownRenderer.refreshImages(getWindow().getDecorView()));
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
         PullRefresh.wrap(list, this::load).follow(loader);
@@ -1088,7 +1081,8 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                 badge.setVisibility(View.GONE);
             }
             TextView body = view.findViewById(R.id.comment_body);
-            markwon.setMarkdown(body, Json.str(c, "body"));
+            // drafts of a pending review exist only on the phone: their Markdown
+            RichText.show(body, Json.str(c, "body_html"), Json.str(c, "body"));
             body.setOnLongClickListener(v -> {
                 commentMenu(v, c);
                 return true;

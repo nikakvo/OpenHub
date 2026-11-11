@@ -152,7 +152,8 @@ public interface PullService {
     );
 
     @NonNull @GET("repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100")
-    @Headers("Cache-Control: no-cache, no-store")
+    // body_html: GitHub's rendering of the text
+    @Headers({"Accept: application/vnd.github.full+json", "Cache-Control: no-cache, no-store"})
     Observable<Response<JsonArray>> getReviews(
             @Path("owner") String owner,
             @Path("repo") String repo,
@@ -161,6 +162,7 @@ public interface PullService {
 
     /** Body: event (APPROVE, REQUEST_CHANGES, COMMENT) and body. */
     @NonNull @POST("repos/{owner}/{repo}/pulls/{number}/reviews")
+    @Headers("Accept: application/vnd.github.full+json")
     Observable<Response<JsonObject>> createReview(
             @Path("owner") String owner,
             @Path("repo") String repo,
@@ -169,7 +171,8 @@ public interface PullService {
     );
 
     @NonNull @GET("repos/{owner}/{repo}/issues/{number}/comments?per_page=100")
-    @Headers("Cache-Control: no-cache, no-store")
+    // body_html: GitHub's rendering of the text
+    @Headers({"Accept: application/vnd.github.full+json", "Cache-Control: no-cache, no-store"})
     Observable<Response<JsonArray>> getComments(
             @Path("owner") String owner,
             @Path("repo") String repo,
@@ -178,6 +181,7 @@ public interface PullService {
 
     /** Body: body. */
     @NonNull @POST("repos/{owner}/{repo}/issues/{number}/comments")
+    @Headers("Accept: application/vnd.github.full+json")
     Observable<Response<JsonObject>> createComment(
             @Path("owner") String owner,
             @Path("repo") String repo,
@@ -187,7 +191,8 @@ public interface PullService {
 
     /** Review comments: comments on lines of the diff (path, line, side, in_reply_to_id). */
     @NonNull @GET("repos/{owner}/{repo}/pulls/{number}/comments?per_page=100")
-    @Headers("Cache-Control: no-cache, no-store")
+    // body_html: GitHub's rendering of the text
+    @Headers({"Accept: application/vnd.github.full+json", "Cache-Control: no-cache, no-store"})
     Observable<Response<JsonArray>> getReviewComments(
             @Path("owner") String owner,
             @Path("repo") String repo,
@@ -197,6 +202,7 @@ public interface PullService {
 
     /** Body: body, commit_id, path, line, side, optional start_line and start_side. */
     @NonNull @POST("repos/{owner}/{repo}/pulls/{number}/comments")
+    @Headers("Accept: application/vnd.github.full+json")
     Observable<Response<JsonObject>> createReviewComment(
             @Path("owner") String owner,
             @Path("repo") String repo,
@@ -206,6 +212,7 @@ public interface PullService {
 
     /** Submits a pending review. Body: event (APPROVE, REQUEST_CHANGES, COMMENT) and body. */
     @NonNull @POST("repos/{owner}/{repo}/pulls/{number}/reviews/{id}/events")
+    @Headers("Accept: application/vnd.github.full+json")
     Observable<Response<JsonObject>> submitReview(
             @Path("owner") String owner,
             @Path("repo") String repo,
@@ -225,6 +232,7 @@ public interface PullService {
 
     /** Body: body. Answers a line comment thread. */
     @NonNull @POST("repos/{owner}/{repo}/pulls/{number}/comments/{id}/replies")
+    @Headers("Accept: application/vnd.github.full+json")
     Observable<Response<JsonObject>> replyReviewComment(
             @Path("owner") String owner,
             @Path("repo") String repo,
@@ -235,7 +243,8 @@ public interface PullService {
 
     /** One review comment as GitHub has it now (body, line, diff_hunk). */
     @NonNull @GET("repos/{owner}/{repo}/pulls/comments/{id}")
-    @Headers("Cache-Control: no-cache, no-store")
+    // body_html: GitHub's rendering of the text
+    @Headers({"Accept: application/vnd.github.full+json", "Cache-Control: no-cache, no-store"})
     Observable<Response<JsonObject>> getReviewComment(
             @Path("owner") String owner,
             @Path("repo") String repo,
@@ -244,6 +253,7 @@ public interface PullService {
 
     /** Body: body. */
     @NonNull @PATCH("repos/{owner}/{repo}/pulls/comments/{id}")
+    @Headers("Accept: application/vnd.github.full+json")
     Observable<Response<JsonObject>> updateReviewComment(
             @Path("owner") String owner,
             @Path("repo") String repo,
@@ -260,6 +270,7 @@ public interface PullService {
 
     /** Body: body. */
     @NonNull @PATCH("repos/{owner}/{repo}/issues/comments/{id}")
+    @Headers("Accept: application/vnd.github.full+json")
     Observable<Response<JsonObject>> updateComment(
             @Path("owner") String owner,
             @Path("repo") String repo,

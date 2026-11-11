@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -21,10 +20,10 @@ import com.thirtydegreesray.openhub.ui.adapter.base.BaseViewHolder;
 import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
 import com.thirtydegreesray.openhub.ui.widget.CircleBackgroundImageView;
 import com.thirtydegreesray.openhub.ui.widget.IssueLabelSpan;
-import com.thirtydegreesray.openhub.util.MarkdownRenderer;
 import com.thirtydegreesray.openhub.util.PrefUtils;
-import com.thirtydegreesray.openhub.util.QuoteStyle;
 import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.util.richtext.RichDoc;
+import com.thirtydegreesray.openhub.util.richtext.RichText;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 import com.thirtydegreesray.openhub.util.WindowUtil;
 
@@ -33,7 +32,6 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 
 import com.thirtydegreesray.openhub.ui.widget.CircleImageView;
-import io.noties.markwon.Markwon;
 
 /**
  * Created by ThirtyDegreesRay on 2017/9/27 16:06:43
@@ -45,60 +43,15 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
     private final int TYPE_COMMENT = 2;
     private final int TYPE_EVENT = 3;
 
-    private Markwon markwon;
     /**
      * Each comment is rendered once and kept, with the pictures it has loaded: a row that is
      * bound again (scrolling, or after a picture arrived) shows the same text at once.
-     * Rendering it again started every picture as an empty space of height 0, so the rows
-     * shrank and grew again (flicker).
      */
-    private final java.util.Map<String, android.text.Spanned> rendered = new java.util.HashMap<>();
+    private final java.util.Map<String, RichDoc> rendered = new java.util.HashMap<>();
 
     @Inject
     public IssueTimelineAdapter(Context context, BaseFragment fragment) {
         super(context, fragment);
-    }
-
-    private RecyclerView recyclerView;
-
-    /**
-     * The comments are rendered from their Markdown like pull requests and discussions,
-     * with pictures. When a picture arrives, the texts on screen are set again in place so
-     * they take its height. The rows are not bound again for that: a comment that moves to
-     * another row cancels the picture still loading in the old row, and it has to start
-     * over in the new one.
-     */
-    @NonNull
-    private Markwon markwon() {
-        if (markwon == null) {
-            markwon = MarkdownRenderer.createPreview(context,
-                    () -> MarkdownRenderer.refreshImages(recyclerView));
-        }
-        return markwon;
-    }
-
-    @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        super.onAttachedToRecyclerView(recyclerView);
-        this.recyclerView = recyclerView;
-    }
-
-    @Override
-    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView);
-        this.recyclerView = null;
-    }
-
-    /**
-     * A row that left the screen stopped its pictures (Markwon cancels them when the text
-     * is detached); a row that comes back without being bound again starts them again.
-     */
-    @Override
-    public void onViewAttachedToWindow(@NonNull BaseViewHolder holder) {
-        super.onViewAttachedToWindow(holder);
-        if (holder instanceof CommentViewHolder && ((CommentViewHolder) holder).commentDesc != null) {
-            io.noties.markwon.image.AsyncDrawableScheduler.schedule(((CommentViewHolder) holder).commentDesc);
-        }
     }
 
     @Override
@@ -246,23 +199,21 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
             // reused, so every branch starts from it
             commentDesc.setMaxLines(20);
             commentDesc.setEllipsize(android.text.TextUtils.TruncateAt.END);
-            if (PrefUtils.isLoadImageEnable() && !StringUtils.isBlank(model.getBody())) {
-                String key = model.getId() + "\n" + model.getBody();
-                android.text.Spanned text = rendered.get(key);
-                if (text == null) {
-                    text = markwon().toMarkdown(model.getBody());
-                    rendered.put(key, text);
+            if (!StringUtils.isBlank(model.getBodyHtml()) || !StringUtils.isBlank(model.getBody())) {
+                // GitHub's rendering of the comment, with pictures (or picture links when
+                // pictures are switched off in Settings)
+                String key = model.getId() + "\n" + model.getBodyHtml() + "\n" + model.getBody()
+                        + "\n" + PrefUtils.isLoadImageEnable();
+                RichDoc doc = rendered.get(key);
+                if (doc == null) {
+                    doc = RichText.render(context, model.getBodyHtml(), model.getBody(), false);
+                    rendered.put(key, doc);
                 }
                 // the whole comment, like pull requests: with "maxLines" and an ellipsis
                 // Android sometimes put "..." in place of a picture as wide as the text
                 commentDesc.setEllipsize(null);
                 commentDesc.setMaxLines(Integer.MAX_VALUE);
-                markwon().setParsedMarkdown(commentDesc, text);
-            } else if (!StringUtils.isBlank(model.getBodyHtml())) {
-                // pictures switched off in Settings: GitHub's HTML without pictures
-                commentDesc.setText(QuoteStyle.apply(context, Html.fromHtml(model.getBodyHtml())));
-            } else if (!StringUtils.isBlank(model.getBody())) {
-                commentDesc.setText(model.getBody());
+                RichText.show(commentDesc, doc, false);
             } else {
                 commentDesc.setText(R.string.no_description);
             }

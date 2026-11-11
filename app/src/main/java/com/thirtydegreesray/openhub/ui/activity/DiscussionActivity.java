@@ -36,6 +36,7 @@ import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.GraphQl;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.StringUtils;
+import com.thirtydegreesray.openhub.util.richtext.RichText;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 
@@ -46,11 +47,6 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.noties.markwon.Markwon;
-import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
-import io.noties.markwon.ext.tables.TablePlugin;
-import io.noties.markwon.ext.tasklist.TaskListPlugin;
-import io.noties.markwon.linkify.LinkifyPlugin;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -98,11 +94,11 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         return seen != 0 && changeStamp != seen;
     }
 
-    private static final String COMMENT_FIELDS = "id body url createdAt upvoteCount viewerHasUpvoted viewerCanUpvote"
+    private static final String COMMENT_FIELDS = "id body bodyHTML url createdAt upvoteCount viewerHasUpvoted viewerCanUpvote"
             + " viewerCanUpdate viewerCanDelete author{login avatarUrl}";
     private static final String QUERY = "query($owner:String!,$repo:String!,$number:Int!,$after:String){"
             + "repository(owner:$owner,name:$repo){discussion(number:$number){"
-            + "id number title body url createdAt closed stateReason locked upvoteCount viewerHasUpvoted viewerCanUpvote"
+            + "id number title body bodyHTML url createdAt closed stateReason locked upvoteCount viewerHasUpvoted viewerCanUpvote"
             + " viewerCanClose viewerCanReopen"
             + " poll{id question totalVoteCount viewerCanVote viewerHasVoted"
             + " options(first:20){nodes{id option totalVoteCount viewerHasVoted}}}"
@@ -127,7 +123,6 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
     private FloatingActionButton commentBn;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
-    private Markwon markwon;
     @Nullable private JsonObject discussion;
 
     @Override
@@ -144,8 +139,6 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         super.initView(savedInstanceState);
         setToolbarBackEnable();
         setToolbarTitle(getString(R.string.discussion_number, number), owner + "/" + repo);
-        markwon = com.thirtydegreesray.openhub.util.MarkdownRenderer.create(this,
-                () -> com.thirtydegreesray.openhub.util.MarkdownRenderer.refreshImages(getWindow().getDecorView()));
         PullRefresh.wrap((View) content.getParent(), this::load).follow(loader);
         load();
     }
@@ -260,7 +253,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         TextView body = view.findViewById(R.id.comment_body);
         String text = Json.str(item, "body");
         if (text.isEmpty()) body.setVisibility(View.GONE);
-        else markwon.setMarkdown(body, text);
+        else RichText.show(body, Json.str(item, "bodyHTML"), text);
         View.OnLongClickListener menu = v -> {
             commentMenu(v, item);
             return true;

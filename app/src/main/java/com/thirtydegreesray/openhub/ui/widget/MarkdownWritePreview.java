@@ -12,22 +12,18 @@ import androidx.annotation.Nullable;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.thirtydegreesray.openhub.R;
-import com.thirtydegreesray.openhub.http.GitHubApi;
-import com.thirtydegreesray.openhub.http.MarkdownService;
 import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.Attachments;
+import com.thirtydegreesray.openhub.util.GitHubMarkdown;
 import com.thirtydegreesray.openhub.util.MarkdownHtml;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import okhttp3.ResponseBody;
 
 /**
  * Write / Preview tabs for a Markdown field (layout_markdown_write_preview), like the
@@ -179,17 +175,8 @@ public class MarkdownWritePreview {
         if (rendering != null) rendering.dispose();
         previewLoader.setVisibility(View.VISIBLE);
         final android.content.Context context = edit.getContext().getApplicationContext();
-        rendering = Single.fromCallable(() -> {
-            // a picture uploaded a moment ago is private on GitHub until the text is sent:
-            // render here and show the picture from the phone
-            if (hasLocalPicture(text)) return inlineLocalPictures(context, MarkdownHtml.render(text));
-            Map<String, Object> body = new HashMap<>();
-            body.put("text", text);
-            body.put("mode", "gfm");
-            if (repoFullName != null) body.put("context", repoFullName);
-            ResponseBody html = GitHubApi.call(GitHubApi.service(MarkdownService.class).render(body));
-            return "<div class=\"markdown-body\">" + (html == null ? "" : html.string()) + "</div>";
-        }).onErrorReturn(error -> MarkdownHtml.render(text))
+        rendering = Single.fromCallable(() -> GitHubMarkdown.preview(context, text, repoFullName))
+                .onErrorReturn(error -> MarkdownHtml.renderComment(text))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(html -> {
@@ -197,44 +184,5 @@ public class MarkdownWritePreview {
                     renderedText = text;
                     previewWeb.setMdSource(html, null);
                 });
-    }
-
-    private static boolean hasLocalPicture(@NonNull String text) {
-        for (String url : Attachments.localUrls()) {
-            String type = Attachments.localType(url);
-            if (type != null && !Attachments.isVideo(type) && text.contains(url)) return true;
-        }
-        return false;
-    }
-
-    /** Replaces src="url" of pictures uploaded in this run with the file from the phone (data: URI). */
-    @NonNull
-    private static String inlineLocalPictures(@NonNull android.content.Context context, @NonNull String html) {
-        for (String url : Attachments.localUrls()) {
-            String type = Attachments.localType(url);
-            String local = Attachments.localCopy(url);
-            if (type == null || Attachments.isVideo(type) || local == null) continue;
-            String quoted = "src=\"" + url + "\"";
-            if (!html.contains(quoted)) continue;
-            try (java.io.InputStream in = context.getContentResolver().openInputStream(android.net.Uri.parse(local))) {
-                if (in == null) continue;
-                java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
-                byte[] buffer = new byte[64 * 1024];
-                int read;
-                long total = 0;
-                while ((read = in.read(buffer)) != -1) {
-                    total += read;
-                    if (total > Attachments.IMAGE_LIMIT) break;
-                    out.write(buffer, 0, read);
-                }
-                if (total > Attachments.IMAGE_LIMIT) continue;
-                String data = "data:" + type + ";base64,"
-                        + android.util.Base64.encodeToString(out.toByteArray(), android.util.Base64.NO_WRAP);
-                html = html.replace(quoted, "src=\"" + data + "\"");
-            } catch (Exception ignored) {
-                // the phone no longer lets the app read it: GitHub's link stays
-            }
-        }
-        return html;
     }
 }

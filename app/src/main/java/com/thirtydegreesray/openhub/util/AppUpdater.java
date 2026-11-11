@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.BuildConfig;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.util.richtext.RichText;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.ReleaseService;
 import com.thirtydegreesray.openhub.mvp.model.Release;
@@ -20,10 +21,6 @@ import com.thirtydegreesray.openhub.mvp.model.ReleaseAsset;
 
 import java.util.Locale;
 
-import io.noties.markwon.Markwon;
-import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
-import io.noties.markwon.ext.tables.TablePlugin;
-import io.noties.markwon.linkify.LinkifyPlugin;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -110,15 +107,11 @@ public final class AppUpdater {
         int pad = activity.getResources().getDimensionPixelSize(R.dimen.spacing_x_large);
         notes.setPadding(pad, pad / 2, pad, 0);
         notes.setTextIsSelectable(true);
-        Markwon markwon = Markwon.builder(activity)
-                .usePlugin(StrikethroughPlugin.create())
-                .usePlugin(TablePlugin.create(activity))
-                .usePlugin(LinkifyPlugin.create())
-                .build();
-        String body = StringUtils.isBlank(release.getBody()) ? "" : release.getBody().trim();
-        String text = activity.getString(R.string.update_message, latest, current)
-                + (body.isEmpty() ? "" : "\n\n" + body);
-        markwon.setMarkdown(notes, text);
+        String body = StringUtils.isBlank(release.getBodyHtml())
+                ? (StringUtils.isBlank(release.getBody()) ? "" : MarkdownHtml.renderComment(release.getBody().trim()))
+                : release.getBodyHtml();
+        String html = MarkdownHtml.renderComment(activity.getString(R.string.update_message, latest, current)) + body;
+        RichText.show(notes, html, null);
         ScrollView scroll = new ScrollView(activity);
         scroll.addView(notes);
 

@@ -148,14 +148,12 @@ dependencies {
     implementation libs.glide.okhttp
     annotationProcessor libs.glide.compiler
 
-    // Markdown in comments, posts and the editor preview
-    implementation libs.markwon.core
-    implementation libs.markwon.strikethrough
-    implementation libs.markwon.tables
-    implementation libs.markwon.tasklist
-    implementation libs.markwon.linkify
-    implementation libs.markwon.image.glide
-    implementation libs.markwon.html
+    // Markdown rendered on the phone (drafts, offline); GitHub renders everything else
+    implementation libs.commonmark
+    implementation libs.commonmark.tables
+    implementation libs.commonmark.strikethrough
+    implementation libs.commonmark.tasklist
+    implementation libs.commonmark.alerts
 
     // Video player for attached videos
     implementation libs.media3.exoplayer

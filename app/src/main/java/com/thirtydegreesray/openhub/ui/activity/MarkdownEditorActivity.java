@@ -190,4 +190,10 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
         return markdownEditorCallback.isTextChanged();
     }
 
+    @Override
+    public String getRepoFullName() {
+        return StringUtils.isBlank(attachOwner) || StringUtils.isBlank(attachRepo)
+                ? null : attachOwner + "/" + attachRepo;
+    }
+
 }

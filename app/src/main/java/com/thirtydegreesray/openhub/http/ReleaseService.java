@@ -61,6 +61,8 @@ public interface ReleaseService {
     );
 
     @NonNull @GET("repos/{owner}/{repo}/releases/latest")
+    // body_html: the update dialog shows the notes as GitHub renders them
+    @Headers("Accept: application/vnd.github.full+json")
     Observable<Response<Release>> getLatestRelease(
             @Header("forceNetWork") boolean forceNetWork,
             @Path("owner") String owner,
