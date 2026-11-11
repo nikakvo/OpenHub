@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -12,6 +14,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
@@ -81,6 +88,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         view.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS);
         view.setKeepScreenOn(true);
         setContentView(view);
+        keepOutOfSystemBars();
 
         // content:// and file:// from the phone, http(s) through the app's OkHttp
         DefaultDataSource.Factory dataSource = new DefaultDataSource.Factory(this,
@@ -118,6 +126,29 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::typeKnown, error -> typeKnown(""));
+    }
+
+    /**
+     * The window is drawn edge to edge (target SDK 35+): without this the seek bar, the
+     * times and the settings button lie under the navigation bar and the top of the video
+     * under the status bar. The bars stay black with light icons.
+     */
+    private void keepOutOfSystemBars() {
+        Window window = getWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setNavigationBarContrastEnforced(false);
+            window.setStatusBarContrastEnforced(false);
+        }
+        WindowInsetsControllerCompat bars = WindowCompat.getInsetsController(window,
+                window.getDecorView());
+        bars.setAppearanceLightStatusBars(false);
+        bars.setAppearanceLightNavigationBars(false);
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            Insets safe = insets.getInsets(WindowInsetsCompat.Type.systemBars()
+                    | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(safe.left, safe.top, safe.right, safe.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
     }
 
     private void play(@NonNull Uri uri) {
