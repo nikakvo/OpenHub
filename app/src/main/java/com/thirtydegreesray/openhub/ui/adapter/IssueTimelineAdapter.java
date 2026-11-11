@@ -46,6 +46,13 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
     private final int TYPE_EVENT = 3;
 
     private Markwon markwon;
+    /**
+     * Each comment is rendered once and kept, with the pictures it has loaded: a row that is
+     * bound again (scrolling, or after a picture arrived) shows the same text at once.
+     * Rendering it again started every picture as an empty space of height 0, so the rows
+     * shrank and grew again (flicker).
+     */
+    private final java.util.Map<String, android.text.Spanned> rendered = new java.util.HashMap<>();
 
     @Inject
     public IssueTimelineAdapter(Context context, BaseFragment fragment) {
@@ -207,7 +214,13 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
             userName.setText(model.getUser().getLogin());
             time.setText(StringUtils.getNewsTimeStr(context, model.getCreatedAt()));
             if (PrefUtils.isLoadImageEnable() && !StringUtils.isBlank(model.getBody())) {
-                markwon().setMarkdown(commentDesc, model.getBody());
+                String key = model.getId() + "\n" + model.getBody();
+                android.text.Spanned text = rendered.get(key);
+                if (text == null) {
+                    text = markwon().toMarkdown(model.getBody());
+                    rendered.put(key, text);
+                }
+                markwon().setParsedMarkdown(commentDesc, text);
             } else if (!StringUtils.isBlank(model.getBodyHtml())) {
                 // pictures switched off in Settings: GitHub's HTML without pictures
                 commentDesc.setText(QuoteStyle.apply(context, Html.fromHtml(model.getBodyHtml())));
