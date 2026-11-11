@@ -103,6 +103,20 @@ public final class MarkdownRenderer {
                         builder.blockQuoteWidth(quoteWidth).blockQuoteColor(quoteBar);
                     }
 
+                    // a video attached on GitHub (a bare user-attachments link) plays in the
+                    // app; every other link opens as before
+                    @Override
+                    public void configureConfiguration(@NonNull io.noties.markwon.MarkwonConfiguration.Builder builder) {
+                        final io.noties.markwon.LinkResolverDef standard = new io.noties.markwon.LinkResolverDef();
+                        builder.linkResolver((view, link) -> {
+                            if (Attachments.isVideoLink(link)) {
+                                com.thirtydegreesray.openhub.ui.activity.VideoPlayerActivity.show(view.getContext(), link);
+                            } else {
+                                standard.resolve(view, link);
+                            }
+                        });
+                    }
+
                     @Override
                     public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
                         builder.appendFactory(BlockQuote.class,

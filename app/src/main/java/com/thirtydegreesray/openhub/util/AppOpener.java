@@ -213,6 +213,11 @@ public class AppOpener {
 
     public static void launchUrl(@NonNull Context context, @NonNull Uri uri){
         if(StringUtils.isBlank(uri.toString())) return;
+        // a video attached on GitHub (github.com/user-attachments/assets/<uuid>): the player
+        if (Attachments.isVideoLink(uri.toString())) {
+            com.thirtydegreesray.openhub.ui.activity.VideoPlayerActivity.show(context, uri.toString());
+            return;
+        }
         // github.com/user?tab=repositories (or stars, followers, following): that list
         String profileTab = GitHubLinks.profileTab(uri.toString());
         // "github.com/owner/repo.git", "...repo#readme" and the like open the repository

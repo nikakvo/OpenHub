@@ -265,6 +265,10 @@
         <activity android:name=".ui.activity.WikiPageActivity"/>
         <activity android:name=".ui.activity.MilestonesActivity"/>
         <activity android:name=".ui.activity.LabelManageActivity"/>
+        <activity
+            android:name=".ui.activity.VideoPlayerActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"/>
 
     </application>
 

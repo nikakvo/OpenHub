@@ -29,14 +29,35 @@ public final class Attachments {
      */
     private static final java.util.Map<String, String> LOCAL_COPIES =
             new java.util.concurrent.ConcurrentHashMap<>();
+    /** GitHub's link -> the content type of a file uploaded in this run of the app. */
+    private static final java.util.Map<String, String> LOCAL_TYPES =
+            new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.regex.Pattern ASSET_LINK = java.util.regex.Pattern.compile(
+            "https://github\\.com/user-attachments/assets/[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}");
 
     private Attachments() {
     }
 
-    public static void rememberLocalCopy(String url, String localUri) {
+    public static void rememberLocalCopy(String url, String localUri, String contentType) {
         if (url == null || localUri == null) return;
-        if (LOCAL_COPIES.size() > 200) LOCAL_COPIES.clear();
+        if (LOCAL_COPIES.size() > 200) {
+            LOCAL_COPIES.clear();
+            LOCAL_TYPES.clear();
+        }
         LOCAL_COPIES.put(url, localUri);
+        if (contentType != null) LOCAL_TYPES.put(url, contentType);
+    }
+
+    /**
+     * True for a link that should open the video player: GitHub's link of an uploaded file
+     * ({@code https://github.com/user-attachments/assets/<uuid>}). github.com writes pictures
+     * as images and videos as such bare links, so a link of this kind is a video, unless it
+     * is a file uploaded here whose type says otherwise.
+     */
+    public static boolean isVideoLink(String url) {
+        if (url == null || !ASSET_LINK.matcher(url.trim()).matches()) return false;
+        String type = LOCAL_TYPES.get(url.trim());
+        return type == null || isVideo(type);
     }
 
     /** The file on the phone for an uploaded link, or null. */

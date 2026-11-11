@@ -170,7 +170,7 @@ public final class AttachFlow {
                 .subscribe(url -> {
                     activity.dismissProgressDialog();
                     ContentFiles.keepReadAccess(activity, uri);
-                    Attachments.rememberLocalCopy(url, uri.toString());
+                    Attachments.rememberLocalCopy(url, uri.toString(), type);
                     host.insertAttachment(Attachments.markdown(name, url, type));
                     Toasty.success(activity, activity.getString(R.string.attach_done, name)).show();
                 }, error -> {

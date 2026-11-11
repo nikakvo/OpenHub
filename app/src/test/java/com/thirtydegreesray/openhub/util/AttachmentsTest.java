@@ -101,6 +101,25 @@ public class AttachmentsTest {
     }
 
     @Test
+    public void videoLinks() {
+        String video = "https://github.com/user-attachments/assets/39b1c65a-4212-4dd5-a9d0-56d0144fd275";
+        assertTrue(Attachments.isVideoLink(video));
+        assertTrue(Attachments.isVideoLink(" " + video + " "));
+        assertFalse(Attachments.isVideoLink(video + "/x"));
+        assertFalse(Attachments.isVideoLink("https://github.com/user-attachments/files/123/log.txt"));
+        assertFalse(Attachments.isVideoLink("https://github.com/nikakvo/OpenHub"));
+        assertFalse(Attachments.isVideoLink(null));
+        // a picture uploaded here is not a video; a video uploaded here is
+        String picture = "https://github.com/user-attachments/assets/2f53e9fa-73ea-47ee-b845-d8436a15904f";
+        Attachments.rememberLocalCopy(picture, "content://x/1", "image/jpeg");
+        assertFalse(Attachments.isVideoLink(picture));
+        assertEquals("content://x/1", Attachments.localCopy(picture));
+        String clip = "https://github.com/user-attachments/assets/a1f9bf6c-2872-485f-b2a8-1bc0fd068dc4";
+        Attachments.rememberLocalCopy(clip, "content://x/2", "video/mp4");
+        assertTrue(Attachments.isVideoLink(clip));
+    }
+
+    @Test
     public void problems() {
         assertEquals(Attachments.Problem.NO_WRITE_ACCESS, Attachments.problem(404, "Not Found"));
         assertEquals(Attachments.Problem.NOT_ACCEPTED, Attachments.problem(403, null));
