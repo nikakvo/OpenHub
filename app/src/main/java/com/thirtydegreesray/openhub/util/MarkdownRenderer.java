@@ -32,6 +32,7 @@ import io.noties.markwon.image.AsyncDrawable;
 import io.noties.markwon.image.AsyncDrawableSpan;
 import io.noties.markwon.image.glide.GlideImagesPlugin;
 import io.noties.markwon.linkify.LinkifyPlugin;
+import io.noties.markwon.movement.MovementMethodPlugin;
 
 import org.commonmark.node.BlockQuote;
 
@@ -59,6 +60,22 @@ public final class MarkdownRenderer {
      */
     @NonNull
     public static Markwon create(@NonNull Context context, @Nullable Runnable onImageLoaded) {
+        return build(context, onImageLoaded, false);
+    }
+
+    /**
+     * For previews in a list that opens the full text on a tap (issue comments): the text
+     * gets no link movement method, so it does not take the taps and long-presses of its
+     * row, and "maxLines" with an ellipsis still works.
+     */
+    @NonNull
+    public static Markwon createPreview(@NonNull Context context, @Nullable Runnable onImageLoaded) {
+        return build(context, onImageLoaded, true);
+    }
+
+    @NonNull
+    private static Markwon build(@NonNull Context context, @Nullable Runnable onImageLoaded,
+                                 boolean preview) {
         final RequestManager glide = Glide.with(context);
         final Handler main = new Handler(Looper.getMainLooper());
         final Runnable relayout = onImageLoaded == null ? null : () -> {
@@ -70,7 +87,9 @@ public final class MarkdownRenderer {
         final int quoteBar = QuoteStyle.barColor(context);
         final int quoteText = QuoteStyle.textColor(context);
         final int quoteWidth = QuoteStyle.px(context, QuoteStyle.BAR_DP);
-        return Markwon.builder(context)
+        Markwon.Builder builder = Markwon.builder(context);
+        if (preview) builder.usePlugin(MovementMethodPlugin.none());
+        return builder
                 .usePlugin(new AbstractMarkwonPlugin() {
                     // quotes: a 4 dp grey bar and grey text, like QuoteStyle (the default bar
                     // is the text color at 10 %, hard to see)

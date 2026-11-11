@@ -21,6 +21,7 @@ import com.thirtydegreesray.openhub.ui.adapter.base.BaseViewHolder;
 import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
 import com.thirtydegreesray.openhub.ui.widget.CircleBackgroundImageView;
 import com.thirtydegreesray.openhub.ui.widget.IssueLabelSpan;
+import com.thirtydegreesray.openhub.util.MarkdownRenderer;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.QuoteStyle;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.noties.markwon.Markwon;
 
 /**
  * Created by ThirtyDegreesRay on 2017/9/27 16:06:43
@@ -43,9 +45,24 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
     private final int TYPE_COMMENT = 2;
     private final int TYPE_EVENT = 3;
 
+    private Markwon markwon;
+
     @Inject
     public IssueTimelineAdapter(Context context, BaseFragment fragment) {
         super(context, fragment);
+    }
+
+    /**
+     * The comments are rendered from their Markdown like pull requests and discussions,
+     * with pictures; when a picture arrives from the network the rows are bound again so
+     * the text takes its height (from the memory cache then, so this happens once).
+     */
+    @NonNull
+    private Markwon markwon() {
+        if (markwon == null) {
+            markwon = MarkdownRenderer.createPreview(context, this::notifyDataSetChanged);
+        }
+        return markwon;
     }
 
     @Override
@@ -189,7 +206,10 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
                     .into(userAvatar);
             userName.setText(model.getUser().getLogin());
             time.setText(StringUtils.getNewsTimeStr(context, model.getCreatedAt()));
-            if (!StringUtils.isBlank(model.getBodyHtml())) {
+            if (PrefUtils.isLoadImageEnable() && !StringUtils.isBlank(model.getBody())) {
+                markwon().setMarkdown(commentDesc, model.getBody());
+            } else if (!StringUtils.isBlank(model.getBodyHtml())) {
+                // pictures switched off in Settings: GitHub's HTML without pictures
                 commentDesc.setText(QuoteStyle.apply(context, Html.fromHtml(model.getBodyHtml())));
             } else if (!StringUtils.isBlank(model.getBody())) {
                 commentDesc.setText(model.getBody());
