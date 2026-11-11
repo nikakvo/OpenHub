@@ -19,6 +19,7 @@ import com.thirtydegreesray.openhub.ui.adapter.base.FragmentPagerModel;
 import com.thirtydegreesray.openhub.ui.adapter.base.FragmentViewPagerAdapter;
 import com.thirtydegreesray.openhub.ui.fragment.MarkdownEditorFragment;
 import com.thirtydegreesray.openhub.ui.fragment.MarkdownPreviewFragment;
+import com.thirtydegreesray.openhub.ui.widget.AttachFlow;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
 import java.util.ArrayList;
@@ -28,7 +29,8 @@ import es.dmoral.toasty.Toasty;
 /**
  * Created by ThirtyDegreesRay on 2017/9/29 11:43:25
  */
-public class MarkdownEditorActivity extends PagerActivity implements MarkdownEditorCallback {
+public class MarkdownEditorActivity extends PagerActivity implements MarkdownEditorCallback,
+        AttachFlow.Owner {
 
     public static void show(@NonNull Activity activity, @StringRes int title, int requestCode) {
         show(activity, title, requestCode, null);
@@ -42,10 +44,26 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
     public static void show(@NonNull Activity activity, @StringRes int title,
                             int requestCode, @Nullable String text,
                             @Nullable ArrayList<String> mentionUsers) {
+        show(activity, title, requestCode, text, mentionUsers, null, null, null);
+    }
+
+    /**
+     * With a repository the editor offers "Attach image or video" (pictures and videos
+     * uploaded to GitHub for that repository).
+     *
+     * @param webUrl the page on github.com for attaching by hand when the app cannot
+     */
+    public static void show(@NonNull Activity activity, @StringRes int title,
+                            int requestCode, @Nullable String text,
+                            @Nullable ArrayList<String> mentionUsers, @Nullable String owner,
+                            @Nullable String repo, @Nullable String webUrl) {
         Intent intent = new Intent(activity, MarkdownEditorActivity.class);
         intent.putExtra("text", text);
         intent.putExtra("title", title);
         intent.putExtra("mentionUsers", mentionUsers);
+        intent.putExtra("attachOwner", owner);
+        intent.putExtra("attachRepo", repo);
+        intent.putExtra("attachWebUrl", webUrl);
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -53,6 +71,13 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
     @AutoAccess String text;
     @AutoAccess @StringRes int title;
     @AutoAccess ArrayList<String> mentionUsers;
+    @AutoAccess String attachOwner;
+    @AutoAccess String attachRepo;
+    @AutoAccess String attachWebUrl;
+    private MarkdownEditorFragment editorFragment;
+    private final AttachFlow attachFlow = new AttachFlow(this, markdown -> {
+        if (editorFragment != null) editorFragment.insertAttachment(markdown);
+    });
     private MarkdownEditorCallback markdownEditorCallback;
     private boolean isKeyBoardShow = true;
 
@@ -72,6 +97,7 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
         super.initView(savedInstanceState);
         setToolbarBackEnable();
         setToolbarTitle(getString(title));
+        attachFlow.setRepository(attachOwner, attachRepo, attachWebUrl);
 
         pagerAdapter.setPagerList(FragmentPagerModel
                 .createMarkdownEditorPagerList(getActivity(), text, getFragments(), mentionUsers));
@@ -86,6 +112,7 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
         super.onAttachFragment(fragment);
         if(fragment instanceof  MarkdownEditorFragment){
             markdownEditorCallback = (MarkdownEditorCallback) fragment;
+            editorFragment = (MarkdownEditorFragment) fragment;
         }
     }
 
@@ -136,6 +163,22 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
         finish();
     }
 
+
+    @Override
+    public boolean canAttach() {
+        return attachFlow.isAvailable();
+    }
+
+    @Override
+    public void attach() {
+        attachFlow.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        attachFlow.dispose();
+        super.onDestroy();
+    }
 
     @Override
     public String getText() {

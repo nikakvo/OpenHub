@@ -871,7 +871,9 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
         ViewUtils.setOnClick(root, R.id.target_row, v -> chooseTarget());
         ViewUtils.setOnClick(root, R.id.generate_notes_bn, v -> generateNotes());
         ViewUtils.setOnClick(root, R.id.markdown_editor_bn, v -> MarkdownEditorActivity.show(
-                getActivity(), R.string.release_notes, MARKDOWN_EDITOR_REQUEST_CODE, textOf(bodyEdit)));
+                getActivity(), R.string.release_notes, MARKDOWN_EDITOR_REQUEST_CODE, textOf(bodyEdit), null,
+                owner, repo, release != null && !StringUtils.isBlank(release.getHtmlUrl())
+                        ? release.getHtmlUrl() : "https://github.com/" + owner + "/" + repo + "/releases"));
         ViewUtils.setOnClick(root, R.id.add_files_bn, v -> filePicker.launch(ContentFiles.pickerIntent()));
         ViewUtils.setOnClick(root, R.id.primary_bn, v -> onPrimaryClick());
         ViewUtils.setOnClick(root, R.id.secondary_bn, v -> onSecondaryClick());

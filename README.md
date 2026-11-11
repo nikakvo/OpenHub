@@ -165,6 +165,8 @@ app goes to them; see [Credits](#credits).
 ### Issues and commits
 * Issues with comments and events; create, edit, close and reopen; issue lists show only
   issues (pull requests have their own list)
+* **Attach pictures and videos** to issues, comments and release notes (repositories you can
+  write to); comments show their pictures, quotes have a clear grey bar
 * **Sub-issues**: the parent, progress, add an existing or a new issue, reorder, remove
 * **Relationships**: blocked by, blocking and relates to
 * Issue types and issue fields (organization repositories)

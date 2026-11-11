@@ -35,7 +35,9 @@ import com.thirtydegreesray.openhub.mvp.model.Issue;
 import com.thirtydegreesray.openhub.mvp.model.Label;
 import com.thirtydegreesray.openhub.mvp.presenter.EditIssuePresenter;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.AttachFlow;
 import com.thirtydegreesray.openhub.ui.widget.ChooseLabelsDialog;
+import com.thirtydegreesray.openhub.util.Attachments;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
@@ -77,6 +79,13 @@ public class EditIssueActivity extends BaseActivity<EditIssuePresenter>
     }
 
     private final int MARKDOWN_EDITOR_REQUEST_CODE= 100;
+    private final AttachFlow attachFlow = new AttachFlow(this, markdown -> {
+        Attachments.Insertion insertion = Attachments.insert(commentEdit.getText().toString(),
+                commentEdit.getSelectionStart(), commentEdit.getSelectionEnd(), markdown);
+        commentEdit.setText(insertion.text);
+        commentEdit.setSelection(Math.min(insertion.cursor, commentEdit.length()));
+        commentEdit.requestFocus();
+    });
     @AutoAccess String titleEditStr;
     @AutoAccess String commentEditStr;
 
@@ -120,6 +129,8 @@ public class EditIssueActivity extends BaseActivity<EditIssuePresenter>
         commentEdit.setText(mPresenter.getIssueComment());
         titleEdit.setSelection(titleEdit.length());
         commentEdit.setSelection(commentEdit.length());
+        attachFlow.setRepository(mPresenter.getRepoOwner(), mPresenter.getRepoName(), attachWebUrl());
+        findViewById(R.id.attach_bn).setVisibility(attachFlow.isAvailable() ? View.VISIBLE : View.GONE);
 
         boolean isOwner = AppData.INSTANCE.getLoggedUser().getLogin().equals(mPresenter.getRepoOwner());
         if (isOwner) mPresenter.setCanEditMeta(true);
@@ -139,9 +150,19 @@ public class EditIssueActivity extends BaseActivity<EditIssuePresenter>
         if (mPresenter.isAddMode() && savedInstanceState == null && empty) loadTemplates();
     }
 
+    /** The page on github.com where files can be attached by hand. */
+    private String attachWebUrl() {
+        if (!mPresenter.isAddMode() && mPresenter.getIssue() != null
+                && !StringUtils.isBlank(mPresenter.getIssue().getHtmlUrl())) {
+            return mPresenter.getIssue().getHtmlUrl();
+        }
+        return "https://github.com/" + mPresenter.getRepoOwner() + "/" + mPresenter.getRepoName() + "/issues/new";
+    }
+
     @Override
     protected void onDestroy() {
         disposables.clear();
+        attachFlow.dispose();
         super.onDestroy();
     }
 
@@ -368,7 +389,10 @@ public class EditIssueActivity extends BaseActivity<EditIssuePresenter>
         int viewId = view.getId();
         if (viewId == R.id.markdown_editor_bn) {
             MarkdownEditorActivity.show(getActivity(), R.string.edit,
-                    MARKDOWN_EDITOR_REQUEST_CODE, commentEdit.getText().toString());
+                    MARKDOWN_EDITOR_REQUEST_CODE, commentEdit.getText().toString(), null,
+                    mPresenter.getRepoOwner(), mPresenter.getRepoName(), attachWebUrl());
+        } else if (viewId == R.id.attach_bn) {
+            attachFlow.start();
         } else if (viewId == R.id.edit_labels) {
             mPresenter.loadLabels();
         } else if (viewId == R.id.edit_assignees) {
@@ -433,6 +457,7 @@ public class EditIssueActivity extends BaseActivity<EditIssuePresenter>
         labelsText = root.findViewById(R.id.labels_text);
         editLabelsLay = root.findViewById(R.id.edit_labels);
         ViewUtils.setOnClick(root, R.id.markdown_editor_bn, v -> onViewClicked(v));
+        ViewUtils.setOnClick(root, R.id.attach_bn, v -> onViewClicked(v));
         ViewUtils.setOnClick(root, R.id.edit_labels, v -> onViewClicked(v));
         assigneesText = root.findViewById(R.id.assignees_text);
         milestoneText = root.findViewById(R.id.milestone_text);

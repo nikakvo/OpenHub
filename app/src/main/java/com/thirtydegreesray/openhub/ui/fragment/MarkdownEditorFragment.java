@@ -15,7 +15,9 @@ import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.ui.activity.MarkdownEditorCallback;
 import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
+import com.thirtydegreesray.openhub.ui.widget.AttachFlow;
 import com.thirtydegreesray.openhub.ui.widget.ToastAbleImageButton;
+import com.thirtydegreesray.openhub.util.Attachments;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
@@ -193,5 +195,23 @@ public class MarkdownEditorFragment extends BaseFragment
         ViewUtils.setOnClick(root, R.id.add_link, v -> onViewClicked(v));
         ViewUtils.setOnClick(root, R.id.add_bulleted_list, v -> onViewClicked(v));
         ViewUtils.setOnClick(root, R.id.add_mention, v -> onViewClicked(v));
+        // "Attach image or video" only when the screen knows the repository
+        View attach = root.findViewById(R.id.add_attachment);
+        boolean canAttach = getActivity() instanceof AttachFlow.Owner
+                && ((AttachFlow.Owner) getActivity()).canAttach();
+        attach.setVisibility(canAttach ? View.VISIBLE : View.GONE);
+        ViewUtils.setOnClick(root, R.id.add_attachment, v -> {
+            if (getActivity() instanceof AttachFlow.Owner) ((AttachFlow.Owner) getActivity()).attach();
+        });
+    }
+
+    /** Puts the Markdown of an attached file at the cursor, on a line of its own. */
+    public void insertAttachment(@androidx.annotation.NonNull String markdown) {
+        if (markdownEdit == null) return;
+        Attachments.Insertion insertion = Attachments.insert(markdownEdit.getText().toString(),
+                markdownEdit.getSelectionStart(), markdownEdit.getSelectionEnd(), markdown);
+        markdownEdit.setText(insertion.text);
+        markdownEdit.setSelection(Math.min(insertion.cursor, markdownEdit.length()));
+        markdownEdit.requestFocus();
     }
 }

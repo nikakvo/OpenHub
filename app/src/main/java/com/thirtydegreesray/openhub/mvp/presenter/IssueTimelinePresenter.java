@@ -180,6 +180,10 @@ public class IssueTimelinePresenter extends BasePresenter<IIssueTimelineContract
         }
     }
 
+    public Issue getIssue() {
+        return issue;
+    }
+
     public void setIssue(Issue issue) {
         this.issue = issue;
     }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="attach_file">Attach image or video</string>
+    <string name="attach_checking">Checking your access to %1$s…</string>
+    <string name="attach_uploading">Uploading %1$s…</string>
+    <string name="attach_done">Attached %1$s</string>
+    <string name="attach_failed_title">Could not attach the file</string>
+    <string name="attach_no_access_title">Attach on github.com</string>
+    <string name="attach_no_access">GitHub lets apps attach files only to repositories you can write to, and you cannot write to %1$s.\n\nOpen the page on github.com and attach the file there; you can drag it into the text box or tap \"Paste, drop, or click to add files\".</string>
+    <string name="attach_wrong_type">GitHub does not take this kind of file: %1$s.\n\nPictures: PNG, JPEG, GIF, WebP, SVG. Videos: MP4, MOV, WebM.</string>
+    <string name="attach_too_big_image">%1$s is bigger than 10 MB, the largest picture GitHub takes.</string>
+    <string name="attach_too_big_video">%1$s is bigger than 100 MB, the largest video GitHub takes (10 MB on the Free plan).</string>
+    <string name="attach_refused_404">GitHub refused the upload (404). This happens when you cannot write to %1$s.\n\nOpen the page on github.com and attach the file there.</string>
+    <string name="attach_refused_auth">GitHub did not accept this sign-in for uploads (HTTP %1$d: %2$s).\n\nOpen the page on github.com and attach the file there.</string>
+    <string name="attach_rate_limited">GitHub asks to wait before the next upload (Retry-After: %1$s). Try again later.</string>
+    <string name="attach_github_said">GitHub refused the file (HTTP %1$d): %2$s</string>
+    <string name="attach_no_url">GitHub took the file but sent no link back. Try again.</string>
+    <string name="attach_no_repo_id">GitHub did not say which repository this is. Try again.</string>
+    <string name="attach_signed_out">You are not signed in.</string>
+    <string name="attach_open_web">Open on github.com</string>
+</resources>

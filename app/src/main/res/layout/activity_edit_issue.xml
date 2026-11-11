@@ -63,6 +63,19 @@
             android:layout_below="@id/comment_layout"
             android:tint="?android:textColorSecondary"/>
 
+        <com.thirtydegreesray.openhub.ui.widget.ToastAbleImageButton
+            android:id="@+id/attach_bn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_attach_file"
+            android:padding="@dimen/spacing_small"
+            android:contentDescription="@string/attach_file"
+            app:toast_text="@string/attach_file"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:layout_below="@id/comment_layout"
+            android:layout_toEndOf="@id/markdown_editor_bn"
+            android:tint="?android:textColorSecondary"/>
+
         <LinearLayout
             android:id="@+id/meta_section"
             android:layout_width="match_parent"

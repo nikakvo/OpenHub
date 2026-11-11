@@ -113,6 +113,18 @@
             android:background="?android:selectableItemBackgroundBorderless"
             app:toast_text="@string/mention"/>
 
+        <com.thirtydegreesray.openhub.ui.widget.ToastAbleImageButton
+            android:id="@+id/add_attachment"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@drawable/ic_attach_file"
+            android:scaleType="center"
+            android:visibility="gone"
+            android:contentDescription="@string/attach_file"
+            android:background="?android:selectableItemBackgroundBorderless"
+            app:toast_text="@string/attach_file"/>
+
     </LinearLayout>
 
     <EditText
