@@ -213,6 +213,10 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
                     .into(userAvatar);
             userName.setText(model.getUser().getLogin());
             time.setText(StringUtils.getNewsTimeStr(context, model.getCreatedAt()));
+            // a preview of 20 lines as before (a tap opens the whole comment); rows are
+            // reused, so every branch starts from it
+            commentDesc.setMaxLines(20);
+            commentDesc.setEllipsize(android.text.TextUtils.TruncateAt.END);
             if (PrefUtils.isLoadImageEnable() && !StringUtils.isBlank(model.getBody())) {
                 String key = model.getId() + "\n" + model.getBody();
                 android.text.Spanned text = rendered.get(key);
@@ -220,6 +224,10 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
                     text = markwon().toMarkdown(model.getBody());
                     rendered.put(key, text);
                 }
+                // the whole comment, like pull requests: with "maxLines" and an ellipsis
+                // Android sometimes put "..." in place of a picture as wide as the text
+                commentDesc.setEllipsize(null);
+                commentDesc.setMaxLines(Integer.MAX_VALUE);
                 markwon().setParsedMarkdown(commentDesc, text);
             } else if (!StringUtils.isBlank(model.getBodyHtml())) {
                 // pictures switched off in Settings: GitHub's HTML without pictures
