@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,6 +18,7 @@ import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.Attachments;
 import com.thirtydegreesray.openhub.util.GitHubMarkdown;
 import com.thirtydegreesray.openhub.util.MarkdownHtml;
+import com.thirtydegreesray.openhub.util.Toasts;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 
 
@@ -43,6 +45,9 @@ public class MarkdownWritePreview {
     private final CodeWebView previewWeb;
     private final TextView previewEmpty;
     private final View previewLoader;
+    /** refreshes the select button (shown only with text, in the Write tab) */
+    @Nullable
+    private Runnable selectUpdate;
     @Nullable private final String repoFullName;
     /** text color of an unselected tab (from the style) */
     private final ColorStateList normalColor;
@@ -71,6 +76,87 @@ public class MarkdownWritePreview {
         tabWrite.setOnClickListener(v -> showWrite());
         tabPreview.setOnClickListener(v -> showPreview());
         updateTabs();
+        setUpSelectButton();
+    }
+
+    /**
+     * Scrolls the dialog or page around the editor so the tabs row (and the select button
+     * in it) is in view: focusing and selecting a long text scrolls it to its end.
+     */
+    private void revealTabs() {
+        View child = tabsRow;
+        int top = 0;
+        android.view.ViewParent parent = tabsRow.getParent();
+        while (parent instanceof View) {
+            top += child.getTop();
+            if (parent instanceof android.widget.ScrollView
+                    || parent instanceof androidx.core.widget.NestedScrollView) {
+                View scroller = (View) parent;
+                if (top < scroller.getScrollY() || top + tabsRow.getHeight() > scroller.getScrollY() + scroller.getHeight()) {
+                    scroller.scrollTo(0, Math.max(0, top));
+                }
+                return;
+            }
+            child = (View) parent;
+            parent = parent.getParent();
+        }
+    }
+
+    private boolean allSelected() {
+        int a = edit.getSelectionStart();
+        int b = edit.getSelectionEnd();
+        return Math.min(a, b) == 0 && Math.max(a, b) == edit.length();
+    }
+
+    /**
+     * The select button in the tabs row: the first tap selects the whole text (to copy or
+     * replace it), a second tap while everything is selected clears it. Two taps, so one
+     * slip of the finger never throws a long text away.
+     */
+    private void setUpSelectButton() {
+        ImageView select = tabsRow.findViewById(R.id.md_select);
+        if (select == null) return;
+        Runnable update = () -> {
+            boolean hasText = edit.length() > 0 && !preview;
+            select.setVisibility(hasText ? View.VISIBLE : View.GONE);
+            boolean all = hasText && allSelected();
+            select.setImageResource(all ? R.drawable.ic_close : R.drawable.ic_select_all);
+            select.setContentDescription(select.getContext().getString(
+                    all ? R.string.write_clear : R.string.write_select_all));
+        };
+        select.setOnClickListener(v -> {
+            showWrite();
+            edit.requestFocus();
+            if (edit.length() > 0 && allSelected()) {
+                edit.setText("");
+                Toasts.info(v.getContext(), v.getContext().getString(R.string.write_cleared)).show();
+            } else {
+                // the moving end of the selection at the start: the text and the dialog stay
+                // at the top, so the second tap (clear) finds the button where the first one was
+                edit.setSelection(edit.length(), 0);
+                tabsRow.post(this::revealTabs);
+                tabsRow.postDelayed(this::revealTabs, 300);
+            }
+            update.run();
+        });
+        edit.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                update.run();
+            }
+        });
+        // a tap in the text moves the cursor and ends the "everything selected" state
+        edit.setOnClickListener(v -> v.post(update));
+        selectUpdate = update;
+        update.run();
     }
 
     /** Shows or hides the tabs (a file that is not Markdown has nothing to preview). */
@@ -104,6 +190,7 @@ public class MarkdownWritePreview {
         inputLayout.setVisibility(View.VISIBLE);
         previewContainer.setVisibility(View.GONE);
         updateTabs();
+        if (selectUpdate != null) selectUpdate.run();
         edit.requestFocus();
     }
 
@@ -114,6 +201,7 @@ public class MarkdownWritePreview {
         inputLayout.setVisibility(View.GONE);
         previewContainer.setVisibility(View.VISIBLE);
         updateTabs();
+        if (selectUpdate != null) selectUpdate.run();
         render();
     }
 

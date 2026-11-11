@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="write_select_all">Select all text (tap again to clear it)</string>
+    <string name="write_clear">Clear the text</string>
+    <string name="write_cleared">Text cleared</string>
+</resources>

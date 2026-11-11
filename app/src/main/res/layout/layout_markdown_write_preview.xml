@@ -26,6 +26,18 @@
             android:layout_height="1dp"
             android:layout_weight="1"/>
         <com.thirtydegreesray.openhub.ui.widget.ToastAbleImageButton
+            android:id="@+id/md_select"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="@dimen/spacing_small"
+            app:srcCompat="@drawable/ic_select_all"
+            android:tint="?android:textColorSecondary"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:contentDescription="@string/write_select_all"
+            app:toast_text="@string/write_select_all"
+            android:visibility="gone"/>
+        <com.thirtydegreesray.openhub.ui.widget.ToastAbleImageButton
             android:id="@+id/md_attach"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
