@@ -140,5 +140,6 @@ img {
     margin-top: 2px;
     margin-bottom: 2px;
 }
-/* GitHub icons in its HTML (e.g. the camera in front of an attached video): the text colour */
-.markdown-body svg.octicon, .markdown-body .octicon { fill: currentColor; }
+/* GitHub icons in its HTML (e.g. the camera in front of an attached video): the text colour;
+   not only inside .markdown-body, a comment opened alone has no such wrapper */
+svg.octicon, .octicon { fill: currentColor; }
