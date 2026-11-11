@@ -1,4 +1,6 @@
-apply plugin: 'com.android.application'
+plugins {
+    alias(libs.plugins.android.application)
+}
 
 // Build properties, highest priority first: Gradle project properties (-Pkey or the
 // ORG_GRADLE_PROJECT_<key> environment variable, used by build.sh for signing),
@@ -102,73 +104,78 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.2.0'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    // AndroidX and Material
+    implementation libs.material
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.arch.core.runtime
+    implementation libs.androidx.preference
+    implementation libs.androidx.transition
+    implementation libs.androidx.webkit
+    implementation libs.androidx.browser
+    implementation libs.androidx.work.runtime
+    implementation libs.androidx.swiperefreshlayout
+    // Set explicitly: the libraries above bring older versions of these
+    implementation libs.androidx.activity
+    implementation libs.androidx.core
+    implementation libs.androidx.fragment
+    implementation libs.androidx.lifecycle.runtime
+    implementation libs.androidx.recyclerview
+    implementation libs.androidx.coordinatorlayout
+    implementation libs.androidx.drawerlayout
+    implementation libs.androidx.viewpager2
+    implementation libs.androidx.exifinterface
 
-    implementation 'javax.annotation:javax.annotation-api:1.3.2'
-    annotationProcessor "javax.annotation:javax.annotation-api:1.3.2"
-
-    implementation 'com.google.android.material:material:1.14.0'
-    implementation 'androidx.appcompat:appcompat:1.8.0'
-    implementation 'androidx.arch.core:core-runtime:2.2.0'
-    implementation 'androidx.preference:preference:1.2.1'
-    implementation 'androidx.transition:transition:1.7.2'
-    implementation 'androidx.webkit:webkit:1.18.0'
-    implementation 'androidx.browser:browser:1.10.0'
-    implementation 'androidx.work:work-runtime:2.12.0'
-
+    implementation libs.javax.annotation
+    annotationProcessor libs.javax.annotation
 
     // Database
-    implementation "androidx.room:room-runtime:${ROOM_VERSION}"
-    annotationProcessor "androidx.room:room-compiler:${ROOM_VERSION}"
-    //事件总线
-    implementation "org.greenrobot:eventbus:${EVENT_BUS_VERSION}"
-    //文件下载
+    implementation libs.androidx.room.runtime
+    annotationProcessor libs.androidx.room.compiler
 
-    //RxJava
-    implementation "io.reactivex.rxjava3:rxjava:${RXJAVA_VERSION}"
-    implementation "io.reactivex.rxjava3:rxandroid:${RXANDROID_VERSION}"
+    implementation libs.eventbus
 
-    //Type-safe HTTP client for Android and Java by Square, Inc.
-    implementation "com.squareup.retrofit2:retrofit:${RETROFIT_VERSION}"
-    implementation "com.squareup.retrofit2:converter-gson:${RETROFIT_VERSION}"
-    implementation "com.squareup.retrofit2:adapter-rxjava3:${RETROFIT_VERSION}"
-    implementation "com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}"
-    implementation "com.google.code.gson:gson:${GSON_VERSION}"
-    implementation ("com.squareup.retrofit2:converter-simplexml:${RETROFIT_VERSION}"){
+    // RxJava
+    implementation libs.rxjava
+    implementation libs.rxandroid
+
+    // HTTP
+    implementation libs.retrofit
+    implementation libs.retrofit.gson
+    implementation libs.retrofit.rxjava3
+    implementation libs.okhttp
+    implementation libs.gson
+    implementation(libs.retrofit.simplexml) {
         exclude group: 'xpp3', module: 'xpp3'
         exclude group: 'stax', module: 'stax-api'
         exclude group: 'stax', module: 'stax'
     }
 
-    //dagger依赖注入
-    implementation "com.google.dagger:dagger:${DAGGER_VERSION}"
-    annotationProcessor "com.google.dagger:dagger-compiler:${DAGGER_VERSION}"
+    // Dependency injection
+    implementation libs.dagger
+    annotationProcessor libs.dagger.compiler
 
+    implementation libs.glide
+    annotationProcessor libs.glide.compiler
 
-    implementation "com.github.bumptech.glide:glide:${GLIDE_VERSION}"
-    annotationProcessor "com.github.bumptech.glide:compiler:${GLIDE_VERSION}"
+    implementation libs.circleimageview
+    implementation libs.toasty
 
-    implementation "de.hdodenhof:circleimageview:${CIRCLE_IMAGEVIEW_VERSION}"
+    // Markdown in comments, posts and the editor preview
+    implementation libs.markwon.core
+    implementation libs.markwon.strikethrough
+    implementation libs.markwon.tables
+    implementation libs.markwon.tasklist
+    implementation libs.markwon.linkify
+    implementation libs.markwon.image.glide
+    implementation libs.markwon.html
 
-    implementation "com.github.GrenderG:Toasty:${TOASTY_VERSION}"
+    implementation libs.logger
 
-
-    // Markdown preview in the editor (replaces richtext, which only existed on JCenter)
-    implementation "io.noties.markwon:core:${MARKWON_VERSION}"
-    implementation "io.noties.markwon:ext-strikethrough:${MARKWON_VERSION}"
-    implementation "io.noties.markwon:ext-tables:${MARKWON_VERSION}"
-    implementation "io.noties.markwon:ext-tasklist:${MARKWON_VERSION}"
-    implementation "io.noties.markwon:linkify:${MARKWON_VERSION}"
-    // images in comments and posts (Markdown and GitHub's <img> tags)
-    implementation "io.noties.markwon:image-glide:${MARKWON_VERSION}"
-    implementation "io.noties.markwon:html:${MARKWON_VERSION}"
-
-    implementation "com.orhanobut:logger:${LOGGER_VERSION}"
-
-    implementation "org.jsoup:jsoup:${JSOUP_VERSION}"
+    implementation libs.jsoup
 
     // Sealed boxes (X25519, XSalsa20-Poly1305, BLAKE2b) for Actions secrets
-    implementation "org.bouncycastle:bcprov-jdk18on:${BOUNCY_CASTLE_VERSION}"
+    implementation libs.bouncycastle.prov
+
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.test.junit
 }

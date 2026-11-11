@@ -1,1 +1,20 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+    repositories {
+        google()
+        mavenCentral()
+        // only for Toasty (removed in the next step)
+        maven { url = 'https://jitpack.io' }
+    }
+}
+
+rootProject.name = 'OpenHub'
 include ':app'

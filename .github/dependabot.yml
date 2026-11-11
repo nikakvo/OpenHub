@@ -1,0 +1,23 @@
+# Dependabot checks once a week for newer versions of the libraries
+# (gradle/libs.versions.toml), the Gradle wrapper and the GitHub Actions of the
+# workflows, and opens a pull request for each update. Nothing is merged by itself.
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      androidx:
+        patterns:
+          - "androidx.*"
+          - "com.google.android.material*"
+    ignore:
+      # Room 3 needs KSP, Kotlin and coroutines; this Java app stays on Room 2
+      - dependency-name: "androidx.room:*"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
