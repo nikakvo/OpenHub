@@ -123,6 +123,8 @@ public final class MarkdownRenderer {
                                 (configuration, props) -> new android.text.style.ForegroundColorSpan(quoteText));
                     }
                 })
+                // a single line break in a comment is a line break on GitHub (not a space)
+                .usePlugin(io.noties.markwon.SoftBreakAddsNewLinePlugin.create())
                 .usePlugin(StrikethroughPlugin.create())
                 .usePlugin(TablePlugin.create(context))
                 .usePlugin(TaskListPlugin.create(context))
