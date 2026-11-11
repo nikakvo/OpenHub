@@ -239,9 +239,6 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
             return true;
         } else if (itemId == R.id.action_watch) {
             mPresenter.watchRepo(!mPresenter.isWatched());
-            invalidateOptionsMenu();
-            showSuccessToast(mPresenter.isWatched() ?
-                    getString(R.string.watched) : getString(R.string.unwatched));
             return true;
         } else if (itemId == R.id.action_fork) {
             if(!mPresenter.getRepository().isFork()) forkRepo();
@@ -334,9 +331,13 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
 
     private void starRepo(boolean star){
         mPresenter.starRepo(star);
+    }
+
+    @Override
+    public void showStarOrWatchChanged(boolean star, boolean on) {
         invalidateOptionsMenu();
-        showSuccessToast(mPresenter.isStarred() ?
-                getString(R.string.starred) : getString(R.string.unstarred));
+        showSuccessToast(getString(star ? (on ? R.string.starred : R.string.unstarred)
+                : (on ? R.string.watched : R.string.unwatched)));
     }
 
     @Override

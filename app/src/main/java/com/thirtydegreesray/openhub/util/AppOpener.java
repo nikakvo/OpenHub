@@ -279,6 +279,15 @@ public class AppOpener {
             context.startActivity(runIntent);
             return;
         }
+        // the Actions tab (github.com/owner/repo/actions)
+        String[] actionsTab = ActionsLinks.tab(url);
+        if (actionsTab != null) {
+            Intent tabIntent = com.thirtydegreesray.openhub.ui.activity.ActionsActivity
+                    .createLinkIntent(context, actionsTab[0], actionsTab[1]);
+            if (!(context instanceof android.app.Activity)) tabIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(tabIntent);
+            return;
+        }
         // gists (gist.github.com/user/id)
         String gistId = GistLinks.id(url);
         if (gistId != null) {

@@ -31,4 +31,18 @@ public class ActionsLinksTest {
         assertNull(ActionsLinks.parse("https://github.com.evil.example/a/b/actions/runs/5"));
         assertNull(ActionsLinks.parse("https://github.com/a/b/pull/5"));
     }
+
+    @Test
+    public void actionsTab() {
+        String[] tab = ActionsLinks.tab("https://github.com/nikakvo/OpenHub/actions");
+        assertEquals("nikakvo", tab[0]);
+        assertEquals("OpenHub", tab[1]);
+        assertEquals("b", ActionsLinks.tab("http://www.github.com/a/b/actions/?query=is%3Afailure")[1]);
+        assertEquals("b", ActionsLinks.tab("https://github.com/a/b.git/actions#x")[1]);
+        assertNull(ActionsLinks.tab(null));
+        assertNull(ActionsLinks.tab("https://github.com/a/b/actions/runs/5"));
+        assertNull(ActionsLinks.tab("https://github.com/a/b/actions/workflows/ci.yml"));
+        assertNull(ActionsLinks.tab("https://github.com.evil.example/a/b/actions"));
+        assertNull(ActionsLinks.tab("https://github.com/a/b"));
+    }
 }

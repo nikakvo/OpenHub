@@ -20,6 +20,9 @@ public interface IRepositoryContract {
         void invalidateOptionsMenu();
         void showStarWishes();
 
+        /** GitHub confirmed the new star or watch state ({@code star}: the star, else watching). */
+        void showStarOrWatchChanged(boolean star, boolean on);
+
         /** GitHub answered 404: no such repository, or a private one without access. */
         void showRepoNotFound();
     }

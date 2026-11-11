@@ -48,10 +48,10 @@ public class WikiModel implements Parcelable {
 
     public String getSimpleTextContent() {
         if(simpleTextContent == null){
-            int DEFAULT_MAX_LENGTH = 1024;
-            int maxLength = content.length() > DEFAULT_MAX_LENGTH ? DEFAULT_MAX_LENGTH : content.length();
-            simpleTextContent =  content.substring(0, maxLength)
-                    .replaceAll("<(.*?)>", "").trim();
+            // the page's text without its HTML, then cut (cutting first left half a tag)
+            String text = content == null ? "" : org.jsoup.Jsoup.parse(content).text().trim();
+            int maxLength = 1024;
+            simpleTextContent = text.length() > maxLength ? text.substring(0, maxLength).trim() + "\u2026" : text;
         }
         return simpleTextContent;
     }

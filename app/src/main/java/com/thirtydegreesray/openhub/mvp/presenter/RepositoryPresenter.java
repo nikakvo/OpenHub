@@ -118,8 +118,8 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
 
     @Override
     public void starRepo(boolean star) {
-        starred = star;
-        Observable<Response<ResponseBody>> observable = starred ?
+        // the star changes only when GitHub has answered (no state the server did not confirm)
+        Observable<Response<ResponseBody>> observable = star ?
                 getRepoService().starRepo(owner, repoName) :
                 getRepoService().unstarRepo(owner, repoName);
         HttpObserver<ResponseBody> httpObserver = new HttpObserver<ResponseBody>() {
@@ -130,8 +130,10 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
 
             @Override
             public void onSuccess(HttpResponse<ResponseBody> response) {
+                starred = star;
                 // the Starred list reloads when it is shown again
                 AccountChanges.markStars();
+                if (mView != null) mView.showStarOrWatchChanged(true, star);
             }
         };
         generalRxHttpExecute(forceNetWork -> observable, httpObserver);
@@ -139,11 +141,22 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
 
     @Override
     public void watchRepo(boolean watch) {
-        watched = watch;
-        Observable<Response<ResponseBody>> observable = watched ?
+        Observable<Response<ResponseBody>> observable = watch ?
                 getRepoService().watchRepo(owner, repoName) :
                 getRepoService().unwatchRepo(owner, repoName);
-        executeSimpleRequest(observable);
+        HttpObserver<ResponseBody> httpObserver = new HttpObserver<ResponseBody>() {
+            @Override
+            public void onError(Throwable error) {
+                if (mView != null) mView.showErrorToast(getErrorTip(error));
+            }
+
+            @Override
+            public void onSuccess(HttpResponse<ResponseBody> response) {
+                watched = watch;
+                if (mView != null) mView.showStarOrWatchChanged(false, watch);
+            }
+        };
+        generalRxHttpExecute(forceNetWork -> observable, httpObserver);
     }
 
     @Override

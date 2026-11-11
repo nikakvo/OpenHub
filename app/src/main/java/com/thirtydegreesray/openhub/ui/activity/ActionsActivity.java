@@ -45,10 +45,24 @@ public class ActionsActivity extends SingleFragmentActivity<IBaseContract.Presen
                         .put("defaultBranch", defaultBranch).put("canRun", canRun).build()));
     }
 
+    /**
+     * From a github.com/owner/repo/actions link: GitHub is asked whether the user may run
+     * workflows (the button appears only when GitHub says so).
+     */
+    @NonNull
+    public static Intent createLinkIntent(@NonNull android.content.Context context, @NonNull String owner,
+                                          @NonNull String repo) {
+        return new Intent(context, ActionsActivity.class)
+                .putExtras(BundleHelper.builder().put("owner", owner).put("repo", repo)
+                        .put("lookUpAccess", true).build());
+    }
+
     @AutoAccess String owner;
     @AutoAccess String repo;
     @AutoAccess String defaultBranch;
     @AutoAccess boolean canRun;
+    @AutoAccess boolean lookUpAccess;
+    @Nullable private io.reactivex.rxjava3.disposables.Disposable access;
 
     private FloatingActionButton runButton;
 
@@ -68,11 +82,38 @@ public class ActionsActivity extends SingleFragmentActivity<IBaseContract.Presen
         super.initView(savedInstanceState);
         setToolbarTitle(getString(R.string.actions), owner.concat("/").concat(repo));
         setToolbarScrollAble(true);
+        showRunButton();
+        if (lookUpAccess) lookUpAccess();
+    }
+
+    private void showRunButton() {
         if (runButton != null && canRun) {
             runButton.setImageResource(R.drawable.ic_play_arrow);
             runButton.setContentDescription(getString(R.string.actions_run_workflow));
             runButton.setVisibility(View.VISIBLE);
         }
+    }
+
+    /** Push or admin access on GitHub allows "Run workflow"; nothing changes without an answer. */
+    private void lookUpAccess() {
+        access = io.reactivex.rxjava3.core.Single.fromCallable(() -> com.thirtydegreesray.openhub.http.GitHubApi.call(
+                        com.thirtydegreesray.openhub.http.GitHubApi.service(com.thirtydegreesray.openhub.http.RepoService.class)
+                                .getRepoInfo(true, owner, repo)))
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(repository -> {
+                    com.thirtydegreesray.openhub.mvp.model.RepositoryPermissions p = repository.getPermissions();
+                    canRun = p != null && (p.isPush() || p.isAdmin());
+                    if (repository.getDefaultBranch() != null) defaultBranch = repository.getDefaultBranch();
+                    showRunButton();
+                    invalidateOptionsMenu();
+                }, error -> { });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (access != null) access.dispose();
+        super.onDestroy();
     }
 
     @Override
