@@ -667,6 +667,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         body.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                if (RichText.onCopyTouch(body, event)) return true;
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     at[0] = event.getX();
                     at[1] = event.getY();

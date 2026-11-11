@@ -1,7 +1,10 @@
 package com.thirtydegreesray.openhub.util.richtext;
 
 import android.content.Context;
+import android.annotation.SuppressLint;
+import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -9,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.MarkdownHtml;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
@@ -53,9 +57,36 @@ public final class RichText {
         doc.attach(view);
         doc.width = contentWidth(view);
         if (links) view.setMovementMethod(LinkMovementMethod.getInstance());
+        view.setOnTouchListener(COPY_TOUCH);
         view.setText(doc.text, TextView.BufferType.SPANNABLE);
         doc.startLoads(view);
         if (doc.dependsOnWidth()) watchWidth(view);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private static final View.OnTouchListener COPY_TOUCH = (v, event) -> onCopyTouch((TextView) v, event);
+
+    /**
+     * A tap on the copy mark of a code block copies the code. Views that need their own
+     * touch listener call this first and stop when it returns true.
+     */
+    public static boolean onCopyTouch(@NonNull TextView view, @NonNull MotionEvent event) {
+        CharSequence text = view.getText();
+        if (!(text instanceof Spanned) || view.getLayout() == null) return false;
+        Spanned spanned = (Spanned) text;
+        int x = (int) event.getX() - view.getTotalPaddingLeft() + view.getScrollX();
+        int y = (int) event.getY() - view.getTotalPaddingTop() + view.getScrollY();
+        int slop = Math.round(12 * view.getResources().getDisplayMetrics().density);
+        for (Spans.CodeBlock block : spanned.getSpans(0, spanned.length(), Spans.CodeBlock.class)) {
+            if (!block.hitsMark(x, y, slop)) continue;
+            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                String code = spanned.subSequence(spanned.getSpanStart(block), spanned.getSpanEnd(block))
+                        .toString().replace("\u200B", "");
+                AppUtils.copyToClipboard(view.getContext(), code);
+            }
+            return true;
+        }
+        return false;
     }
 
     /** The width the text can use; before the first layout an estimate from the screen. */

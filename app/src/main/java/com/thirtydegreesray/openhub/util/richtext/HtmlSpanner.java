@@ -52,6 +52,8 @@ final class HtmlSpanner {
     private int pending = NONE;
     private int listDepth;
     private int inListItem;
+    /** How many margin blocks (lists, quotes) the current text is inside. */
+    private int marginDepth;
     private boolean inPre;
     /** where the last empty line between blocks ends: never two of them in a row */
     private int blankAt = -1;
@@ -132,6 +134,19 @@ final class HtmlSpanner {
         if (out.length() > start) out.setSpan(what, start, out.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
+    /**
+     * A span that moves the text to the right (list item, quote bar, code block). The
+     * outer block of a nested pair is added last, but Android draws the margins in the
+     * order it gets the spans: a higher priority for the outer block keeps the inner
+     * marker or bar next to its own text instead of at the left edge.
+     */
+    private void marginSpan(@NonNull Object what, int start) {
+        if (out.length() <= start) return;
+        int priority = Math.max(1, 200 - marginDepth);
+        out.setSpan(what, start, out.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE | (priority << Spanned.SPAN_PRIORITY_SHIFT));
+    }
+
     // ---- text
 
     private void text(@NonNull TextNode node) {
@@ -210,7 +225,7 @@ final class HtmlSpanner {
                 start = open(LINE);
                 append("▾ ");
                 children(e);
-                span(new StyleSpan(Typeface.BOLD), start);
+                span(new Spans.Bold(), start);
                 close(LINE);
                 return;
             case "h1": case "h2": case "h3": case "h4": case "h5": case "h6":
@@ -218,8 +233,10 @@ final class HtmlSpanner {
                 return;
             case "blockquote":
                 start = open(gap());
+                marginDepth++;
                 children(e);
-                span(new QuoteStyle.BarSpan(style.quoteBar, style.quoteBarWidth, style.quoteGap), start);
+                marginDepth--;
+                marginSpan(new QuoteStyle.BarSpan(style.quoteBar, style.quoteBarWidth, style.quoteGap), start);
                 span(new ForegroundColorSpan(style.secondaryColor), start);
                 close(gap());
                 return;
@@ -264,7 +281,7 @@ final class HtmlSpanner {
             case "b": case "strong":
                 start = out.length();
                 children(e);
-                span(new StyleSpan(Typeface.BOLD), start);
+                span(new Spans.Bold(), start);
                 return;
             case "i": case "em": case "cite": case "var": case "dfn":
                 start = out.length();
@@ -335,7 +352,7 @@ final class HtmlSpanner {
         float[] sizes = {1.6f, 1.4f, 1.2f, 1.05f, 0.95f, 0.9f};
         int start = open(gap());
         children(e);
-        span(new StyleSpan(Typeface.BOLD), start);
+        span(new Spans.Bold(), start);
         span(new RelativeSizeSpan(sizes[Math.max(1, Math.min(6, level)) - 1]), start);
         close(gap());
     }
@@ -348,8 +365,10 @@ final class HtmlSpanner {
         int color = style.alertColor(type);
         int start = open(gap());
         e.attr("data-alert-type", type);
+        marginDepth++;
         children(e);
-        span(new QuoteStyle.BarSpan(color, style.quoteBarWidth, style.quoteGap), start);
+        marginDepth--;
+        marginSpan(new QuoteStyle.BarSpan(color, style.quoteBarWidth, style.quoteGap), start);
         close(gap());
     }
 
@@ -360,7 +379,7 @@ final class HtmlSpanner {
         int start = open(LINE);
         append(RichStyle.alertMark(type));
         children(e);
-        span(new StyleSpan(Typeface.BOLD), start);
+        span(new Spans.Bold(), start);
         span(new ForegroundColorSpan(style.alertColor(type)), start);
         close(LINE);
         tightNext = true;
@@ -407,11 +426,12 @@ final class HtmlSpanner {
         }
         int start = open(LINE);
         inListItem++;
+        marginDepth++;
         children(li);
+        marginDepth--;
         inListItem--;
         if (out.length() == start) out.append(ZERO_WIDTH);
-        out.setSpan(new Spans.ListItem(marker, style.px(24)), start, out.length(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        marginSpan(new Spans.ListItem(marker, style.px(24)), start);
         close(LINE);
     }
 
@@ -433,7 +453,8 @@ final class HtmlSpanner {
         if (out.length() == start) out.append(' ');
         span(new TypefaceSpan("monospace"), start);
         span(new RelativeSizeSpan(0.85f), start);
-        span(new Spans.CodeBlock(style.codeBackground, style.px(8)), start);
+        marginSpan(new Spans.CodeBlock(style.codeBackground, style.px(8), style.secondaryColor,
+                style.px(16), style.density * 1.5f), start);
         close(gap());
     }
 
@@ -549,7 +570,7 @@ final class HtmlSpanner {
         append("▶ " + playVideo);
         if (style.clickable) span(new Spans.Link(url, Spans.Link.VIDEO), start);
         else span(new ForegroundColorSpan(linkColorFallback()), start);
-        span(new StyleSpan(Typeface.BOLD), start);
+        span(new Spans.Bold(), start);
         close(LINE);
     }
 
@@ -561,7 +582,7 @@ final class HtmlSpanner {
         int columns = 0;
         for (Element row : rows) columns = Math.max(columns, cellsOf(row).size());
         if (columns == 0) return;
-        open(gap());
+        int tableStart = open(gap());
         doc.hasTables = true;
         boolean first = true;
         for (Element row : rows) {
@@ -576,7 +597,7 @@ final class HtmlSpanner {
                     HtmlSpanner inner = new HtmlSpanner(doc, cellText, playVideo);
                     inner.render(cell);
                     if (cell.normalName().equals("th") && cellText.length() > 0) {
-                        cellText.setSpan(new StyleSpan(Typeface.BOLD), 0, cellText.length(),
+                        cellText.setSpan(new Spans.Bold(), 0, cellText.length(),
                                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
                     if (!cell.normalName().equals("th")) header = false;
@@ -592,6 +613,12 @@ final class HtmlSpanner {
                     start, start + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             breakBefore(LINE);
             first = false;
+        }
+        // a tap opens the table on its own page: wide tables scroll sideways there, and the
+        // links in its cells work
+        if (style.clickable && out.length() > tableStart) {
+            out.setSpan(new Spans.Link(table.outerHtml(), Spans.Link.TABLE), tableStart, out.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         close(gap());
     }
