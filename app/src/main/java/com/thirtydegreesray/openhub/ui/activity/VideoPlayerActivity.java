@@ -34,7 +34,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private static final String EXTRA_URL = "url";
     private static final String STATE_POSITION = "position";
 
-    private VideoView video;
+    private FitVideoView video;
     private ProgressBar loader;
     private String url;
     private int startAt;
@@ -59,9 +59,9 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(Color.BLACK);
-        video = new VideoView(this);
+        video = new FitVideoView(this);
         root.addView(video, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+                FrameLayout.LayoutParams.MATCH_PARENT, Gravity.CENTER));
         loader = new ProgressBar(this);
         root.addView(loader, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
@@ -72,6 +72,8 @@ public class VideoPlayerActivity extends AppCompatActivity {
         video.setMediaController(controls);
         video.setOnPreparedListener(player -> {
             loader.setVisibility(android.view.View.GONE);
+            video.setVideoSize(player.getVideoWidth(), player.getVideoHeight());
+            player.setOnVideoSizeChangedListener((p, w, h) -> video.setVideoSize(w, h));
             if (startAt > 0) video.seekTo(startAt);
             video.start();
             controls.show(3000);
@@ -99,6 +101,40 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 .setNegativeButton(R.string.close, (d, w) -> finish())
                 .setOnCancelListener(d -> finish())
                 .show();
+    }
+
+    /**
+     * Fits the video into the screen with its own proportions (black bars at the sides or
+     * at the top and bottom), also after a rotation. VideoView with a fixed width and a
+     * limited height cut the height and stretched the picture.
+     */
+    private static final class FitVideoView extends VideoView {
+
+        private int videoWidth;
+        private int videoHeight;
+
+        FitVideoView(@NonNull Context context) {
+            super(context);
+        }
+
+        void setVideoSize(int width, int height) {
+            if (width <= 0 || height <= 0 || (width == videoWidth && height == videoHeight)) return;
+            videoWidth = width;
+            videoHeight = height;
+            requestLayout();
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            int maxWidth = MeasureSpec.getSize(widthMeasureSpec);
+            int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
+            if (videoWidth <= 0 || videoHeight <= 0 || maxWidth <= 0 || maxHeight <= 0) {
+                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+                return;
+            }
+            float scale = Math.min(maxWidth / (float) videoWidth, maxHeight / (float) videoHeight);
+            setMeasuredDimension(Math.round(videoWidth * scale), Math.round(videoHeight * scale));
+        }
     }
 
     @Override
