@@ -59,17 +59,46 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
         super(context, fragment);
     }
 
+    private RecyclerView recyclerView;
+
     /**
      * The comments are rendered from their Markdown like pull requests and discussions,
-     * with pictures; when a picture arrives from the network the rows are bound again so
-     * the text takes its height (from the memory cache then, so this happens once).
+     * with pictures. When a picture arrives, the texts on screen are set again in place so
+     * they take its height. The rows are NOT bound again: notifyDataSetChanged could move a
+     * comment to another row, and the old row, when it was taken away, cancelled the
+     * picture still loading from the network (the picture stayed a placeholder for good).
      */
     @NonNull
     private Markwon markwon() {
         if (markwon == null) {
-            markwon = MarkdownRenderer.createPreview(context, this::notifyDataSetChanged);
+            markwon = MarkdownRenderer.createPreview(context,
+                    () -> MarkdownRenderer.refreshImages(recyclerView));
         }
         return markwon;
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        this.recyclerView = recyclerView;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        this.recyclerView = null;
+    }
+
+    /**
+     * A row that left the screen stopped its pictures (Markwon cancels them when the text
+     * is detached); a row that comes back without being bound again starts them again.
+     */
+    @Override
+    public void onViewAttachedToWindow(@NonNull BaseViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+        if (holder instanceof CommentViewHolder && ((CommentViewHolder) holder).commentDesc != null) {
+            io.noties.markwon.image.AsyncDrawableScheduler.schedule(((CommentViewHolder) holder).commentDesc);
+        }
     }
 
     @Override
