@@ -145,6 +145,7 @@ dependencies {
     annotationProcessor libs.dagger.compiler
 
     implementation libs.glide
+    implementation libs.glide.okhttp
     annotationProcessor libs.glide.compiler
 
     // Markdown in comments, posts and the editor preview
