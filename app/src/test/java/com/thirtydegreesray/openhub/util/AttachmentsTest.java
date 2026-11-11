@@ -105,6 +105,8 @@ public class AttachmentsTest {
         String video = "https://github.com/user-attachments/assets/39b1c65a-4212-4dd5-a9d0-56d0144fd275";
         assertTrue(Attachments.isVideoLink(video));
         assertTrue(Attachments.isVideoLink(" " + video + " "));
+        // phone keyboards capitalise the first letter
+        assertTrue(Attachments.isVideoLink("Https://GitHub.com/user-attachments/assets/39B1C65A-4212-4dd5-a9d0-56d0144fd275"));
         assertFalse(Attachments.isVideoLink(video + "/x"));
         assertFalse(Attachments.isVideoLink("https://github.com/user-attachments/files/123/log.txt"));
         assertFalse(Attachments.isVideoLink("https://github.com/nikakvo/OpenHub"));

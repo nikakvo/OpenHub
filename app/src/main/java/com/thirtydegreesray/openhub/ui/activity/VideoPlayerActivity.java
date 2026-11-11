@@ -38,6 +38,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private ProgressBar loader;
     private String url;
     private int startAt;
+    @Nullable private io.reactivex.rxjava3.disposables.Disposable checking;
 
     public static void show(@NonNull Context context, @NonNull String url) {
         Intent intent = new Intent(context, VideoPlayerActivity.class).putExtra(EXTRA_URL, url.trim());
@@ -86,7 +87,38 @@ public class VideoPlayerActivity extends AppCompatActivity {
         video.setOnCompletionListener(player -> controls.show(0));
 
         String local = Attachments.localCopy(url);
-        video.setVideoURI(Uri.parse(local != null ? local : url));
+        if (local != null) {
+            video.setVideoURI(Uri.parse(local));
+            return;
+        }
+        // a bare link of a picture (pasted instead of ![..](..)) is not a video: ask GitHub
+        // what the file is before playing it
+        checking = io.reactivex.rxjava3.core.Single.fromCallable(() -> contentType(url))
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(type -> {
+                    if (type.startsWith("image/")) {
+                        ViewerActivity.showImage(this, url);
+                        finish();
+                    } else {
+                        video.setVideoURI(Uri.parse(url));
+                    }
+                }, error -> video.setVideoURI(Uri.parse(url)));
+    }
+
+    /** The Content-Type of the file behind a link ("" when unknown); reads one byte. */
+    @NonNull
+    private static String contentType(@NonNull String url) throws java.io.IOException {
+        okhttp3.OkHttpClient client = new okhttp3.OkHttpClient.Builder()
+                .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+                .build();
+        okhttp3.Request request = new okhttp3.Request.Builder().url(url)
+                .header("Range", "bytes=0-0").header("User-Agent", "OpenHub").build();
+        try (okhttp3.Response response = client.newCall(request).execute()) {
+            String type = response.header("Content-Type");
+            return type == null ? "" : type.toLowerCase(java.util.Locale.ROOT);
+        }
     }
 
     private void showCannotPlay() {
@@ -154,6 +186,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (checking != null) checking.dispose();
         if (video != null) video.stopPlayback();
         super.onDestroy();
     }

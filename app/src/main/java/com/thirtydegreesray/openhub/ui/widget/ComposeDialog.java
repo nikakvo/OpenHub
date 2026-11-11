@@ -52,6 +52,7 @@ public final class ComposeDialog {
         @Nullable private CharSequence checkLabel;
         private boolean checkDefault;
         @Nullable private boolean[] checkResult;
+        @Nullable private AttachFlow attachFlow;
 
         public Builder(@NonNull Context context) {
             this.context = context;
@@ -91,6 +92,12 @@ public final class ComposeDialog {
             return this;
         }
 
+        /** The paperclip "Attach image or video" in the editor (repositories you can write to). */
+        public Builder attach(@Nullable AttachFlow flow) {
+            this.attachFlow = flow;
+            return this;
+        }
+
         /** No text editor: only the choice, the title (if any) and the check box. */
         public Builder noBody() {
             this.noBody = true;
@@ -112,6 +119,7 @@ public final class ComposeDialog {
             MarkdownWritePreview editor = new MarkdownWritePreview(view, repoFullName);
             editor.setHint(bodyHint);
             if (bodyText != null) editor.getEditText().setText(bodyText);
+            if (attachFlow != null && !noBody) editor.enableAttach(attachFlow);
 
             if (choices != null) {
                 group.setVisibility(View.VISIBLE);

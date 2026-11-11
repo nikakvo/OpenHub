@@ -21,6 +21,22 @@
             android:id="@+id/md_tab_preview"
             style="@style/MarkdownTab"
             android:text="@string/preview"/>
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"/>
+        <com.thirtydegreesray.openhub.ui.widget.ToastAbleImageButton
+            android:id="@+id/md_attach"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="@dimen/spacing_small"
+            app:srcCompat="@drawable/ic_attach_file"
+            android:tint="?android:textColorSecondary"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:contentDescription="@string/attach_file"
+            app:toast_text="@string/attach_file"
+            android:visibility="gone"/>
     </LinearLayout>
 
     <View

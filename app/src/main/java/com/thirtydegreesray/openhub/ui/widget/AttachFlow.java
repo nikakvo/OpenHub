@@ -70,7 +70,7 @@ public final class AttachFlow {
     private static OkHttpClient client;
 
     private final BaseActivity<?> activity;
-    private final Host host;
+    private Host host;
     private final ActivityResultLauncher<String[]> picker;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -93,10 +93,16 @@ public final class AttachFlow {
      *               issue, or the "new issue" page); null = the repository's issues
      */
     public void setRepository(@Nullable String owner, @Nullable String repo, @Nullable String webUrl) {
+        boolean changed = !java.util.Objects.equals(owner, this.owner) || !java.util.Objects.equals(repo, this.repo);
         this.owner = owner;
         this.repo = repo;
         this.webUrl = webUrl;
-        this.repositoryId = 0;
+        if (changed) this.repositoryId = 0;
+    }
+
+    /** The editor that receives the next upload (a screen with several dialogs sets it per dialog). */
+    public void setHost(@NonNull Host host) {
+        this.host = host;
     }
 
     public boolean isAvailable() {

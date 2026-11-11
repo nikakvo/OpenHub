@@ -33,6 +33,7 @@ import com.thirtydegreesray.openhub.http.PullService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.AttachFlow;
 import com.thirtydegreesray.openhub.ui.widget.ComposeDialog;
 import com.thirtydegreesray.openhub.ui.widget.ReviewDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
@@ -88,6 +89,13 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
     @AutoAccess String owner;
     @AutoAccess String repo;
     @AutoAccess int number;
+    private final AttachFlow attachFlow = new AttachFlow(this, markdown -> { });
+
+    /** "Attach image or video" of the comment dialogs, for this repository. */
+    private AttachFlow attachFlow() {
+        attachFlow.setRepository(owner, repo, "https://github.com/" + owner + "/" + repo + "/pull/" + number + "/files");
+        return attachFlow;
+    }
     @AutoAccess String path;
     @AutoAccess String headSha;
 
@@ -181,6 +189,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
 
     @Override
     protected void onDestroy() {
+        attachFlow.dispose();
         disposables.clear();
         super.onDestroy();
     }
@@ -576,6 +585,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         ComposeDialog.Builder dialog = new ComposeDialog.Builder(this)
                 .title(title)
                 .repo(owner + "/" + repo)
+                .attach(attachFlow())
                 .header(code)
                 .choices(choices, reviewing ? 1 : 0)
                 .body(getString(R.string.diff_comment_hint), null)
@@ -618,6 +628,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
         ComposeDialog.Builder dialog = new ComposeDialog.Builder(this)
                 .title(getString(R.string.diff_reply_title))
                 .repo(owner + "/" + repo)
+                .attach(attachFlow())
                 .body(getString(R.string.diff_comment_hint), null)
                 .bodyRequired(true, null)
                 .positive(getString(R.string.pull_comment));
@@ -657,6 +668,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                 new ComposeDialog.Builder(this)
                         .title(getString(R.string.comment_edit))
                         .repo(owner + "/" + repo)
+                        .attach(attachFlow())
                         .body(getString(R.string.diff_comment_hint), Json.str(draft, "body"))
                         .bodyRequired(true, null)
                         .positive(getString(R.string.save))
@@ -692,6 +704,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                 new ComposeDialog.Builder(this)
                         .title(getString(R.string.comment_edit))
                         .repo(owner + "/" + repo)
+                        .attach(attachFlow())
                         .body(getString(R.string.diff_comment_hint), Json.str(comment, "body"))
                         .bodyRequired(true, null)
                         .positive(getString(R.string.save))

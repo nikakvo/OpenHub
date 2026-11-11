@@ -28,6 +28,7 @@ import com.thirtydegreesray.openhub.common.GlideApp;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.AttachFlow;
 import com.thirtydegreesray.openhub.ui.widget.ComposeDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
@@ -113,6 +114,13 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
     @AutoAccess String owner;
     @AutoAccess String repo;
     @AutoAccess int number;
+    private final AttachFlow attachFlow = new AttachFlow(this, markdown -> { });
+
+    /** "Attach image or video" of the comment dialogs, for this repository. */
+    private AttachFlow attachFlow() {
+        attachFlow.setRepository(owner, repo, "https://github.com/" + owner + "/" + repo + "/discussions/" + number);
+        return attachFlow;
+    }
 
     private LinearLayout content;
     private ProgressBar loader;
@@ -144,6 +152,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
 
     @Override
     protected void onDestroy() {
+        attachFlow.dispose();
         disposables.clear();
         super.onDestroy();
     }
@@ -439,6 +448,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         ComposeDialog.Builder dialog = new ComposeDialog.Builder(this)
                 .title(getString(replyTo == null ? R.string.discussion_comment_title : R.string.discussion_reply_title))
                 .repo(owner + "/" + repo)
+                .attach(attachFlow())
                 .body(getString(R.string.diff_comment_hint), null)
                 .bodyRequired(true, null)
                 .positive(getString(R.string.comment));
@@ -465,6 +475,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
                     new ComposeDialog.Builder(this)
                             .title(getString(R.string.comment_edit))
                             .repo(owner + "/" + repo)
+                            .attach(attachFlow())
                             .body(getString(R.string.diff_comment_hint), Json.str(item, "body"))
                             .bodyRequired(true, null)
                             .positive(getString(R.string.save))

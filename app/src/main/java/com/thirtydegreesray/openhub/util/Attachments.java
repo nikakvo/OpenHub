@@ -33,7 +33,8 @@ public final class Attachments {
     private static final java.util.Map<String, String> LOCAL_TYPES =
             new java.util.concurrent.ConcurrentHashMap<>();
     private static final java.util.regex.Pattern ASSET_LINK = java.util.regex.Pattern.compile(
-            "https://github\\.com/user-attachments/assets/[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}");
+            "https://github\\.com/user-attachments/assets/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+            java.util.regex.Pattern.CASE_INSENSITIVE);
 
     private Attachments() {
     }
@@ -58,6 +59,16 @@ public final class Attachments {
         if (url == null || !ASSET_LINK.matcher(url.trim()).matches()) return false;
         String type = LOCAL_TYPES.get(url.trim());
         return type == null || isVideo(type);
+    }
+
+    /** The links uploaded in this run of the app (a copy). */
+    public static java.util.Set<String> localUrls() {
+        return new java.util.HashSet<>(LOCAL_COPIES.keySet());
+    }
+
+    /** The content type of a file uploaded in this run of the app, or null. */
+    public static String localType(String url) {
+        return url == null ? null : LOCAL_TYPES.get(url);
     }
 
     /** The file on the phone for an uploaded link, or null. */

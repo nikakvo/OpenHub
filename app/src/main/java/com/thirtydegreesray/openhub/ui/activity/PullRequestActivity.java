@@ -45,6 +45,7 @@ import com.thirtydegreesray.openhub.http.RulesetService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.AttachFlow;
 import com.thirtydegreesray.openhub.ui.widget.ComposeDialog;
 import com.thirtydegreesray.openhub.ui.widget.ReviewDialog;
 import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
@@ -125,6 +126,13 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     @AutoAccess String owner;
     @AutoAccess String repo;
     @AutoAccess int number;
+    private final AttachFlow attachFlow = new AttachFlow(this, markdown -> { });
+
+    /** "Attach image or video" of the comment dialogs, for this repository. */
+    private AttachFlow attachFlow() {
+        attachFlow.setRepository(owner, repo, "https://github.com/" + owner + "/" + repo + "/pull/" + number);
+        return attachFlow;
+    }
     @AutoAccess int tab;
 
     private TextView tabConversation;
@@ -229,6 +237,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
 
     @Override
     protected void onDestroy() {
+        attachFlow.dispose();
         handler.removeCallbacksAndMessages(null);
         disposables.clear();
         super.onDestroy();
@@ -981,6 +990,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         new ComposeDialog.Builder(this)
                 .title(getString(R.string.pull_comment))
                 .repo(owner + "/" + repo)
+                .attach(attachFlow())
                 .body(getString(R.string.pull_comment_hint), null)
                 .bodyRequired(true, null)
                 .positive(getString(R.string.pull_comment))
@@ -1195,6 +1205,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                 new ComposeDialog.Builder(this)
                         .title(getString(R.string.comment_edit))
                         .repo(owner + "/" + repo)
+                        .attach(attachFlow())
                         .body(getString(R.string.pull_comment_hint), Json.str(comment, "body"))
                         .bodyRequired(true, null)
                         .positive(getString(R.string.save))
@@ -1243,6 +1254,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         new ComposeDialog.Builder(this)
                 .title(getString(R.string.pull_edit))
                 .repo(owner + "/" + repo)
+                .attach(attachFlow())
                 .titleField(getString(R.string.title), Json.str(pull, "title"))
                 .body(getString(R.string.pull_description_hint), Json.str(pull, "body"))
                 .positive(getString(R.string.save))
