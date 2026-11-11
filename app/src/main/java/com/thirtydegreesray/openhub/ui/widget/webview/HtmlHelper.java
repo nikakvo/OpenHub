@@ -193,13 +193,20 @@ class HtmlHelper {
                                  boolean isDark, @NonNull String backgroundColor,
                                  @NonNull String accentColor, boolean wrapCode) {
         String skin = isDark ? "markdown_dark.css" : "markdown_white.css";
+        String base = isDark ? "github-markdown/github-markdown-dark.css"
+                : "github-markdown/github-markdown-light.css";
         mdSource = StringUtils.isBlank(baseUrl) ? mdSource : fixLinks(mdSource, baseUrl);
         //fix wiki inner url like this "href="/robbyrussell/oh-my-zsh/wiki/Themes""
         mdSource = fixWikiLinks(mdSource);
-        return generateMdHtml(mdSource, skin, backgroundColor, accentColor, wrapCode);
+        return generateMdHtml(mdSource, base, skin, backgroundColor, accentColor, wrapCode);
     }
 
-    private static String generateMdHtml(@NonNull String mdSource, String skin,
+    /**
+     * GitHub's own Markdown style (github-markdown-css: alerts, footnotes, task lists,
+     * tables, kbd, ...) under the app's few changes (font size, quotes, the theme's
+     * background and accent color).
+     */
+    private static String generateMdHtml(@NonNull String mdSource, @NonNull String base, String skin,
                                          @NonNull String backgroundColor,
                                          @NonNull String accentColor, boolean wrapCode) {
         return "<html>\n" +
@@ -207,9 +214,11 @@ class HtmlHelper {
                         "<meta charset=\"utf-8\" />\n" +
                         "<title>MD View</title>\n" +
                         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0\"/>" +
+                        "<link rel=\"stylesheet\" type=\"text/css\" href=\"./" + base + "\">\n" +
                         "<link rel=\"stylesheet\" type=\"text/css\" href=\"./" + skin + "\">\n" +
                         "<style>" +
                             "body{background: " + backgroundColor + ";}" +
+                            ".markdown-body{background-color: transparent !important;}" +
                             "a {color:" + accentColor + " !important;}" +
                             ".highlight pre, pre {" +
                             " word-wrap: " + (wrapCode ? "break-word" : "normal") + "; " +
@@ -217,7 +226,7 @@ class HtmlHelper {
                             "}" +
                         "</style>" +
                     "</head>\n" +
-                    "<body>\n" +
+                    "<body class=\"markdown-body\">\n" +
                         mdSource +
                         ANCHOR_SCRIPT +
                         VIDEO_SCRIPT +

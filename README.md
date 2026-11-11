@@ -302,7 +302,8 @@ Never commit keys or passwords: `public.properties` is in git and must stay empt
 * [jsoup](https://github.com/jhy/jsoup) Java HTML Parser, with best of DOM, CSS, and jquery.
 * [OctoDroid](https://github.com/slapperwan/gh4a) This application provides access to GitHub and lets you stay connected with your network.
 * [FastHub](https://github.com/k0shk0sh/FastHub) FastHub the ultimate GitHub client for Android.
-* [highlight](https://github.com/highlight/highlight) Highlight code in WebView.
+* [highlight.js](https://github.com/highlightjs/highlight.js) Syntax highlighting of code files.
+* [github-markdown-css](https://github.com/sindresorhus/github-markdown-css) GitHub's Markdown style for READMEs, wiki pages and comments opened alone.
 * [highlightjs-line-numbers.js](https://github.com/yauhenipakala/highlightjs-line-numbers.js) Display code line number with highlightjs.
 
 ## Contributors to the original OpenHub
