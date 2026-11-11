@@ -140,6 +140,11 @@ public final class MarkdownRenderer {
                         return glide.load(source)
                                 .override(maxWidth, Target.SIZE_ORIGINAL)
                                 .fitCenter()
+                                // no placeholder: Markwon keeps a placeholder as the picture's
+                                // result, and a load that is cancelled while it shows (the row is
+                                // bound again) is never started again, because the picture already
+                                // "has a result": the app icon stayed in place of the picture
+                                .placeholder((Drawable) null)
                                 .addListener(new RequestListener<Drawable>() {
                                     @Override
                                     public boolean onLoadFailed(@Nullable GlideException e, Object model,

@@ -64,9 +64,9 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
     /**
      * The comments are rendered from their Markdown like pull requests and discussions,
      * with pictures. When a picture arrives, the texts on screen are set again in place so
-     * they take its height. The rows are NOT bound again: notifyDataSetChanged could move a
-     * comment to another row, and the old row, when it was taken away, cancelled the
-     * picture still loading from the network (the picture stayed a placeholder for good).
+     * they take its height. The rows are not bound again for that: a comment that moves to
+     * another row cancels the picture still loading in the old row, and it has to start
+     * over in the new one.
      */
     @NonNull
     private Markwon markwon() {
