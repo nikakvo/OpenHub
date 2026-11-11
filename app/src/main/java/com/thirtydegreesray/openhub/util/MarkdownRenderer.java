@@ -84,6 +84,11 @@ public final class MarkdownRenderer {
             main.postDelayed(onImageLoaded, 120);
         };
         final int maxWidth = context.getResources().getDisplayMetrics().widthPixels;
+        // pictures that already made the text lay out again once: a picture from the memory
+        // cache (opening a screen again) arrives after the layout too, but must not lay the
+        // text out again on every bind, or the rebinds would never end
+        final java.util.Set<String> arrived =
+                java.util.Collections.synchronizedSet(new java.util.HashSet<>());
         final int quoteBar = QuoteStyle.barColor(context);
         final int quoteText = QuoteStyle.textColor(context);
         final int quoteWidth = QuoteStyle.px(context, QuoteStyle.BAR_DP);
@@ -128,7 +133,8 @@ public final class MarkdownRenderer {
                                     public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model,
                                                                    Target<Drawable> target, @NonNull DataSource source,
                                                                    boolean isFirst) {
-                                        if (relayout != null && source != DataSource.MEMORY_CACHE) {
+                                        boolean first = arrived.add(String.valueOf(model));
+                                        if (relayout != null && (first || source != DataSource.MEMORY_CACHE)) {
                                             main.post(relayout);
                                         }
                                         return false;
