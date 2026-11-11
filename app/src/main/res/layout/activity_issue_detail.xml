@@ -52,7 +52,7 @@
                     android:orientation="horizontal"
                     android:layout_toEndOf="@+id/user_avatar"
                     android:layout_marginStart="@dimen/spacing_normal"
-                    android:layout_marginTop="@dimen/spacing_x_large"
+                    android:layout_marginTop="28dp"
                     android:gravity="center_vertical">
 
                     <androidx.appcompat.widget.AppCompatImageView
@@ -82,6 +82,7 @@
                     android:layout_below="@+id/state_lay"
                     android:layout_toEndOf="@+id/user_avatar"
                     android:layout_marginStart="@dimen/spacing_normal"
+                    android:layout_marginTop="-3dp"
                     android:transitionName="issueTitle"/>
 
             </RelativeLayout>

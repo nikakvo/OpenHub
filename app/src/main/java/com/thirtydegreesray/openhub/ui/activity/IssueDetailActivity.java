@@ -179,8 +179,8 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
         issueTitle.setText(issue.getTitle());
         commentBn.setVisibility(issue.isLocked() ? View.GONE : View.VISIBLE);
 
-        String commentStr = String.valueOf(issue.getCommentNum()).concat(" ")
-                .concat(getString(R.string.comments).toLowerCase());
+        String commentStr = getResources().getQuantityString(R.plurals.discussion_comments,
+                issue.getCommentNum(), issue.getCommentNum());
         if (Issue.IssueState.open.equals(issue.getState())) {
             issueStateImg.setImageResource(R.drawable.ic_issues);
             issueStateText.setText(getString(R.string.open).concat("    ").concat(commentStr));
