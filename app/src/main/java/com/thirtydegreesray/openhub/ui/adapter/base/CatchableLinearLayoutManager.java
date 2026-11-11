@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.AttributeSet;
 
-import com.orhanobut.logger.Logger;
+import com.thirtydegreesray.openhub.util.AppLog;
 
 /**
  * Created by ThirtyDegreesRay on 2017/12/26 16:35:06 <br>
@@ -42,8 +42,8 @@ public class CatchableLinearLayoutManager extends LinearLayoutManager {
         try {
             super.onLayoutChildren(recycler, state);
         } catch (IndexOutOfBoundsException e){
-            Logger.t("CatchableLinearLayoutManager")
-                    .d("meet a IndexOutOfBoundsException in RecyclerView");
+            AppLog.d("CatchableLinearLayoutManager",
+                    "meet a IndexOutOfBoundsException in RecyclerView");
         }
     }
 }

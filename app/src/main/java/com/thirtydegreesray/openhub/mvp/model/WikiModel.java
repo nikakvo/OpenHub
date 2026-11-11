@@ -3,9 +3,6 @@ package com.thirtydegreesray.openhub.mvp.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -13,13 +10,12 @@ import java.net.URLDecoder;
  * Created by ThirtyDegreesRay on 2017/12/6 15:59:31
  */
 
-@Root(name = "entry")
 public class WikiModel implements Parcelable {
 
-    @Element(name = "id") private String id;
-    @Element(name = "published") private String published;
-    @Element(name = "updated") private String updated;
-    @Element(name = "content") private String content;
+    private String id;
+    private String published;
+    private String updated;
+    private String content;
     private String simpleTextContent;
 
     public String getId() {

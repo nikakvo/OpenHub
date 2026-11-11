@@ -1,21 +1,16 @@
 package com.thirtydegreesray.openhub.mvp.model;
 
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.Root;
-
 import java.util.ArrayList;
 
 /**
  * Created by ThirtyDegreesRay on 2017/12/7 10:01:39
  */
-@Root(name = "feed")
 public class WikiFeedModel {
 
-    @Element(name = "id") private String id;
-    @Element(name = "title") private String title;
-    @Element(name = "updated") private String updated;
-    @ElementList(inline = true) private ArrayList<WikiModel> wikiList;
+    private String id;
+    private String title;
+    private String updated;
+    private ArrayList<WikiModel> wikiList;
 
     public String getId() {
         return id;

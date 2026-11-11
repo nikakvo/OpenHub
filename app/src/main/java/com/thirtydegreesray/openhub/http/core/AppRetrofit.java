@@ -36,7 +36,6 @@ import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 /**
  * Retrofit 网络请求
@@ -86,7 +85,8 @@ public enum  AppRetrofit {
         if (isJson) {
             builder.addConverterFactory(GsonConverterFactory.create());
         } else {
-            builder.addConverterFactory(SimpleXmlConverterFactory.createNonStrict());
+            // github.com pages: the wiki Atom feed; HTML pages are read as ResponseBody
+            builder.addConverterFactory(new WikiFeedConverterFactory());
         }
         return builder.build();
     }

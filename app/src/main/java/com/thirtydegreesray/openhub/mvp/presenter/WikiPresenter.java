@@ -9,8 +9,6 @@ import com.thirtydegreesray.openhub.mvp.model.WikiFeedModel;
 import com.thirtydegreesray.openhub.mvp.model.WikiModel;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.util.ArrayList;
 
 import javax.inject.Inject;
@@ -44,11 +42,7 @@ public class WikiPresenter extends BasePresenter<IWikiContract.View>
             @Override
             public void onError(Throwable error) {
                 mView.hideLoading();
-                if (error.getCause() != null && error.getCause() instanceof XmlPullParserException) {
-                    mView.showWiki(null);
-                } else {
-                    mView.showLoadError(getErrorTip(error));
-                }
+                mView.showLoadError(getErrorTip(error));
             }
 
             @Override

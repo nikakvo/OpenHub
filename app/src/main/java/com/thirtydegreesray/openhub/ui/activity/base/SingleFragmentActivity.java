@@ -5,7 +5,7 @@ package com.thirtydegreesray.openhub.ui.activity.base;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
-import com.orhanobut.logger.Logger;
+import com.thirtydegreesray.openhub.util.AppLog;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
@@ -37,10 +37,10 @@ public abstract class SingleFragmentActivity<P extends IBaseContract.Presenter, 
                     .beginTransaction()
                     .add(R.id.container, mFragment, FRAGMENT_TAG)
                     .commit();
-            Logger.d("temp fragment is null");
+            AppLog.d("SingleFragmentActivity", "temp fragment is null");
         } else {
             mFragment = (F) temp;
-            Logger.d("temp fragment not null");
+            AppLog.d("SingleFragmentActivity", "temp fragment not null");
         }
     }
 
@@ -53,7 +53,7 @@ public abstract class SingleFragmentActivity<P extends IBaseContract.Presenter, 
     @Override
     public void onAttachFragment(Fragment fragment) {
         super.onAttachFragment(fragment);
-        Logger.d("onAttachFragment");
+        AppLog.d("SingleFragmentActivity", "onAttachFragment");
     }
 
     @Override

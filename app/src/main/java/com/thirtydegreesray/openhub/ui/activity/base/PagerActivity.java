@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 import android.view.KeyEvent;
 
-import com.orhanobut.logger.Logger;
+import com.thirtydegreesray.openhub.util.AppLog;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.mvp.presenter.base.BasePresenter;
@@ -131,7 +131,7 @@ public abstract class PagerActivity<P extends BasePresenter> extends BaseDrawerA
         postNotifyFragmentStatus(position, true, 500);
         prePosition = position;
         viewPager.post(this::invalidateBack);
-        Logger.d("onPageSelected " + position);
+        AppLog.d("PagerActivity", "onPageSelected " + position);
     }
 
     @Override
@@ -166,7 +166,7 @@ public abstract class PagerActivity<P extends BasePresenter> extends BaseDrawerA
         super.onAttachFragment(fragment);
         int fragmentPosition = getFragmentPosition(fragment);
         if(fragmentPosition != -1) getFragments().set(fragmentPosition, fragment);
-        Logger.d("onAttachFragment" + fragment);
+        AppLog.d("PagerActivity", "onAttachFragment " + fragment);
     }
 
     @NonNull

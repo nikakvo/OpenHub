@@ -17,7 +17,7 @@ import com.thirtydegreesray.openhub.mvp.presenter.base.BasePagerPresenter;
 import com.thirtydegreesray.openhub.ui.fragment.UserListFragment;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
-import org.greenrobot.eventbus.Subscribe;
+import com.thirtydegreesray.openhub.common.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;

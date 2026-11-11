@@ -13,9 +13,7 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
 
-import com.orhanobut.logger.AndroidLogAdapter;
-import com.orhanobut.logger.Logger;
-import com.orhanobut.logger.PrettyFormatStrategy;
+import com.thirtydegreesray.openhub.util.AppLog;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.inject.component.DaggerAppComponent;
 import com.thirtydegreesray.openhub.inject.module.AppModule;
@@ -50,8 +48,7 @@ public class AppApplication extends Application {
         AppData.INSTANCE.getSystemDefaultLocal();
         //apply language for application context
         AppUtils.updateAppLanguage(getApplicationContext());
-        initLogger();
-        Logger.t(TAG).i("startTime:" + startTime);
+        AppLog.i(TAG, "startTime:" + startTime);
         mAppComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
                 .build();
@@ -60,35 +57,15 @@ public class AppApplication extends Application {
         SignInWatch.install(this);
         // RxJava 3 sends errors that arrive after a request was cancelled (screen closed)
         // to this handler; without one they would crash the app.
-        RxJavaPlugins.setErrorHandler(error -> Logger.t(TAG).w("Rx error after dispose: " + error));
+        RxJavaPlugins.setErrorHandler(error -> AppLog.w(TAG, "Rx error after dispose: " + error));
         // keep the release check scheduled (no-op when nothing is watched)
         ReleaseWatcher.schedule(this);
         com.thirtydegreesray.openhub.util.GitHubNotifier.schedule(this);
         com.thirtydegreesray.openhub.util.ActionsWatcher.schedule(this);
         startTime = System.currentTimeMillis();
-        Logger.t(TAG).i("application ok:" + (System.currentTimeMillis() - startTime));
+        AppLog.i(TAG, "application ok:" + (System.currentTimeMillis() - startTime));
 
 
-    }
-
-    private void initLogger(){
-        PrettyFormatStrategy strategy = PrettyFormatStrategy.newBuilder()
-                        .showThreadInfo(false)
-                        .methodCount(0)
-                        .methodOffset(0)
-                        .tag("OpenHub_Logger")
-                        .build();
-        Logger.addLogAdapter(new AndroidLogAdapter(strategy){
-            @Override
-            public boolean isLoggable(int priority, String tag) {
-                return BuildConfig.DEBUG;
-            }
-
-            @Override
-            public void log(int priority, String tag, String message) {
-                super.log(priority, tag, message);
-            }
-        });
     }
 
     private void initNetwork(){

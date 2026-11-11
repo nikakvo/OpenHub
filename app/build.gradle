@@ -125,14 +125,9 @@ dependencies {
     implementation libs.androidx.viewpager2
     implementation libs.androidx.exifinterface
 
-    implementation libs.javax.annotation
-    annotationProcessor libs.javax.annotation
-
     // Database
     implementation libs.androidx.room.runtime
     annotationProcessor libs.androidx.room.compiler
-
-    implementation libs.eventbus
 
     // RxJava
     implementation libs.rxjava
@@ -144,11 +139,6 @@ dependencies {
     implementation libs.retrofit.rxjava3
     implementation libs.okhttp
     implementation libs.gson
-    implementation(libs.retrofit.simplexml) {
-        exclude group: 'xpp3', module: 'xpp3'
-        exclude group: 'stax', module: 'stax-api'
-        exclude group: 'stax', module: 'stax'
-    }
 
     // Dependency injection
     implementation libs.dagger
@@ -156,7 +146,6 @@ dependencies {
 
     implementation libs.glide
     annotationProcessor libs.glide.compiler
-
 
     // Markdown in comments, posts and the editor preview
     implementation libs.markwon.core
@@ -166,8 +155,6 @@ dependencies {
     implementation libs.markwon.linkify
     implementation libs.markwon.image.glide
     implementation libs.markwon.html
-
-    implementation libs.logger
 
     implementation libs.jsoup
 

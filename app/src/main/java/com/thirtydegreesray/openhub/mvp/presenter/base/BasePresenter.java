@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 
-import com.orhanobut.logger.Logger;
+import com.thirtydegreesray.openhub.util.AppLog;
 import com.thirtydegreesray.openhub.util.state.DataAutoAccess;
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.AppData;
@@ -115,7 +115,7 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
         for (Disposable subscriber : subscribers) {
             if (subscriber != null && !subscriber.isDisposed()) {
                 subscriber.dispose();
-                Logger.d(TAG, "unsubscribe:" + subscriber);
+                AppLog.d(TAG, "unsubscribe:" + subscriber);
             }
         }
         if (isEventSubscriber) AppEventBus.INSTANCE.getEventBus().unregister(this);
@@ -318,7 +318,7 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
     public void rxDBExecute(@NonNull Runnable runnable){
         Completable.fromAction(() -> db.runInTransaction(runnable))
                 .subscribeOn(Schedulers.io())
-                .subscribe(() -> { }, error -> Logger.e(error, "rxDBExecute"));
+                .subscribe(() -> { }, error -> AppLog.e(TAG, "rxDBExecute", error));
     }
 
 

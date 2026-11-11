@@ -28,7 +28,7 @@ import com.thirtydegreesray.openhub.ui.fragment.RepositoriesFragment;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.TrendingParser;
 
-import org.greenrobot.eventbus.Subscribe;
+import com.thirtydegreesray.openhub.common.Subscribe;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

@@ -289,7 +289,6 @@ Never commit keys or passwords: `public.properties` is in git and must stay empt
 ## Libraries
 
 * [Room](https://developer.android.com/training/data-storage/room) The SQLite object mapping library of Android Jetpack.
-* [EventBus](https://github.com/greenrobot/EventBus) Android optimized event bus that simplifies communication between Activities, Fragments, Threads, Services, etc.
 * [RxJava](https://github.com/ReactiveX/RxJava) A library for composing asynchronous and event-based programs using observable sequences for the Java VM.
 * [RxAndroid](https://github.com/ReactiveX/RxAndroid) RxJava bindings for Android.
 * [Retrofit](https://github.com/square/retrofit) Type-safe HTTP client for Android and Java by Square, Inc.

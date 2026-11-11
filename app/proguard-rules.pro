@@ -46,16 +46,11 @@
 -keepclassmembers class * { @com.thirtydegreesray.openhub.util.state.AutoAccess <fields>; }
 
 
-#EventBus
+# App event bus (common.AppEventBus): finds the @Subscribe methods by reflection
 -keepattributes *Annotation*
+-keep @interface com.thirtydegreesray.openhub.common.Subscribe
 -keepclassmembers class ** {
-    @org.greenrobot.eventbus.Subscribe <methods>;
-}
--keep enum org.greenrobot.eventbus.ThreadMode { *; }
-
-# Only required if you use AsyncExecutor
--keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
-    <init>(java.lang.Throwable);
+    @com.thirtydegreesray.openhub.common.Subscribe <methods>;
 }
 
 #Glide
@@ -83,5 +78,3 @@
 -keepattributes EnclosingMethod
 -keep class com.thirtydegreesray.openhub.mvp.model.**{*;}
 -keep class com.thirtydegreesray.openhub.dao.**{*;}
-# SimpleXml
--keep class org.simpleframework.xml.core.**{ *; }
