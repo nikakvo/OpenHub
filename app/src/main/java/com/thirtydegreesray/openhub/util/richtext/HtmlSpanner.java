@@ -491,6 +491,8 @@ final class HtmlSpanner {
         else children(a);
         if (style.clickable) span(new Spans.Link(href, Spans.Link.LINK), start);
         else span(new ForegroundColorSpan(linkColorFallback()), start);
+        // @user and @org/team mentions are bold on github.com
+        if (a.hasClass("user-mention") || a.hasClass("team-mention")) span(new Spans.Bold(), start);
     }
 
     private int linkColorFallback() {
