@@ -21,8 +21,13 @@ import com.bumptech.glide.request.transition.Transition;
 import com.thirtydegreesray.openhub.R;
 
 import java.lang.ref.WeakReference;
+import org.jsoup.Jsoup;
+
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A rendered text with its pictures. It can be kept and shown again (a list row bound
@@ -37,9 +42,21 @@ public final class RichDoc {
     boolean hasTables;
     /** width of the text in pixels (pictures and tables are fitted into it) */
     int width;
+    /**
+     * The HTML, kept only when the text has {@code <details>}: opening or closing one
+     * renders the text again from it.
+     */
+    @Nullable
+    private String source;
+    @NonNull
+    private String playVideo = "";
+    /** the {@code <details>} the user opened (true) or closed (false), by their number in the text */
+    private final Map<Integer, Boolean> detailsOpen = new HashMap<>();
+    /** pictures of the previous rendering, used again by the next one (no new load, no jump) */
+    @Nullable
+    private Map<String, ArrayDeque<ImageSpan>> oldImages;
 
     private WeakReference<TextView> host = new WeakReference<>(null);
-    private boolean loadsStarted;
     private final Runnable relayout = this::relayoutNow;
 
     private final Drawable.Callback animation = new Drawable.Callback() {
@@ -71,6 +88,65 @@ public final class RichDoc {
         return text;
     }
 
+    /** Renders {@code html} into the text; {@code html} is kept when it has {@code <details>}. */
+    void build(@NonNull String html, @NonNull String playVideo) {
+        this.source = html;
+        this.playVideo = playVideo;
+        rebuild();
+        if (detailsIds.isEmpty()) source = null;
+    }
+
+    /** the {@code <details>} of the last rendering: their number in the HTML */
+    @NonNull
+    private Map<org.jsoup.nodes.Element, Integer> detailsIds = new java.util.IdentityHashMap<>();
+
+    private void rebuild() {
+        String html = source;
+        if (html == null) return;
+        oldImages = new HashMap<>();
+        for (ImageSpan span : images) {
+            String key = String.valueOf(span.source);
+            ArrayDeque<ImageSpan> same = oldImages.get(key);
+            if (same == null) oldImages.put(key, same = new ArrayDeque<>());
+            same.add(span);
+        }
+        images.clear();
+        text.clearSpans();
+        text.clear();
+        hasTables = false;
+        org.jsoup.nodes.Element body = Jsoup.parseBodyFragment(html).body();
+        detailsIds = new java.util.IdentityHashMap<>();
+        int number = 0;
+        for (org.jsoup.nodes.Element details : body.select("details")) detailsIds.put(details, number++);
+        new HtmlSpanner(this, text, playVideo, detailsIds).render(body);
+        oldImages = null;
+    }
+
+    /** A picture of the previous rendering with the same source, or null. */
+    @Nullable
+    ImageSpan reuseImage(@NonNull Object source) {
+        if (oldImages == null) return null;
+        ArrayDeque<ImageSpan> same = oldImages.get(String.valueOf(source));
+        return same == null ? null : same.poll();
+    }
+
+    /** Whether {@code <details>} number {@code id} is open: the user's choice, else its {@code open} attribute. */
+    boolean isOpen(int id, boolean byDefault) {
+        Boolean chosen = detailsOpen.get(id);
+        return chosen != null ? chosen : byDefault;
+    }
+
+    /** Opens or closes {@code <details>} number {@code id} and shows the new text in {@code view}. */
+    void toggle(int id, boolean wasOpen, @NonNull TextView view) {
+        if (source == null) return;
+        detailsOpen.put(id, !wasOpen);
+        rebuild();
+        if (view.getTag(R.id.rich_text_doc) == this) {
+            view.setText(text, TextView.BufferType.SPANNABLE);
+            startLoads(view);
+        }
+    }
+
     void attach(@NonNull TextView view) {
         host = new WeakReference<>(view);
     }
@@ -87,13 +163,16 @@ public final class RichDoc {
     }
 
     void startLoads(@NonNull TextView view) {
-        if (loadsStarted || images.isEmpty() || !style.loadImages) return;
+        if (images.isEmpty() || !style.loadImages) return;
         Activity activity = activityOf(view.getContext());
         if (activity != null && (activity.isDestroyed() || activity.isFinishing())) return;
-        loadsStarted = true;
-        RequestManager glide = Glide.with(view.getContext());
+        RequestManager glide = null;
         int max = Math.max(view.getResources().getDisplayMetrics().widthPixels, 1);
         for (final ImageSpan span : images) {
+            // every picture is loaded once; pictures of an opened <details> come later
+            if (span.requested) continue;
+            span.requested = true;
+            if (glide == null) glide = Glide.with(view.getContext());
             glide.load(span.source)
                     // big screenshots are decoded at most as wide as the screen, small
                     // pictures stay as they are (never scaled up)

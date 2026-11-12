@@ -390,6 +390,18 @@ final class Spans {
         }
     }
 
+    /** The summary line of a {@code <details>}: a tap on it opens or closes it ({@link RichText}). */
+    static final class Toggle {
+
+        final int id;
+        final boolean open;
+
+        Toggle(int id, boolean open) {
+            this.id = id;
+            this.open = open;
+        }
+    }
+
     /** A horizontal rule ({@code <hr>}): a thin line across the middle of its line. */
     static final class Rule implements LineBackgroundSpan {
 

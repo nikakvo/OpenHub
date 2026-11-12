@@ -6,6 +6,7 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,8 +17,6 @@ import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.MarkdownHtml;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
 /**
  * Comments, posts and notes in a text view, the way github.com shows them. The text is
@@ -38,8 +37,7 @@ public final class RichText {
         String source = !StringUtils.isBlank(html) ? html
                 : !StringUtils.isBlank(markdown) ? MarkdownHtml.renderComment(markdown) : "";
         if (source.isEmpty()) return doc;
-        Document parsed = Jsoup.parseBodyFragment(source);
-        new HtmlSpanner(doc, doc.text, context.getString(R.string.rich_text_play_video)).render(parsed.body());
+        doc.build(source, context.getString(R.string.rich_text_play_video));
         return doc;
     }
 
@@ -67,8 +65,9 @@ public final class RichText {
     private static final View.OnTouchListener COPY_TOUCH = (v, event) -> onCopyTouch((TextView) v, event);
 
     /**
-     * A tap on the copy mark of a code block copies the code. Views that need their own
-     * touch listener call this first and stop when it returns true.
+     * A tap on the copy mark of a code block copies the code; a tap on the summary line of
+     * a {@code <details>} opens or closes it. Views that need their own touch listener call
+     * this first and stop when it returns true (the tap then does not open the comment).
      */
     public static boolean onCopyTouch(@NonNull TextView view, @NonNull MotionEvent event) {
         CharSequence text = view.getText();
@@ -83,6 +82,26 @@ public final class RichText {
                 String code = spanned.subSequence(spanned.getSpanStart(block), spanned.getSpanEnd(block))
                         .toString().replace("\u200B", "");
                 AppUtils.copyToClipboard(view.getContext(), code);
+            }
+            return true;
+        }
+        return onDetailsTouch(view, spanned, x, y, event);
+    }
+
+    private static boolean onDetailsTouch(@NonNull TextView view, @NonNull Spanned spanned, int x, int y,
+                                          @NonNull MotionEvent event) {
+        Object tag = view.getTag(R.id.rich_text_doc);
+        if (!(tag instanceof RichDoc)) return false;
+        android.text.Layout layout = view.getLayout();
+        if (y < 0 || y > layout.getHeight() || x < 0) return false;
+        int line = layout.getLineForVertical(y);
+        int lineStart = layout.getLineStart(line);
+        int lineEnd = layout.getLineEnd(line);
+        for (Spans.Toggle toggle : spanned.getSpans(lineStart, lineEnd, Spans.Toggle.class)) {
+            if (spanned.getSpanStart(toggle) >= lineEnd || spanned.getSpanEnd(toggle) <= lineStart) continue;
+            if (event.getActionMasked() == MotionEvent.ACTION_UP
+                    && event.getEventTime() - event.getDownTime() < ViewConfiguration.getLongPressTimeout()) {
+                ((RichDoc) tag).toggle(toggle.id, toggle.open, view);
             }
             return true;
         }

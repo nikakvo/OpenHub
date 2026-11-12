@@ -28,6 +28,7 @@ import org.jsoup.nodes.TextNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Turns GitHub's rendered HTML (body_html, bodyHTML, POST /markdown) into Android text:
@@ -42,11 +43,15 @@ final class HtmlSpanner {
 
     private static final String OBJECT = "￼";
     private static final String ZERO_WIDTH = "​";
+    /** keeps the ▸ / ▾ mark of a {@code <details>} on the line of its first word */
+    private static final char NO_BREAK = '\u00A0';
 
     private final RichDoc doc;
     private final RichStyle style;
     private final SpannableStringBuilder out;
     private final String playVideo;
+    /** every {@code <details>} of the whole text with its number (its open state is kept by it) */
+    private final Map<Element, Integer> detailsIds;
 
     /** pending break before the next content */
     private int pending = NONE;
@@ -60,11 +65,13 @@ final class HtmlSpanner {
     /** the text right after an alert's title follows on the next line */
     private boolean tightNext;
 
-    HtmlSpanner(@NonNull RichDoc doc, @NonNull SpannableStringBuilder out, @NonNull String playVideo) {
+    HtmlSpanner(@NonNull RichDoc doc, @NonNull SpannableStringBuilder out, @NonNull String playVideo,
+                @NonNull Map<Element, Integer> detailsIds) {
         this.doc = doc;
         this.style = doc.style;
         this.out = out;
         this.playVideo = playVideo;
+        this.detailsIds = detailsIds;
     }
 
     void render(@NonNull Element root) {
@@ -171,7 +178,7 @@ final class HtmlSpanner {
 
     private boolean endsWithSpace() {
         char last = out.charAt(out.length() - 1);
-        return last == ' ' || last == '\n';
+        return last == ' ' || last == '\n' || last == NO_BREAK;
     }
 
     private void append(@NonNull String s) {
@@ -215,15 +222,19 @@ final class HtmlSpanner {
                 close(LINE);
                 return;
             case "section": case "article": case "header": case "footer": case "figure":
-            case "figcaption": case "dl": case "dt": case "dd": case "details": case "main":
+            case "figcaption": case "dl": case "dt": case "dd": case "main":
             case "aside": case "nav": case "address":
                 open(LINE);
                 children(e);
                 close(LINE);
                 return;
+            case "details":
+                details(e);
+                return;
             case "summary":
+                // a summary outside a <details>
                 start = open(LINE);
-                append("▾ ");
+                append("▾" + NO_BREAK);
                 children(e);
                 span(new Spans.Bold(), start);
                 close(LINE);
@@ -357,6 +368,37 @@ final class HtmlSpanner {
                 return e.hasClass("sr-only") || e.hasAttr("hidden")
                         || (tag.equals("a") && e.hasClass("anchor"));
         }
+    }
+
+    /**
+     * {@code <details>}: closed like on github.com unless it has {@code open} or the user
+     * opened it. The summary line opens and closes it on a tap ({@link RichText}); closed,
+     * only the summary is shown.
+     */
+    private void details(@NonNull Element e) {
+        Integer number = detailsIds.get(e);
+        int id = number != null ? number : -1;
+        boolean opened = id < 0 || doc.isOpen(id, e.hasAttr("open"));
+        Element summary = null;
+        for (Element child : e.children()) {
+            if (child.normalName().equals("summary")) {
+                summary = child;
+                break;
+            }
+        }
+        int start = open(LINE);
+        append((opened ? "▾" : "▸") + NO_BREAK);
+        if (summary != null) children(summary);
+        if (out.length() == start + 2) append("Details");
+        span(new Spans.Bold(), start);
+        if (id >= 0) span(new Spans.Toggle(id, opened), start);
+        close(LINE);
+        if (opened) {
+            for (Node child : new ArrayList<>(e.childNodes())) {
+                if (child != summary) node(child);
+            }
+        }
+        close(LINE);
     }
 
     private void heading(@NonNull Element e, int level) {
@@ -557,7 +599,9 @@ final class HtmlSpanner {
         String local = Attachments.localCopy(canonical.isEmpty() ? src : canonical);
         if (local == null) local = Attachments.localCopy(src);
         Object source = local != null ? android.net.Uri.parse(local) : src;
-        ImageSpan span = new ImageSpan(doc, source, dimension(img, "width"), dimension(img, "height"), emoji);
+        // the same picture of the text rendered before (a <details> was opened or closed)
+        ImageSpan span = doc.reuseImage(source);
+        if (span == null) span = new ImageSpan(doc, source, dimension(img, "width"), dimension(img, "height"), emoji);
         doc.images.add(span);
         flush();
         int start = out.length();
@@ -619,7 +663,7 @@ final class HtmlSpanner {
                 Element cell = i < cells.size() ? cells.get(i) : null;
                 SpannableStringBuilder cellText = new SpannableStringBuilder();
                 if (cell != null) {
-                    HtmlSpanner inner = new HtmlSpanner(doc, cellText, playVideo);
+                    HtmlSpanner inner = new HtmlSpanner(doc, cellText, playVideo, detailsIds);
                     inner.render(cell);
                     if (cell.normalName().equals("th") && cellText.length() > 0) {
                         cellText.setSpan(new Spans.Bold(), 0, cellText.length(),

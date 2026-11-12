@@ -28,6 +28,8 @@ final class ImageSpan extends ReplacementSpan {
     @Nullable Drawable drawable;
     /** a narrower limit inside a table cell; 0 = the width of the text */
     int maxWidth;
+    /** the load of the picture has been started */
+    boolean requested;
 
     ImageSpan(@NonNull RichDoc doc, @NonNull Object source, int attrWidth, int attrHeight, boolean emoji) {
         this.doc = doc;
