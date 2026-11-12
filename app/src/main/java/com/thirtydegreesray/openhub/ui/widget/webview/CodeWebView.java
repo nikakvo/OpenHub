@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
 import android.webkit.WebChromeClient;
@@ -111,6 +112,29 @@ public class CodeWebView extends WebView {
                 return false;
             }
         });
+    }
+
+    /**
+     * A web view as tall as its page (wrap_content inside a scrolling screen: README, pull
+     * request and release text) gets its drawing memory from the part that is on screen.
+     * When only a strip of it is visible (a README below the repo info), big animated
+     * pictures need more than that and parts of the page vanish for a moment, again and
+     * again. Pre-rastering sizes the memory by the whole view and stops the flicker
+     * (charmbracelet/vhs: 104 "tile memory limits exceeded" in 10 s before, 0 after,
+     * app memory +2 MB).
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        ViewGroup.LayoutParams params = getLayoutParams();
+        if (params != null && preRasterFor(params.height)) {
+            getSettings().setOffscreenPreRaster(true);
+        }
+    }
+
+    /** True for a web view that takes the height of its page. */
+    public static boolean preRasterFor(int layoutHeight) {
+        return layoutHeight == ViewGroup.LayoutParams.WRAP_CONTENT;
     }
 
     private float touchDownX, touchDownY;
