@@ -22,16 +22,31 @@ public final class Attachments {
     public static final long VIDEO_LIMIT = 100L * 1024 * 1024;
 
     /**
-     * GitHub's link of a file uploaded in this run of the app -> the file on the phone
-     * (content:// URI). A new upload is not public until a comment that uses it is sent, so
-     * GitHub answers 404 for it in the preview; the preview (and the comment just sent)
-     * shows the same file from the phone instead.
+     * GitHub's link of a file uploaded from this phone -> the file on the phone (content://
+     * URI). A new upload is not public until a comment that uses it is sent, so GitHub
+     * answers 404 for it in the preview; the preview (and the comment just sent) shows the
+     * same file from the phone instead. Kept in a small file ({@link #STORE_NAME}) so it
+     * survives when Android stops the app while the editor is in the background: at most
+     * {@link #MAX_LOCAL_COPIES} links, each for {@link #LOCAL_COPY_KEEP_MS}.
      */
     private static final java.util.Map<String, String> LOCAL_COPIES =
             new java.util.concurrent.ConcurrentHashMap<>();
-    /** GitHub's link -> the content type of a file uploaded in this run of the app. */
+    /** GitHub's link -> the content type of a file uploaded from this phone. */
     private static final java.util.Map<String, String> LOCAL_TYPES =
             new java.util.concurrent.ConcurrentHashMap<>();
+    /** GitHub's link -> when it was uploaded (ms since 1970). */
+    private static final java.util.Map<String, Long> LOCAL_TIMES =
+            new java.util.concurrent.ConcurrentHashMap<>();
+    public static final String STORE_NAME = "attachments.json";
+    public static final int MAX_LOCAL_COPIES = 200;
+    public static final long LOCAL_COPY_KEEP_MS = 24L * 60 * 60 * 1000;
+    private static volatile java.io.File store;
+    private static final java.util.concurrent.Executor SAVER =
+            java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+                Thread t = new Thread(r, "attachments-store");
+                t.setDaemon(true);
+                return t;
+            });
     private static final java.util.regex.Pattern ASSET_LINK = java.util.regex.Pattern.compile(
             "https://github\\.com/user-attachments/assets/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
             java.util.regex.Pattern.CASE_INSENSITIVE);
@@ -40,13 +55,146 @@ public final class Attachments {
     }
 
     public static void rememberLocalCopy(String url, String localUri, String contentType) {
-        if (url == null || localUri == null) return;
-        if (LOCAL_COPIES.size() > 200) {
-            LOCAL_COPIES.clear();
-            LOCAL_TYPES.clear();
-        }
+        if (!putLocalCopy(url, localUri, contentType, System.currentTimeMillis())) return;
+        final java.io.File file = store;
+        if (file != null) SAVER.execute(() -> saveLocalCopies(file, System.currentTimeMillis()));
+    }
+
+    static synchronized boolean putLocalCopy(String url, String localUri, String contentType,
+                                             long time) {
+        if (url == null || localUri == null) return false;
         LOCAL_COPIES.put(url, localUri);
         if (contentType != null) LOCAL_TYPES.put(url, contentType);
+        else LOCAL_TYPES.remove(url);
+        LOCAL_TIMES.put(url, time);
+        trimLocalCopies(time);
+        return true;
+    }
+
+    /** Drops links older than a day, then the oldest ones over the limit. */
+    static synchronized void trimLocalCopies(long now) {
+        for (String url : new java.util.ArrayList<>(LOCAL_COPIES.keySet())) {
+            Long time = LOCAL_TIMES.get(url);
+            if (time == null || time > now + LOCAL_COPY_KEEP_MS || now - time > LOCAL_COPY_KEEP_MS) {
+                forgetLocalCopy(url);
+            }
+        }
+        if (LOCAL_COPIES.size() <= MAX_LOCAL_COPIES) return;
+        java.util.List<String> oldestFirst = new java.util.ArrayList<>(LOCAL_COPIES.keySet());
+        java.util.Collections.sort(oldestFirst, (a, b) -> Long.compare(timeOf(a), timeOf(b)));
+        for (int i = 0; i < oldestFirst.size() - MAX_LOCAL_COPIES; i++) {
+            forgetLocalCopy(oldestFirst.get(i));
+        }
+    }
+
+    private static long timeOf(String url) {
+        Long time = LOCAL_TIMES.get(url);
+        return time == null ? Long.MIN_VALUE : time;
+    }
+
+    private static void forgetLocalCopy(String url) {
+        LOCAL_COPIES.remove(url);
+        LOCAL_TYPES.remove(url);
+        LOCAL_TIMES.remove(url);
+    }
+
+    /** Forgets every link (tests). */
+    static synchronized void clearLocalCopies() {
+        LOCAL_COPIES.clear();
+        LOCAL_TYPES.clear();
+        LOCAL_TIMES.clear();
+    }
+
+    /**
+     * Reads the links kept in {@code dir/attachments.json} (app start) and saves there from
+     * now on. Links older than a day are dropped; a broken file is ignored.
+     */
+    public static void loadLocalCopies(java.io.File dir) {
+        java.io.File file = new java.io.File(dir, STORE_NAME);
+        long now = System.currentTimeMillis();
+        int before = LOCAL_COPIES.size();
+        readLocalCopies(file, now);
+        store = file;
+        if (file.exists() && LOCAL_COPIES.size() != before) {
+            SAVER.execute(() -> saveLocalCopies(file, System.currentTimeMillis()));
+        }
+    }
+
+    static synchronized void readLocalCopies(java.io.File file, long now) {
+        if (!file.isFile()) return;
+        try {
+            byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
+            fromJson(new String(bytes, java.nio.charset.StandardCharsets.UTF_8), now);
+        } catch (Exception ignored) {
+            // unreadable file: start without the old links
+        }
+    }
+
+    static synchronized void saveLocalCopies(java.io.File file, long now) {
+        trimLocalCopies(now);
+        java.io.File tmp = new java.io.File(file.getPath() + ".tmp");
+        try {
+            java.nio.file.Files.write(tmp.toPath(),
+                    toJson().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            java.nio.file.Files.move(tmp.toPath(), file.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (Exception e) {
+            //noinspection ResultOfMethodCallIgnored
+            tmp.delete();
+        }
+    }
+
+    /** {@code [{"url":..,"local":..,"type":..,"time":..}, ...]} */
+    static synchronized String toJson() {
+        com.google.gson.JsonArray array = new com.google.gson.JsonArray();
+        for (java.util.Map.Entry<String, String> entry : LOCAL_COPIES.entrySet()) {
+            com.google.gson.JsonObject item = new com.google.gson.JsonObject();
+            item.addProperty("url", entry.getKey());
+            item.addProperty("local", entry.getValue());
+            String type = LOCAL_TYPES.get(entry.getKey());
+            if (type != null) item.addProperty("type", type);
+            item.addProperty("time", timeOf(entry.getKey()));
+            array.add(item);
+        }
+        return array.toString();
+    }
+
+    /** Adds the links of {@link #toJson()} text; drops old, broken and extra entries. */
+    static synchronized void fromJson(String json, long now) {
+        com.google.gson.JsonElement root;
+        try {
+            root = com.google.gson.JsonParser.parseString(json == null ? "" : json);
+        } catch (RuntimeException e) {
+            return;
+        }
+        if (root == null || !root.isJsonArray()) return;
+        for (com.google.gson.JsonElement element : root.getAsJsonArray()) {
+            if (!element.isJsonObject()) continue;
+            com.google.gson.JsonObject item = element.getAsJsonObject();
+            String url = string(item, "url");
+            String local = string(item, "local");
+            if (url == null || local == null || LOCAL_COPIES.containsKey(url)) continue;
+            long time;
+            try {
+                time = item.has("time") ? item.get("time").getAsLong() : -1;
+            } catch (RuntimeException e) {
+                continue;
+            }
+            if (time < 0) continue;
+            LOCAL_COPIES.put(url, local);
+            String type = string(item, "type");
+            if (type != null) LOCAL_TYPES.put(url, type);
+            LOCAL_TIMES.put(url, time);
+        }
+        trimLocalCopies(now);
+    }
+
+    private static String string(com.google.gson.JsonObject item, String key) {
+        com.google.gson.JsonElement value = item.get(key);
+        if (value == null || !value.isJsonPrimitive()) return null;
+        String text = value.getAsString();
+        return text.isEmpty() ? null : text;
     }
 
     /**
@@ -61,12 +209,12 @@ public final class Attachments {
         return type == null || isVideo(type);
     }
 
-    /** The links uploaded in this run of the app (a copy). */
+    /** The links uploaded from this phone (a copy). */
     public static java.util.Set<String> localUrls() {
         return new java.util.HashSet<>(LOCAL_COPIES.keySet());
     }
 
-    /** The content type of a file uploaded in this run of the app, or null. */
+    /** The content type of a file uploaded from this phone, or null. */
     public static String localType(String url) {
         return url == null ? null : LOCAL_TYPES.get(url);
     }

@@ -64,6 +64,8 @@ public class AppApplication extends Application {
         com.thirtydegreesray.openhub.util.ActionsWatcher.schedule(this);
         // the shared HTTP cache of the web views has no small limit of its own
         com.thirtydegreesray.openhub.util.WebViewCache.trimInBackground(this);
+        // links of fresh uploads -> the files on the phone (preview before the comment is sent)
+        com.thirtydegreesray.openhub.util.Attachments.loadLocalCopies(getFilesDir());
         startTime = System.currentTimeMillis();
         AppLog.i(TAG, "application ok:" + (System.currentTimeMillis() - startTime));
 
