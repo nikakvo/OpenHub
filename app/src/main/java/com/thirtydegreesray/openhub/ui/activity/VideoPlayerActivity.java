@@ -63,6 +63,9 @@ public class VideoPlayerActivity extends AppCompatActivity {
     /** the file type check is still running: a player error waits for its answer */
     private boolean typeUnknown;
     @Nullable private PlaybackException waitingError;
+    /** the play / pause button of the small window (picture in picture) */
+    @Nullable private android.content.BroadcastReceiver pipActions;
+    private static final String ACTION_PIP_TOGGLE = "io.github.nikakvo.openhub.PIP_TOGGLE";
 
     public static void show(@NonNull Context context, @NonNull String url) {
         Intent intent = new Intent(context, VideoPlayerActivity.class).putExtra(EXTRA_URL, url.trim());
@@ -111,9 +114,21 @@ public class VideoPlayerActivity extends AppCompatActivity {
             @Override
             public void onPlaybackStateChanged(int state) {
                 // at the end the controls stay, so it can be played again
-                if (state == Player.STATE_ENDED) view.showController();
+                if (state == Player.STATE_ENDED && !inPip()) view.showController();
+                updatePip();
+            }
+
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                updatePip();
+            }
+
+            @Override
+            public void onVideoSizeChanged(@NonNull androidx.media3.common.VideoSize size) {
+                updatePip();
             }
         });
+        updatePip();
 
         String local = Attachments.localCopy(url);
         play(local != null ? Uri.parse(local) : Uri.parse(url));
@@ -209,7 +224,135 @@ public class VideoPlayerActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        // in the small window the video goes on playing
+        if (player != null && !inPip()) player.pause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // the small window was closed (or the screen left any other way): stop playing
         if (player != null) player.pause();
+        if (closedFromPip) finish();
+    }
+
+    /** set when the small window goes away without going back to full screen */
+    private boolean closedFromPip;
+
+    private boolean inPip() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isInPictureInPictureMode();
+    }
+
+    private boolean pipAvailable() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                && getPackageManager().hasSystemFeature(
+                        android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE);
+    }
+
+    /**
+     * The small window: as wide as the video (Android allows 1:2.39 to 2.39:1), with a play
+     * / pause button. On Android 12+ it opens by itself when the user goes home while the
+     * video plays; before, {@link #onUserLeaveHint()} opens it.
+     */
+    @androidx.annotation.RequiresApi(Build.VERSION_CODES.O)
+    @NonNull
+    private android.app.PictureInPictureParams pipParams() {
+        android.app.PictureInPictureParams.Builder builder =
+                new android.app.PictureInPictureParams.Builder();
+        androidx.media3.common.VideoSize size = player == null
+                ? androidx.media3.common.VideoSize.UNKNOWN : player.getVideoSize();
+        int[] ratio = com.thirtydegreesray.openhub.util.PipRatio.of(size.width, size.height,
+                size.pixelWidthHeightRatio);
+        if (ratio != null) builder.setAspectRatio(new android.util.Rational(ratio[0], ratio[1]));
+        boolean playing = player != null && player.isPlaying();
+        Intent toggle = new Intent(ACTION_PIP_TOGGLE).setPackage(getPackageName());
+        android.app.PendingIntent pending = android.app.PendingIntent.getBroadcast(this, 0, toggle,
+                android.app.PendingIntent.FLAG_IMMUTABLE | android.app.PendingIntent.FLAG_UPDATE_CURRENT);
+        String label = getString(playing ? R.string.video_pause : R.string.video_play);
+        android.app.RemoteAction action = new android.app.RemoteAction(
+                android.graphics.drawable.Icon.createWithResource(this, playing
+                        ? androidx.media3.ui.R.drawable.exo_icon_pause
+                        : androidx.media3.ui.R.drawable.exo_icon_play),
+                label, label, pending);
+        builder.setActions(java.util.Collections.singletonList(action));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            builder.setAutoEnterEnabled(playing);
+            builder.setSeamlessResizeEnabled(false);
+        }
+        return builder.build();
+    }
+
+    private void updatePip() {
+        if (!pipAvailable() || isFinishing() || isDestroyed()) return;
+        try {
+            setPictureInPictureParams(pipParams());
+        } catch (RuntimeException ignored) {
+            // the system refused the values (e.g. no picture in picture on this phone)
+        }
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        // Android 12+ opens the small window itself (auto enter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S || !pipAvailable()) return;
+        if (player != null && player.isPlaying()) {
+            try {
+                enterPictureInPictureMode(pipParams());
+            } catch (RuntimeException ignored) {
+                // picture in picture switched off for the app in the phone settings
+            }
+        }
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean inPip,
+                                              @NonNull android.content.res.Configuration config) {
+        super.onPictureInPictureModeChanged(inPip, config);
+        if (inPip) {
+            closedFromPip = false;
+            view.hideController();
+            view.setUseController(false);
+            registerPipActions();
+        } else {
+            view.setUseController(true);
+            unregisterPipActions();
+            // back to full screen: the screen is started again; closed: it only stops
+            if (!getLifecycle().getCurrentState().isAtLeast(
+                    androidx.lifecycle.Lifecycle.State.STARTED)) {
+                closedFromPip = true;
+                if (player != null) player.pause();
+                finish();
+            }
+        }
+    }
+
+    private void registerPipActions() {
+        if (pipActions != null) return;
+        pipActions = new android.content.BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (player == null || !ACTION_PIP_TOGGLE.equals(intent.getAction())) return;
+                if (player.isPlaying()) {
+                    player.pause();
+                } else {
+                    if (player.getPlaybackState() == Player.STATE_ENDED) player.seekTo(0);
+                    player.play();
+                }
+            }
+        };
+        androidx.core.content.ContextCompat.registerReceiver(this, pipActions,
+                new android.content.IntentFilter(ACTION_PIP_TOGGLE),
+                androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED);
+    }
+
+    private void unregisterPipActions() {
+        if (pipActions == null) return;
+        try {
+            unregisterReceiver(pipActions);
+        } catch (IllegalArgumentException ignored) {
+        }
+        pipActions = null;
     }
 
     private void releasePlayer() {
@@ -222,6 +365,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        unregisterPipActions();
         if (checking != null) checking.dispose();
         releasePlayer();
         super.onDestroy();

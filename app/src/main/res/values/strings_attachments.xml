@@ -20,6 +20,8 @@
     <string name="attach_open_web">Open on github.com</string>
     <string name="video_cannot_play_title">Cannot play the video here</string>
     <string name="video_cannot_play">The phone could not play this video (%1$s). GitHub keeps a new upload private until the comment that uses it is sent, and some formats cannot be played by every phone.\n\nOpen it in the browser instead?</string>
+    <string name="video_play">Play</string>
+    <string name="video_pause">Pause</string>
     <string name="rich_text_play_video">Play video</string>
     <string name="rich_text_table">Table</string>
 </resources>
