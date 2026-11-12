@@ -17,6 +17,8 @@ public interface IIssueDetailContract {
         void showIssue(@NonNull Issue issue);
         void showAddedComment(@NonNull IssueEvent event);
         void showAddCommentPage(@Nullable String text);
+        /** GitHub has no issue with this number: like github.com, open the discussion with it. */
+        void openAsDiscussion(@NonNull String owner, @NonNull String repo, int number);
     }
 
     interface Presenter extends IBaseContract.Presenter<IIssueDetailContract.View> {

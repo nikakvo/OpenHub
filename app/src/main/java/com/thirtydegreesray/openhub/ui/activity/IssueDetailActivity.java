@@ -170,6 +170,12 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
     }
 
     @Override
+    public void openAsDiscussion(@NonNull String owner, @NonNull String repo, int number) {
+        startActivity(DiscussionActivity.createIntent(this, owner, repo, number));
+        finish();
+    }
+
+    @Override
     public void showIssue(final Issue issue) {
         setToolbarTitle(getString(R.string.issue).concat(" #").concat(String.valueOf(issue.getNumber())));
         GlideApp.with(getActivity())

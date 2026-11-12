@@ -19,6 +19,8 @@ import com.thirtydegreesray.openhub.util.StringUtils;
 
 import javax.inject.Inject;
 
+import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
+
 import retrofit2.Response;
 import io.reactivex.rxjava3.core.Observable;
 
@@ -75,6 +77,12 @@ public class IssueDetailPresenter extends BasePresenter<IIssueDetailContract.Vie
         HttpObserver<Issue> httpObserver = new HttpObserver<Issue>() {
             @Override
             public void onError(Throwable error) {
+                // issues and discussions share their numbers: github.com/o/r/issues/12 of a
+                // discussion redirects to it (links like #12 written in a comment can be one)
+                if (error instanceof HttpPageNoFoundError && issue == null) {
+                    mView.openAsDiscussion(user, repo, issueNumber);
+                    return;
+                }
                 mView.showErrorToast(getErrorTip(error));
                 mView.hideLoading();
             }
