@@ -52,4 +52,14 @@ public class ZoomAbleFloatingActionButton extends FloatingActionButton {
         isNormalSize = true;
     }
 
+    /**
+     * While shrunk to nothing (the list scrolls down) the button takes no touches: the
+     * "back to top" button of the list sits at the same place and must get the tap.
+     */
+    @Override
+    public boolean dispatchTouchEvent(android.view.MotionEvent event) {
+        if (!isNormalSize) return false;
+        return super.dispatchTouchEvent(event);
+    }
+
 }
