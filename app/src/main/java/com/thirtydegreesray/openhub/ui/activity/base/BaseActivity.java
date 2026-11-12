@@ -113,8 +113,45 @@ BaseActivity<P extends IBaseContract.Presenter>
     @Nullable protected Toolbar toolbar;
     @Nullable protected CollapsingToolbarLayout toolbarLayout;
 
+    /**
+     * Android stopped the app while this screen was in the background and now brings it
+     * back in a new process: sign in again with the selected account from the database (as
+     * the start screen does) and the profile this screen saved, so the screen and what was
+     * typed in it come back instead of the start screen. Nothing happens when the account
+     * is not usable (no account, token unreadable or refused by GitHub, another login).
+     */
+    private void restoreAccount(@NonNull Bundle savedInstanceState) {
+        if (AppData.INSTANCE.getAuthUser() != null && AppData.INSTANCE.getLoggedUser() != null) {
+            return;
+        }
+        try {
+            savedInstanceState.setClassLoader(getClassLoader());
+            Object saved = savedInstanceState.get("appData_loggedUser");
+            if (!(saved instanceof com.thirtydegreesray.openhub.mvp.model.User)) return;
+            com.thirtydegreesray.openhub.mvp.model.User user =
+                    (com.thirtydegreesray.openhub.mvp.model.User) saved;
+            com.thirtydegreesray.openhub.dao.AppDatabase database = getAppComponent().getDatabase();
+            com.thirtydegreesray.openhub.util.TokenCrypto.migrate(database);
+            com.thirtydegreesray.openhub.dao.AuthUser account =
+                    database.authUserDao().loadSelectedOrFirst();
+            if (!com.thirtydegreesray.openhub.util.AccountRestore.usable(
+                    account == null ? null : account.getLoginId(),
+                    account == null ? null : account.getAccessToken(),
+                    user.getLogin(),
+                    account != null && com.thirtydegreesray.openhub.util.TokenRefresher
+                            .isRefused(account.getLoginId()))) {
+                return;
+            }
+            AppData.INSTANCE.setAuthUser(account);
+            AppData.INSTANCE.setLoggedUser(user);
+        } catch (Exception ignored) {
+            // anything unexpected: the start screen as before
+        }
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        if (savedInstanceState != null) restoreAccount(savedInstanceState);
         if((AppData.INSTANCE.getAuthUser() == null || AppData.INSTANCE.getLoggedUser() == null)
                 && !this.getClass().equals(SplashActivity.class)
                 && !this.getClass().equals(LoginActivity.class)
@@ -201,7 +238,7 @@ BaseActivity<P extends IBaseContract.Presenter>
         //系统由于内存不足而杀死activity，此时保存数据
         DataAutoAccess.saveData(this, outState);
         if(mPresenter != null) mPresenter.onSaveInstanceState(outState);
-        if(curActivity.equals(this)){
+        if(this.equals(curActivity)){
             DataAutoAccess.saveData(AppData.INSTANCE, outState);
         }
     }
