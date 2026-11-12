@@ -112,6 +112,7 @@ public class AppOpener {
         Intent intent = new Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Intent chooser = createActivityChooserIntent(context, intent, uri, VIEW_IGNORE_PACKAGE);
+        if (chooser == SHOWN_OWN_PICKER) return;
         if ((chooser != null && start(context, chooser)) || openWithDefaultApp(context, uri)) return;
         Toasts.warning(context, context.getString(R.string.no_browser_clients), Toast.LENGTH_LONG).show();
     }
@@ -193,6 +194,7 @@ public class AppOpener {
         Intent intent = new Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Intent chooser = createActivityChooserIntent(context, intent, uri, VIEW_IGNORE_PACKAGE);
+        if (chooser == SHOWN_OWN_PICKER) return;
         if ((chooser != null && start(context, chooser)) || openWithDefaultApp(context, uri)) return;
         Toasts.warning(context, context.getString(R.string.no_download_clients), Toast.LENGTH_LONG).show();
     }
@@ -434,18 +436,62 @@ public class AppOpener {
             targetIntent.setDataAndType(uri, intent.getType());
             chooserIntents.add(targetIntent);
         }
-
-        final Intent lastIntent = chooserIntents.remove(chooserIntents.size() - 1);
-        if (chooserIntents.isEmpty()) {
+        if (chooserIntents.size() == 1) {
             // there was only one, no need to show the chooser
-            return lastIntent;
+            return chooserIntents.get(0);
         }
 
+        // Android's chooser shows only 2 extra apps (EXTRA_INITIAL_INTENTS, Android 10+):
+        // with more browsers some would be missing, so the app shows its own list
+        Activity activity = context instanceof Activity ? (Activity) context : BaseActivity.getCurActivity();
+        if (activity != null && !activity.isFinishing()) {
+            showAppPicker(activity, targets, chooserIntents);
+            return SHOWN_OWN_PICKER;
+        }
+        final Intent lastIntent = chooserIntents.remove(chooserIntents.size() - 1);
         Intent chooserIntent = Intent.createChooser(lastIntent, null);
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
                 chooserIntents.toArray(new Intent[chooserIntents.size()]));
         chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return chooserIntent;
+    }
+
+    /** marker: {@link #createActivityChooserIntent} showed the app's own list, nothing to start */
+    private static final Intent SHOWN_OWN_PICKER = new Intent();
+
+    /** Every app that can open the link, with its icon and name; a tap opens the link in it. */
+    private static void showAppPicker(@NonNull Activity activity, @NonNull List<ResolveInfo> targets,
+                                      @NonNull List<Intent> intents) {
+        final PackageManager pm = activity.getPackageManager();
+        final int iconSize = (int) (32 * activity.getResources().getDisplayMetrics().density);
+        final int pad = (int) (16 * activity.getResources().getDisplayMetrics().density);
+        android.widget.ArrayAdapter<ResolveInfo> adapter = new android.widget.ArrayAdapter<ResolveInfo>(
+                activity, android.R.layout.select_dialog_item, android.R.id.text1, targets) {
+            @NonNull
+            @Override
+            public android.view.View getView(int position, android.view.View convertView,
+                                             @NonNull android.view.ViewGroup parent) {
+                android.view.View row = super.getView(position, convertView, parent);
+                android.widget.TextView text = row.findViewById(android.R.id.text1);
+                ResolveInfo info = getItem(position);
+                text.setText(info.loadLabel(pm));
+                android.graphics.drawable.Drawable icon = info.loadIcon(pm);
+                icon.setBounds(0, 0, iconSize, iconSize);
+                text.setCompoundDrawablesRelative(icon, null, null, null);
+                text.setCompoundDrawablePadding(pad);
+                return row;
+            }
+        };
+        new androidx.appcompat.app.AlertDialog.Builder(activity)
+                .setTitle(R.string.open_with)
+                .setAdapter(adapter, (dialog, which) -> {
+                    if (!start(activity, intents.get(which))) {
+                        Toasts.warning(activity, activity.getString(R.string.no_browser_clients),
+                                Toast.LENGTH_LONG).show();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     /** The answers of Android that may be offered ({@link BrowserTargets#pick}). */

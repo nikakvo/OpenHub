@@ -152,6 +152,7 @@
     <string name="branch_tip">Branches or tags</string>
     <string name="share">Share</string>
     <string name="open_in_browser">Open in browser</string>
+    <string name="open_with">Open with</string>
     <string name="viewer_no_ref">GitHub has no branch or file \"%1$s\" in %2$s.</string>
     <string name="viewer_no_file">GitHub has no file \"%1$s\" on \"%2$s\" in %3$s.</string>
     <string name="viewer_no_file_plain">GitHub has no file \"%1$s\".</string>
