@@ -465,8 +465,15 @@ public class AppOpener {
         final PackageManager pm = activity.getPackageManager();
         final int iconSize = (int) (32 * activity.getResources().getDisplayMetrics().density);
         final int pad = (int) (16 * activity.getResources().getDisplayMetrics().density);
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(activity);
+        // rows inflated with the dialog's own theme and its text color, so the names are
+        // readable in dark themes too
+        android.content.res.TypedArray colors = builder.getContext()
+                .obtainStyledAttributes(new int[]{android.R.attr.textColorPrimary});
+        final android.content.res.ColorStateList textColor = colors.getColorStateList(0);
+        colors.recycle();
         android.widget.ArrayAdapter<ResolveInfo> adapter = new android.widget.ArrayAdapter<ResolveInfo>(
-                activity, android.R.layout.select_dialog_item, android.R.id.text1, targets) {
+                builder.getContext(), android.R.layout.select_dialog_item, android.R.id.text1, targets) {
             @NonNull
             @Override
             public android.view.View getView(int position, android.view.View convertView,
@@ -475,6 +482,7 @@ public class AppOpener {
                 android.widget.TextView text = row.findViewById(android.R.id.text1);
                 ResolveInfo info = getItem(position);
                 text.setText(info.loadLabel(pm));
+                if (textColor != null) text.setTextColor(textColor);
                 android.graphics.drawable.Drawable icon = info.loadIcon(pm);
                 icon.setBounds(0, 0, iconSize, iconSize);
                 text.setCompoundDrawablesRelative(icon, null, null, null);
@@ -482,8 +490,7 @@ public class AppOpener {
                 return row;
             }
         };
-        new androidx.appcompat.app.AlertDialog.Builder(activity)
-                .setTitle(R.string.open_with)
+        builder.setTitle(R.string.open_with)
                 .setAdapter(adapter, (dialog, which) -> {
                     if (!start(activity, intents.get(which))) {
                         Toasts.warning(activity, activity.getString(R.string.no_browser_clients),
