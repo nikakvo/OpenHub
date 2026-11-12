@@ -152,6 +152,13 @@
     <string name="branch_tip">Branches or tags</string>
     <string name="share">Share</string>
     <string name="open_in_browser">Open in browser</string>
+    <string name="viewer_no_ref">GitHub has no branch or file \"%1$s\" in %2$s.</string>
+    <string name="viewer_no_file">GitHub has no file \"%1$s\" on \"%2$s\" in %3$s.</string>
+    <string name="viewer_no_file_plain">GitHub has no file \"%1$s\".</string>
+    <string name="viewer_no_repo">GitHub has no repository %1$s, or it is private and this account cannot see it.</string>
+    <string name="viewer_offline">Cannot reach GitHub. Check the connection and try again.</string>
+    <string name="viewer_load_failed">Loading the file failed: %1$s</string>
+    <string name="viewer_open_default_branch">Open the default branch</string>
     <string name="copy_url">Copy URL</string>
     <string name="copy_clone_url">Copy clone URL</string>
     <string name="watch">Watch</string>

@@ -35,6 +35,18 @@ public interface GitDataService {
             @Path(value = "branch", encoded = true) String branch
     );
 
+    /**
+     * Refs whose name starts with {@code ref} ("heads/feature" -> refs/heads/feature,
+     * refs/heads/feature/x, ...); an empty list when there is none.
+     */
+    @NonNull @GET("repos/{owner}/{repo}/git/matching-refs/{ref}")
+    @Headers("Cache-Control: no-cache, no-store")
+    Observable<Response<com.google.gson.JsonArray>> getMatchingRefs(
+            @Path("owner") String owner,
+            @Path("repo") String repo,
+            @Path(value = "ref", encoded = true) String ref
+    );
+
     @NonNull @GET("repos/{owner}/{repo}/git/commits/{sha}")
     @Headers("Cache-Control: no-cache, no-store")
     Observable<Response<JsonObject>> getCommit(

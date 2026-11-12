@@ -9,7 +9,9 @@ import androidx.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.R;
@@ -23,6 +25,7 @@ import com.thirtydegreesray.openhub.mvp.presenter.ViewerPresenter;
 import com.thirtydegreesray.openhub.ui.activity.ViewerActivity;
 import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
 import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
+import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -38,6 +41,10 @@ public class ViewerFragment extends BaseFragment<ViewerPresenter>
 
     CodeWebView webView;
     ProgressBar loader;
+    View problemLayout;
+    TextView problemText;
+    Button problemAction;
+    Button problemBrowser;
 
     @AutoAccess boolean wrap = false;
     //store scroll y percent, recover position when needed
@@ -165,12 +172,14 @@ public class ViewerFragment extends BaseFragment<ViewerPresenter>
 
     @Override
     public void loadImageUrl(@NonNull String url) {
+        hideFileProblem();
         webView.loadImage(url);
         webView.setContentChangedListener(this);
     }
 
     @Override
     public void loadMdText(@NonNull String text, @NonNull String baseUrl) {
+        hideFileProblem();
         webView.setMdSource(text, baseUrl);
         webView.setContentChangedListener(this);
         loader.setVisibility(View.VISIBLE);
@@ -179,6 +188,7 @@ public class ViewerFragment extends BaseFragment<ViewerPresenter>
 
     @Override
     public void loadCode(@NonNull String text, @Nullable String extension) {
+        hideFileProblem();
         webView.setCodeSource(text, wrap, extension);
         webView.setContentChangedListener(this);
         getActivity().invalidateOptionsMenu();
@@ -204,7 +214,43 @@ public class ViewerFragment extends BaseFragment<ViewerPresenter>
     }
 
     @Override
+    public void showFileProblem(@NonNull String text, @Nullable String actionLabel,
+                                @Nullable Runnable action, @Nullable String browserUrl) {
+        if (problemLayout == null) return;
+        problemText.setText(text);
+        if (actionLabel != null && action != null) {
+            problemAction.setText(actionLabel);
+            problemAction.setOnClickListener(v -> action.run());
+            problemAction.setVisibility(View.VISIBLE);
+        } else {
+            problemAction.setVisibility(View.GONE);
+        }
+        if (browserUrl != null) {
+            problemBrowser.setOnClickListener(v -> AppOpener.openInCustomTabsOrBrowser(
+                    getActivity(), browserUrl));
+            problemBrowser.setVisibility(View.VISIBLE);
+        } else {
+            problemBrowser.setVisibility(View.GONE);
+        }
+        problemLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void hideFileProblem() {
+        if (problemLayout != null) problemLayout.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void openFile(@NonNull FileModel file) {
+        if (getActivity() == null) return;
+        String repoName = getActivity().getIntent() == null ? null
+                : getActivity().getIntent().getStringExtra("repoName");
+        ViewerActivity.show(getActivity(), file, repoName);
+        getActivity().finish();
+    }
+
+    @Override
     public void showLoading() {
+        hideFileProblem();
         super.showLoading();
         loader.setVisibility(View.VISIBLE);
         loader.setIndeterminate(true);
@@ -271,5 +317,9 @@ public class ViewerFragment extends BaseFragment<ViewerPresenter>
         super.bindViews(root);
         webView = root.findViewById(R.id.web_view);
         loader = root.findViewById(R.id.loader);
+        problemLayout = root.findViewById(R.id.problem_layout);
+        problemText = root.findViewById(R.id.problem_text);
+        problemAction = root.findViewById(R.id.problem_action);
+        problemBrowser = root.findViewById(R.id.problem_browser);
     }
 }

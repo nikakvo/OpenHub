@@ -14,6 +14,48 @@
         android:layout_height="match_parent"
         app:webview_background="?android:windowBackground"/>
 
+    <!-- Why the file could not be shown (missing branch or file, offline), with what to do. -->
+    <LinearLayout
+        android:id="@+id/problem_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="@dimen/spacing_x_large"
+        android:background="?android:windowBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/problem_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:lineSpacingMultiplier="1.15"
+            android:textColor="?android:textColorPrimary"
+            android:textIsSelectable="true"/>
+
+        <Button
+            android:id="@+id/problem_action"
+            style="@style/OpenHubButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_x_large"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/problem_browser"
+            style="@style/OpenHubButton.Tonal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:text="@string/open_in_browser"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
     <ProgressBar
         android:id="@+id/loader"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
