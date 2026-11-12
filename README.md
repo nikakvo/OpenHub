@@ -73,9 +73,9 @@ app goes to them; see [Credits](#credits).
   its feature tiles jump to the matching section
 * Light, dark and AMOLED dark themes, many accent colors, colored or plain side menu icons
 * Comments look like on github.com (GitHub's own rendering): pictures, tables, task lists,
-  alerts with GitHub's icons, quotes, nested lists, footnotes, keys, bold @mentions and
+  alerts with GitHub's icons, quotes, nested lists, footnotes, keys, bold `@mentions` and
   folded sections that open on a tap; a tap on a table opens it full screen
-* **Quote reply** and **Mention @name** in the long-press menu of every comment (issues,
+* **Quote reply** and **Mention `@name`** in the long-press menu of every comment (issues,
   pull requests, discussions, gists)
 * Code highlighting for 193 languages; a copy button on every code block and code file
   (copies the code without line numbers)
@@ -188,7 +188,7 @@ app goes to them; see [Credits](#credits).
 * **Milestones**: open and closed, due dates and progress, their issues; create, edit,
   close, reopen and delete
 * Comments with a Markdown editor and preview; drafts drawn on the phone link URLs,
-  @mentions and #123 like github.com
+  `@mentions` and `#123` like github.com
 * Manage labels in your own repositories
 * Your created, assigned and mentioned issues
 * Commit details, changed files and diffs
