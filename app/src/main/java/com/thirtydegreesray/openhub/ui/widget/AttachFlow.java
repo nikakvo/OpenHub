@@ -116,8 +116,17 @@ public final class AttachFlow {
     /** The button: checks write access on the first tap, then opens the picker. */
     public void start() {
         if (!isAvailable()) return;
+        withRepository(this::pickOrExplain);
+    }
+
+    /**
+     * Reads the repository id and write access from GitHub once, then runs {@code next}.
+     * Also needed after the picker: when Android recreated the screen (new process,
+     * rotation) while the picker was open, the values read before are gone.
+     */
+    private void withRepository(@NonNull Runnable next) {
         if (repositoryId != 0) {
-            pickOrExplain();
+            next.run();
             return;
         }
         activity.showProgressDialog(activity.getString(R.string.attach_checking, owner + "/" + repo));
@@ -135,7 +144,7 @@ public final class AttachFlow {
                                 activity.getString(R.string.attach_no_repo_id), false);
                         return;
                     }
-                    pickOrExplain();
+                    next.run();
                 }, error -> {
                     activity.dismissProgressDialog();
                     showProblem(activity.getString(R.string.attach_failed_title), error.getMessage(), false);
@@ -153,6 +162,15 @@ public final class AttachFlow {
 
     private void onPicked(@Nullable Uri uri) {
         if (uri == null) return;
+        if (repositoryId == 0) {
+            // the screen was recreated while the picker was open
+            if (!isAvailable()) return;
+            withRepository(() -> {
+                if (writeAccess) onPicked(uri);
+                else pickOrExplain();
+            });
+            return;
+        }
         Context ctx = activity;
         UploadItem item = ContentFiles.describe(ctx, uri);
         String mime = ctx.getContentResolver().getType(uri);
