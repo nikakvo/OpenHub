@@ -64,6 +64,20 @@ public class MatrixRainView extends View {
     private final int[] headerPos = new int[2];
     private final int[] ownPos = new int[2];
     private final ViewTreeObserver.OnScrollChangedListener scrollListener = this::invalidate;
+    /** Where this view and its header were on the last frame (window coordinates). */
+    private int drawnOwnY = Integer.MIN_VALUE;
+    private int drawnHeaderY = Integer.MIN_VALUE;
+    private final int[] checkPos = new int[2];
+    /**
+     * A collapsing header moves this view with offsetTopAndBottom, which neither scrolls
+     * anything nor redraws it: the last frame (drawn for the old place) then moved with the
+     * header and jumped back on the next frame, a flicker while the header collapsed slowly.
+     * Draw again in the same frame whenever this view or its header moved.
+     */
+    private final ViewTreeObserver.OnPreDrawListener moveListener = () -> {
+        if (isShown() && moved()) invalidate();
+        return true;
+    };
 
     private final float cellW;
     private final float cellH;
@@ -188,6 +202,17 @@ public class MatrixRainView extends View {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         getViewTreeObserver().addOnScrollChangedListener(scrollListener);
+        getViewTreeObserver().addOnPreDrawListener(moveListener);
+    }
+
+    private boolean moved() {
+        getLocationInWindow(checkPos);
+        if (checkPos[1] != drawnOwnY) return true;
+        if (header != null && header.isAttachedToWindow()) {
+            header.getLocationInWindow(checkPos);
+            return checkPos[1] != drawnHeaderY;
+        }
+        return false;
     }
 
     @Override
@@ -204,6 +229,7 @@ public class MatrixRainView extends View {
     protected void onDetachedFromWindow() {
         running = false;
         getViewTreeObserver().removeOnScrollChangedListener(scrollListener);
+        getViewTreeObserver().removeOnPreDrawListener(moveListener);
         super.onDetachedFromWindow();
     }
 
@@ -213,9 +239,13 @@ public class MatrixRainView extends View {
         int width = getWidth();
         int headerTop = 0;
         int headerBottom = 0;
-        if (header != null && header.isAttachedToWindow() && header.getHeight() > 0) {
+        getLocationInWindow(ownPos);
+        drawnOwnY = ownPos[1];
+        if (header != null && header.isAttachedToWindow()) {
             header.getLocationInWindow(headerPos);
-            getLocationInWindow(ownPos);
+            drawnHeaderY = headerPos[1];
+        }
+        if (header != null && header.isAttachedToWindow() && header.getHeight() > 0) {
             headerTop = headerPos[1] - ownPos[1];
             headerBottom = headerTop + header.getHeight();
             if (fromTop) headerTop = -ownPos[1];
