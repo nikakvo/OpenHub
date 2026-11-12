@@ -1,18 +1,31 @@
-# Dependabot checks once a week for newer versions of the libraries
+# Dependabot checks once a month for newer versions of the libraries
 # (gradle/libs.versions.toml), the Gradle wrapper and the GitHub Actions of the
-# workflows, and opens a pull request for each update. Nothing is merged by itself.
+# workflows. Updates are grouped (one pull request for all actions, one for
+# androidx, one for the other minor and patch library updates); major library
+# updates come as single pull requests. Nothing is merged by itself: accepted
+# updates are taken into a local release series, built, tested on the phone and
+# pushed with the release, then Dependabot closes its pull requests.
 version: 2
 updates:
   - package-ecosystem: gradle
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 10
+      interval: monthly
+    open-pull-requests-limit: 5
     groups:
       androidx:
         patterns:
           - "androidx.*"
           - "com.google.android.material*"
+      libraries:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "androidx.*"
+          - "com.google.android.material*"
+        update-types:
+          - "minor"
+          - "patch"
     ignore:
       # Room 3 needs KSP, Kotlin and coroutines; this Java app stays on Room 2
       - dependency-name: "androidx.room:*"
@@ -20,4 +33,9 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      actions:
+        patterns:
+          - "*"
