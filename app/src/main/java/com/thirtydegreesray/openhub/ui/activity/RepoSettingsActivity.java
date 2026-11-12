@@ -556,10 +556,10 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
         form.setOrientation(LinearLayout.VERTICAL);
         int pad = getResources().getDimensionPixelSize(R.dimen.spacing_x_large);
         form.setPadding(pad, pad / 2, pad, 0);
-        EditText newOwner = new EditText(this);
+        EditText newOwner = new com.thirtydegreesray.openhub.ui.widget.OhEditText(this);
         newOwner.setHint(R.string.settings_transfer_new_owner);
         newOwner.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        EditText confirm = new EditText(this);
+        EditText confirm = new com.thirtydegreesray.openhub.ui.widget.OhEditText(this);
         confirm.setHint(owner + "/" + repo);
         confirm.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         TextView hint = new TextView(this);
@@ -613,7 +613,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
         FrameLayout frame = new FrameLayout(this);
         int pad = getResources().getDimensionPixelSize(R.dimen.spacing_x_large);
         frame.setPadding(pad, 0, pad, 0);
-        EditText confirm = new EditText(this);
+        EditText confirm = new com.thirtydegreesray.openhub.ui.widget.OhEditText(this);
         confirm.setHint(owner + "/" + repo);
         confirm.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         frame.addView(confirm);

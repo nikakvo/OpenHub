@@ -164,7 +164,7 @@ public class LoginActivity extends BaseActivity<LoginPresenter>
     }
 
     public void onTokenLoginClick() {
-        final EditText tokenEt = new EditText(getActivity());
+        final EditText tokenEt = new com.thirtydegreesray.openhub.ui.widget.OhEditText(getActivity());
         tokenEt.setSingleLine(true);
         tokenEt.setHint(R.string.token_hint);
         tokenEt.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);

@@ -239,13 +239,13 @@ public class ActionsFragment extends ListFragment<ActionsPresenter, ActionsAdapt
         content.setOrientation(LinearLayout.VERTICAL);
         content.setPadding(padding, padding / 2, padding, 0);
 
-        final EditText refEt = new EditText(getActivity());
+        final EditText refEt = new com.thirtydegreesray.openhub.ui.widget.OhEditText(getActivity());
         refEt.setSingleLine(true);
         refEt.setHint(R.string.actions_branch);
         refEt.setText(mPresenter.getDefaultBranch());
         content.addView(refEt);
 
-        final EditText inputsEt = new EditText(getActivity());
+        final EditText inputsEt = new com.thirtydegreesray.openhub.ui.widget.OhEditText(getActivity());
         inputsEt.setHint(R.string.actions_inputs);
         inputsEt.setMinLines(2);
         inputsEt.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE

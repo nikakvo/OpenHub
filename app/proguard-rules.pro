@@ -78,3 +78,6 @@
 -keepattributes EnclosingMethod
 -keep class com.thirtydegreesray.openhub.mvp.model.**{*;}
 -keep class com.thirtydegreesray.openhub.dao.**{*;}
+
+# The themes name the view inflater (viewInflaterClass): AppCompat creates it by reflection
+-keep class com.thirtydegreesray.openhub.ui.widget.OhViewInflater { <init>(); }

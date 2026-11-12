@@ -394,7 +394,7 @@ public class IssueFieldsBox {
             about.setTextSize(TypedValue.COMPLEX_UNIT_PX, ctx.getResources().getDimension(R.dimen.text_small));
             layout.addView(about);
         }
-        EditText input = new EditText(ctx);
+        EditText input = new com.thirtydegreesray.openhub.ui.widget.OhEditText(ctx);
         input.setText(v == null ? "" : number ? IssueFields.number(IssueFields.raw(v.value)) : IssueFields.raw(v.value));
         input.setSelection(input.getText().length());
         if (number) {

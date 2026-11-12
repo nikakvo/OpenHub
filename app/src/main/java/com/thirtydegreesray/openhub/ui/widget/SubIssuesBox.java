@@ -573,7 +573,7 @@ public class SubIssuesBox {
         int pad = dp(ctx, 20);
         layout.setPadding(pad, dp(ctx, 8), pad, 0);
 
-        EditText search = new EditText(ctx);
+        EditText search = new com.thirtydegreesray.openhub.ui.widget.OhEditText(ctx);
         search.setHint(R.string.sub_issue_search_hint);
         search.setSingleLine(true);
         search.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);

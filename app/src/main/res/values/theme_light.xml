@@ -19,6 +19,7 @@
     <color name="light_text_color_secondary">#757575</color>
 
     <style name="ThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="viewInflaterClass">com.thirtydegreesray.openhub.ui.widget.OhViewInflater</item>
         <item name="buttonStyle">@style/OpenHubButton</item>
         <item name="android:buttonStyle">@style/OpenHubButton</item>
         <item name="borderlessButtonStyle">@style/OpenHubButton.Text</item>

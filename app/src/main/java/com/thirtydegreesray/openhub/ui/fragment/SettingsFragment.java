@@ -390,7 +390,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     private void showCustomReleaseInterval() {
-        final EditText input = new EditText(getContext());
+        final EditText input = new com.thirtydegreesray.openhub.ui.widget.OhEditText(getContext());
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         input.setHint(R.string.release_check_custom_hint);
         input.setText(String.valueOf(ReleaseWatcher.getIntervalMinutes(getContext())));

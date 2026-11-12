@@ -287,12 +287,12 @@ public class DeployKeysActivity extends BaseActivity<IBaseContract.Presenter> {
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(pad, pad / 2, pad, 0);
 
-        EditText titleEdit = new EditText(ctx);
+        EditText titleEdit = new com.thirtydegreesray.openhub.ui.widget.OhEditText(ctx);
         titleEdit.setHint(R.string.deploy_keys_title_hint);
         titleEdit.setSingleLine(true);
         box.addView(titleEdit);
 
-        EditText keyEdit = new EditText(ctx);
+        EditText keyEdit = new com.thirtydegreesray.openhub.ui.widget.OhEditText(ctx);
         keyEdit.setHint(R.string.deploy_keys_key_hint);
         keyEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
                 | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
