@@ -30,6 +30,8 @@ final class ImageSpan extends ReplacementSpan {
     int maxWidth;
     /** the load of the picture has been started */
     boolean requested;
+    /** the running or finished load of the picture (RichDoc.release frees it) */
+    @Nullable com.bumptech.glide.request.target.Target<Drawable> target;
 
     ImageSpan(@NonNull RichDoc doc, @NonNull Object source, int attrWidth, int attrHeight, boolean emoji) {
         this.doc = doc;

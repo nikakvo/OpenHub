@@ -45,9 +45,23 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
 
     /**
      * Each comment is rendered once and kept, with the pictures it has loaded: a row that is
-     * bound again (scrolling, or after a picture arrived) shows the same text at once.
+     * bound again (scrolling, or after a picture arrived) shows the same text at once. A very
+     * long issue keeps only the 150 comments used last (never the ones on the screen); the
+     * others free their pictures and are rendered again when they come back.
      */
-    private final java.util.Map<String, RichDoc> rendered = new java.util.HashMap<>();
+    private final com.thirtydegreesray.openhub.util.RenderCache<RichDoc> rendered =
+            new com.thirtydegreesray.openhub.util.RenderCache<>(150,
+                    new com.thirtydegreesray.openhub.util.RenderCache.Rule<RichDoc>() {
+                        @Override
+                        public boolean inUse(RichDoc doc) {
+                            return doc.isShown();
+                        }
+
+                        @Override
+                        public void dropped(RichDoc doc) {
+                            doc.release();
+                        }
+                    });
 
     @Inject
     public IssueTimelineAdapter(Context context, BaseFragment fragment) {

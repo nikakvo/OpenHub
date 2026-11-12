@@ -57,6 +57,9 @@ public final class RichDoc {
     private Map<String, ArrayDeque<ImageSpan>> oldImages;
 
     private WeakReference<TextView> host = new WeakReference<>(null);
+    /** what loaded the pictures (to free them in {@link #release()}) */
+    @Nullable
+    private RequestManager loader;
     private final Runnable relayout = this::relayoutNow;
 
     private final Drawable.Callback animation = new Drawable.Callback() {
@@ -158,6 +161,36 @@ public final class RichDoc {
         return view != null && view.getTag(R.id.rich_text_doc) == this ? view : null;
     }
 
+    /** True while a text view shows this text (also a row kept for reuse by its list). */
+    public boolean isShown() {
+        return shownIn() != null;
+    }
+
+    /**
+     * Frees the loaded pictures (a list dropped this text from its cache). The text can
+     * still be shown; its pictures would load again.
+     */
+    public void release() {
+        RequestManager glide = loader;
+        loader = null;
+        for (ImageSpan span : images) {
+            Target<Drawable> target = span.target;
+            span.target = null;
+            span.requested = false;
+            if (glide != null && target != null) {
+                try {
+                    glide.clear(target);
+                } catch (RuntimeException ignored) {
+                    // the screen is already gone: Glide freed it with the screen
+                }
+            }
+            Drawable old = span.drawable;
+            if (old instanceof Animatable) ((Animatable) old).stop();
+            if (old != null) old.setCallback(null);
+            span.drawable = null;
+        }
+    }
+
     boolean dependsOnWidth() {
         return hasTables || !images.isEmpty();
     }
@@ -172,8 +205,8 @@ public final class RichDoc {
             // every picture is loaded once; pictures of an opened <details> come later
             if (span.requested) continue;
             span.requested = true;
-            if (glide == null) glide = Glide.with(view.getContext());
-            glide.load(span.source)
+            if (glide == null) glide = loader = Glide.with(view.getContext());
+            span.target = glide.load(span.source)
                     // big screenshots are decoded at most as wide as the screen, small
                     // pictures stay as they are (never scaled up)
                     .override(max, Target.SIZE_ORIGINAL)
