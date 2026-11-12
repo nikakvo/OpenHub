@@ -62,6 +62,8 @@ public class AppApplication extends Application {
         ReleaseWatcher.schedule(this);
         com.thirtydegreesray.openhub.util.GitHubNotifier.schedule(this);
         com.thirtydegreesray.openhub.util.ActionsWatcher.schedule(this);
+        // the shared HTTP cache of the web views has no small limit of its own
+        com.thirtydegreesray.openhub.util.WebViewCache.trimInBackground(this);
         startTime = System.currentTimeMillis();
         AppLog.i(TAG, "application ok:" + (System.currentTimeMillis() - startTime));
 

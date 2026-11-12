@@ -253,14 +253,15 @@ public class SettingsFragment extends PreferenceFragmentCompat
         if (context == null) return;
         final Context app = context.getApplicationContext();
         com.bumptech.glide.Glide.get(app).clearMemory();
-        clearWebViewCache(context);
+        // the web views keep their own HTTP cache in cacheDir/WebView (shared by all of them)
+        com.thirtydegreesray.openhub.util.WebViewCache.clear(context);
         new Thread(() -> {
             com.thirtydegreesray.openhub.http.core.AppRetrofit.INSTANCE.clearCache();
             com.bumptech.glide.Glide.get(app).clearDiskCache();
             com.thirtydegreesray.openhub.util.ArtifactFiles.deleteTree(
                     new java.io.File(app.getCacheDir(), "artifacts"));
             // the web views delete their files in the background: count after they are done
-            waitUntilSettled(new java.io.File(app.getCacheDir(), "WebView"));
+            waitUntilSettled(com.thirtydegreesray.openhub.util.WebViewCache.dir(app));
             if (getActivity() == null) return;
             getActivity().runOnUiThread(() -> {
                 if (!isAdded()) return;
@@ -268,21 +269,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 updateCacheSummary();
             });
         }, "cache-clear").start();
-    }
-
-    /**
-     * The pages shown in the app's web views (a comment opened alone, a README, Help) keep
-     * their own HTTP cache in cacheDir/WebView, shared by all web views of the app; it was
-     * most of the size that stayed after Clear cache.
-     */
-    private static void clearWebViewCache(@androidx.annotation.NonNull Context context) {
-        try {
-            android.webkit.WebView webView = new android.webkit.WebView(context);
-            webView.clearCache(true);
-            webView.destroy();
-        } catch (RuntimeException e) {
-            // no WebView on this phone (being updated or switched off): nothing to clear
-        }
     }
 
     /** Waits (at most 3 s) until the size of a folder stops changing. */
