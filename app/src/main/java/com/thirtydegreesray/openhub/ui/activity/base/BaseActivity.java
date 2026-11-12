@@ -257,6 +257,12 @@ BaseActivity<P extends IBaseContract.Presenter>
     }
 
     @Override
+    public boolean dispatchTouchEvent(android.view.MotionEvent ev) {
+        com.thirtydegreesray.openhub.util.TouchAnchor.record(ev);
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         // the theme, accent or menu header changed while this screen was in the back stack

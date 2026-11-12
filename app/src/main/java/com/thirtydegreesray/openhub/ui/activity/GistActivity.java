@@ -328,7 +328,7 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
         String me = AppData.INSTANCE.getLoggedUser() == null ? "" : AppData.INSTANCE.getLoggedUser().getLogin();
         boolean own = Json.str(comment, "user.login").equalsIgnoreCase(me);
         long id = Json.get(comment, "id") == null ? 0 : Json.get(comment, "id").getAsLong();
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = com.thirtydegreesray.openhub.util.TouchAnchor.popup(this, anchor);
         popup.getMenu().add(0, 1, 0, R.string.gist_comment_copy);
         if (own) popup.getMenu().add(0, 2, 1, R.string.gist_comment_edit);
         // the gist's owner may remove anyone's comment
@@ -412,7 +412,7 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void showFileMenu(@NonNull View anchor, @NonNull JsonObject file, boolean mine) {
         String name = Json.str(file, "filename");
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = com.thirtydegreesray.openhub.util.TouchAnchor.popup(this, anchor);
         if (mine) {
             popup.getMenu().add(0, 1, 0, R.string.gist_edit_file);
             popup.getMenu().add(0, 2, 1, R.string.rename);

@@ -456,7 +456,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void commentMenu(@NonNull View anchor, @NonNull JsonObject item) {
         boolean isPost = discussion != null && Json.str(item, "id").equals(Json.str(discussion, "id"));
-        PopupMenu menu = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu menu = com.thirtydegreesray.openhub.util.TouchAnchor.popup(this, anchor);
         if (!isPost && Json.bool(item, "viewerCanUpdate")) menu.getMenu().add(0, 1, 0, R.string.comment_edit);
         if (!isPost && Json.bool(item, "viewerCanDelete")) menu.getMenu().add(0, 2, 1, R.string.comment_delete);
         menu.getMenu().add(0, 3, 2, R.string.copy_url);

@@ -1189,8 +1189,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         boolean line = Json.bool(comment, "_line");
         boolean mine = AppData.INSTANCE.getLoggedUser() != null && AppData.INSTANCE.getLoggedUser().getLogin()
                 .equalsIgnoreCase(Json.str(comment, "user.login"));
-        androidx.appcompat.widget.PopupMenu menu = new androidx.appcompat.widget.PopupMenu(this, anchor,
-                android.view.Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        androidx.appcompat.widget.PopupMenu menu =
+                com.thirtydegreesray.openhub.util.TouchAnchor.popup(this, anchor);
         if (mine) {
             menu.getMenu().add(0, 1, 0, R.string.comment_edit);
             menu.getMenu().add(0, 2, 1, R.string.comment_delete);

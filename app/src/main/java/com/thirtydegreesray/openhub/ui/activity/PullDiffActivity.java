@@ -653,7 +653,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void draftMenu(@NonNull View anchor, @NonNull JsonObject draft) {
         long id = longOf(draft, "id");
-        PopupMenu menu = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu menu = com.thirtydegreesray.openhub.util.TouchAnchor.popup(this, anchor);
         menu.getMenu().add(0, 1, 0, R.string.comment_edit);
         menu.getMenu().add(0, 2, 1, R.string.comment_delete);
         menu.setOnMenuItemClickListener(item -> {
@@ -685,7 +685,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
             draftMenu(anchor, comment);
             return;
         }
-        PopupMenu menu = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu menu = com.thirtydegreesray.openhub.util.TouchAnchor.popup(this, anchor);
         if (isMine(comment)) {
             menu.getMenu().add(0, 1, 0, R.string.comment_edit);
             menu.getMenu().add(0, 2, 1, R.string.comment_delete);
