@@ -614,7 +614,14 @@ final class HtmlSpanner {
         // the link of the viewer: GitHub's own link of a fresh upload, else what is loaded
         String viewUrl = canonical.contains("/user-attachments/") ? canonical : src;
         boolean emoji = img.hasClass("emoji");
-        if (!style.loadImages && !emoji) {
+        if (!style.loadImages && emoji) {
+            // pictures switched off: GitHub's emoji picture by its name (:octocat:)
+            String name = img.attr("alt").trim();
+            if (name.isEmpty()) name = img.attr("title").trim();
+            if (!name.isEmpty()) append(name);
+            return;
+        }
+        if (!style.loadImages) {
             // pictures switched off (Settings, on mobile data): the picture as a link
             String alt = img.attr("alt").trim();
             int start = out.length();
