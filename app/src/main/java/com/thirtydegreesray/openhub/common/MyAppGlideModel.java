@@ -12,9 +12,7 @@ import com.bumptech.glide.integration.okhttp3.OkHttpUrlLoader;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.engine.cache.InternalCacheDiskCacheFactory;
 import com.bumptech.glide.module.AppGlideModule;
-import com.bumptech.glide.request.RequestOptions;
 import com.thirtydegreesray.openhub.AppConfig;
-import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.http.core.MediaHttp;
 
 import java.io.InputStream;
@@ -35,8 +33,10 @@ public class MyAppGlideModel extends AppGlideModule {
     public void applyOptions(Context context, GlideBuilder builder) {
         super.applyOptions(context, builder);
         builder.setDiskCache(new InternalCacheDiskCacheFactory(context, AppConfig.IMAGE_MAX_CACHE_SIZE));
-        RequestOptions requestOptions = RequestOptions.placeholderOf(R.drawable.ic_logo);
-        builder.setDefaultRequestOptions(requestOptions);
+        // no default placeholder: an avatar without a picture (loading, failed, held back on
+        // mobile data) draws its own neutral person (CircleImageView); the app logo there
+        // looked like a strange avatar, and was huge in the blurred profile header
+
     }
 
     @Override
