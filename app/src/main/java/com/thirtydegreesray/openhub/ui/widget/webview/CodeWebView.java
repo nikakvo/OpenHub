@@ -205,13 +205,16 @@ public class CodeWebView extends WebView {
     public void setCodeSource(@NonNull String source, boolean wrap, @Nullable String extension) {
         if (StringUtils.isBlank(source)) return;
         WebSettings settings = getSettings();
-        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
+        // the page has the phone's width (viewport meta) and the code its real font size:
+        // no fit-to-width zoom and no text boosting, so wrapped and unwrapped lines have the
+        // same size and only the line breaks differ
+        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
         settings.setUseWideViewPort(true);
-        settings.setLoadWithOverviewMode(true);
+        settings.setLoadWithOverviewMode(false);
         String page = HtmlHelper.generateCodeHtml(source, extension, AppUtils.isNightMode(),
                 getCodeBackgroundColor(), wrap, true);
         loadPage(page);

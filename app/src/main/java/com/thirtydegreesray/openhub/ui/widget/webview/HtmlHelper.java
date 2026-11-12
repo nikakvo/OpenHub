@@ -114,6 +114,9 @@ class HtmlHelper {
                 "<html>\n" +
                 "<head>\n" +
                 "   <meta charset=\"utf-8\">\n" +
+                // the real width of the phone: the code keeps its font size (a wide page
+                // scaled down to fit made "Wrap lines" look the same as off)
+                "   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\n" +
                 "   <title>Code View</title>\n" +
                 "   <style type=\"text/css\">\n" +
                 "       pre {\n" +
@@ -149,10 +152,16 @@ class HtmlHelper {
                 (lineNums ? "    <script>hljs.initLineNumbersOnLoad({singleLine: true});</script>\n" : "\n") +
                 "    <style>\n" +
                 "       body {background: " + backgroundColor + ";}\n" +
-                "       code {\n" +
-                "           word-wrap: " + (wrap ? "break-word" : "normal") + ";\n" +
-                "           white-space: " + (wrap ? "pre-wrap" : "no-wrap") + ";\n" +
+                "       pre, code {font-size: 13px; line-height: 1.45;}\n" +
+                "       code, .hljs-ln td.hljs-ln-code {\n" +
+                (wrap
+                        // long lines go on below, at the screen width, next to their number
+                        ? "           white-space: pre-wrap; overflow-wrap: anywhere;\n"
+                        // long lines stay whole: the page scrolls sideways
+                        : "           white-space: pre; overflow-wrap: normal;\n") +
                 "       }\n" +
+                "       .hljs-ln {border-collapse: collapse;" + (wrap ? " width: 100%;" : "") + "}\n" +
+                "       .hljs-ln td.hljs-ln-numbers {width: 1%; white-space: nowrap;}\n" +
                 "    </style>\n" +
                 "</head>\n" +
                 "<body style=\"margin: 0; padding: 0\" class=\"hljs\">\n" +
