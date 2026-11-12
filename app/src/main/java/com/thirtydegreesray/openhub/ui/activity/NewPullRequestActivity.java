@@ -281,7 +281,8 @@ public class NewPullRequestActivity extends BaseActivity<IBaseContract.Presenter
                         return;
                     }
                     compareText.setText(getResources().getQuantityString(R.plurals.new_pull_compare,
-                            ahead, ahead, files));
+                            ahead, ahead, getResources().getQuantityString(R.plurals.new_pull_files,
+                                    files, files)));
                     if (titleEdit.getText() == null || titleEdit.getText().length() == 0) {
                         titleEdit.setText(suggestTitle(result, ahead));
                     }

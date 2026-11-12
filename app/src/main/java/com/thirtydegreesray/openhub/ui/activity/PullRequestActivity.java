@@ -591,8 +591,10 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         String base = Json.str(pull, "base.ref");
         String head = Json.str(pull, "head.label");
         summaryText.setText(isMerged()
-                ? getString(R.string.pull_summary_merged, Json.str(pull, "merged_by.login"), commits, base, head)
-                : getString(R.string.pull_summary_open, author, commits, base, head));
+                ? getResources().getQuantityString(R.plurals.pull_summary_merged, commits,
+                        Json.str(pull, "merged_by.login"), commits, base, head)
+                : getResources().getQuantityString(R.plurals.pull_summary_open, commits,
+                        author, commits, base, head));
 
         tabCommits.setText(getString(R.string.pull_tab_commits_count, commits));
         tabFiles.setText(getString(R.string.pull_tab_files_count, Json.integer(pull, "changed_files")));
@@ -969,7 +971,8 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                 row.setOnClickListener(v -> openDiff(Json.str(file, "filename")));
                 filesList.addView(row);
             }
-            filesSummary.setText(getString(R.string.pull_files_summary, array.size(), additions, deletions));
+            filesSummary.setText(getResources().getQuantityString(R.plurals.pull_files_summary,
+                    array.size(), array.size(), additions, deletions));
         }, error -> {
             loader.setVisibility(View.GONE);
             filesLoaded = false;

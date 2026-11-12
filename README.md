@@ -71,7 +71,11 @@ app goes to them; see [Credits](#credits).
 * Searchable in-app help that explains every screen, written for people new to GitHub;
   its feature tiles jump to the matching section
 * Light, dark and AMOLED dark themes, many accent colors, colored or plain side menu icons
-* Markdown rendering and code highlighting, with images in comments and posts
+* Comments look like on github.com (GitHub's own rendering): pictures, tables, task lists,
+  alerts, quotes, nested lists; a tap on a table opens it full screen
+* Code highlighting for 193 languages; a copy button on every code block and code file
+  (copies the code without line numbers)
+* A select all / clear mark in text fields
 * Offline mode (cached pages); Clear cache in the settings
 * Trending repositories for all languages, by day, week or month
 * GitHub collections and featured topics
@@ -294,7 +298,6 @@ Never commit keys or passwords: `public.properties` is in git and must stay empt
 * [Retrofit](https://github.com/square/retrofit) Type-safe HTTP client for Android and Java by Square, Inc.
 * [Dagger](https://github.com/google/dagger) A fast dependency injector for Android and Java.
 * [Glide](https://github.com/bumptech/glide) An image loading and caching library for Android focused on smooth scrolling.
-* [code-prettify](https://github.com/google/code-prettify) An embeddable script that makes source-code snippets in HTML prettier.
 * [DataAutoAccess](https://github.com/ThirtyDegreesRay/DataAutoAccess) A simple way to access android bundle data.
 * [GitHub-Trending](https://github.com/thedillonb/GitHub-Trending) Scrapes GitHub's Trending Pages.
 * [commonmark-java](https://github.com/commonmark/commonmark-java) Markdown on the phone, for drafts and when GitHub cannot be reached.

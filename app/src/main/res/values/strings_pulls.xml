@@ -20,11 +20,20 @@
     <string name="pull_tab_files">Files</string>
     <string name="pull_tab_commits_count">Commits %1$d</string>
     <string name="pull_tab_files_count">Files %1$d</string>
-    <string name="pull_summary_open">%1$s wants to merge %2$d commit(s) into %3$s from %4$s</string>
-    <string name="pull_summary_merged">%1$s merged %2$d commit(s) into %3$s from %4$s</string>
+    <plurals name="pull_summary_open">
+        <item quantity="one">%1$s wants to merge %2$d commit into %3$s from %4$s</item>
+        <item quantity="other">%1$s wants to merge %2$d commits into %3$s from %4$s</item>
+    </plurals>
+    <plurals name="pull_summary_merged">
+        <item quantity="one">%1$s merged %2$d commit into %3$s from %4$s</item>
+        <item quantity="other">%1$s merged %2$d commits into %3$s from %4$s</item>
+    </plurals>
     <string name="pull_no_description">No description provided.</string>
     <string name="pull_file_meta">%1$s · +%2$d −%3$d</string>
-    <string name="pull_files_summary">%1$d files changed · +%2$d −%3$d</string>
+    <plurals name="pull_files_summary">
+        <item quantity="one">%1$d file changed · +%2$d −%3$d</item>
+        <item quantity="other">%1$d files changed · +%2$d −%3$d</item>
+    </plurals>
 
     <string name="pull_checks_passed">All checks have passed (%1$d)</string>
     <string name="pull_checks_failing">%1$d failing</string>
@@ -78,8 +87,12 @@
     <string name="new_pull_comparing">Comparing…</string>
     <string name="new_pull_nothing">%2$s has no commits that are not in %1$s: nothing to compare</string>
     <plurals name="new_pull_compare">
-        <item quantity="one">%1$d commit, %2$d file(s) changed. Able to create the pull request.</item>
-        <item quantity="other">%1$d commits, %2$d file(s) changed. Able to create the pull request.</item>
+        <item quantity="one">%1$d commit, %2$s. Able to create the pull request.</item>
+        <item quantity="other">%1$d commits, %2$s. Able to create the pull request.</item>
+    </plurals>
+    <plurals name="new_pull_files">
+        <item quantity="one">%d file changed</item>
+        <item quantity="other">%d files changed</item>
     </plurals>
     <string name="new_pull_draft">Create as draft</string>
     <string name="new_pull_create">Create pull request</string>
