@@ -50,6 +50,7 @@ class HtmlHelper {
                     "</head>" +
                     "<body>" +
                         htmlSource +
+                        copyScript(false) +
                     "</body>" +
                 "</html>";
     }
@@ -158,6 +159,7 @@ class HtmlHelper {
                 "<pre><code" + (lang != null ? " class=\"language-" + lang + "\"" : "") +">" +
                 formatCode(codeSource) +
                 "</pre>\n" +
+                copyScript(true) +
                 "</body>\n</html>\n";
     }
 
@@ -185,6 +187,48 @@ class HtmlHelper {
             + "var v=ev.target;if(!v||v.tagName!=='VIDEO')return;v.pause();"
             + "var s=v.currentSrc||v.getAttribute('src')||v.getAttribute('data-canonical-src');"
             + "if(s)location.href='" + "openhub-video" + ":'+encodeURIComponent(s);},true);</script>\n";
+
+    /** The page asks the app to copy text: openhub-copy:ENCODED_TEXT. */
+    static final String COPY_SCHEME = "openhub-copy";
+
+    /**
+     * A copy button on every code block of a document (READMEs, wiki pages, release notes,
+     * comments, Markdown files), like on github.com. {@code fixed}: one button in the top
+     * right corner of the screen for a whole code file. The text of a highlighted file with
+     * line numbers is read row by row, without the numbers.
+     */
+    private static String copyScript(boolean fixed) {
+        return "<style>"
+                + ".oh-copy-box{position:relative;}"
+                + ".oh-copy-box pre{padding-right:48px !important;}"
+                + ".oh-copy{position:" + (fixed ? "fixed" : "absolute") + ";top:6px;right:6px;z-index:9;"
+                + "width:34px;height:34px;padding:7px;border:1px solid rgba(128,128,128,.45);border-radius:6px;"
+                + "background:rgba(128,128,128,.18);color:inherit;opacity:.85;line-height:0;}"
+                + ".oh-copy svg{width:18px;height:18px;fill:currentColor;}"
+                + "</style>"
+                + "<script>(function(){"
+                + "var ICON='<svg viewBox=\"0 0 16 16\"><path d=\"M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z\"/><path d=\"M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z\"/></svg>';"
+                + "var DONE='<svg viewBox=\"0 0 16 16\"><path d=\"M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z\"/></svg>';"
+                + "function text(pre){var rows=pre.querySelectorAll('td.hljs-ln-code');"
+                + "if(rows.length){var t=[];for(var i=0;i<rows.length;i++)t.push(rows[i].textContent);return t.join('\\n');}"
+                + "return pre.innerText.replace(/\\n$/,'');}"
+                + "function add(pre){if(pre.getAttribute('data-oh-copy'))return;pre.setAttribute('data-oh-copy','1');"
+                + "var b=document.createElement('button');b.className='oh-copy';b.type='button';"
+                + "b.setAttribute('aria-label','Copy');b.innerHTML=ICON;"
+                + "b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();"
+                + "location.href='" + COPY_SCHEME + ":'+encodeURIComponent(text(pre));"
+                + "b.innerHTML=DONE;setTimeout(function(){b.innerHTML=ICON;},1500);});"
+                + (fixed ? "document.body.appendChild(b);"
+                        : "var box=pre.parentNode;if(!box.classList||!box.classList.contains('highlight')){"
+                        + "box=document.createElement('div');pre.parentNode.insertBefore(box,pre);box.appendChild(pre);}"
+                        + "box.classList.add('oh-copy-box');box.appendChild(b);")
+                + "}"
+                + "function all(){var p=document.querySelectorAll('pre');"
+                + (fixed ? "if(p.length)add(p[0]);" : "for(var i=0;i<p.length;i++)add(p[i]);")
+                + "}"
+                + "if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',all);else all();"
+                + "})();</script>\n";
+    }
 
     /** The page asks the app to play a video: openhub-video:ENCODED_URL. */
     static final String VIDEO_SCHEME = "openhub-video";
@@ -230,6 +274,7 @@ class HtmlHelper {
                         mdSource +
                         ANCHOR_SCRIPT +
                         VIDEO_SCRIPT +
+                        copyScript(false) +
                     "</body>\n" +
                 "</html>";
     }

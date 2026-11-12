@@ -114,6 +114,18 @@
             app:toast_text="@string/mention"/>
 
         <com.thirtydegreesray.openhub.ui.widget.ToastAbleImageButton
+            android:id="@+id/select_all_text"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@drawable/ic_select_all"
+            android:scaleType="center"
+            android:visibility="gone"
+            android:contentDescription="@string/write_select_all"
+            android:background="?android:selectableItemBackgroundBorderless"
+            app:toast_text="@string/write_select_all"/>
+
+        <com.thirtydegreesray.openhub.ui.widget.ToastAbleImageButton
             android:id="@+id/add_attachment"
             android:layout_width="0dp"
             android:layout_height="match_parent"

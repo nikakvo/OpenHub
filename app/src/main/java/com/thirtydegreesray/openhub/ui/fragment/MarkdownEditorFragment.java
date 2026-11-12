@@ -195,6 +195,7 @@ public class MarkdownEditorFragment extends BaseFragment
         ViewUtils.setOnClick(root, R.id.add_link, v -> onViewClicked(v));
         ViewUtils.setOnClick(root, R.id.add_bulleted_list, v -> onViewClicked(v));
         ViewUtils.setOnClick(root, R.id.add_mention, v -> onViewClicked(v));
+        setUpSelectButton(root);
         // "Attach image or video" only when the screen knows the repository
         View attach = root.findViewById(R.id.add_attachment);
         boolean canAttach = getActivity() instanceof AttachFlow.Owner
@@ -203,6 +204,56 @@ public class MarkdownEditorFragment extends BaseFragment
         ViewUtils.setOnClick(root, R.id.add_attachment, v -> {
             if (getActivity() instanceof AttachFlow.Owner) ((AttachFlow.Owner) getActivity()).attach();
         });
+    }
+
+    /**
+     * The select button of the toolbar: the first tap selects the whole text, a second tap
+     * while everything is selected clears it (two taps, so one slip never loses a text).
+     */
+    private void setUpSelectButton(@androidx.annotation.NonNull View root) {
+        android.widget.ImageView select = root.findViewById(R.id.select_all_text);
+        if (select == null) return;
+        Runnable update = () -> {
+            boolean hasText = markdownEdit.length() > 0;
+            select.setVisibility(hasText ? View.VISIBLE : View.GONE);
+            boolean all = hasText && allSelected();
+            select.setImageResource(all ? R.drawable.ic_close : R.drawable.ic_select_all);
+            select.setContentDescription(getString(all ? R.string.write_clear : R.string.write_select_all));
+        };
+        select.setOnClickListener(v -> {
+            markdownEdit.requestFocus();
+            if (markdownEdit.length() > 0 && allSelected()) {
+                markdownEdit.setText("");
+                com.thirtydegreesray.openhub.util.Toasts.info(v.getContext(),
+                        getString(R.string.write_cleared)).show();
+            } else {
+                // the moving end at the start keeps the text scrolled to its top
+                markdownEdit.setSelection(markdownEdit.length(), 0);
+            }
+            update.run();
+        });
+        markdownEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                update.run();
+            }
+        });
+        markdownEdit.setOnClickListener(v -> v.post(update));
+        update.run();
+    }
+
+    private boolean allSelected() {
+        int a = markdownEdit.getSelectionStart();
+        int b = markdownEdit.getSelectionEnd();
+        return Math.min(a, b) == 0 && Math.max(a, b) == markdownEdit.length();
     }
 
     /** Puts the Markdown of an attached file at the cursor, on a line of its own. */

@@ -290,6 +290,12 @@ public class CodeWebView extends WebView {
             scrollToAnchor(uri.getSchemeSpecificPart());
             return;
         }
+        // a copy button of a code block: the code goes to the clipboard
+        if (HtmlHelper.COPY_SCHEME.equalsIgnoreCase(uri.getScheme())) {
+            String code = Uri.decode(uri.getEncodedSchemeSpecificPart());
+            if (code != null) com.thirtydegreesray.openhub.util.AppUtils.copyToClipboard(getContext(), code);
+            return;
+        }
         // a video of the page started: the app's player, with the page's own source
         if (HtmlHelper.VIDEO_SCHEME.equalsIgnoreCase(uri.getScheme())) {
             String source = Uri.decode(uri.getEncodedSchemeSpecificPart());
