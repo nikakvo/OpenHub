@@ -221,7 +221,16 @@ final class HtmlSpanner {
                 children(e);
                 close(LINE);
                 return;
-            case "section": case "article": case "header": case "footer": case "figure":
+            case "section":
+                if (e.hasClass("footnotes")) {
+                    footnotes(e);
+                    return;
+                }
+                open(LINE);
+                children(e);
+                close(LINE);
+                return;
+            case "article": case "header": case "footer": case "figure":
             case "figcaption": case "dl": case "dt": case "dd": case "main":
             case "aside": case "nav": case "address":
                 open(LINE);
@@ -364,9 +373,10 @@ final class HtmlSpanner {
             case "noscript": case "head": case "title": case "meta": case "link":
                 return true;
             default:
-                // the hidden "Footnotes" heading and the permalink icons of headings
+                // the hidden "Footnotes" heading, the permalink icons of headings and the
+                // back links of footnotes (a list row cannot jump back to the reference)
                 return e.hasClass("sr-only") || e.hasAttr("hidden")
-                        || (tag.equals("a") && e.hasClass("anchor"));
+                        || (tag.equals("a") && (e.hasClass("anchor") || e.hasAttr("data-footnote-backref")));
         }
     }
 
@@ -399,6 +409,23 @@ final class HtmlSpanner {
             }
         }
         close(LINE);
+    }
+
+    /** The footnotes at the end: a line, a "Footnotes" heading and the list in smaller grey text, like github.com. */
+    private void footnotes(@NonNull Element e) {
+        int ruleStart = open(gap());
+        out.append(ZERO_WIDTH);
+        span(new Spans.Rule(style.borderColor, Math.max(1, style.px(1))), ruleStart);
+        breakBefore(LINE);
+        int start = open(LINE);
+        append("Footnotes");
+        span(new Spans.Bold(), start);
+        breakBefore(LINE);
+        tightNext = true;
+        children(e);
+        span(new RelativeSizeSpan(0.85f), start);
+        span(new ForegroundColorSpan(style.secondaryColor), start);
+        close(gap());
     }
 
     private void heading(@NonNull Element e, int level) {
