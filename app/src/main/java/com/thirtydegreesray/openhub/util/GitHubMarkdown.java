@@ -29,7 +29,7 @@ public final class GitHubMarkdown {
 
     /**
      * Blocking; throws when GitHub cannot be reached (the caller falls back to
-     * {@link MarkdownHtml#renderComment}). A picture uploaded a moment ago is private on
+     * {@link MarkdownHtml#renderComment(String, String)}). A picture uploaded a moment ago is private on
      * GitHub until the text is sent: then the text is rendered on the phone and the
      * picture comes from the phone.
      */
@@ -37,7 +37,7 @@ public final class GitHubMarkdown {
     @NonNull
     public static String preview(@NonNull Context context, @NonNull String text,
                                  @Nullable String repoFullName) throws Exception {
-        if (hasLocalPicture(text)) return inlineLocalPictures(context, MarkdownHtml.renderComment(text));
+        if (hasLocalPicture(text)) return inlineLocalPictures(context, MarkdownHtml.renderComment(text, repoFullName));
         Map<String, Object> body = new HashMap<>();
         body.put("text", text);
         body.put("mode", "gfm");

@@ -264,7 +264,7 @@ public class MarkdownWritePreview {
         previewLoader.setVisibility(View.VISIBLE);
         final android.content.Context context = edit.getContext().getApplicationContext();
         rendering = Single.fromCallable(() -> GitHubMarkdown.preview(context, text, repoFullName))
-                .onErrorReturn(error -> MarkdownHtml.renderComment(text))
+                .onErrorReturn(error -> MarkdownHtml.renderComment(text, repoFullName))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(html -> {

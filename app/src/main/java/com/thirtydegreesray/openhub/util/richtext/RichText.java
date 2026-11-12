@@ -33,9 +33,16 @@ public final class RichText {
     @NonNull
     public static RichDoc render(@NonNull Context context, @Nullable String html, @Nullable String markdown,
                                  boolean clickable) {
+        return render(context, html, markdown, null, clickable);
+    }
+
+    /** {@code repoFullName}: Markdown rendered on the phone links a bare #123 to that repository. */
+    @NonNull
+    public static RichDoc render(@NonNull Context context, @Nullable String html, @Nullable String markdown,
+                                 @Nullable String repoFullName, boolean clickable) {
         RichDoc doc = new RichDoc(new RichStyle(context, clickable));
         String source = !StringUtils.isBlank(html) ? html
-                : !StringUtils.isBlank(markdown) ? MarkdownHtml.renderComment(markdown) : "";
+                : !StringUtils.isBlank(markdown) ? MarkdownHtml.renderComment(markdown, repoFullName) : "";
         if (source.isEmpty()) return doc;
         doc.build(source, context.getString(R.string.rich_text_play_video));
         return doc;
@@ -43,7 +50,13 @@ public final class RichText {
 
     /** A whole text with working links, pictures and videos (comments in a conversation). */
     public static void show(@NonNull TextView view, @Nullable String html, @Nullable String markdown) {
-        show(view, render(view.getContext(), html, markdown, true), true);
+        show(view, html, markdown, null);
+    }
+
+    /** Like {@link #show(TextView, String, String)}; a bare #123 of phone-rendered Markdown links to {@code repoFullName}. */
+    public static void show(@NonNull TextView view, @Nullable String html, @Nullable String markdown,
+                            @Nullable String repoFullName) {
+        show(view, render(view.getContext(), html, markdown, repoFullName, true), true);
     }
 
     /**

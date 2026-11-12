@@ -1,8 +1,11 @@
 package com.thirtydegreesray.openhub.util;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.commonmark.Extension;
+import org.commonmark.ext.autolink.AutolinkExtension;
+import org.commonmark.ext.footnotes.FootnotesExtension;
 import org.commonmark.ext.gfm.alerts.AlertsExtension;
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
@@ -20,13 +23,18 @@ import java.util.List;
 public final class MarkdownHtml {
 
     private static final List<Extension> EXTENSIONS = Arrays.asList(TablesExtension.create(),
-            StrikethroughExtension.create(), TaskListItemsExtension.create(), AlertsExtension.create());
+            StrikethroughExtension.create(), TaskListItemsExtension.create(), AlertsExtension.create(),
+            AutolinkExtension.create(), FootnotesExtension.create());
 
     private static final Parser PARSER = Parser.builder().extensions(EXTENSIONS).build();
+    /** comments: also @user, #123 and :emoji: like github.com (here without a repository) */
+    private static final Parser COMMENT_PARSER = commentParser(null);
     private static final HtmlRenderer DOCUMENT = HtmlRenderer.builder().extensions(EXTENSIONS).build();
     /** in comments a single line break is a line break, as on github.com */
     private static final HtmlRenderer COMMENT = HtmlRenderer.builder().extensions(EXTENSIONS)
-            .softbreak("<br />\n").build();
+            .softbreak("<br />\n")
+            .nodeRendererFactory(MarkdownRefs::renderer)
+            .build();
 
     private MarkdownHtml() {
     }
@@ -40,6 +48,21 @@ public final class MarkdownHtml {
     /** A comment, issue or pull request text: line breaks stay line breaks. */
     @NonNull
     public static String renderComment(@NonNull String markdown) {
-        return "<div class=\"markdown-body\">" + COMMENT.render(PARSER.parse(markdown)) + "</div>";
+        return renderComment(markdown, null);
+    }
+
+    /**
+     * Like {@link #renderComment(String)}; with {@code repoFullName} ("owner/repo") a bare
+     * {@code #123} links to that repository's issue, without it only {@code owner/repo#123} does.
+     */
+    @NonNull
+    public static String renderComment(@NonNull String markdown, @Nullable String repoFullName) {
+        Parser parser = repoFullName == null ? COMMENT_PARSER : commentParser(repoFullName);
+        return "<div class=\"markdown-body\">" + COMMENT.render(parser.parse(markdown)) + "</div>";
+    }
+
+    @NonNull
+    private static Parser commentParser(@Nullable String repoFullName) {
+        return Parser.builder().extensions(EXTENSIONS).postProcessor(new MarkdownRefs(repoFullName)).build();
     }
 }

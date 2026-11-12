@@ -1102,7 +1102,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
             }
             TextView body = view.findViewById(R.id.comment_body);
             // drafts of a pending review exist only on the phone: their Markdown
-            RichText.show(body, Json.str(c, "body_html"), Json.str(c, "body"));
+            RichText.show(body, Json.str(c, "body_html"), Json.str(c, "body"), owner + "/" + repo);
             body.setOnLongClickListener(v -> {
                 commentMenu(v, c);
                 return true;

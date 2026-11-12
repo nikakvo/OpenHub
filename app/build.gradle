@@ -154,6 +154,8 @@ dependencies {
     implementation libs.commonmark.strikethrough
     implementation libs.commonmark.tasklist
     implementation libs.commonmark.alerts
+    implementation libs.commonmark.autolink
+    implementation libs.commonmark.footnotes
 
     // Video player for attached videos
     implementation libs.media3.exoplayer

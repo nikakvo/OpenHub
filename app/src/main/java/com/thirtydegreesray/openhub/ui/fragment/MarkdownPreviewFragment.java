@@ -77,7 +77,7 @@ public class MarkdownPreviewFragment extends BaseFragment {
         final Context context = requireContext().getApplicationContext();
         final String repo = getMarkdownEditorCallback().getRepoFullName();
         rendering = Single.fromCallable(() -> GitHubMarkdown.preview(context, text, repo))
-                .onErrorReturn(error -> MarkdownHtml.renderComment(text))
+                .onErrorReturn(error -> MarkdownHtml.renderComment(text, repo))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(html -> {
