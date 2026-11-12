@@ -166,6 +166,10 @@ public class CodeWebView extends WebView {
 
     public void loadImage(@NonNull String url) {
         WebSettings settings = getSettings();
+        // the user tapped this one picture: it loads even when "Disable loading network
+        // image" holds pictures back on mobile data (only this page, the setting stays)
+        settings.setLoadsImagesAutomatically(true);
+        settings.setBlockNetworkImage(false);
         settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
         setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         settings.setSupportZoom(true);
