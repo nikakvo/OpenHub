@@ -187,7 +187,7 @@
     <string name="select_branch">Select branch or tag</string>
     <string name="share_to">Share to</string>
     <string name="no_share_clients">There are no share clients installed.</string>
-    <string name="no_browser_clients">There are no browser clients installed.</string>
+    <string name="no_browser_clients">No app can open this link. Install a browser, or set one as the default browser in Android settings.</string>
     <string name="no_download_clients">There are no download clients installed.</string>
     <string name="send_email">Send email</string>
     <string name="open_in_market">Open in market</string>

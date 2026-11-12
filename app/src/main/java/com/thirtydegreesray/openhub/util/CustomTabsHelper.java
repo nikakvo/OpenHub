@@ -8,6 +8,8 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import androidx.browser.customtabs.CustomTabsService;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,8 +21,8 @@ import java.util.List;
 public enum  CustomTabsHelper {
     INSTANCE;
 
-    private final String ACTION_CUSTOM_TABS_CONNECTION =
-            "androidx.browser.customtabs.CustomTabsService";
+    /** the action browsers declare for their Custom Tabs service ("android.support.customtabs.action.CustomTabsService") */
+    private final String ACTION_CUSTOM_TABS_CONNECTION = CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION;
 
     private final String CHROME_STABLE_PACKAGE = "com.android.chrome";
     private final String CHROME_BETA_PACKAGE = "com.chrome.beta";
@@ -40,58 +42,50 @@ public enum  CustomTabsHelper {
             FIREFOX_BETA_PACKAGE, FIREFOX_DEV_PACKAGE
     );
 
-    private String bestPackageName ;
-
     /**
-     * Goes through all apps that handle VIEW intents and have a warmup service. Picks
-     * the one chosen by the user if there is one, otherwise makes a best effort to return a
-     * valid package name.
-     *
-     * This is <strong>not</strong> threadsafe.
+     * The browser to open Custom Tabs with: the default browser when it has Custom Tabs;
+     * none when the default browser has no Custom Tabs (the link then opens in it the normal
+     * way, the user chose it); without a default browser the first known one (Chrome,
+     * Firefox, ...) or else the first that has them. Asked again each time, so a new
+     * default browser or a removed one counts at once.
      *
      * @param context {@link Context} to use for accessing {@link PackageManager}.
-     * @return The package name recommended to use for connecting to custom tabs related components.
+     * @return The package name to use for Custom Tabs, or null.
      */
-    public  String getBestPackageName(Context context) {
-        if (bestPackageName != null) return bestPackageName;
-
+    public String getBestPackageName(Context context) {
         PackageManager pm = context.getPackageManager();
-        // Get default VIEW intent handler.
-        Intent activityIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com"));
-        ResolveInfo defaultViewHandlerInfo = pm.resolveActivity(activityIntent, 0);
+        Intent activityIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com"))
+                .addCategory(Intent.CATEGORY_BROWSABLE);
+        ResolveInfo defaultViewHandlerInfo = pm.resolveActivity(activityIntent, PackageManager.MATCH_DEFAULT_ONLY);
         String defaultViewHandlerPackageName = null;
-        if (defaultViewHandlerInfo != null) {
+        if (defaultViewHandlerInfo != null && defaultViewHandlerInfo.activityInfo != null
+                && BrowserTargets.isDirectTarget(defaultViewHandlerInfo.activityInfo.packageName,
+                defaultViewHandlerInfo.activityInfo.name, context.getPackageName())) {
             defaultViewHandlerPackageName = defaultViewHandlerInfo.activityInfo.packageName;
         }
 
-        // Get all apps that can handle VIEW intents.
-        List<ResolveInfo> resolvedActivityList = pm.queryIntentActivities(activityIntent, 0);
+        // All apps that can open web pages (MATCH_ALL: otherwise Android 12+ names only the default browser).
+        List<ResolveInfo> resolvedActivityList = pm.queryIntentActivities(activityIntent, PackageManager.MATCH_ALL);
         List<String> packagesSupportingCustomTabs = new ArrayList<>();
         for (ResolveInfo info : resolvedActivityList) {
+            String packageName = info.activityInfo.packageName;
+            if (packagesSupportingCustomTabs.contains(packageName)) continue;
             Intent serviceIntent = new Intent();
             serviceIntent.setAction(ACTION_CUSTOM_TABS_CONNECTION);
-            serviceIntent.setPackage(info.activityInfo.packageName);
+            serviceIntent.setPackage(packageName);
             if (pm.resolveService(serviceIntent, 0) != null) {
-                packagesSupportingCustomTabs.add(info.activityInfo.packageName);
+                packagesSupportingCustomTabs.add(packageName);
             }
         }
 
-        // Now packagesSupportingCustomTabs contains all apps that can handle both VIEW intents
-        // and service calls.
-        if (packagesSupportingCustomTabs.isEmpty()) {
-            bestPackageName = null;
-        } else if (packagesSupportingCustomTabs.size() == 1) {
-            bestPackageName = packagesSupportingCustomTabs.get(0);
-        } else if (!TextUtils.isEmpty(defaultViewHandlerPackageName)
-                && !hasSpecializedHandlerIntents(context, activityIntent)
-                && packagesSupportingCustomTabs.contains(defaultViewHandlerPackageName)) {
-            bestPackageName = defaultViewHandlerPackageName;
-        } else if ((bestPackageName = getFirstMatchedPackage(packagesSupportingCustomTabs)) != null) {
-            //do nothing
-        } else {
-            packagesSupportingCustomTabs.get(0);
+        if (packagesSupportingCustomTabs.isEmpty()) return null;
+        if (!TextUtils.isEmpty(defaultViewHandlerPackageName)) {
+            if (hasSpecializedHandlerIntents(context, activityIntent)) return null;
+            return packagesSupportingCustomTabs.contains(defaultViewHandlerPackageName)
+                    ? defaultViewHandlerPackageName : null;
         }
-        return bestPackageName;
+        String known = getFirstMatchedPackage(packagesSupportingCustomTabs);
+        return known != null ? known : packagesSupportingCustomTabs.get(0);
     }
 
     /**

@@ -88,7 +88,13 @@ public class AppOpener {
 //                    .setExitAnimations(context, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
                     .build();
             customTabsIntent.intent.setPackage(customTabsPackageName);
-            customTabsIntent.launchUrl(context, Uri.parse(url));
+            try {
+                customTabsIntent.launchUrl(context, Uri.parse(url));
+            } catch (ActivityNotFoundException | SecurityException e) {
+                // the browser went away or refuses the link: open it the normal way
+                openInBrowser(context, url);
+                return;
+            }
 
             if(PrefUtils.isCustomTabsTipsEnable()){
                 Toasts.info(context, context.getString(R.string.use_custom_tabs_tips), Toast.LENGTH_LONG).show();
@@ -105,11 +111,34 @@ public class AppOpener {
         Uri uri = Uri.parse(url);
         Intent intent = new Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent = createActivityChooserIntent(context, intent, uri, VIEW_IGNORE_PACKAGE);
-        if(intent != null){
+        Intent chooser = createActivityChooserIntent(context, intent, uri, VIEW_IGNORE_PACKAGE);
+        if ((chooser != null && start(context, chooser)) || openWithDefaultApp(context, uri)) return;
+        Toasts.warning(context, context.getString(R.string.no_browser_clients), Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * Last try before "no app": a plain link intent, so Android starts the default browser
+     * itself (apps that hide from our list still get it). Never OpenHub or the system
+     * chooser (that would offer OpenHub again).
+     */
+    private static boolean openWithDefaultApp(@NonNull Context context, @NonNull Uri uri) {
+        Intent view = new Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ResolveInfo target = context.getPackageManager().resolveActivity(view, PackageManager.MATCH_DEFAULT_ONLY);
+        if (target == null || target.activityInfo == null || !BrowserTargets.isDirectTarget(
+                target.activityInfo.packageName, target.activityInfo.name, context.getPackageName())) {
+            return false;
+        }
+        view.setPackage(target.activityInfo.packageName);
+        return start(context, view);
+    }
+
+    private static boolean start(@NonNull Context context, @NonNull Intent intent) {
+        try {
             context.startActivity(intent);
-        } else {
-            Toasts.warning(context, context.getString(R.string.no_browser_clients), Toast.LENGTH_LONG).show();
+            return true;
+        } catch (ActivityNotFoundException | SecurityException e) {
+            return false;
         }
     }
 
@@ -163,12 +192,9 @@ public class AppOpener {
         Uri uri = Uri.parse(url);
         Intent intent = new Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent = createActivityChooserIntent(context, intent, uri, VIEW_IGNORE_PACKAGE);
-        if(intent != null){
-            context.startActivity(intent);
-        } else {
-            Toasts.warning(context, context.getString(R.string.no_download_clients), Toast.LENGTH_LONG).show();
-        }
+        Intent chooser = createActivityChooserIntent(context, intent, uri, VIEW_IGNORE_PACKAGE);
+        if ((chooser != null && start(context, chooser)) || openWithDefaultApp(context, uri)) return;
+        Toasts.warning(context, context.getString(R.string.no_download_clients), Toast.LENGTH_LONG).show();
     }
 
     public static void shareText(@NonNull Context context, @NonNull String text) {
@@ -376,65 +402,73 @@ public class AppOpener {
         return false;
     }
 
-    private static boolean onlyOurs(@NonNull List<ResolveInfo> activities, @NonNull String ourPackage) {
-        for (ResolveInfo info : activities) {
-            if (!ourPackage.equals(info.activityInfo.packageName)) return false;
-        }
-        return true;
-    }
 
+    @Nullable
     private static Intent createActivityChooserIntent(Context context, Intent intent,
                                                       Uri uri, List<String> ignorPackageList) {
         final PackageManager pm = context.getPackageManager();
-        // MATCH_ALL: when OpenHub may open github.com links (Android 12+ "Open by default"),
-        // Android otherwise answers with OpenHub alone and hides the browsers
-        List<ResolveInfo> activities = pm.queryIntentActivities(intent,
-                PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_ALL);
-        if (onlyOurs(activities, context.getPackageName()) && uri != null
+        final String ourPackageName = context.getPackageName();
+        // MATCH_ALL alone: with MATCH_DEFAULT_ONLY Android 12+ answers a github.com link with
+        // the apps that may open github.com links (OpenHub, other GitHub clients) and hides
+        // every browser
+        List<ResolveInfo> activities = pm.queryIntentActivities(intent, PackageManager.MATCH_ALL);
+        List<ResolveInfo> targets = targets(activities, ourPackageName, ignorPackageList);
+        if (targets.isEmpty() && uri != null
                 && ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme()))) {
-            // still nothing else: ask which apps open any web page, then give them this link
+            // nothing left (only OpenHub or other GitHub clients): ask which apps open any
+            // web page, then give them this link
             Intent anyPage = new Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com"))
                     .addCategory(Intent.CATEGORY_BROWSABLE);
-            activities = pm.queryIntentActivities(anyPage,
-                    PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_ALL);
+            targets = targets(pm.queryIntentActivities(anyPage, PackageManager.MATCH_ALL),
+                    ourPackageName, ignorPackageList);
         }
+        if (targets.isEmpty()) return null;
+        Collections.sort(targets, new ResolveInfo.DisplayNameComparator(pm));
+
         final ArrayList<Intent> chooserIntents = new ArrayList<>();
-        final String ourPackageName = context.getPackageName();
-
-        Collections.sort(activities, new ResolveInfo.DisplayNameComparator(pm));
-
-        for (ResolveInfo resInfo : activities) {
+        for (ResolveInfo resInfo : targets) {
             ActivityInfo info = resInfo.activityInfo;
-            if (!info.enabled || !info.exported) {
-                continue;
-            }
-            if (info.packageName.equals(ourPackageName)) {
-                continue;
-            }
-            if (ignorPackageList != null && ignorPackageList.contains(info.packageName)) {
-                continue;
-            }
-
             Intent targetIntent = new Intent(intent);
-            targetIntent.setPackage(info.packageName);
+            // the exact activity Android found (works for filters without DEFAULT too)
+            targetIntent.setClassName(info.packageName, info.name);
             targetIntent.setDataAndType(uri, intent.getType());
             chooserIntents.add(targetIntent);
         }
 
-        if (chooserIntents.isEmpty()) {
-            return null;
-        }
-
         final Intent lastIntent = chooserIntents.remove(chooserIntents.size() - 1);
         if (chooserIntents.isEmpty()) {
-            // there was only one, no need to showImage the chooser
+            // there was only one, no need to show the chooser
             return lastIntent;
         }
 
         Intent chooserIntent = Intent.createChooser(lastIntent, null);
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
                 chooserIntents.toArray(new Intent[chooserIntents.size()]));
+        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return chooserIntent;
+    }
+
+    /** The answers of Android that may be offered ({@link BrowserTargets#pick}). */
+    @NonNull
+    private static List<ResolveInfo> targets(@NonNull List<ResolveInfo> activities, @NonNull String ourPackage,
+                                             @Nullable List<String> ignoredPackages) {
+        List<BrowserTargets.Candidate> candidates = new ArrayList<>();
+        for (ResolveInfo info : activities) {
+            if (info.activityInfo == null) continue;
+            candidates.add(new BrowserTargets.Candidate(info.activityInfo.packageName,
+                    info.activityInfo.name, info.activityInfo.exported && info.activityInfo.enabled));
+        }
+        List<ResolveInfo> out = new ArrayList<>();
+        for (BrowserTargets.Candidate c : BrowserTargets.pick(candidates, ourPackage, ignoredPackages)) {
+            for (ResolveInfo info : activities) {
+                if (info.activityInfo != null && c.packageName.equals(info.activityInfo.packageName)
+                        && c.activityName.equals(info.activityInfo.name)) {
+                    out.add(info);
+                    break;
+                }
+            }
+        }
+        return out;
     }
 
     private static final List<String> VIEW_IGNORE_PACKAGE = Arrays.asList(
