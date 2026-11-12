@@ -118,7 +118,11 @@ public final class ComposeDialog {
             TextInputEditText titleEdit = view.findViewById(R.id.title_edit);
             MarkdownWritePreview editor = new MarkdownWritePreview(view, repoFullName);
             editor.setHint(bodyHint);
-            if (bodyText != null) editor.getEditText().setText(bodyText);
+            if (bodyText != null) {
+                editor.getEditText().setText(bodyText);
+                // the cursor after the text (a quote or a mention is followed by the answer)
+                editor.getEditText().setSelection(editor.getEditText().length());
+            }
             if (attachFlow != null && !noBody) editor.enableAttach(attachFlow);
 
             if (choices != null) {

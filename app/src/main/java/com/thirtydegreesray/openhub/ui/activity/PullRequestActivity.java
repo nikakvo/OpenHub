@@ -51,6 +51,7 @@ import com.thirtydegreesray.openhub.ui.widget.ReviewDialog;
 import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
+import com.thirtydegreesray.openhub.util.CommentQuote;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.ArchivedPulls;
@@ -984,11 +985,16 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
     // ---------------------------------------------------------------------------------
 
     private void comment() {
+        comment(null);
+    }
+
+    /** A new conversation comment; {@code text} is written in the box already (a quote, a mention). */
+    private void comment(@Nullable String text) {
         new ComposeDialog.Builder(this)
                 .title(getString(R.string.pull_comment))
                 .repo(owner + "/" + repo)
                 .attach(attachFlow())
-                .body(getString(R.string.pull_comment_hint), null)
+                .body(getString(R.string.pull_comment_hint), text)
                 .bodyRequired(true, null)
                 .positive(getString(R.string.pull_comment))
                 .callback((choice, title, body) -> {
@@ -1191,14 +1197,28 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                 .equalsIgnoreCase(Json.str(comment, "user.login"));
         androidx.appcompat.widget.PopupMenu menu =
                 com.thirtydegreesray.openhub.util.TouchAnchor.popup(this, anchor);
-        if (mine) {
-            menu.getMenu().add(0, 1, 0, R.string.comment_edit);
-            menu.getMenu().add(0, 2, 1, R.string.comment_delete);
+        // Quote reply and Mention go into the conversation's comment box; a line comment is
+        // answered in its thread on the diff page
+        boolean canWrite = !line && findViewById(R.id.comment_bn).getVisibility() == View.VISIBLE;
+        String login = Json.str(comment, "user.login");
+        String quote = CommentQuote.quote(Json.str(comment, "body"));
+        String me = AppData.INSTANCE.getLoggedUser() == null ? null : AppData.INSTANCE.getLoggedUser().getLogin();
+        if (canWrite && !quote.isEmpty()) menu.getMenu().add(0, 4, 0, R.string.comment_quote_reply);
+        if (canWrite && CommentQuote.canMention(login, me, "Bot".equals(Json.str(comment, "user.type")))) {
+            menu.getMenu().add(0, 5, 1, getString(R.string.comment_mention, login));
         }
-        menu.getMenu().add(0, 3, 2, R.string.copy_url);
+        if (mine) {
+            menu.getMenu().add(0, 1, 2, R.string.comment_edit);
+            menu.getMenu().add(0, 2, 3, R.string.comment_delete);
+        }
+        menu.getMenu().add(0, 3, 4, R.string.copy_url);
         menu.setOnMenuItemClickListener(item -> {
             long id = comment.get("id").getAsLong();
-            if (item.getItemId() == 1) {
+            if (item.getItemId() == 4) {
+                comment(CommentQuote.addQuote(null, quote));
+            } else if (item.getItemId() == 5) {
+                comment(CommentQuote.addMention(null, login));
+            } else if (item.getItemId() == 1) {
                 new ComposeDialog.Builder(this)
                         .title(getString(R.string.comment_edit))
                         .repo(owner + "/" + repo)

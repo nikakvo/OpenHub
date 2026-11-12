@@ -299,6 +299,12 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
                 issue == null ? null : issue.getHtmlUrl());
     }
 
+    /** Whether a new comment can be written here (not on a locked issue, like the comment button). */
+    public boolean canComment() {
+        Issue issue = mPresenter.getIssue();
+        return issue != null && !issue.isLocked();
+    }
+
     public void onCommentBnClicked() {
         showAddCommentPage(null);
     }

@@ -31,7 +31,9 @@ import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.AttachFlow;
 import com.thirtydegreesray.openhub.ui.widget.ComposeDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
+import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.util.AppUtils;
+import com.thirtydegreesray.openhub.util.CommentQuote;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.GraphQl;
 import com.thirtydegreesray.openhub.util.Json;
@@ -95,7 +97,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private static final String COMMENT_FIELDS = "id body bodyHTML url createdAt upvoteCount viewerHasUpvoted viewerCanUpvote"
-            + " viewerCanUpdate viewerCanDelete author{login avatarUrl}";
+            + " viewerCanUpdate viewerCanDelete author{login avatarUrl __typename}";
     private static final String QUERY = "query($owner:String!,$repo:String!,$number:Int!,$after:String){"
             + "repository(owner:$owner,name:$repo){discussion(number:$number){"
             + "id number title body bodyHTML url createdAt closed stateReason locked upvoteCount viewerHasUpvoted viewerCanUpvote"
@@ -222,6 +224,8 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
                 if (replies != null && replies.isJsonArray()) {
                     for (JsonElement r : replies.getAsJsonArray()) {
                         JsonObject reply = r.getAsJsonObject();
+                        // Quote reply on a reply answers in the same thread
+                        reply.addProperty("_thread", Json.str(c, "id"));
                         content.addView(box(inflater, reply, 32));
                         content.addView(actions(reply, false, null, 32));
                     }
@@ -437,12 +441,17 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
 
     /** A new comment, or a reply when {@code replyTo} is a comment id. */
     private void compose(@Nullable String replyTo, @Nullable String header) {
+        compose(replyTo, header, null);
+    }
+
+    /** {@code text} is written in the box already (a quote, a mention). */
+    private void compose(@Nullable String replyTo, @Nullable String header, @Nullable String text) {
         if (discussion == null) return;
         ComposeDialog.Builder dialog = new ComposeDialog.Builder(this)
                 .title(getString(replyTo == null ? R.string.discussion_comment_title : R.string.discussion_reply_title))
                 .repo(owner + "/" + repo)
                 .attach(attachFlow())
-                .body(getString(R.string.diff_comment_hint), null)
+                .body(getString(R.string.diff_comment_hint), text)
                 .bodyRequired(true, null)
                 .positive(getString(R.string.comment));
         if (header != null) dialog.header(header);
@@ -457,12 +466,33 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
     private void commentMenu(@NonNull View anchor, @NonNull JsonObject item) {
         boolean isPost = discussion != null && Json.str(item, "id").equals(Json.str(discussion, "id"));
         PopupMenu menu = com.thirtydegreesray.openhub.util.TouchAnchor.popup(this, anchor);
-        if (!isPost && Json.bool(item, "viewerCanUpdate")) menu.getMenu().add(0, 1, 0, R.string.comment_edit);
-        if (!isPost && Json.bool(item, "viewerCanDelete")) menu.getMenu().add(0, 2, 1, R.string.comment_delete);
-        menu.getMenu().add(0, 3, 2, R.string.copy_url);
-        menu.getMenu().add(0, 4, 3, R.string.copy_text);
+        // Quote reply and Mention: on the post a new comment, on a comment or a reply an
+        // answer in that thread (like the Reply button)
+        boolean canWrite = discussion != null && !Json.bool(discussion, "locked");
+        String login = Json.str(item, "author.login");
+        String quote = CommentQuote.quote(Json.str(item, "body"));
+        String me = AppData.INSTANCE.getLoggedUser() == null ? null : AppData.INSTANCE.getLoggedUser().getLogin();
+        String thread = isPost ? null : (item.has("_thread") ? Json.str(item, "_thread") : Json.str(item, "id"));
+        String header = isPost ? null : getString(R.string.discussion_reply_to, login.isEmpty()
+                ? getString(R.string.discussion_ghost) : login);
+        if (canWrite && !quote.isEmpty()) menu.getMenu().add(0, 5, 0, R.string.comment_quote_reply);
+        if (canWrite && CommentQuote.canMention(login, me, "Bot".equals(Json.str(item, "author.__typename")))) {
+            menu.getMenu().add(0, 6, 1, getString(R.string.comment_mention, login));
+        }
+        if (!isPost && Json.bool(item, "viewerCanUpdate")) menu.getMenu().add(0, 1, 2, R.string.comment_edit);
+        if (!isPost && Json.bool(item, "viewerCanDelete")) menu.getMenu().add(0, 2, 3, R.string.comment_delete);
+        menu.getMenu().add(0, 3, 4, R.string.copy_url);
+        menu.getMenu().add(0, 4, 5, R.string.copy_text);
         menu.setOnMenuItemClickListener(menuItem -> {
             String id = Json.str(item, "id");
+            if (menuItem.getItemId() == 5) {
+                compose(thread, header, CommentQuote.addQuote(null, quote));
+                return true;
+            }
+            if (menuItem.getItemId() == 6) {
+                compose(thread, header, CommentQuote.addMention(null, login));
+                return true;
+            }
             switch (menuItem.getItemId()) {
                 case 1:
                     new ComposeDialog.Builder(this)

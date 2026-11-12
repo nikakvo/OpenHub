@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- long-press menu of a comment: quote it into a new comment, or mention its author -->
+    <string name="comment_quote_reply">Quote reply</string>
+    <string name="comment_mention">Mention @%1$s</string>
+</resources>

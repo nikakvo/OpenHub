@@ -34,6 +34,7 @@ import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.TextInputDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
+import com.thirtydegreesray.openhub.util.CommentQuote;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.GistChanges;
 import com.thirtydegreesray.openhub.util.GitHubHelper;
@@ -329,12 +330,23 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
         boolean own = Json.str(comment, "user.login").equalsIgnoreCase(me);
         long id = Json.get(comment, "id") == null ? 0 : Json.get(comment, "id").getAsLong();
         PopupMenu popup = com.thirtydegreesray.openhub.util.TouchAnchor.popup(this, anchor);
-        popup.getMenu().add(0, 1, 0, R.string.gist_comment_copy);
-        if (own) popup.getMenu().add(0, 2, 1, R.string.gist_comment_edit);
+        String login = Json.str(comment, "user.login");
+        String quote = CommentQuote.quote(Json.str(comment, "body"));
+        // Quote reply and Mention open a new comment with the quote or the name written
+        if (!quote.isEmpty()) popup.getMenu().add(0, 4, 0, R.string.comment_quote_reply);
+        if (CommentQuote.canMention(login, me, "Bot".equals(Json.str(comment, "user.type")))) {
+            popup.getMenu().add(0, 5, 1, getString(R.string.comment_mention, login));
+        }
+        popup.getMenu().add(0, 1, 2, R.string.gist_comment_copy);
+        if (own) popup.getMenu().add(0, 2, 3, R.string.gist_comment_edit);
         // the gist's owner may remove anyone's comment
-        if (own || isMine()) popup.getMenu().add(0, 3, 2, R.string.gist_comment_delete);
+        if (own || isMine()) popup.getMenu().add(0, 3, 4, R.string.gist_comment_delete);
         popup.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == 1) {
+            if (item.getItemId() == 4) {
+                writeComment(0, CommentQuote.addQuote(null, quote));
+            } else if (item.getItemId() == 5) {
+                writeComment(0, CommentQuote.addMention(null, login));
+            } else if (item.getItemId() == 1) {
                 AppUtils.copyToClipboard(this, Json.str(comment, "body"));
             } else if (item.getItemId() == 2) {
                 writeComment(id, Json.str(comment, "body"));

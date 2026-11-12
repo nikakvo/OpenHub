@@ -38,6 +38,7 @@ import com.thirtydegreesray.openhub.ui.widget.ComposeDialog;
 import com.thirtydegreesray.openhub.ui.widget.ReviewDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
+import com.thirtydegreesray.openhub.util.CommentQuote;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.ReviewDrafts;
@@ -614,6 +615,11 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void reply(long threadId) {
+        reply(threadId, null);
+    }
+
+    /** A reply in a thread; {@code text} is written in the box already (a quote, a mention). */
+    private void reply(long threadId, @Nullable String text) {
         // a reply can also wait in the pending review, like "Start a review" on github.com
         ReviewThreads.Thread info = threads.get(threadId);
         boolean canQueue = info != null && !info.id.isEmpty();
@@ -622,7 +628,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                 .title(getString(R.string.diff_reply_title))
                 .repo(owner + "/" + repo)
                 .attach(attachFlow())
-                .body(getString(R.string.diff_comment_hint), null)
+                .body(getString(R.string.diff_comment_hint), text)
                 .bodyRequired(true, null)
                 .positive(getString(R.string.pull_comment));
         if (canQueue) {
@@ -686,14 +692,28 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
             return;
         }
         PopupMenu menu = com.thirtydegreesray.openhub.util.TouchAnchor.popup(this, anchor);
-        if (isMine(comment)) {
-            menu.getMenu().add(0, 1, 0, R.string.comment_edit);
-            menu.getMenu().add(0, 2, 1, R.string.comment_delete);
+        // Quote reply and Mention go into the reply box of the comment's thread
+        long thread = Json.str(comment, "in_reply_to_id").isEmpty() ? longOf(comment, "id")
+                : longOf(comment, "in_reply_to_id");
+        String login = Json.str(comment, "user.login");
+        String quote = CommentQuote.quote(Json.str(comment, "body"));
+        String me = AppData.INSTANCE.getLoggedUser() == null ? null : AppData.INSTANCE.getLoggedUser().getLogin();
+        if (!quote.isEmpty()) menu.getMenu().add(0, 4, 0, R.string.comment_quote_reply);
+        if (CommentQuote.canMention(login, me, "Bot".equals(Json.str(comment, "user.type")))) {
+            menu.getMenu().add(0, 5, 1, getString(R.string.comment_mention, login));
         }
-        menu.getMenu().add(0, 3, 2, R.string.copy_url);
+        if (isMine(comment)) {
+            menu.getMenu().add(0, 1, 2, R.string.comment_edit);
+            menu.getMenu().add(0, 2, 3, R.string.comment_delete);
+        }
+        menu.getMenu().add(0, 3, 4, R.string.copy_url);
         menu.setOnMenuItemClickListener(item -> {
             long id = longOf(comment, "id");
-            if (item.getItemId() == 1) {
+            if (item.getItemId() == 4) {
+                reply(thread, CommentQuote.addQuote(null, quote));
+            } else if (item.getItemId() == 5) {
+                reply(thread, CommentQuote.addMention(null, login));
+            } else if (item.getItemId() == 1) {
                 new ComposeDialog.Builder(this)
                         .title(getString(R.string.comment_edit))
                         .repo(owner + "/" + repo)

@@ -20,7 +20,9 @@ import com.thirtydegreesray.openhub.ui.activity.MarkdownEditorActivity;
 import com.thirtydegreesray.openhub.ui.activity.ViewerActivity;
 import com.thirtydegreesray.openhub.ui.adapter.IssueTimelineAdapter;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
+import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.util.AppOpener;
+import com.thirtydegreesray.openhub.util.CommentQuote;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 
 import java.util.ArrayList;
@@ -142,27 +144,51 @@ public class IssueTimelineFragment extends ListFragment<IssueTimelinePresenter, 
             return true;
         }
 
-        String[] actions ;
+        // Quote reply, Mention @login, Share, then Edit and Delete on your own comments
+        final IssueDetailActivity page = getActivity() instanceof IssueDetailActivity
+                ? (IssueDetailActivity) getActivity() : null;
+        final boolean canWrite = page != null && page.canComment();
+        final String login = issueEvent.getUser() == null ? null : issueEvent.getUser().getLogin();
+        final String quote = CommentQuote.quote(issueEvent.getBody());
+        final java.util.List<String> labels = new java.util.ArrayList<>();
+        final java.util.List<Integer> ids = new java.util.ArrayList<>();
+        if (canWrite && !quote.isEmpty()) {
+            labels.add(getString(R.string.comment_quote_reply));
+            ids.add(1);
+        }
+        String me = AppData.INSTANCE.getLoggedUser() == null ? null : AppData.INSTANCE.getLoggedUser().getLogin();
+        if (canWrite && CommentQuote.canMention(login, me, false)) {
+            labels.add(getString(R.string.comment_mention, login));
+            ids.add(2);
+        }
+        labels.add(getString(R.string.share));
+        ids.add(3);
         if(mPresenter.isEditAndDeleteEnable(position) && position != 0){
-            actions = new String[]{getString(R.string.share), getString(R.string.edit), getString(R.string.delete)};
-        } else {
-            actions = new String[]{getString(R.string.share)};
-
+            labels.add(getString(R.string.edit));
+            ids.add(4);
+            labels.add(getString(R.string.delete));
+            ids.add(5);
         }
         new AlertDialog.Builder(getActivity())
-                .setItems(actions, new DialogInterface.OnClickListener() {
+                .setItems(labels.toArray(new String[0]), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        switch (which){
-                            case 0:
+                        switch (ids.get(which)){
+                            case 1:
+                                page.showAddCommentPage(CommentQuote.addQuote(null, quote));
+                                break;
+                            case 2:
+                                page.showAddCommentPage(CommentQuote.addMention(null, login));
+                                break;
+                            case 3:
                                 AppOpener.shareText(getActivity(), issueEvent.getHtmlUrl());
                                 break;
-                            case 1:
+                            case 4:
                                 editingCommentId = issueEvent.getId();
                                 showEditCommentPage(editingCommentId, issueEvent.getBody());
                                 break;
-                            case 2:
+                            case 5:
                                 showDeleteCommentWarning(position, issueEvent.getId());
                                 break;
                         }
