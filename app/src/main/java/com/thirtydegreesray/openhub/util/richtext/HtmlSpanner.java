@@ -393,7 +393,14 @@ final class HtmlSpanner {
         String type = alert == null ? "note" : alert.attr("data-alert-type");
         if (type.isEmpty()) type = "note";
         int start = open(LINE);
-        append(RichStyle.alertMark(type));
+        android.graphics.drawable.Drawable icon = style.alertIcon(type);
+        if (icon != null) {
+            // GitHub's octicon of the alert, as on github.com
+            append(OBJECT);
+            out.setSpan(new Spans.Icon(icon), out.length() - 1, out.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        } else {
+            append(RichStyle.alertMark(type));
+        }
         children(e);
         span(new Spans.Bold(), start);
         span(new ForegroundColorSpan(style.alertColor(type)), start);

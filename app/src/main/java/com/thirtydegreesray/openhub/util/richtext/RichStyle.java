@@ -3,10 +3,14 @@ package com.thirtydegreesray.openhub.util.richtext;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
+
+import com.thirtydegreesray.openhub.R;
 
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.QuoteStyle;
@@ -25,6 +29,9 @@ final class RichStyle {
     /** lines of tables and of horizontal rules */
     final int borderColor;
     final boolean dark;
+    /** for the alert icons; null in tests on the JVM */
+    @Nullable
+    private final Context context;
     /** pictures are loaded (Settings: not on mobile data when switched off) */
     final boolean loadImages;
     /** links and pictures react to taps (not in previews that open on a tap) */
@@ -32,6 +39,7 @@ final class RichStyle {
 
     RichStyle(@NonNull Context context, boolean clickable) {
         this.clickable = clickable;
+        this.context = context.getApplicationContext();
         density = context.getResources().getDisplayMetrics().density;
         textColor = primaryText(context);
         secondaryColor = QuoteStyle.textColor(context);
@@ -47,6 +55,7 @@ final class RichStyle {
     /** For tests on the JVM: fixed colors, no theme. */
     RichStyle(float density, @ColorInt int textColor, boolean loadImages, boolean clickable) {
         this.clickable = clickable;
+        this.context = null;
         this.density = density;
         this.textColor = textColor;
         secondaryColor = withAlpha(textColor, 0xB3);
@@ -75,6 +84,31 @@ final class RichStyle {
         }
     }
 
+    /** GitHub's octicon of an alert in the alert's color, or null when it cannot be loaded. */
+    @Nullable
+    Drawable alertIcon(@NonNull String type) {
+        if (context == null) return null;
+        int id;
+        switch (type) {
+            case "tip": id = R.drawable.ic_alert_tip; break;
+            case "important": id = R.drawable.ic_alert_important; break;
+            case "warning": id = R.drawable.ic_alert_warning; break;
+            case "caution": id = R.drawable.ic_alert_caution; break;
+            default: id = R.drawable.ic_alert_note;
+        }
+        Drawable icon;
+        try {
+            icon = AppCompatResources.getDrawable(context, id);
+        } catch (RuntimeException e) {
+            return null;
+        }
+        if (icon == null) return null;
+        icon = icon.mutate();
+        icon.setTint(alertColor(type));
+        return icon;
+    }
+
+    /** The text mark of an alert, used only when its icon cannot be loaded. */
     @NonNull
     static String alertMark(@NonNull String type) {
         switch (type) {

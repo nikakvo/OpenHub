@@ -354,6 +354,42 @@ final class Spans {
         }
     }
 
+    /**
+     * A small icon in the text (the octicon of an alert title), a bit bigger than the
+     * letters, centered on them, with a gap after it.
+     */
+    static final class Icon extends android.text.style.ReplacementSpan {
+
+        private final android.graphics.drawable.Drawable drawable;
+
+        Icon(@NonNull android.graphics.drawable.Drawable drawable) {
+            this.drawable = drawable;
+        }
+
+        private static int side(@NonNull Paint paint) {
+            return Math.round(paint.getTextSize() * 1.15f);
+        }
+
+        @Override
+        public int getSize(@NonNull Paint paint, CharSequence text, int start, int end,
+                           @androidx.annotation.Nullable Paint.FontMetricsInt fm) {
+            if (fm != null) paint.getFontMetricsInt(fm);
+            return side(paint) + Math.round(paint.getTextSize() * 0.55f);
+        }
+
+        @Override
+        public void draw(@NonNull Canvas canvas, CharSequence text, int start, int end, float x,
+                         int top, int y, int bottom, @NonNull Paint paint) {
+            int side = side(paint);
+            Paint.FontMetrics m = paint.getFontMetrics();
+            float middle = y + (m.ascent + m.descent) / 2f;
+            int left = Math.round(x);
+            int iconTop = Math.round(middle - side / 2f);
+            drawable.setBounds(left, iconTop, left + side, iconTop + side);
+            drawable.draw(canvas);
+        }
+    }
+
     /** A horizontal rule ({@code <hr>}): a thin line across the middle of its line. */
     static final class Rule implements LineBackgroundSpan {
 
