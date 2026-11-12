@@ -295,6 +295,65 @@ final class Spans {
         }
     }
 
+    /**
+     * A key ({@code <kbd>}): monospace text in a small box with a thin border and rounded
+     * corners, like github.com. The key never breaks over two lines.
+     */
+    static final class Kbd extends android.text.style.ReplacementSpan {
+
+        private final int background;
+        private final int border;
+        private final float stroke;
+        private final float radius;
+        private final int padding;
+        private final android.graphics.RectF box = new android.graphics.RectF();
+
+        Kbd(@ColorInt int background, @ColorInt int border, float stroke, float radius, int padding) {
+            this.background = background;
+            this.border = border;
+            this.stroke = stroke;
+            this.radius = radius;
+            this.padding = padding;
+        }
+
+        @NonNull
+        private TextPaint keyPaint(@NonNull Paint paint) {
+            TextPaint key = new TextPaint(paint);
+            key.setTypeface(Typeface.MONOSPACE);
+            key.setTextSize(paint.getTextSize() * 0.85f);
+            return key;
+        }
+
+        @Override
+        public int getSize(@NonNull Paint paint, CharSequence text, int start, int end,
+                           @androidx.annotation.Nullable Paint.FontMetricsInt fm) {
+            if (fm != null) paint.getFontMetricsInt(fm);
+            float width = keyPaint(paint).measureText(text, start, end);
+            // a little space on both sides, so two keys in a row do not touch
+            return Math.round(width + 2 * padding + 2 * stroke + padding);
+        }
+
+        @Override
+        public void draw(@NonNull Canvas canvas, CharSequence text, int start, int end, float x,
+                         int top, int y, int bottom, @NonNull Paint paint) {
+            TextPaint key = keyPaint(paint);
+            float width = key.measureText(text, start, end);
+            Paint.FontMetrics m = key.getFontMetrics();
+            float left = x + padding / 2f + stroke / 2f;
+            box.set(left, y + m.ascent - padding / 2f, left + width + 2 * padding + stroke,
+                    y + m.descent + padding / 2f);
+            Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
+            fill.setStyle(Paint.Style.FILL);
+            fill.setColor(background);
+            canvas.drawRoundRect(box, radius, radius, fill);
+            fill.setStyle(Paint.Style.STROKE);
+            fill.setStrokeWidth(stroke);
+            fill.setColor(border);
+            canvas.drawRoundRect(box, radius, radius, fill);
+            canvas.drawText(text, start, end, left + stroke / 2f + padding, y, key);
+        }
+    }
+
     /** A horizontal rule ({@code <hr>}): a thin line across the middle of its line. */
     static final class Rule implements LineBackgroundSpan {
 

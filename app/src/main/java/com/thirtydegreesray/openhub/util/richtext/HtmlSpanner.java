@@ -250,7 +250,18 @@ final class HtmlSpanner {
             case "pre":
                 pre(e);
                 return;
-            case "code": case "kbd": case "samp": case "tt":
+            case "kbd":
+                if (inPre) {
+                    children(e);
+                    return;
+                }
+                start = out.length();
+                children(e);
+                span(new Spans.Kbd(style.dark ? 0xFF151B23 : 0xFFF6F8FA,
+                        style.dark ? 0xFF3D444D : 0xFFD1D9E0, Math.max(1, style.px(1)),
+                        style.px(4), style.px(4)), start);
+                return;
+            case "code": case "samp": case "tt":
                 if (inPre) {
                     children(e);
                     return;
