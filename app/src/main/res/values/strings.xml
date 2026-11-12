@@ -134,8 +134,8 @@
     <string name="use_system_downloader">Use built-in downloader</string>
     <string name="use_system_downloader_summary">Downloads over any network: Wi-Fi, mobile data, roaming and VPN. Turn off to open download links in another app.</string>
     <string name="use_custom_tabs">Use Custom Tabs</string>
-    <string name="custom_tabs_desc">Open in custom tabs instead of outer browser(support chrome, firefox…)</string>
-    <string name="use_custom_tabs_tips">If you want to open in outer browser directly, you could change in settings.</string>
+    <string name="custom_tabs_desc">Open web links in a tab of your default browser on top of OpenHub; Back returns to the app</string>
+    <string name="use_custom_tabs_tips">Opened in a Custom Tab. Turn it off in Settings.</string>
     <string name="language">Language</string>
     <string name="logout">Logout</string>
 
@@ -188,7 +188,7 @@
     <string name="select_branch">Select branch or tag</string>
     <string name="share_to">Share to</string>
     <string name="no_share_clients">There are no share clients installed.</string>
-    <string name="no_browser_clients">No app can open this link. Install a browser, or set one as the default browser in Android settings.</string>
+    <string name="no_browser_clients">No app can open this link. Install a browser or set a default one.</string>
     <string name="no_download_clients">There are no download clients installed.</string>
     <string name="send_email">Send email</string>
     <string name="open_in_market">Open in market</string>

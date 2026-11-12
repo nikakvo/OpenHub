@@ -54,7 +54,8 @@ app goes to them; see [Credits](#credits).
   badges and download buttons; it can be the start page
 * Built-in updater with an on/off switch; GitHub links from other apps open in the app
   (repositories, also `.git` links, files, folders, wiki pages, issues, pull requests,
-  releases, profiles and their repositories, stars, followers and following)
+  releases, profiles and their repositories, stars, followers and following); a file link
+  to a branch that does not exist says so and offers the default branch
 * The side menu on every screen (≡ always at the top left, Back right next to it), to jump
   anywhere without pressing Back many times
 * **Matrix rain** side menu: slowly falling green characters behind your account and down
@@ -72,11 +73,17 @@ app goes to them; see [Credits](#credits).
   its feature tiles jump to the matching section
 * Light, dark and AMOLED dark themes, many accent colors, colored or plain side menu icons
 * Comments look like on github.com (GitHub's own rendering): pictures, tables, task lists,
-  alerts, quotes, nested lists; a tap on a table opens it full screen
+  alerts with GitHub's icons, quotes, nested lists, footnotes, keys, bold @mentions and
+  folded sections that open on a tap; a tap on a table opens it full screen
+* **Quote reply** and **Mention @name** in the long-press menu of every comment (issues,
+  pull requests, discussions, gists)
 * Code highlighting for 193 languages; a copy button on every code block and code file
   (copies the code without line numbers)
 * A select all / clear mark in text fields
-* Offline mode (cached pages); Clear cache in the settings
+* Offline mode (cached pages); Clear cache in the settings, and the cache of web pages is
+  kept small by itself
+* Web links open in a Custom Tab of your default browser on top of the app, or in the
+  browser you pick from a list of all your browsers
 * Trending repositories for all languages, by day, week or month
 * GitHub collections and featured topics
 * Search repositories and users, with a search history (× forgets one search, or clear
@@ -86,7 +93,8 @@ app goes to them; see [Credits](#credits).
   files, pull requests, discussions, releases, logs and more); lists also update
   themselves when you come back to them
 * Launcher shortcuts
-* Option to skip loading images on mobile data
+* Option to skip loading images on mobile data (a picture you tap still loads; avatars not
+  loaded yet show a grey person)
 
 ### Repositories
 * Create repositories (README, .gitignore templates and your own lines, license);
@@ -170,7 +178,8 @@ app goes to them; see [Credits](#credits).
 * Issues with comments and events; create, edit, close and reopen; issue lists show only
   issues (pull requests have their own list)
 * **Attach pictures and videos** to issues, comments and release notes (repositories you can
-  write to); comments show their pictures, quotes have a clear grey bar
+  write to); comments show their pictures, quotes have a clear grey bar; videos play in the
+  app and keep playing in a small window (picture in picture) when you press Home
 * **Sub-issues**: the parent, progress, add an existing or a new issue, reorder, remove
 * **Relationships**: blocked by, blocking and relates to
 * Issue types and issue fields (organization repositories)
@@ -178,7 +187,8 @@ app goes to them; see [Credits](#credits).
 * Labels, assignees and milestone for people with triage or write access
 * **Milestones**: open and closed, due dates and progress, their issues; create, edit,
   close, reopen and delete
-* Comments with a Markdown editor and preview
+* Comments with a Markdown editor and preview; drafts drawn on the phone link URLs,
+  @mentions and #123 like github.com
 * Manage labels in your own repositories
 * Your created, assigned and mentioned issues
 * Commit details, changed files and diffs
