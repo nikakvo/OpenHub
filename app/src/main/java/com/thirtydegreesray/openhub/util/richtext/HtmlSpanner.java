@@ -354,6 +354,11 @@ final class HtmlSpanner {
         children(e);
         span(new Spans.Bold(), start);
         span(new RelativeSizeSpan(sizes[Math.max(1, Math.min(6, level)) - 1]), start);
+        if (level <= 2 && out.length() > start) {
+            // github.com draws a thin line under h1 and h2
+            out.setSpan(new Spans.HeadingRule(style.borderColor, Math.max(1, style.px(1)), style.px(6)),
+                    start, out.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
         close(gap());
     }
 

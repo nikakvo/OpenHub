@@ -252,6 +252,49 @@ final class Spans {
         }
     }
 
+    /**
+     * The thin line under a big heading (h1, h2), like github.com: the last line of the
+     * heading gets some space below it and the line is drawn at its bottom.
+     */
+    static final class HeadingRule implements LineBackgroundSpan, android.text.style.LineHeightSpan {
+
+        private final int color;
+        private final int thickness;
+        private final int gap;
+
+        HeadingRule(@ColorInt int color, int thickness, int gap) {
+            this.color = color;
+            this.thickness = thickness;
+            this.gap = gap;
+        }
+
+        private boolean lastLine(@NonNull CharSequence text, int end) {
+            return text instanceof Spanned && end >= ((Spanned) text).getSpanEnd(this);
+        }
+
+        @Override
+        public void chooseHeight(@NonNull CharSequence text, int start, int end, int spanstartv,
+                                 int lineHeight, @NonNull Paint.FontMetricsInt fm) {
+            if (!lastLine(text, end)) return;
+            fm.descent += gap + thickness;
+            fm.bottom += gap + thickness;
+        }
+
+        @Override
+        public void drawBackground(@NonNull Canvas canvas, @NonNull Paint paint, int left, int right,
+                                   int top, int baseline, int bottom, @NonNull CharSequence text,
+                                   int start, int end, int lineNumber) {
+            if (!lastLine(text, end)) return;
+            int old = paint.getColor();
+            Paint.Style style = paint.getStyle();
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(color);
+            canvas.drawRect(left, bottom - thickness, right, bottom, paint);
+            paint.setColor(old);
+            paint.setStyle(style);
+        }
+    }
+
     /** A horizontal rule ({@code <hr>}): a thin line across the middle of its line. */
     static final class Rule implements LineBackgroundSpan {
 
