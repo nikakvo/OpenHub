@@ -89,7 +89,7 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
     @Override
     protected void initActivity() {
         super.initActivity();
-        pagerAdapter = new FragmentViewPagerAdapter(getSupportFragmentManager());
+        pagerAdapter = new FragmentViewPagerAdapter(this);
     }
 
     @Override
@@ -102,8 +102,7 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
         pagerAdapter.setPagerList(FragmentPagerModel
                 .createMarkdownEditorPagerList(getActivity(), text, getFragments(), mentionUsers));
         tabLayout.setVisibility(View.VISIBLE);
-        tabLayout.setupWithViewPager(viewPager);
-        viewPager.setAdapter(pagerAdapter);
+        setupPager();
 
     }
 

@@ -311,8 +311,7 @@ public class SearchActivity extends PagerActivity<SearchPresenter>
             pagerAdapter.setPagerList(FragmentPagerModel.
                     createSearchPagerList(getActivity(), mPresenter.getQueryModels(query), getFragments()));
             tabLayout.setVisibility(View.VISIBLE);
-            tabLayout.setupWithViewPager(viewPager);
-            viewPager.setAdapter(pagerAdapter);
+            setupPager();
             showFirstPager();
         } else {
             for (SearchModel searchModel : mPresenter.getQueryModels(query)) {

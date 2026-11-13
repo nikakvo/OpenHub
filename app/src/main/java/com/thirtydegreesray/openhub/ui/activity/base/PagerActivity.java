@@ -4,11 +4,13 @@ package com.thirtydegreesray.openhub.ui.activity.base;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 import android.view.KeyEvent;
 
 import com.thirtydegreesray.openhub.util.AppLog;
@@ -30,17 +32,29 @@ import android.view.View;
 
 public abstract class PagerActivity<P extends BasePresenter> extends BaseDrawerActivity<P>
         implements IBaseContract.View,
-        ViewPager.OnPageChangeListener,
         TabLayout.OnTabSelectedListener{
 
     @Inject protected FragmentViewPagerAdapter pagerAdapter;
 
-    protected ViewPager viewPager;
+    protected ViewPager2 viewPager;
     protected TabLayout tabLayout;
 
     private ArrayList<Fragment> fragments ;
 
     private int prePosition = 0;
+
+    /** ViewPager2 also reports the page it starts on; the old pager did not. */
+    private boolean firstPageReported;
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
+    private final ViewPager2.OnPageChangeCallback pageChangeCallback =
+            new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageSelected(int position) {
+                    PagerActivity.this.onPageSelected(position);
+                }
+            };
 
     @Override
     protected void initActivity() {
@@ -50,7 +64,7 @@ public abstract class PagerActivity<P extends BasePresenter> extends BaseDrawerA
     @Override
     protected void initView(Bundle savedInstanceState) {
         super.initView(savedInstanceState);
-        viewPager.addOnPageChangeListener(this);
+        viewPager.registerOnPageChangeCallback(pageChangeCallback);
         tabLayout.addOnTabSelectedListener(this);
     }
 
@@ -107,6 +121,8 @@ public abstract class PagerActivity<P extends BasePresenter> extends BaseDrawerA
 
     @Override
     protected void onDestroy() {
+        handler.removeCallbacksAndMessages(null);
+        if (viewPager != null) viewPager.unregisterOnPageChangeCallback(pageChangeCallback);
         super.onDestroy();
     }
 
@@ -120,23 +136,32 @@ public abstract class PagerActivity<P extends BasePresenter> extends BaseDrawerA
         void handleBack();
     }
 
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+    /**
+     * Shows the pages of {@link #pagerAdapter} with their tabs. Every page stays alive (as
+     * with the old pager), so switching tabs never reloads a page or loses its place.
+     */
+    protected void setupPager() {
+        viewPager.setOffscreenPageLimit(Math.max(1, pagerAdapter.getItemCount() - 1));
+        viewPager.setAdapter(pagerAdapter);
+        new TabLayoutMediator(tabLayout, viewPager,
+                (tab, position) -> tab.setText(pagerAdapter.getPageTitle(position))).attach();
     }
 
-    @Override
     public void onPageSelected(final int position) {
+        pagerAdapter.setCurPosition(position);
+        if (!firstPageReported) {
+            // the page shown when the screen opens (or comes back): nothing changed
+            firstPageReported = true;
+            if (position == prePosition) {
+                viewPager.post(this::invalidateBack);
+                return;
+            }
+        }
         postNotifyFragmentStatus(prePosition, false, 100);
         postNotifyFragmentStatus(position, true, 500);
         prePosition = position;
         viewPager.post(this::invalidateBack);
         AppLog.d("PagerActivity", "onPageSelected " + position);
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
-
     }
 
     /**
@@ -149,9 +174,10 @@ public abstract class PagerActivity<P extends BasePresenter> extends BaseDrawerA
     }
 
     private void postNotifyFragmentStatus(final int position, final boolean isShow, long delay){
-        new Handler().postDelayed(new Runnable() {
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                if (isFinishing() || isDestroyed()) return;
                 if(isShow){
                     pagerAdapter.getPagerList().get(position).getFragment().onFragmentShowed();
                 }else{

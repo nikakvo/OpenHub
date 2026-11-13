@@ -177,8 +177,7 @@ public class ProfileActivity extends PagerActivity<ProfilePresenter>
         if (pagerAdapter.getCount() == 0) {
             pagerAdapter.setPagerList(FragmentPagerModel.createProfilePagerList(getActivity(), user, getFragments()));
             tabLayout.setVisibility(View.VISIBLE);
-            tabLayout.setupWithViewPager(viewPager);
-            viewPager.setAdapter(pagerAdapter);
+            setupPager();
             showFirstPager();
         } else {
             notifyUserInfoUpdated(user);

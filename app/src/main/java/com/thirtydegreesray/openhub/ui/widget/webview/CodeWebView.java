@@ -142,7 +142,7 @@ public class CodeWebView extends WebView {
 
     /**
      * Wide tables and code blocks scroll sideways inside the page. Without this the
-     * ViewPager around (repository tabs) takes every horizontal drag, so they could
+     * tab pager around (repository tabs) takes every horizontal drag, so they could
      * hardly be moved. A drag that starts mostly horizontal stays with the WebView; a
      * vertical one is handed back so the surrounding scroll view scrolls the page.
      */

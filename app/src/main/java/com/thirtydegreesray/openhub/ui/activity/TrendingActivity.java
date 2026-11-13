@@ -69,8 +69,7 @@ public class TrendingActivity extends PagerActivity<TrendingPresenter>
         setToolbarBackEnable();
         pagerAdapter.setPagerList(FragmentPagerModel.createTrendingPagerList(getActivity(), getFragments()));
         tabLayout.setVisibility(View.VISIBLE);
-        tabLayout.setupWithViewPager(viewPager);
-        viewPager.setAdapter(pagerAdapter);
+        setupPager();
         showFirstPager();
         initLanguagesDrawer();
         updateTitle();

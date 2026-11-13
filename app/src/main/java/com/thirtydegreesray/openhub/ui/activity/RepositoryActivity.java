@@ -373,8 +373,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
             pagerAdapter.setPagerList(FragmentPagerModel
                     .createRepoPagerList(getActivity(), repo, getFragments()));
             tabLayout.setVisibility(View.VISIBLE);
-            tabLayout.setupWithViewPager(viewPager);
-            viewPager.setAdapter(pagerAdapter);
+            setupPager();
             showFirstPager();
             openFilesFromLink(repo);
 

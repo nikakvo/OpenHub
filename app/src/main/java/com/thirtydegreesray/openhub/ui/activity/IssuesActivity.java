@@ -136,8 +136,7 @@ public class IssuesActivity extends PagerActivity<IssuesActPresenter>
             listeners.add((IssuesListListener) pagerModel.getFragment());
         }
         tabLayout.setVisibility(View.VISIBLE);
-        tabLayout.setupWithViewPager(viewPager);
-        viewPager.setAdapter(pagerAdapter);
+        setupPager();
         showFirstPager();
     }
 

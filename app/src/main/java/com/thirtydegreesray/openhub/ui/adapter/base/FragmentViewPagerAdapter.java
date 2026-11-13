@@ -2,66 +2,68 @@
 
 package com.thirtydegreesray.openhub.ui.adapter.base;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import android.view.ViewGroup;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+
+import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
 /**
- * Created by ThirtyDegreesRay on 2017/8/9 21:24:34
+ * The pages of a screen with tabs (ViewPager2). The page fragments are made up front by
+ * {@link FragmentPagerModel} (the screen talks to them directly), so this adapter only
+ * hands them out. The screen keeps every page alive (offscreen page limit = all pages),
+ * as the old pager did, so a page never loses its scroll position or loaded content.
  */
-
-public class FragmentViewPagerAdapter extends FragmentStatePagerAdapter {
+public class FragmentViewPagerAdapter extends FragmentStateAdapter {
 
     private List<FragmentPagerModel> mPagerList;
 
-    private Fragment curFragment;
+    private int curPosition;
 
     @Inject
-    public FragmentViewPagerAdapter(FragmentManager fm) {
-        super(fm);
+    public FragmentViewPagerAdapter(@NonNull BaseActivity activity) {
+        super(activity);
     }
 
     public void setPagerList(List<FragmentPagerModel> pagerList) {
         mPagerList = pagerList;
     }
 
+    @NonNull
     @Override
-    public Fragment getItem(int position) {
+    public Fragment createFragment(int position) {
         return mPagerList.get(position).getFragment();
     }
 
-
     @Override
-    public int getCount() {
+    public int getItemCount() {
         return mPagerList == null ? 0 : mPagerList.size();
     }
 
-    @Override
+    /** Same as {@link #getItemCount()}. */
+    public int getCount() {
+        return getItemCount();
+    }
+
     public CharSequence getPageTitle(int position) {
         return mPagerList.get(position).getTitle();
     }
 
-    @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
-        if(curFragment != null && curFragment.equals(object)){
-            curFragment = null;
-        }
-//        super.destroyItem(container, position, object);
+    /** The selected page (set by the screen when a page is selected). */
+    public void setCurPosition(int position) {
+        curPosition = position;
     }
 
-    @Override
-    public void setPrimaryItem(ViewGroup container, int position, Object object) {
-        curFragment = (Fragment) object;
-        super.setPrimaryItem(container, position, object);
-    }
-
+    @Nullable
     public Fragment getCurFragment() {
-        return curFragment;
+        if (mPagerList == null || curPosition < 0 || curPosition >= mPagerList.size()) return null;
+        Fragment fragment = mPagerList.get(curPosition).getFragment();
+        return fragment != null && fragment.isAdded() ? fragment : null;
     }
 
     public List<FragmentPagerModel> getPagerList() {

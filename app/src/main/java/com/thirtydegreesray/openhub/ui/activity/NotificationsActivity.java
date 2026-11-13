@@ -35,7 +35,7 @@ public class NotificationsActivity extends PagerActivity {
     @Override
     protected void initActivity() {
         super.initActivity();
-        pagerAdapter =  new FragmentViewPagerAdapter(getSupportFragmentManager());
+        pagerAdapter =  new FragmentViewPagerAdapter(this);
     }
 
     @Override
@@ -47,8 +47,7 @@ public class NotificationsActivity extends PagerActivity {
 
         pagerAdapter.setPagerList(FragmentPagerModel.createNotificationsPagerList(getActivity(), getFragments()));
         tabLayout.setVisibility(View.VISIBLE);
-        tabLayout.setupWithViewPager(viewPager);
-        viewPager.setAdapter(pagerAdapter);
+        setupPager();
         showFirstPager();
     }
 
