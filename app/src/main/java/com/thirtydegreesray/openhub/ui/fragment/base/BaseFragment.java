@@ -120,10 +120,55 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         MenuProvider menu = menuProvider();
+        hasPageMenu = menu != null;
         if (menu != null) {
-            // only while this page is in front (a pager keeps the other pages STARTED)
-            requireActivity().addMenuProvider(menu, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+            // only while this page is in front: a pager keeps the other pages STARTED,
+            // the start screen keeps its other pages hidden (still RESUMED)
+            requireActivity().addMenuProvider(new ShownPageMenu(menu), getViewLifecycleOwner(),
+                    Lifecycle.State.RESUMED);
         }
+    }
+
+    private boolean hasPageMenu;
+
+    /** Like the old fragment menus: nothing while the page is hidden or its menu is off. */
+    private final class ShownPageMenu implements MenuProvider {
+        private final MenuProvider page;
+
+        ShownPageMenu(@NonNull MenuProvider page) {
+            this.page = page;
+        }
+
+        private boolean shown() {
+            return !isHidden() && isMenuVisible();
+        }
+
+        @Override
+        public void onCreateMenu(@NonNull android.view.Menu menu, @NonNull android.view.MenuInflater inflater) {
+            if (shown()) page.onCreateMenu(menu, inflater);
+        }
+
+        @Override
+        public void onPrepareMenu(@NonNull android.view.Menu menu) {
+            if (shown()) page.onPrepareMenu(menu);
+        }
+
+        @Override
+        public boolean onMenuItemSelected(@NonNull android.view.MenuItem item) {
+            return shown() && page.onMenuItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (hasPageMenu && getActivity() != null) getActivity().invalidateMenu();
+    }
+
+    @Override
+    public void setMenuVisibility(boolean menuVisible) {
+        super.setMenuVisibility(menuVisible);
+        if (hasPageMenu && getActivity() != null) getActivity().invalidateMenu();
     }
 
     /** Toolbar menu items of this page, or null for none. */
