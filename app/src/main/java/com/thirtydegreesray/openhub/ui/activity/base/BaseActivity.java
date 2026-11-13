@@ -191,6 +191,7 @@ BaseActivity<P extends IBaseContract.Presenter>
         if (toolbar != null && !(this instanceof SplashActivity) && !(this instanceof LoginActivity)) {
             MatrixBar.install(this, toolbar, matrixBarTitle());
         }
+        com.thirtydegreesray.openhub.util.SmoothHeader.install(toolbarLayout);
         if (toolbar != null && showsMainMenu()) {
             com.thirtydegreesray.openhub.ui.widget.MainMenuDrawer.install(this, toolbar);
         }
