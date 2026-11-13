@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.util.state;
 
+import androidx.core.os.BundleCompat;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -71,8 +72,11 @@ public final class DataAutoAccess {
         for (Entry entry : entriesOf(target.getClass())) {
             if (!bundle.containsKey(entry.key)) continue;
             try {
-                @SuppressWarnings("deprecation")
-                Object value = bundle.get(entry.key);
+                // every supported value is Parcelable or Serializable (see put): typed
+                // reads instead of the deprecated Bundle.get
+                Object value = Parcelable.class.isAssignableFrom(entry.field.getType())
+                        ? BundleCompat.getParcelable(bundle, entry.key, Parcelable.class)
+                        : BundleCompat.getSerializable(bundle, entry.key, Serializable.class);
                 if (value == null && entry.field.getType().isPrimitive()) continue;
                 entry.field.set(target, value);
             } catch (Exception e) {
