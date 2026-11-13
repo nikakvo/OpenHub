@@ -52,7 +52,7 @@ final class Spans {
             boolean italic = (old.getStyle() & Typeface.ITALIC) != 0;
             Typeface bold = android.os.Build.VERSION.SDK_INT >= 28
                     ? Typeface.create(old, 700, italic)
-                    : Typeface.create(old, old.getStyle() | Typeface.BOLD);
+                    : Typeface.create(old, italic ? Typeface.BOLD_ITALIC : Typeface.BOLD);
             paint.setTypeface(bold);
             if (!drawsBold(old, bold, paint.getTextSize())) paint.setFakeBoldText(true);
         }

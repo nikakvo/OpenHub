@@ -130,6 +130,8 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
     }
 
     private boolean hasPageMenu;
+    /** Fragment.isMenuVisible is library-internal: the value set through setMenuVisibility. */
+    private boolean pageMenuVisible = true;
 
     /** Like the old fragment menus: nothing while the page is hidden or its menu is off. */
     private final class ShownPageMenu implements MenuProvider {
@@ -140,7 +142,7 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
         }
 
         private boolean shown() {
-            return !isHidden() && isMenuVisible();
+            return !isHidden() && pageMenuVisible;
         }
 
         @Override
@@ -168,6 +170,7 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
     @Override
     public void setMenuVisibility(boolean menuVisible) {
         super.setMenuVisibility(menuVisible);
+        pageMenuVisible = menuVisible;
         if (hasPageMenu && getActivity() != null) getActivity().invalidateMenu();
     }
 

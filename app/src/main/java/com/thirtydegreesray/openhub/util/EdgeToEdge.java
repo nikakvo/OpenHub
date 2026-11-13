@@ -106,9 +106,8 @@ public final class EdgeToEdge {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             WindowManager.LayoutParams lp = window.getAttributes();
             lp.setFitInsetsTypes(lp.getFitInsetsTypes() | android.view.WindowInsets.Type.ime());
-            lp.softInputMode = (lp.softInputMode & ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
-                    | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
             window.setAttributes(lp);
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         } else {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         }
