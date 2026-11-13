@@ -48,10 +48,15 @@
                 android:background="?color_primary_blur"
                 android:fitsSystemWindows="true"/>
 
-            <RelativeLayout
+            <!-- avatar and the text block side by side, both centered: a long block (name,
+                 location, date) makes the row taller instead of being cut -->
+            <LinearLayout
+                android:id="@+id/profile_header_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start|top"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingStart="@dimen/spacing_normal"
                 android:paddingEnd="@dimen/spacing_normal"
                 android:paddingBottom="@dimen/spacing_normal"
@@ -64,29 +69,44 @@
                     android:transitionName="userAvatar"
                     android:src="@drawable/ic_logo"/>
 
-                <TextView
-                    android:id="@+id/location"
-                    android:layout_width="match_parent"
+                <!-- Name, location and join date as one block next to the avatar, even gaps
+                     (the header's own expanded title collided with the location line). -->
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/text_small"
-                    android:textColor="?title_color"
-                    android:layout_toEndOf="@+id/user_avatar"
+                    android:layout_weight="1"
                     android:layout_marginStart="@dimen/spacing_normal"
-                    android:layout_marginTop="@dimen/spacing_x_large"/>
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/joined_time"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:textSize="@dimen/text_small"
-                    android:textColor="?title_color"
-                    android:layout_below="@+id/location"
-                    android:layout_toEndOf="@+id/user_avatar"
-                    android:layout_marginStart="@dimen/spacing_normal"
-                    android:transitionName="issueTitle"/>
+                    <TextView
+                        android:id="@+id/profile_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="22sp"
+                        android:textColor="?title_color"
+                        android:maxLines="2"
+                        android:ellipsize="end"/>
 
-            </RelativeLayout>
+                    <TextView
+                        android:id="@+id/location"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_mini"
+                        android:textSize="@dimen/text_small"
+                        android:textColor="?title_color"
+                        android:visibility="gone"/>
+
+                    <TextView
+                        android:id="@+id/joined_time"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_mini"
+                        android:textSize="@dimen/text_small"
+                        android:textColor="?title_color"
+                        android:transitionName="issueTitle"/>
+                </LinearLayout>
+
+            </LinearLayout>
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"

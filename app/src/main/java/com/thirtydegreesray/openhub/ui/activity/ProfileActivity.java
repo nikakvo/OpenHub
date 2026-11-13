@@ -97,6 +97,7 @@ public class ProfileActivity extends PagerActivity<ProfilePresenter>
     ProgressBar loader;
     TextView joinedTime;
     TextView location;
+    TextView profileName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -140,6 +141,11 @@ public class ProfileActivity extends PagerActivity<ProfilePresenter>
         super.initView(savedInstanceState);
         setToolbarBackEnable();
         setToolbarTitle(mPresenter.getLoginId());
+        // the name is a text view in the header block (even gaps to location and date);
+        // the header's own title only shows once it is collapsed into the toolbar
+        if (toolbarLayout != null) toolbarLayout.setExpandedTitleColor(android.graphics.Color.TRANSPARENT);
+        profileName.setText(mPresenter.getLoginId());
+        keepHeaderBelowToolbar();
         setUserAvatar();
     }
 
@@ -166,6 +172,27 @@ public class ProfileActivity extends PagerActivity<ProfilePresenter>
         return super.onOptionsItemSelected(item);
     }
 
+    /** The header block starts a small gap below the toolbar (status bar height varies). */
+    private void keepHeaderBelowToolbar() {
+        final View headerInfo = findViewById(R.id.profile_header_info);
+        if (toolbar == null || toolbarLayout == null || headerInfo == null) return;
+        final int gap = getResources().getDimensionPixelSize(R.dimen.spacing_small);
+        toolbarLayout.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            androidx.core.view.WindowInsetsCompat insets =
+                    androidx.core.view.ViewCompat.getRootWindowInsets(v);
+            int statusTop = insets == null ? 0 : insets.getInsets(
+                    androidx.core.view.WindowInsetsCompat.Type.systemBars()
+                            | androidx.core.view.WindowInsetsCompat.Type.displayCutout()).top;
+            int top = statusTop + toolbar.getHeight() + gap;
+            android.view.ViewGroup.MarginLayoutParams lp =
+                    (android.view.ViewGroup.MarginLayoutParams) headerInfo.getLayoutParams();
+            if (toolbar.getHeight() > 0 && lp.topMargin != top) {
+                lp.topMargin = top;
+                headerInfo.setLayoutParams(lp);
+            }
+        });
+    }
+
     @Override
     public void showProfileInfo(User user) {
         invalidateOptionsMenu();
@@ -173,6 +200,7 @@ public class ProfileActivity extends PagerActivity<ProfilePresenter>
         joinedTime.setText(getString(R.string.joined_at).concat(" ")
                 .concat(StringUtils.getDateStr(user.getCreatedAt())));
         location.setText(user.getLocation());
+        location.setVisibility(StringUtils.isBlank(user.getLocation()) ? View.GONE : View.VISIBLE);
 
         if (pagerAdapter.getCount() == 0) {
             pagerAdapter.setPagerList(FragmentPagerModel.createProfilePagerList(getActivity(), user, getFragments()));
@@ -267,6 +295,7 @@ public class ProfileActivity extends PagerActivity<ProfilePresenter>
         loader = root.findViewById(R.id.loader);
         joinedTime = root.findViewById(R.id.joined_time);
         location = root.findViewById(R.id.location);
+        profileName = root.findViewById(R.id.profile_name);
         ViewUtils.setOnClick(root, R.id.user_avatar, v -> onUserAvatarClick());
     }
 }
