@@ -2,7 +2,7 @@
 
 package com.thirtydegreesray.openhub.http.core;
 
-import android.app.AlertDialog;
+import android.app.Dialog;
 import androidx.annotation.NonNull;
 
 /**
@@ -14,9 +14,9 @@ public class HttpProgressSubscriber<T> extends HttpSubscriber<T> {
     /**
      * 网络请求dialog
      */
-    private AlertDialog mDialog;
+    private Dialog mDialog;
 
-    public HttpProgressSubscriber(@NonNull AlertDialog dialog, @NonNull HttpObserver<T> observer) {
+    public HttpProgressSubscriber(@NonNull Dialog dialog, @NonNull HttpObserver<T> observer) {
         super(observer);
         mDialog = dialog;
     }

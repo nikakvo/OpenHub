@@ -1,7 +1,6 @@
 package com.thirtydegreesray.openhub.ui.widget;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
@@ -120,7 +119,7 @@ public final class RepoFileActions {
     public static void run(@NonNull Activity activity, @NonNull String owner, @NonNull String repo,
                            @NonNull String branch, @NonNull List<RepoCommitter.Change> changes,
                            @NonNull RepoCommitter.Options options, @Nullable Done done) {
-        ProgressDialog dialog = new ProgressDialog(activity);
+        LoadingDialog dialog = new LoadingDialog(activity);
         dialog.setCancelable(false);
         dialog.setMessage(activity.getString(R.string.commit_working));
         dialog.show();

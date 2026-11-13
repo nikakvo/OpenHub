@@ -2,7 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.presenter.base;
 
-import android.app.ProgressDialog;
+import com.thirtydegreesray.openhub.ui.widget.LoadingDialog;
 import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.CallSuper;
@@ -259,7 +259,7 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
 
     protected <T> void generalRxHttpExecute(@NonNull final IObservableCreator<T> observableCreator
             , @NonNull final HttpObserver<T> httpObserver, final boolean readCacheFirst
-            , @Nullable final ProgressDialog progressDialog) {
+            , @Nullable final LoadingDialog progressDialog) {
         requestTimesMap.put(observableCreator.toString(), 1);
 
         final HttpObserver<T> tempObserver = new HttpObserver<T>() {
@@ -307,7 +307,7 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
                 getHttpSubscriber(tempObserver, progressDialog));
     }
 
-    private <T> HttpSubscriber<T> getHttpSubscriber(HttpObserver<T> httpObserver, ProgressDialog progressDialog) {
+    private <T> HttpSubscriber<T> getHttpSubscriber(HttpObserver<T> httpObserver, LoadingDialog progressDialog) {
         if(progressDialog == null)
             return new HttpSubscriber<>(httpObserver);
         else

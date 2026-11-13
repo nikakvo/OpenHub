@@ -2,7 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.contract.base;
 
-import android.app.ProgressDialog;
+import com.thirtydegreesray.openhub.ui.widget.LoadingDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -21,7 +21,7 @@ public interface IBaseContract {
 
         void dismissProgressDialog();
 
-        ProgressDialog getProgressDialog(String content);
+        LoadingDialog getProgressDialog(String content);
 
         void showTipDialog(String content);
 

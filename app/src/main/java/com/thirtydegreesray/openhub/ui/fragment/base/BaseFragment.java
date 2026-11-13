@@ -2,10 +2,10 @@
 
 package com.thirtydegreesray.openhub.ui.fragment.base;
 
+import com.thirtydegreesray.openhub.ui.widget.LoadingDialog;
 import androidx.lifecycle.Lifecycle;
 import androidx.core.view.MenuProvider;
 import com.thirtydegreesray.openhub.util.PullRefresh;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -48,7 +48,7 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
 
     @Inject
     protected P mPresenter;
-    private ProgressDialog mProgressDialog;
+    private LoadingDialog mProgressDialog;
 
     /**
      * fragment for viewpager
@@ -233,9 +233,9 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
     }
 
     @Override
-    public ProgressDialog getProgressDialog(String content) {
+    public LoadingDialog getProgressDialog(String content) {
         if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(getActivity());
+            mProgressDialog = new LoadingDialog(getActivity());
             mProgressDialog.setCancelable(false);
         }
         mProgressDialog.setMessage(content);

@@ -2,10 +2,10 @@
 
 package com.thirtydegreesray.openhub.ui.activity.base;
 
+import com.thirtydegreesray.openhub.ui.widget.LoadingDialog;
 import androidx.core.os.BundleCompat;
 import android.os.Looper;
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -64,7 +64,7 @@ BaseActivity<P extends IBaseContract.Presenter>
 
     @Inject
     protected P mPresenter;
-    private ProgressDialog mProgressDialog;
+    private LoadingDialog mProgressDialog;
     private static BaseActivity curActivity;
 
     {
@@ -431,9 +431,9 @@ BaseActivity<P extends IBaseContract.Presenter>
     }
 
     @Override
-    public ProgressDialog getProgressDialog(String content){
+    public LoadingDialog getProgressDialog(String content){
         if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(getActivity());
+            mProgressDialog = new LoadingDialog(getActivity());
             mProgressDialog.setCancelable(false);
         }
         mProgressDialog.setMessage(content);
