@@ -239,12 +239,11 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private boolean closedFromPip;
 
     private boolean inPip() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isInPictureInPictureMode();
+        return isInPictureInPictureMode();
     }
 
     private boolean pipAvailable() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                && getPackageManager().hasSystemFeature(
+        return getPackageManager().hasSystemFeature(
                         android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE);
     }
 

@@ -669,12 +669,10 @@ public class UploadService extends Service {
     // ---------------------------------------------------------------------------------
 
     private void createChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    getString(R.string.upload_channel_name), NotificationManager.IMPORTANCE_LOW);
-            channel.setShowBadge(false);
-            notificationManager.createNotificationChannel(channel);
-        }
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+                getString(R.string.upload_channel_name), NotificationManager.IMPORTANCE_LOW);
+        channel.setShowBadge(false);
+        notificationManager.createNotificationChannel(channel);
     }
 
     private void enterForeground() {

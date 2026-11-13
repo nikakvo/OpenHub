@@ -122,11 +122,9 @@ public class ReleaseCheckWorker extends Worker {
         NotificationManager manager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager == null) return;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            manager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
-                    context.getString(R.string.release_updates_channel),
-                    NotificationManager.IMPORTANCE_DEFAULT));
-        }
+        manager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
+                context.getString(R.string.release_updates_channel),
+                NotificationManager.IMPORTANCE_DEFAULT));
         String text = StringUtils.isBlank(name) || name.equals(tag) ? tag : tag + " · " + name;
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification_logo)

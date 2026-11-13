@@ -113,11 +113,9 @@ public class NotificationCheckWorker extends Worker {
         NotificationManager manager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager == null) return;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            manager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
-                    context.getString(R.string.github_notifications_channel),
-                    NotificationManager.IMPORTANCE_DEFAULT));
-        }
+        manager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
+                context.getString(R.string.github_notifications_channel),
+                NotificationManager.IMPORTANCE_DEFAULT));
         int count = 0;
         for (JsonObject thread : fresh) {
             if (count++ >= MAX_POSTED) break;

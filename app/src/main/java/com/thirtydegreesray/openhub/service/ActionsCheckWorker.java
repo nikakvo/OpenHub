@@ -176,11 +176,9 @@ public class ActionsCheckWorker extends Worker {
         NotificationManager manager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager == null) return;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            manager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
-                    context.getString(R.string.actions_runs_channel),
-                    NotificationManager.IMPORTANCE_DEFAULT));
-        }
+        manager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
+                context.getString(R.string.actions_runs_channel),
+                NotificationManager.IMPORTANCE_DEFAULT));
 
         long id = run.get("id").getAsLong();
         String workflow = Json.str(run, "name");

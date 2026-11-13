@@ -84,11 +84,9 @@ public final class SignInNotice {
         NotificationManager manager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager == null) return;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            manager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
-                    context.getString(R.string.sign_in_channel),
-                    NotificationManager.IMPORTANCE_DEFAULT));
-        }
+        manager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
+                context.getString(R.string.sign_in_channel),
+                NotificationManager.IMPORTANCE_DEFAULT));
         String text = context.getString(R.string.sign_in_notice_text, login);
         // the start screen asks to sign in again (with the account name filled in)
         Intent open = new Intent(context, SplashActivity.class)
