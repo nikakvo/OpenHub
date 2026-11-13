@@ -7,7 +7,6 @@ import io.reactivex.rxjava3.plugins.RxJavaPlugins;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -17,7 +16,6 @@ import com.thirtydegreesray.openhub.util.AppLog;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.inject.component.DaggerAppComponent;
 import com.thirtydegreesray.openhub.inject.module.AppModule;
-import com.thirtydegreesray.openhub.service.NetBroadcastReceiver;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.NetHelper;
 import com.thirtydegreesray.openhub.util.SignInWatch;
@@ -73,13 +71,8 @@ public class AppApplication extends Application {
     }
 
     private void initNetwork(){
-        // Android 7+ uses a default-network callback inside NetHelper. The broadcast is
-        // only a fallback for older versions.
+        // NetHelper follows the default network through a ConnectivityManager callback.
         NetHelper.INSTANCE.init(this);
-        if (NetHelper.INSTANCE.needsBroadcastReceiver()) {
-            registerReceiver(new NetBroadcastReceiver(),
-                    new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        }
     }
 
     public static AppApplication get(){

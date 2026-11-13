@@ -4,13 +4,10 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.thirtydegreesray.openhub.common.AppEventBus;
 import com.thirtydegreesray.openhub.common.Event;
@@ -43,9 +40,7 @@ public enum NetHelper {
 	public void init(@NonNull Context context) {
 		mContext = context.getApplicationContext();
 		checkNet();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			registerCallback();
-		}
+		registerCallback();
 	}
 
 	/** Re-reads the current network state. */
@@ -57,11 +52,8 @@ public enum NetHelper {
 		try {
 			ConnectivityManager cm = connectivity();
 			if (cm == null) return TYPE_DISCONNECT;
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				Network network = cm.getActiveNetwork();
-				return statusOf(network == null ? null : cm.getNetworkCapabilities(network));
-			}
-			return legacyStatus(cm);
+			Network network = cm.getActiveNetwork();
+			return statusOf(network == null ? null : cm.getNetworkCapabilities(network));
 		} catch (Exception e) {
 			Log.w(TAG, "checkNet failed", e);
 			// Never report "offline" because of an error, it would block requests.
@@ -77,14 +69,6 @@ public enum NetHelper {
 				? TYPE_WIFI : TYPE_MOBILE;
 	}
 
-	@SuppressWarnings("deprecation")
-	private static int legacyStatus(@NonNull ConnectivityManager cm) {
-		NetworkInfo info = cm.getActiveNetworkInfo();
-		if (info == null || !info.isConnected()) return TYPE_DISCONNECT;
-		return cm.isActiveNetworkMetered() ? TYPE_MOBILE : TYPE_WIFI;
-	}
-
-	@RequiresApi(Build.VERSION_CODES.N)
 	private void registerCallback() {
 		if (mCallbackRegistered) return;
 		ConnectivityManager cm = connectivity();
@@ -113,10 +97,20 @@ public enum NetHelper {
 		}
 	}
 
-	/** True when the legacy CONNECTIVITY_ACTION broadcast is still needed (below Android 7). */
-	public boolean needsBroadcastReceiver() {
-		return !mCallbackRegistered;
+	/**
+	 * Without the network callback (the system refused it) nothing reports changes:
+	 * read the state again on every query and try to register once more.
+	 */
+	private void refreshIfNoCallback() {
+		if (mCallbackRegistered || mContext == null) return;
+		checkNet();
+		long now = android.os.SystemClock.elapsedRealtime();
+		if (now - mLastRegisterTry < 30_000L) return;
+		mLastRegisterTry = now;
+		registerCallback();
 	}
+
+	private volatile long mLastRegisterTry;
 
 	private void setStatus(int status) {
 		int previous = mCurNetStatus;
@@ -135,16 +129,19 @@ public enum NetHelper {
 	/** Any usable network. */
 	@NonNull
 	public Boolean getNetEnabled() {
+		refreshIfNoCallback();
 		return mCurNetStatus != TYPE_DISCONNECT;
 	}
 
 	/** Metered network (mobile data, roaming...). */
 	@NonNull
 	public Boolean isMobileStatus() {
+		refreshIfNoCallback();
 		return mCurNetStatus == TYPE_MOBILE;
 	}
 
 	public int getNetStatus() {
+		refreshIfNoCallback();
 		return mCurNetStatus;
 	}
 }
