@@ -2,6 +2,10 @@
 
 package com.thirtydegreesray.openhub.util;
 
+import androidx.core.os.LocaleListCompat;
+import androidx.appcompat.app.AppCompatDelegate;
+import android.os.LocaleList;
+import android.app.LocaleManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -59,28 +63,32 @@ public class AppUtils {
     }
 
 
+    /**
+     * The app is English only. Android 13+ keeps the language of each app in the system
+     * (LocaleManager, also shown in the app's system settings), older versions get it
+     * from AppCompat for every screen. Called once when the app starts.
+     */
+    public static void applyAppLanguage(@NonNull Context context) {
+        Locale locale = getLocale(PrefUtils.getLanguage());
+        Locale.setDefault(locale);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            LocaleManager manager = context.getSystemService(LocaleManager.class);
+            LocaleList wanted = new LocaleList(locale);
+            if (manager != null && !wanted.equals(manager.getApplicationLocales())) {
+                manager.setApplicationLocales(wanted);
+            }
+        } else {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.create(locale));
+        }
+    }
+
+    /**
+     * The default Locale (dates, numbers) follows the app language. A WebView can reset
+     * it to the system language, so screens and pages call this again.
+     */
     public static void updateAppLanguage(@NonNull Context context) {
-        String lang = PrefUtils.getLanguage();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) updateResources(context, lang);
-        updateResourcesLegacy(context, lang);
-    }
-
-    private static void updateResources(Context context, String language) {
-        Locale locale = getLocale(language);
-        Locale.setDefault(locale);
-        Configuration configuration = context.getResources().getConfiguration();
-        configuration.setLocale(locale);
-        context.createConfigurationContext(configuration);
-    }
-
-    @SuppressWarnings("deprecation")
-    private static void updateResourcesLegacy(Context context, String language) {
-        Locale locale = getLocale(language);
-        Locale.setDefault(locale);
-        Resources resources = context.getResources();
-        Configuration configuration = resources.getConfiguration();
-        configuration.locale = locale;
-        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+        Locale locale = getLocale(PrefUtils.getLanguage());
+        if (!locale.equals(Locale.getDefault())) Locale.setDefault(locale);
     }
 
     @NonNull

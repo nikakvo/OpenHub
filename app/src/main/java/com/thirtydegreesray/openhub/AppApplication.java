@@ -45,7 +45,7 @@ public class AppApplication extends Application {
         long startTime = System.currentTimeMillis();
         AppData.INSTANCE.getSystemDefaultLocal();
         //apply language for application context
-        AppUtils.updateAppLanguage(getApplicationContext());
+        AppUtils.applyAppLanguage(this);
         AppLog.i(TAG, "startTime:" + startTime);
         mAppComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
