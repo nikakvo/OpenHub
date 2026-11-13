@@ -2,6 +2,8 @@
 
 package com.thirtydegreesray.openhub.ui.fragment.base;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.core.view.MenuProvider;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -115,13 +117,19 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        MenuProvider menu = menuProvider();
+        if (menu != null) {
+            // only while this page is in front (a pager keeps the other pages STARTED)
+            requireActivity().addMenuProvider(menu, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+        }
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    /** Toolbar menu items of this page, or null for none. */
+    @Nullable
+    protected MenuProvider menuProvider() {
+        return null;
     }
 
     @Override
@@ -316,11 +324,6 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
 
     public void scrollToTop() {
 
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
     }
 
     protected final void showOperationTip(@StringRes int msgResId) {

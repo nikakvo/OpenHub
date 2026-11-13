@@ -2,6 +2,8 @@
 
 package com.thirtydegreesray.openhub.ui.fragment;
 
+import android.view.MenuInflater;
+import androidx.core.view.MenuProvider;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -99,12 +101,6 @@ public class ViewerFragment extends BaseFragment<ViewerPresenter>
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
     protected int getLayoutId() {
         return R.layout.fragment_viewer;
     }
@@ -125,9 +121,28 @@ public class ViewerFragment extends BaseFragment<ViewerPresenter>
         loader.setIndeterminate(true);
     }
 
+    @Nullable
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
+    protected MenuProvider menuProvider() {
+        // the items belong to the screen's menu, this page shows and handles them
+        return new MenuProvider() {
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+            }
+
+            @Override
+            public void onPrepareMenu(@NonNull Menu menu) {
+                prepareMenu(menu);
+            }
+
+            @Override
+            public boolean onMenuItemSelected(@NonNull MenuItem item) {
+                return onItemSelected(item);
+            }
+        };
+    }
+
+    private void prepareMenu(@NonNull Menu menu) {
         MenuItem menuItem = menu.findItem(R.id.action_wrap_lines);
         MenuItem menuItemDownload = menu.findItem(R.id.action_download);
         MenuItem menuItemViewFile = menu.findItem(R.id.action_view_file);
@@ -151,8 +166,7 @@ public class ViewerFragment extends BaseFragment<ViewerPresenter>
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    private boolean onItemSelected(@NonNull MenuItem item) {
         if(item.getItemId() == R.id.action_wrap_lines){
             item.setChecked(!item.isChecked());
             wrap = item.isChecked();
@@ -167,7 +181,7 @@ public class ViewerFragment extends BaseFragment<ViewerPresenter>
             refresh();
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        return false;
     }
 
     @Override

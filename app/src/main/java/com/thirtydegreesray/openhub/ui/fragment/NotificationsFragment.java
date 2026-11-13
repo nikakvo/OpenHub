@@ -2,6 +2,8 @@
 
 package com.thirtydegreesray.openhub.ui.fragment;
 
+import androidx.annotation.Nullable;
+import androidx.core.view.MenuProvider;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -58,7 +60,6 @@ public class NotificationsFragment extends ListFragment<NotificationsPresenter, 
     protected void initFragment(Bundle savedInstanceState) {
         super.initFragment(savedInstanceState);
         setLoadMoreEnable(true);
-        setHasOptionsMenu(NotificationsType.Unread.equals(mPresenter.getType()));
         adapter.setListener(this);
     }
 
@@ -174,21 +175,27 @@ public class NotificationsFragment extends ListFragment<NotificationsPresenter, 
         return true;
     }
 
+    @Nullable
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        if(!mPresenter.isNotificationsAllRead()){
-            inflater.inflate(R.menu.menu_notifications, menu);
-        }
-    }
+    protected MenuProvider menuProvider() {
+        if (!NotificationsType.Unread.equals(mPresenter.getType())) return null;
+        return new MenuProvider() {
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+                if (!mPresenter.isNotificationsAllRead()) {
+                    inflater.inflate(R.menu.menu_notifications, menu);
+                }
+            }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.action_mark_all_as_read){
-            mPresenter.markAllNotificationsAsRead();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+            @Override
+            public boolean onMenuItemSelected(@NonNull MenuItem item) {
+                if (item.getItemId() == R.id.action_mark_all_as_read) {
+                    mPresenter.markAllNotificationsAsRead();
+                    return true;
+                }
+                return false;
+            }
+        };
     }
 
     @Override

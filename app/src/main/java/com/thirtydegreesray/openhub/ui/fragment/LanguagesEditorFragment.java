@@ -1,5 +1,9 @@
 package com.thirtydegreesray.openhub.ui.fragment;
 
+import android.view.MenuInflater;
+import android.view.Menu;
+import androidx.annotation.Nullable;
+import androidx.core.view.MenuProvider;
 import android.app.Activity;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -55,7 +59,6 @@ public class LanguagesEditorFragment extends ListFragment<LanguagesEditorPresent
     @Override
     protected void initFragment(Bundle savedInstanceState) {
         super.initFragment(savedInstanceState);
-        setHasOptionsMenu(true);
         setCanLoadMore(false);
         if(LanguagesEditorActivity.LanguageEditorMode.Sort.equals(mPresenter.getMode())){
             ItemTouchHelperCallback callback = new ItemTouchHelperCallback(
@@ -117,8 +120,23 @@ public class LanguagesEditorFragment extends ListFragment<LanguagesEditorPresent
         }
     }
 
+    @Nullable
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    protected MenuProvider menuProvider() {
+        // the commit item belongs to the screen's menu
+        return new MenuProvider() {
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+            }
+
+            @Override
+            public boolean onMenuItemSelected(@NonNull MenuItem item) {
+                return onCommitSelected(item);
+            }
+        };
+    }
+
+    private boolean onCommitSelected(@NonNull MenuItem item) {
         if(item.getItemId() == R.id.action_commit){
             if(mPresenter.getListSelectedLanguageCount() < 1){
                 showWarningToast(getString(R.string.no_choose_language_warning));
@@ -129,7 +147,7 @@ public class LanguagesEditorFragment extends ListFragment<LanguagesEditorPresent
             }
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        return false;
     }
 
     public void updateLanguages(){

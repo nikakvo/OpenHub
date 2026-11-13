@@ -6,8 +6,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.navigation.NavigationView;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -107,12 +105,6 @@ public class RepositoriesFragment extends ListFragment<RepositoriesPresenter, Re
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
     public void showRepositories(ArrayList<Repository> repositoryList) {
         adapter.setData(repositoryList);
         postNotifyDataSetChanged();
@@ -183,23 +175,6 @@ public class RepositoriesFragment extends ListFragment<RepositoriesPresenter, Re
     protected void onLoadMore(int page) {
         super.onLoadMore(page);
         mPresenter.loadRepositories(false, page);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-//        if(mPresenter.getType().equals(RepositoriesType.OWNED)){
-//            inflater.inflate(R.menu.menu_owned_repo, menu);
-//            if(!mPresenter.getUser().equals(AppData.INSTANCE.getLoggedUser().getLogin())){
-//                menu.findItem(R.id.action_filter_public).setVisible(false);
-//                menu.findItem(R.id.action_filter_private).setVisible(false);
-//            }
-//        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
