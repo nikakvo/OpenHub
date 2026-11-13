@@ -2,6 +2,8 @@
 
 package com.thirtydegreesray.openhub.ui.fragment;
 
+import com.thirtydegreesray.openhub.mvp.model.User;
+import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import android.view.inputmethod.EditorInfo;
 import android.text.TextWatcher;
@@ -141,6 +143,7 @@ public class RepositoriesFragment extends ListFragment<RepositoriesPresenter, Re
         filterClear = root.findViewById(R.id.repo_filter_clear);
         filterStatus = root.findViewById(R.id.repo_filter_status);
         if (filterEdit == null) return;
+        filterEdit.setHint(filterHint());
         filterEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -164,6 +167,25 @@ public class RepositoriesFragment extends ListFragment<RepositoriesPresenter, Re
             return false;
         });
         if (filterClear != null) filterClear.setOnClickListener(v -> filterEdit.setText(""));
+    }
+
+    /** The hint says which list the field filters. */
+    @NonNull
+    private String filterHint() {
+        Bundle args = getArguments();
+        RepositoriesType type = args == null ? null
+                : BundleCompat.getSerializable(args, "type", RepositoriesType.class);
+        String user = args == null ? null : args.getString("user");
+        User me = AppData.INSTANCE.getLoggedUser();
+        boolean mine = user == null || (me != null && user.equalsIgnoreCase(me.getLogin()));
+        if (RepositoriesType.STARRED.equals(type)) {
+            return mine ? getString(R.string.repo_filter_hint_my_stars)
+                    : getString(R.string.repo_filter_hint_user_stars, user);
+        }
+        if (RepositoriesType.PUBLIC.equals(type) && !mine) {
+            return getString(R.string.repo_filter_hint_user, user);
+        }
+        return getString(R.string.repo_filter_hint_mine);
     }
 
     @Override

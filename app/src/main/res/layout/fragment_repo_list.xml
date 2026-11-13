@@ -31,7 +31,7 @@
             android:background="@null"
             android:paddingTop="@dimen/spacing_normal"
             android:paddingBottom="@dimen/spacing_normal"
-            android:hint="@string/repo_filter_hint"
+            android:hint="@string/repo_filter_hint_mine"
             android:inputType="text"
             android:imeOptions="actionSearch"
             android:maxLines="1"

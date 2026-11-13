@@ -741,7 +741,10 @@
     </plurals>
 
     <!-- Filter field of the repository lists -->
-    <string name="repo_filter_hint">Filter by name, description, language or topic</string>
+    <string name="repo_filter_hint_mine">Filter your repositories</string>
+    <string name="repo_filter_hint_my_stars">Filter your starred repositories</string>
+    <string name="repo_filter_hint_user">Filter %s\'s repositories</string>
+    <string name="repo_filter_hint_user_stars">Filter repositories %s starred</string>
     <string name="repo_filter_clear">Clear the filter</string>
     <string name="repo_filter_loading">%1$d matches · loading all repositories (%2$d so far)…</string>
     <string name="repo_filter_count">%1$d of %2$d repositories</string>
