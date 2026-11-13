@@ -568,8 +568,8 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
     }
 
     @Override
-    public void onAttachFragment(Fragment fragment) {
-        super.onAttachFragment(fragment);
+    protected void onFragmentAttached(@NonNull Fragment fragment) {
+        super.onFragmentAttached(fragment);
     }
 
     @Override

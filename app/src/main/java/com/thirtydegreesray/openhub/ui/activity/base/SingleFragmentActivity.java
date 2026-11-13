@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.activity.base;
 
+import androidx.annotation.NonNull;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
@@ -51,8 +52,8 @@ public abstract class SingleFragmentActivity<P extends IBaseContract.Presenter, 
     }
 
     @Override
-    public void onAttachFragment(Fragment fragment) {
-        super.onAttachFragment(fragment);
+    protected void onFragmentAttached(@NonNull Fragment fragment) {
+        super.onFragmentAttached(fragment);
         AppLog.d("SingleFragmentActivity", "onAttachFragment");
     }
 

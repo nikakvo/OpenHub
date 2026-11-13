@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -380,16 +381,16 @@ public class Issue implements Parcelable {
         this.closedAt = tmpClosedAt == -1 ? null : new Date(tmpClosedAt);
         this.body = in.readString();
         this.bodyHtml = in.readString();
-        this.user = in.readParcelable(User.class.getClassLoader());
+        this.user = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
         int tmpAuthorAssociation = in.readInt();
         this.authorAssociation = tmpAuthorAssociation == -1 ? null : IssueAuthorAssociation.values()[tmpAuthorAssociation];
         this.repoUrl = in.readString();
         this.htmlUrl = in.readString();
         this.labels = in.createTypedArrayList(Label.CREATOR);
-        this.assignee = in.readParcelable(User.class.getClassLoader());
+        this.assignee = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
         this.assignees = in.createTypedArrayList(User.CREATOR);
-        this.milestone = in.readParcelable(Milestone.class.getClassLoader());
-        this.closedBy = in.readParcelable(User.class.getClassLoader());
+        this.milestone = ParcelCompat.readParcelable(in, Milestone.class.getClassLoader(), Milestone.class);
+        this.closedBy = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
         this.stateReason = in.readString();
         this.parentIssueUrl = in.readString();
         if (in.readByte() != 0) {

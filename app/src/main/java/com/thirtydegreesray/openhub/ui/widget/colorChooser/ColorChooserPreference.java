@@ -2,8 +2,9 @@
 
 package com.thirtydegreesray.openhub.ui.widget.colorChooser;
 
+import androidx.core.graphics.BlendModeCompat;
+import androidx.core.graphics.BlendModeColorFilterCompat;
 import android.content.Context;
-import android.graphics.PorterDuff;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.preference.Preference;
@@ -63,7 +64,8 @@ public class ColorChooserPreference extends Preference {
         super.onBindViewHolder(holder);
         View colorView = holder.findViewById(R.id.color_view);
         colorView.setBackgroundResource(R.drawable.shape_circle);
-        colorView.getBackground().setColorFilter(getSelectedColor(), PorterDuff.Mode.SRC_IN);
+        colorView.getBackground().setColorFilter(BlendModeColorFilterCompat
+                .createBlendModeColorFilterCompat(getSelectedColor(), BlendModeCompat.SRC_IN));
     }
 
     @Override

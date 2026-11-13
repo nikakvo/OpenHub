@@ -19,14 +19,14 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-        int from = viewHolder.getAdapterPosition();
-        int to = target.getAdapterPosition();
+        int from = viewHolder.getBindingAdapterPosition();
+        int to = target.getBindingAdapterPosition();
         return listener.onItemMoved(from, to);
     }
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        listener.onItemSwiped(viewHolder.getAdapterPosition(), direction);
+        listener.onItemSwiped(viewHolder.getBindingAdapterPosition(), direction);
     }
 
     public interface ItemGestureListener{

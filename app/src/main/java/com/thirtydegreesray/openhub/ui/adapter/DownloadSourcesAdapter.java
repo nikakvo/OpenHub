@@ -68,12 +68,12 @@ public class DownloadSourcesAdapter extends BaseAdapter<DownloadSourcesAdapter.V
         }
 
         public void onNameLongClick() {
-            DownloadSource source = data.get(getAdapterPosition());
+            DownloadSource source = data.get(getBindingAdapterPosition());
             AppUtils.copyToClipboard(context, source.getUrl());
         }
 
         public void onDownloadClick(){
-            DownloadSource source = data.get(getAdapterPosition());
+            DownloadSource source = data.get(getBindingAdapterPosition());
             String fileName = repoName.concat("-").concat(tagName)
                     .concat("-").concat(source.getName());
             AppOpener.startDownload(context, source.getUrl(), fileName, source.getDigest());

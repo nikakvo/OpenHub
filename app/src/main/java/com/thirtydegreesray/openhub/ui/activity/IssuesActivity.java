@@ -1,5 +1,7 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import androidx.core.os.BundleCompat;
+import androidx.core.content.IntentCompat;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -258,7 +260,7 @@ public class IssuesActivity extends PagerActivity<IssuesActPresenter>
     @Override
     protected int getFragmentPosition(Fragment fragment) {
         if (fragment instanceof IssuesFragment) {
-            IssuesFilter issuesFilter = fragment.getArguments().getParcelable("issuesFilter");
+            IssuesFilter issuesFilter = BundleCompat.getParcelable(fragment.getArguments(), "issuesFilter", IssuesFilter.class);
             if (issuesFilter == null) {
                 return -1;
             } else {
@@ -273,7 +275,7 @@ public class IssuesActivity extends PagerActivity<IssuesActPresenter>
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK) return;
         if (requestCode == ADD_ISSUE_REQUEST_CODE) {
-            Issue issue = data.getParcelableExtra("issue");
+            Issue issue = IntentCompat.getParcelableExtra(data, "issue", Issue.class);
             listeners.get(0).onCreateIssue(issue);
         }
     }

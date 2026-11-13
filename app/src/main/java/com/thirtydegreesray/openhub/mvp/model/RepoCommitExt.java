@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class RepoCommitExt extends RepoCommit{
     protected RepoCommitExt(Parcel in) {
         super(in);
         this.files = in.createTypedArrayList(CommitFile.CREATOR);
-        this.stats = in.readParcelable(CommitStats.class.getClassLoader());
+        this.stats = ParcelCompat.readParcelable(in, CommitStats.class.getClassLoader(), CommitStats.class);
     }
 
     public static final Creator<RepoCommitExt> CREATOR = new Creator<RepoCommitExt>() {

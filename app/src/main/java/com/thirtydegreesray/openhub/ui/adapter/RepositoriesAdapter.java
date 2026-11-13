@@ -72,9 +72,9 @@ public class RepositoriesAdapter extends BaseAdapter<RepositoriesAdapter.ViewHol
         }
 
         public void onUserClick(){
-            if(getAdapterPosition() != RecyclerView.NO_POSITION){
-                ProfileActivity.show((Activity) context, ivUserAvatar, data.get(getAdapterPosition()).getOwner().getLogin(),
-                        data.get(getAdapterPosition()).getOwner().getAvatarUrl());
+            if(getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+                ProfileActivity.show((Activity) context, ivUserAvatar, data.get(getBindingAdapterPosition()).getOwner().getLogin(),
+                        data.get(getBindingAdapterPosition()).getOwner().getAvatarUrl());
             }
         }
 

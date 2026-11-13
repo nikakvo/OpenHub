@@ -107,8 +107,8 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
     }
 
     @Override
-    public void onAttachFragment(Fragment fragment) {
-        super.onAttachFragment(fragment);
+    protected void onFragmentAttached(@NonNull Fragment fragment) {
+        super.onFragmentAttached(fragment);
         if(fragment instanceof  MarkdownEditorFragment){
             markdownEditorCallback = (MarkdownEditorCallback) fragment;
             editorFragment = (MarkdownEditorFragment) fragment;

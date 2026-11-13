@@ -152,7 +152,6 @@ public class VideoPlayerActivity extends AppCompatActivity {
         Window window = getWindow();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.setNavigationBarContrastEnforced(false);
-            window.setStatusBarContrastEnforced(false);
         }
         WindowInsetsControllerCompat bars = WindowCompat.getInsetsController(window,
                 window.getDecorView());

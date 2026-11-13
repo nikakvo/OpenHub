@@ -1,5 +1,7 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import android.os.Looper;
+import androidx.core.content.IntentCompat;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -198,7 +200,7 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
 
         if (issueTimelineFragment == null) {
             issueTimelineFragment = IssueTimelineFragment.create(issue);
-            new Handler().postDelayed(new Runnable() {
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (!isAlive) return;
@@ -284,8 +286,8 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
     }
 
     @Override
-    public void onAttachFragment(Fragment fragment) {
-        super.onAttachFragment(fragment);
+    protected void onFragmentAttached(@NonNull Fragment fragment) {
+        super.onFragmentAttached(fragment);
         if (fragment instanceof IssueTimelineFragment) {
             issueTimelineFragment = (IssueTimelineFragment) fragment;
         }
@@ -331,12 +333,12 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
             issueTimelineFragment.onEditComment(text);
             return;
         } else if (requestCode == EDIT_ISSUE_REQUEST_CODE) {
-            Issue issue = data.getParcelableExtra("issue");
+            Issue issue = IntentCompat.getParcelableExtra(data, "issue", Issue.class);
             mPresenter.setIssue(issue);
             issueTitle.setText(issue.getTitle());
             issueTimelineFragment.onEditIssue(issue);
         } else if (requestCode == NEW_SUB_ISSUE_REQUEST_CODE) {
-            Issue created = data == null ? null : data.getParcelableExtra("issue");
+            Issue created = data == null ? null : IntentCompat.getParcelableExtra(data, "issue", Issue.class);
             if (created != null) subIssuesBox().addCreated(created);
             return;
         }

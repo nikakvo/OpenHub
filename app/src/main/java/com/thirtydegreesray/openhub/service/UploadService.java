@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.service;
 
+import androidx.core.content.IntentCompat;
 import com.thirtydegreesray.openhub.http.core.FreshTokenInterceptor;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -238,7 +239,6 @@ public class UploadService extends Service {
         }
 
         @Nullable
-        @SuppressWarnings("deprecation")
         static Job from(int id, @NonNull Intent intent) {
             Job job = new Job(id);
             job.owner = intent.getStringExtra("owner");
@@ -246,7 +246,7 @@ public class UploadService extends Service {
             job.releaseId = intent.getStringExtra("releaseId");
             job.tag = intent.getStringExtra("tag");
             job.uploadUrl = intent.getStringExtra("uploadUrl");
-            job.items = intent.getParcelableArrayListExtra("items");
+            job.items = IntentCompat.getParcelableArrayListExtra(intent, "items", UploadItem.class);
             job.publish = intent.getBooleanExtra("publish", false);
             job.makeLatest = intent.getStringExtra("makeLatest");
             job.checksums = intent.getBooleanExtra("checksums", false);

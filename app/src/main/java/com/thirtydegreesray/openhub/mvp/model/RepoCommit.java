@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -118,11 +119,11 @@ public class RepoCommit implements Parcelable {
         this.url = in.readString();
         this.htmlUrl = in.readString();
         this.commentsUrl = in.readString();
-        this.commit = in.readParcelable(CommitGitInfo.class.getClassLoader());
-        this.author = in.readParcelable(User.class.getClassLoader());
-        this.committer = in.readParcelable(User.class.getClassLoader());
+        this.commit = ParcelCompat.readParcelable(in, CommitGitInfo.class.getClassLoader(), CommitGitInfo.class);
+        this.author = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
+        this.committer = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
         this.parents = new ArrayList<RepoCommit>();
-        in.readList(this.parents, RepoCommit.class.getClassLoader());
+        ParcelCompat.readList(in, this.parents, RepoCommit.class.getClassLoader(), RepoCommit.class);
     }
 
     public static final Creator<RepoCommit> CREATOR = new Creator<RepoCommit>() {

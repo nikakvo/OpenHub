@@ -43,15 +43,15 @@ public class BaseViewHolder extends RecyclerView.ViewHolder
 
     @Override
     public void onClick(View v) {
-        if(mOnItemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
-            mOnItemClickListener.onItemClick(getAdapterPosition(), v);
+        if(mOnItemClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+            mOnItemClickListener.onItemClick(getBindingAdapterPosition(), v);
         }
     }
 
     @Override
     public boolean onLongClick(View v) {
-        if(mOnItemLongClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
-            return mOnItemLongClickListener.onItemLongClick(getAdapterPosition(), v);
+        if(mOnItemLongClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+            return mOnItemLongClickListener.onItemLongClick(getBindingAdapterPosition(), v);
         }
         return false;
     }

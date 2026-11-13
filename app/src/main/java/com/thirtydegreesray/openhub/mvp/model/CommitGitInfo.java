@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -80,8 +81,8 @@ public class CommitGitInfo implements Parcelable {
         this.message = in.readString();
         this.url = in.readString();
         this.commentCount = in.readInt();
-        this.committer = in.readParcelable(CommitGitUser.class.getClassLoader());
-        this.author = in.readParcelable(CommitGitUser.class.getClassLoader());
+        this.committer = ParcelCompat.readParcelable(in, CommitGitUser.class.getClassLoader(), CommitGitUser.class);
+        this.author = ParcelCompat.readParcelable(in, CommitGitUser.class.getClassLoader(), CommitGitUser.class);
     }
 
     public static final Parcelable.Creator<CommitGitInfo> CREATOR = new Parcelable.Creator<CommitGitInfo>() {

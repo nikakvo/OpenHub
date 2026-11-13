@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.activity;
 
+import androidx.core.os.BundleCompat;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -87,11 +88,7 @@ public class TrendingActivity extends PagerActivity<TrendingPresenter>
     @Override
     protected int getFragmentPosition(Fragment fragment) {
         if(fragment instanceof RepositoriesFragment){
-            TrendingSince since = null;
-            Object obj = fragment.getArguments().get("since");
-            if (obj instanceof TrendingSince)
-                since = (TrendingSince) obj;
-
+            TrendingSince since = BundleCompat.getSerializable(fragment.getArguments(), "since", TrendingSince.class);
             if(since == null){
                 return -1;
             }else if(since.equals(TrendingSince.Daily)){

@@ -40,7 +40,6 @@ import com.thirtydegreesray.openhub.util.NetHelper;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
-import org.apache.http.conn.ConnectTimeoutException;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -340,7 +339,7 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
         }
         if(error instanceof UnknownHostException){
             errorTip = getString(R.string.no_network_tip);
-        } else if (error instanceof SocketTimeoutException || error instanceof ConnectTimeoutException) {
+        } else if (error instanceof SocketTimeoutException) {
             errorTip = getString(R.string.load_timeout_tip);
         } else if (error instanceof HttpError) {
             errorTip = error.getMessage();

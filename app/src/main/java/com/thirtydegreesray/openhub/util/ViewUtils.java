@@ -256,9 +256,9 @@ public class ViewUtils {
 
     public static int getLabelTextColor(@NonNull Context context, int bgColorValue){
         if(ViewUtils.isLightColor(bgColorValue)){
-            return context.getResources().getColor(R.color.light_text_color_primary);
+            return ContextCompat.getColor(context, R.color.light_text_color_primary);
         } else {
-            return context.getResources().getColor(R.color.material_light_white);
+            return ContextCompat.getColor(context, R.color.material_light_white);
         }
     }
 

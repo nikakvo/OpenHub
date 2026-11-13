@@ -341,7 +341,7 @@ public class RepositoryPresenter extends BasePresenter<IRepositoryContract.View>
         if(!starred && getString(R.string.author_login_id).equals(owner)
                 && getString(R.string.app_name).equals(repoName)
                 && StarWishesHelper.isStarWishesTipable()){
-            new android.os.Handler().postDelayed(new Runnable() {
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if(!starred && mView != null){

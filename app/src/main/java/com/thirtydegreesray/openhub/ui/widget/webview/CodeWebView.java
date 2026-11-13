@@ -6,7 +6,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.net.Uri;
-import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.util.AttributeSet;
@@ -84,11 +83,7 @@ public class CodeWebView extends WebView {
         }
 
         setWebChromeClient(new ChromeClient());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            setWebViewClient(new WebClientN());
-        } else {
-            setWebViewClient(new WebClient());
-        }
+        setWebViewClient(new WebClientN());
         WebSettings settings = getSettings();
         settings.setJavaScriptEnabled(true);
         // pages from GitHub never need the phone's files, other apps' content or the location
@@ -194,7 +189,7 @@ public class CodeWebView extends WebView {
         // image" holds pictures back on mobile data (only this page, the setting stays)
         settings.setLoadsImagesAutomatically(true);
         settings.setBlockNetworkImage(false);
-        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(true);
@@ -205,7 +200,7 @@ public class CodeWebView extends WebView {
 
     public void setHtmlSource(@NonNull String htmlSource) {
         WebSettings settings = getSettings();
-        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(true);
@@ -294,15 +289,6 @@ public class CodeWebView extends WebView {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             startActivity(request.getUrl());
-            return true;
-        }
-    }
-
-    private class WebClient extends WebViewClient {
-        @SuppressWarnings("deprecation")
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            startActivity(Uri.parse(url));
             return true;
         }
     }

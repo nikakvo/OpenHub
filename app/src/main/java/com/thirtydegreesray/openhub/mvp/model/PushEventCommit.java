@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -78,7 +79,7 @@ public class PushEventCommit implements Parcelable {
 
     protected PushEventCommit(Parcel in) {
         this.sha = in.readString();
-        this.author = in.readParcelable(User.class.getClassLoader());
+        this.author = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
         this.message = in.readString();
         this.distinct = in.readByte() != 0;
         this.url = in.readString();

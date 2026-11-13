@@ -154,8 +154,8 @@ public class CommitDetailActivity extends BaseActivity<CommitDetailPresenter>
     }
 
     @Override
-    public void onAttachFragment(Fragment fragment) {
-        super.onAttachFragment(fragment);
+    protected void onFragmentAttached(@NonNull Fragment fragment) {
+        super.onFragmentAttached(fragment);
         if (fragment instanceof CommitFilesFragment) {
             commitFilesFragment = (CommitFilesFragment) fragment;
         }

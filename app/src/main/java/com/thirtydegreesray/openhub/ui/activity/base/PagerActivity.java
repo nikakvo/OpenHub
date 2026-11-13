@@ -188,8 +188,8 @@ public abstract class PagerActivity<P extends BasePresenter> extends BaseDrawerA
     }
 
     @Override
-    public void onAttachFragment(Fragment fragment) {
-        super.onAttachFragment(fragment);
+    protected void onFragmentAttached(@NonNull Fragment fragment) {
+        super.onFragmentAttached(fragment);
         int fragmentPosition = getFragmentPosition(fragment);
         if(fragmentPosition != -1) getFragments().set(fragmentPosition, fragment);
         AppLog.d("PagerActivity", "onAttachFragment " + fragment);

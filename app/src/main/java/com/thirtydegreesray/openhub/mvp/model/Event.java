@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -203,10 +204,10 @@ public class Event implements Parcelable {
         this.id = in.readString();
         int tmpType = in.readInt();
         this.type = tmpType == -1 ? null : EventType.values()[tmpType];
-        this.actor = in.readParcelable(User.class.getClassLoader());
-        this.repo = in.readParcelable(Repository.class.getClassLoader());
-        this.org = in.readParcelable(User.class.getClassLoader());
-        this.payload = in.readParcelable(EventPayload.class.getClassLoader());
+        this.actor = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
+        this.repo = ParcelCompat.readParcelable(in, Repository.class.getClassLoader(), Repository.class);
+        this.org = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
+        this.payload = ParcelCompat.readParcelable(in, EventPayload.class.getClassLoader(), EventPayload.class);
         this.isPublic = in.readByte() != 0;
         long tmpCreatedAt = in.readLong();
         this.createdAt = tmpCreatedAt == -1 ? null : new Date(tmpCreatedAt);

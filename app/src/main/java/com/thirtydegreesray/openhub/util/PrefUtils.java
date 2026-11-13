@@ -4,7 +4,6 @@ package com.thirtydegreesray.openhub.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.AppApplication;
@@ -79,7 +78,7 @@ public class PrefUtils {
     public final static String SEARCH_RECORDS = "searchRecords";
 
     public static SharedPreferences getDefaultSp(){
-        return PreferenceManager.getDefaultSharedPreferences(AppApplication.get());
+        return androidx.preference.PreferenceManager.getDefaultSharedPreferences(AppApplication.get());
     }
 
     public static void set(@NonNull String key, @NonNull Object value) {
@@ -215,7 +214,7 @@ public class PrefUtils {
     }
 
     public static SharedPreferences getDefaultSp(Context context){
-        return PreferenceManager.getDefaultSharedPreferences(context);
+        return androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public static SharedPreferences getSP(Context context, String spName){

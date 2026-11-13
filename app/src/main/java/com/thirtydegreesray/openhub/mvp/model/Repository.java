@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -414,7 +415,7 @@ public class Repository implements Parcelable {
         this.htmlUrl = in.readString();
         this.description = in.readString();
         this.language = in.readString();
-        this.owner = in.readParcelable(User.class.getClassLoader());
+        this.owner = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
         this.defaultBranch = in.readString();
         long tmpCreatedAt = in.readLong();
         this.createdAt = tmpCreatedAt == -1 ? null : new Date(tmpCreatedAt);
@@ -433,8 +434,8 @@ public class Repository implements Parcelable {
         this.openIssuesCount = in.readInt();
         this.subscribersCount = in.readInt();
         this.fork = in.readByte() != 0;
-        this.parent = in.readParcelable(Repository.class.getClassLoader());
-        this.permissions = in.readParcelable(RepositoryPermissions.class.getClassLoader());
+        this.parent = ParcelCompat.readParcelable(in, Repository.class.getClassLoader(), Repository.class);
+        this.permissions = ParcelCompat.readParcelable(in, RepositoryPermissions.class.getClassLoader(), RepositoryPermissions.class);
         this.hasIssues = in.readByte() != 0;
         this.hasProjects = in.readByte() != 0;
         this.hasDownloads = in.readByte() != 0;

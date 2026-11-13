@@ -1,8 +1,8 @@
 package com.thirtydegreesray.openhub.ui.adapter;
 
+import androidx.core.text.HtmlCompat;
 import android.content.Context;
 import androidx.annotation.NonNull;
-import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
 
@@ -63,7 +63,7 @@ public class ReleasesAdapter extends BaseAdapter<ReleasesAdapter.ViewHolder, Rel
         holder.time.setText(model.getDisplayDate() == null ? ""
                 : StringUtils.getNewsTimeStr(context, model.getDisplayDate()));
         if(!StringUtils.isBlank(model.getBodyHtml())){
-            holder.body.setText(com.thirtydegreesray.openhub.util.QuoteStyle.apply(context, Html.fromHtml(model.getBodyHtml())));
+            holder.body.setText(com.thirtydegreesray.openhub.util.QuoteStyle.apply(context, HtmlCompat.fromHtml(model.getBodyHtml(), HtmlCompat.FROM_HTML_MODE_LEGACY)));
             holder.body.setVisibility(View.VISIBLE);
         } else {
             holder.body.setText("");

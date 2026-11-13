@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.widget;
 
+import androidx.core.content.ContextCompat;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -209,7 +210,7 @@ public class EditLabelDialog implements DialogInterface.OnDismissListener,
         String name = labelNameEt.getText().toString();
         int color = getCurrentColorValue();
         if(color == 0){
-            labelPreview.setBackgroundColor(activity.getResources().getColor(R.color.transparent));
+            labelPreview.setBackgroundColor(ContextCompat.getColor(activity, R.color.transparent));
             labelPreview.setText(R.string.invalid_color);
             labelPreview.setTextColor(ViewUtils.getSecondaryTextColor(activity));
         } else {

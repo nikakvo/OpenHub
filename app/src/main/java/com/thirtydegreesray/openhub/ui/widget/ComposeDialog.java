@@ -3,7 +3,6 @@ package com.thirtydegreesray.openhub.ui.widget;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -203,7 +202,7 @@ public final class ComposeDialog {
             });
             dialog.setOnDismissListener(d -> editor.dispose());
             if (dialog.getWindow() != null) {
-                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+                com.thirtydegreesray.openhub.util.EdgeToEdge.dialogAboveKeyboard(dialog.getWindow());
             }
             dialog.show();
         }

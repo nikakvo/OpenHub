@@ -11,7 +11,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.core.view.MenuItemCompat;
 import androidx.appcompat.widget.SearchView;
 import android.text.InputType;
 import android.util.TypedValue;
@@ -53,7 +52,7 @@ import java.util.Map;
 
 public class SearchActivity extends PagerActivity<SearchPresenter>
         implements ISearchContract.View,
-        MenuItemCompat.OnActionExpandListener,
+        MenuItem.OnActionExpandListener,
         SearchView.OnQueryTextListener {
 
     public static void show(@NonNull Context context) {
@@ -105,16 +104,16 @@ public class SearchActivity extends PagerActivity<SearchPresenter>
         getMenuInflater().inflate(R.menu.menu_search, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
         SearchView searchView =
-                (SearchView) MenuItemCompat.getActionView(searchItem);
+                (SearchView) searchItem.getActionView();
         searchView.setOnQueryTextListener(this);
         searchView.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         searchView.setQuery(mPresenter.getSearchModels().get(0).getQuery(), false);
         if (isInputMode) {
-            MenuItemCompat.expandActionView(searchItem);
+            searchItem.expandActionView();
         } else {
-            MenuItemCompat.collapseActionView(searchItem);
+            searchItem.collapseActionView();
         }
-        MenuItemCompat.setOnActionExpandListener(searchItem, this);
+        searchItem.setOnActionExpandListener(this);
 
         AutoCompleteTextView autoCompleteTextView = searchView
                 .findViewById(androidx.appcompat.R.id.search_src_text);
@@ -250,8 +249,8 @@ public class SearchActivity extends PagerActivity<SearchPresenter>
         if (isInputMode) {
             menu.findItem(R.id.action_info).setVisible(false);
             menu.findItem(R.id.action_sort).setVisible(false);
-            SearchView searchView = (SearchView) MenuItemCompat.
-                    getActionView(menu.findItem(R.id.action_search));
+            SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
+                    .getActionView();
             searchView.setQuery(mPresenter.getSearchModels().get(0).getQuery(), false);
         } else {
             menu.findItem(R.id.action_info).setVisible(false);

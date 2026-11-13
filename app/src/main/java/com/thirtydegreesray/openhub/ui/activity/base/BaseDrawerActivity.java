@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity.base;
 
+import android.os.Looper;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.NonNull;
@@ -116,7 +117,7 @@ public abstract class BaseDrawerActivity<P extends IBaseContract.Presenter> exte
             ViewUtils.selectMenuItem(navView.getMenu(), item.getItemId(), true);
         }
         closeDrawer();
-        new Handler().postDelayed(new Runnable() {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
                 onNavItemSelected(item, isStartDrawer);

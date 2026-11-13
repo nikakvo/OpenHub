@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -151,7 +152,7 @@ public class CommitComment implements Parcelable {
         this.updatedAt = tmpUpdatedAt == -1 ? null : new Date(tmpUpdatedAt);
         this.htmlUrl = in.readString();
         this.url = in.readString();
-        this.user = in.readParcelable(User.class.getClassLoader());
+        this.user = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
     }
 
     public static final Parcelable.Creator<CommitComment> CREATOR = new Parcelable.Creator<CommitComment>() {

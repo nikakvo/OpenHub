@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -337,7 +338,7 @@ public class IssueEvent implements Parcelable {
 
     protected IssueEvent(Parcel in) {
         this.id = in.readString();
-        this.user = in.readParcelable(User.class.getClassLoader());
+        this.user = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
         long tmpCreatedAt = in.readLong();
         this.createdAt = tmpCreatedAt == -1 ? null : new Date(tmpCreatedAt);
         long tmpUpdatedAt = in.readLong();
@@ -349,14 +350,14 @@ public class IssueEvent implements Parcelable {
         int tmpType = in.readInt();
         this.type = tmpType == -1 ? null : Type.values()[tmpType];
         this.htmlUrl = in.readString();
-        this.assignee = in.readParcelable(User.class.getClassLoader());
-        this.assigner = in.readParcelable(User.class.getClassLoader());
-        this.actor = in.readParcelable(User.class.getClassLoader());
-        this.label = in.readParcelable(Label.class.getClassLoader());
-        this.milestone = in.readParcelable(Milestone.class.getClassLoader());
-        this.reactions = in.readParcelable(Reactions.class.getClassLoader());
-        this.source = in.readParcelable(IssueCrossReferencedSource.class.getClassLoader());
-        this.parentIssue = in.readParcelable(Issue.class.getClassLoader());
+        this.assignee = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
+        this.assigner = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
+        this.actor = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
+        this.label = ParcelCompat.readParcelable(in, Label.class.getClassLoader(), Label.class);
+        this.milestone = ParcelCompat.readParcelable(in, Milestone.class.getClassLoader(), Milestone.class);
+        this.reactions = ParcelCompat.readParcelable(in, Reactions.class.getClassLoader(), Reactions.class);
+        this.source = ParcelCompat.readParcelable(in, IssueCrossReferencedSource.class.getClassLoader(), IssueCrossReferencedSource.class);
+        this.parentIssue = ParcelCompat.readParcelable(in, Issue.class.getClassLoader(), Issue.class);
     }
 
     public static final Creator<IssueEvent> CREATOR = new Creator<IssueEvent>() {

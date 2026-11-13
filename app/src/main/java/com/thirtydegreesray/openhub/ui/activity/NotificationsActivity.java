@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.activity;
 
+import androidx.core.os.BundleCompat;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -72,7 +73,8 @@ public class NotificationsActivity extends PagerActivity {
     protected int getFragmentPosition(Fragment fragment) {
         if(fragment instanceof NotificationsFragment){
             NotificationsFragment.NotificationsType type
-                    = (NotificationsFragment.NotificationsType) fragment.getArguments().get("type");
+                    = BundleCompat.getSerializable(fragment.getArguments(), "type",
+                    NotificationsFragment.NotificationsType.class);
             if(NotificationsFragment.NotificationsType.Unread.equals(type)){
                 return 0;
             } else if(NotificationsFragment.NotificationsType.Participating.equals(type)){

@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -62,7 +63,7 @@ public class SearchResult<M> implements Parcelable {
         this.totalCount = in.readString();
         this.incompleteResults = in.readByte() != 0;
         this.items = new ArrayList<M>();
-        in.readList(this.items, SearchResult.class.getClassLoader());
+        ParcelCompat.readList(in, (java.util.List) this.items, SearchResult.class.getClassLoader(), Object.class);
     }
 
     public static final Parcelable.Creator<SearchResult> CREATOR = new Parcelable.Creator<SearchResult>() {

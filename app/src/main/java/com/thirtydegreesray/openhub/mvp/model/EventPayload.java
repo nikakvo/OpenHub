@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -266,12 +267,12 @@ public class EventPayload implements Parcelable {
         this.masterBranch = in.readString();
         this.description = in.readString();
         this.pusherType = in.readString();
-        this.release = in.readParcelable(Release.class.getClassLoader());
-        this.issue = in.readParcelable(Issue.class.getClassLoader());
-        this.comment = in.readParcelable(IssueEvent.class.getClassLoader());
-        this.member = in.readParcelable(User.class.getClassLoader());
-        this.organization = in.readParcelable(User.class.getClassLoader());
-        this.blockedUser = in.readParcelable(User.class.getClassLoader());
+        this.release = ParcelCompat.readParcelable(in, Release.class.getClassLoader(), Release.class);
+        this.issue = ParcelCompat.readParcelable(in, Issue.class.getClassLoader(), Issue.class);
+        this.comment = ParcelCompat.readParcelable(in, IssueEvent.class.getClassLoader(), IssueEvent.class);
+        this.member = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
+        this.organization = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
+        this.blockedUser = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
     }
 
     public static final Creator<EventPayload> CREATOR = new Creator<EventPayload>() {

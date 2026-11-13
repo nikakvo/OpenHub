@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.presenter;
 
+import android.os.Looper;
 import android.os.Handler;
 
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
@@ -53,7 +54,7 @@ public class ProfilePresenter extends BasePresenter<IProfileContract.View>
     @Override
     public void onViewInitialized() {
         super.onViewInitialized();
-        new Handler().postDelayed(new Runnable() {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
                 if(mView == null) return;

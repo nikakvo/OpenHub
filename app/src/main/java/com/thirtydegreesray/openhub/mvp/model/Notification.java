@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -124,8 +125,8 @@ public class Notification implements Parcelable {
         this.updateAt = tmpUpdateAt == -1 ? null : new Date(tmpUpdateAt);
         long tmpLastReadAt = in.readLong();
         this.lastReadAt = tmpLastReadAt == -1 ? null : new Date(tmpLastReadAt);
-        this.repository = in.readParcelable(Repository.class.getClassLoader());
-        this.subject = in.readParcelable(NotificationSubject.class.getClassLoader());
+        this.repository = ParcelCompat.readParcelable(in, Repository.class.getClassLoader(), Repository.class);
+        this.subject = ParcelCompat.readParcelable(in, NotificationSubject.class.getClassLoader(), NotificationSubject.class);
     }
 
     public static final Parcelable.Creator<Notification> CREATOR = new Parcelable.Creator<Notification>() {

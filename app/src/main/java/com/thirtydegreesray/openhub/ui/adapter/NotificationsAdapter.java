@@ -169,27 +169,27 @@ public class NotificationsAdapter extends BaseAdapter<BaseViewHolder,
         }
 
         public void onUserClicked() {
-            if(getAdapterPosition() != RecyclerView.NO_POSITION) {
+            if(getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
                 ProfileActivity.show((Activity) context, userAvatar,
                         getRepository().getOwner().getLogin(), getRepository().getOwner().getAvatarUrl());
             }
         }
 
         public void onRepoClicked() {
-            if(getAdapterPosition() != RecyclerView.NO_POSITION) {
+            if(getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
                 RepositoryActivity.show(context, getRepository().getOwner().getLogin(),
                         getRepository().getName());
             }
         }
 
         public void onMarkAsReadClicked() {
-            if(getAdapterPosition() != RecyclerView.NO_POSITION) {
-                listener.onRepoMarkAsReadClicked(data.get(getAdapterPosition()).getM1());
+            if(getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+                listener.onRepoMarkAsReadClicked(data.get(getBindingAdapterPosition()).getM1());
             }
         }
 
         private Repository getRepository(){
-            return data.get(getAdapterPosition()).getM1();
+            return data.get(getBindingAdapterPosition()).getM1();
         }
 
 

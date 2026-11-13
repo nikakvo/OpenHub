@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.adapter;
 
+import androidx.core.content.ContextCompat;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -47,7 +48,7 @@ public class LabelManageAdapter extends BaseAdapter<LabelManageAdapter.ViewHolde
             holder.name.getPaint().setFakeBoldText(true);
             holder.name.setTextColor(ViewUtils.getLabelTextColor(context, model.getColorValue()));
         } else {
-            holder.labelBg.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+            holder.labelBg.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
             holder.name.getPaint().setFakeBoldText(false);
             holder.name.setTextColor(ViewUtils.getPrimaryTextColor(context));
         }

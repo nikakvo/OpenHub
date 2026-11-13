@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -153,7 +154,7 @@ public class ReleaseAsset implements Parcelable {
         this.id = in.readString();
         this.name = in.readString();
         this.label = in.readString();
-        this.uploader = in.readParcelable(User.class.getClassLoader());
+        this.uploader = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
         this.contentType = in.readString();
         this.state = in.readString();
         this.size = in.readLong();

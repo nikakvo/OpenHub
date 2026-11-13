@@ -378,6 +378,7 @@ public final class MatrixTitleDrawable extends android.graphics.drawable.Drawabl
     }
 
     @Override
+    @SuppressWarnings("deprecation") // abstract in Drawable, must be implemented
     public int getOpacity() {
         return PixelFormat.TRANSLUCENT;
     }

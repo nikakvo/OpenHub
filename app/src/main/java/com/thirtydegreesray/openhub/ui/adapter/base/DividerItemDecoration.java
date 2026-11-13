@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.adapter.base;
 
+import androidx.core.content.ContextCompat;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -35,7 +36,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
     private int mOrientation;
 
     public DividerItemDecoration(@NonNull Context context, int orientation) {
-        mDivider = context.getResources().getDrawable(R.drawable.shape_line);
+        mDivider = ContextCompat.getDrawable(context, R.drawable.shape_line);
 //        a.recycle();
         setOrientation(orientation);
     }

@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -111,8 +112,8 @@ public class CommitsComparison implements Parcelable {
     protected CommitsComparison(Parcel in) {
         this.url = in.readString();
         this.htmlUrl = in.readString();
-        this.baseCommit = in.readParcelable(RepoCommit.class.getClassLoader());
-        this.mergeBaseCommit = in.readParcelable(RepoCommit.class.getClassLoader());
+        this.baseCommit = ParcelCompat.readParcelable(in, RepoCommit.class.getClassLoader(), RepoCommit.class);
+        this.mergeBaseCommit = ParcelCompat.readParcelable(in, RepoCommit.class.getClassLoader(), RepoCommit.class);
         this.status = in.readString();
         this.totalCommits = in.readInt();
         this.commits = in.createTypedArrayList(RepoCommit.CREATOR);

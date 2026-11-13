@@ -2,6 +2,8 @@
 
 package com.thirtydegreesray.openhub.ui.activity.base;
 
+import androidx.core.os.BundleCompat;
+import android.os.Looper;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -11,7 +13,6 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -65,6 +66,17 @@ BaseActivity<P extends IBaseContract.Presenter>
     protected P mPresenter;
     private ProgressDialog mProgressDialog;
     private static BaseActivity curActivity;
+
+    {
+        // Registered at construction, so it also sees the fragments that
+        // super.onCreate restores after a rotation or process death.
+        getSupportFragmentManager().addFragmentOnAttachListener(
+                (fragmentManager, fragment) -> onFragmentAttached(fragment));
+    }
+
+    /** A fragment was attached directly to this screen (not a child fragment). */
+    protected void onFragmentAttached(@NonNull Fragment fragment) {
+    }
 
     /**
      * True for screens other apps start directly (e.g. a share) that load the signed-in
@@ -126,10 +138,9 @@ BaseActivity<P extends IBaseContract.Presenter>
         }
         try {
             savedInstanceState.setClassLoader(getClassLoader());
-            Object saved = savedInstanceState.get("appData_loggedUser");
-            if (!(saved instanceof com.thirtydegreesray.openhub.mvp.model.User)) return;
-            com.thirtydegreesray.openhub.mvp.model.User user =
-                    (com.thirtydegreesray.openhub.mvp.model.User) saved;
+            com.thirtydegreesray.openhub.mvp.model.User user = BundleCompat.getParcelable(
+                    savedInstanceState, "appData_loggedUser", com.thirtydegreesray.openhub.mvp.model.User.class);
+            if (user == null) return;
             com.thirtydegreesray.openhub.dao.AppDatabase database = getAppComponent().getDatabase();
             com.thirtydegreesray.openhub.util.TokenCrypto.migrate(database);
             com.thirtydegreesray.openhub.dao.AuthUser account =
@@ -489,7 +500,7 @@ BaseActivity<P extends IBaseContract.Presenter>
     }
 
     protected void postDelayFinish(int time){
-        new Handler().postDelayed(new Runnable() {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
                 finish();
@@ -535,9 +546,9 @@ BaseActivity<P extends IBaseContract.Presenter>
     private void getScreenSize(){
         if(WindowUtil.screenHeight == 0 ||
                 WindowUtil.screenWidth == 0){
-            Display display = getWindowManager().getDefaultDisplay();
-            WindowUtil.screenWidth = display.getWidth();
-            WindowUtil.screenHeight = display.getHeight();
+            android.util.DisplayMetrics metrics = getResources().getDisplayMetrics();
+            WindowUtil.screenWidth = metrics.widthPixels;
+            WindowUtil.screenHeight = metrics.heightPixels;
         }
     }
 
@@ -567,7 +578,7 @@ BaseActivity<P extends IBaseContract.Presenter>
     }
 
     protected void delayFinish(int mills){
-        new Handler().postDelayed(new Runnable() {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
                 finish();

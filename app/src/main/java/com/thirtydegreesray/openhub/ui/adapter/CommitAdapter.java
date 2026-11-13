@@ -80,8 +80,8 @@ public class CommitAdapter extends BaseAdapter<CommitAdapter.ViewHolder, RepoCom
         }
 
         void onUserClick() {
-            if(getAdapterPosition() != RecyclerView.NO_POSITION) {
-                RepoCommit commit = data.get(getAdapterPosition());
+            if(getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+                RepoCommit commit = data.get(getBindingAdapterPosition());
                 String loginId = commit.getAuthor() == null ?
                         commit.getCommit().getAuthor().getName() : commit.getAuthor().getLogin();
                 String userAvatar = commit.getAuthor() == null ?

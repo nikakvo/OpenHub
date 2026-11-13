@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.activity;
 
+import androidx.core.content.pm.PackageInfoCompat;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
@@ -293,10 +294,9 @@ public class AboutActivity extends AppCompatActivity {
                         ? info.signingInfo.getApkContentsSigners()
                         : info.signingInfo.getSigningCertificateHistory();
             } else {
-                @SuppressWarnings("deprecation")
-                PackageInfo info = pm.getPackageInfo(context.getPackageName(),
-                        PackageManager.GET_SIGNATURES);
-                signatures = info.signatures;
+                // Android 8.x: the only signer
+                signatures = PackageInfoCompat.getSignatures(pm, context.getPackageName())
+                        .toArray(new Signature[0]);
             }
             if (signatures == null || signatures.length == 0) return null;
             // the history lists the oldest first: the current key is the last one

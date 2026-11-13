@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.util;
 
+import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
@@ -79,7 +80,8 @@ public class AppOpener {
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_IMMUTABLE : 0);
 
             CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
-                    .setToolbarColor(ViewUtils.getPrimaryColor(context))
+                    .setDefaultColorSchemeParams(new CustomTabColorSchemeParams.Builder()
+                            .setToolbarColor(ViewUtils.getPrimaryColor(context)).build())
                     .setCloseButtonIcon(backIconBitmap)
                     .setShowTitle(true)
                     .addMenuItem(context.getString(R.string.share), sharePendingIntent)

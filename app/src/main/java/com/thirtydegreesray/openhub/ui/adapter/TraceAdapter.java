@@ -183,10 +183,10 @@ public class TraceAdapter extends BaseAdapter<BaseViewHolder, TraceExt>
         }
 
         public void onUserClick(){
-            if(getAdapterPosition() != RecyclerView.NO_POSITION) {
+            if(getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
                 ProfileActivity.show((Activity) context, ivUserAvatar,
-                        data.get(getAdapterPosition()).getRepository().getOwner().getLogin(),
-                        data.get(getAdapterPosition()).getRepository().getOwner().getAvatarUrl());
+                        data.get(getBindingAdapterPosition()).getRepository().getOwner().getLogin(),
+                        data.get(getBindingAdapterPosition()).getRepository().getOwner().getAvatarUrl());
             }
         }
 

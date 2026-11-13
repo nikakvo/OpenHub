@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.adapter;
 
+import androidx.core.content.ContextCompat;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -196,9 +197,9 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
         }
 
         public void onUserClicked() {
-            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
-                ProfileActivity.show((Activity) context, userAvatar, data.get(getAdapterPosition()).getUser().getLogin(),
-                        data.get(getAdapterPosition()).getUser().getAvatarUrl());
+            if (getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+                ProfileActivity.show((Activity) context, userAvatar, data.get(getBindingAdapterPosition()).getUser().getLogin(),
+                        data.get(getBindingAdapterPosition()).getUser().getAvatarUrl());
             }
         }
 
@@ -259,9 +260,9 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
         }
 
         public void onUserClicked() {
-            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
-                ProfileActivity.show((Activity) context, userAvatar, data.get(getAdapterPosition()).getActor().getLogin(),
-                        data.get(getAdapterPosition()).getActor().getAvatarUrl());
+            if (getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+                ProfileActivity.show((Activity) context, userAvatar, data.get(getBindingAdapterPosition()).getActor().getLogin(),
+                        data.get(getBindingAdapterPosition()).getActor().getAvatarUrl());
             }
         }
 
@@ -333,7 +334,7 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
                     text.append(info);
                     break;
                 default:
-//                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+//                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
                     break;
             }
 
@@ -371,70 +372,70 @@ public class IssueTimelineAdapter extends BaseAdapter<BaseViewHolder, IssueEvent
             switch (model.getType()){
                 case reopened:
                     eventIcon.setImageResource(R.drawable.ic_dot);
-                    eventIcon.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
-                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.commit_file_added_color));
+                    eventIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white)));
+                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.commit_file_added_color));
                     setEventIconPadding(8);
                     break;
                 case closed:
                     eventIcon.setImageResource(R.drawable.ic_block);
-                    eventIcon.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
-                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.material_red_800));
+                    eventIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white)));
+                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.material_red_800));
                     recoverEventIconPadding();
                     break;
                 case renamed:
                     eventIcon.setImageResource(R.drawable.ic_edit);
-                    eventIcon.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
-                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.material_grey_500));
+                    eventIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white)));
+                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.material_grey_500));
                     recoverEventIconPadding();
                     break;
                 case locked:
                     eventIcon.setImageResource(R.drawable.ic_lock);
-                    eventIcon.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
-                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.black_light));
+                    eventIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white)));
+                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.black_light));
                     recoverEventIconPadding();
                     break;
                 case unlocked:
                     eventIcon.setImageResource(R.drawable.ic_unlock);
-                    eventIcon.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
-                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.commit_file_added_color));
+                    eventIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white)));
+                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.commit_file_added_color));
                     recoverEventIconPadding();
                     break;
                 case crossReferenced:
                     eventIcon.setImageResource(R.drawable.ic_quote);
-                    eventIcon.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
-                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.material_grey_500));
+                    eventIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white)));
+                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.material_grey_500));
                     recoverEventIconPadding();
                     break;
                 case assigned:
                 case unassigned:
                     eventIcon.setImageResource(R.drawable.ic_menu_person);
-                    eventIcon.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
-                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.material_grey_500));
+                    eventIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white)));
+                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.material_grey_500));
                     recoverEventIconPadding();
                     break;
                 case milestoned:
                 case demilestoned:
                     eventIcon.setImageResource(R.drawable.ic_milestone);
-                    eventIcon.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
-                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.material_grey_500));
+                    eventIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white)));
+                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.material_grey_500));
                     recoverEventIconPadding();
                     break;
                 case commentDeleted:
                     eventIcon.setImageResource(R.drawable.ic_delete);
-                    eventIcon.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
-                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.material_grey_500));
+                    eventIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white)));
+                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.material_grey_500));
                     recoverEventIconPadding();
                     break;
                 case labeled:
                 case unlabeled:
                     eventIcon.setImageResource(R.drawable.ic_label);
-                    eventIcon.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
-                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.material_grey_500));
+                    eventIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white)));
+                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.material_grey_500));
                     recoverEventIconPadding();
                     break;
 
                 default:
-                    eventIcon.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+                    eventIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
                     break;
             }
         }

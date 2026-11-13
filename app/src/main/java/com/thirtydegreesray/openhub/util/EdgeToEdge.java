@@ -45,9 +45,7 @@ public final class EdgeToEdge {
         Window window = activity.getWindow();
         WindowCompat.setDecorFitsSystemWindows(window, false);
         // The keyboard is handled through the IME inset below, never by panning.
-        window.setSoftInputMode((window.getAttributes().softInputMode
-                & ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
-                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        keyboardInsetsOnly(window);
 
         final ViewGroup content = activity.findViewById(android.R.id.content);
         if (content == null) return;
@@ -83,6 +81,37 @@ public final class EdgeToEdge {
                     .build();
         });
         ViewCompat.requestApplyInsets(content);
+    }
+
+    /**
+     * The window gets the keyboard as an IME inset and is never panned or resized by the
+     * system. Android 11+ always sends the IME inset, "adjust nothing" only stops the pan.
+     * Android 8-10 send it only with "adjust resize" (its replacement needs Android 11).
+     */
+    @SuppressWarnings("deprecation")
+    public static void keyboardInsetsOnly(@NonNull Window window) {
+        int mode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                ? WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
+                : WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+        window.setSoftInputMode((window.getAttributes().softInputMode
+                & ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST) | mode);
+    }
+
+    /**
+     * A floating dialog window shrinks above the keyboard. Android 11+ does this through
+     * the window's inset types, Android 8-10 only know "adjust resize".
+     */
+    @SuppressWarnings("deprecation")
+    public static void dialogAboveKeyboard(@NonNull Window window) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowManager.LayoutParams lp = window.getAttributes();
+            lp.setFitInsetsTypes(lp.getFitInsetsTypes() | android.view.WindowInsets.Type.ime());
+            lp.softInputMode = (lp.softInputMode & ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
+                    | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+            window.setAttributes(lp);
+        } else {
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
     }
 
     /**
@@ -129,7 +158,6 @@ public final class EdgeToEdge {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // The navigation bar strip is painted by BarsDrawable: no system scrim on top.
             window.setNavigationBarContrastEnforced(false);
-            window.setStatusBarContrastEnforced(false);
         }
         WindowInsetsControllerCompat controller =
                 WindowCompat.getInsetsController(window, window.getDecorView());
@@ -225,6 +253,7 @@ public final class EdgeToEdge {
         }
 
         @Override
+        @SuppressWarnings("deprecation") // abstract in Drawable, must be implemented
         public int getOpacity() {
             return PixelFormat.TRANSLUCENT;
         }

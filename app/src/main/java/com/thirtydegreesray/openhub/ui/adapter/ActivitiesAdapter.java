@@ -84,9 +84,9 @@ public class ActivitiesAdapter extends BaseAdapter<ActivitiesAdapter.ViewHolder,
         }
 
         void onUserClick() {
-            if(getAdapterPosition() != RecyclerView.NO_POSITION) {
-                String loginId = data.get(getAdapterPosition()).getActor().getLogin();
-                String userAvatar = data.get(getAdapterPosition()).getActor().getAvatarUrl();
+            if(getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+                String loginId = data.get(getBindingAdapterPosition()).getActor().getLogin();
+                String userAvatar = data.get(getBindingAdapterPosition()).getActor().getAvatarUrl();
                 ProfileActivity.show((Activity) context, ViewHolder.this.userAvatar, loginId, userAvatar);
             }
         }

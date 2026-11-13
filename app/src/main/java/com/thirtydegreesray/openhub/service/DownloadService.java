@@ -217,17 +217,13 @@ public class DownloadService extends Service {
 
     private synchronized void stopIfIdle() {
         if (tasks.isEmpty()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                stopForeground(STOP_FOREGROUND_REMOVE);
-            } else {
-                stopForeground(true);
-            }
+            stopForeground(STOP_FOREGROUND_REMOVE);
             stopSelf();
         }
     }
 
     private int immutableFlag() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
+        return PendingIntent.FLAG_IMMUTABLE;
     }
 
     private void notifyProgress(Task task, String text) {

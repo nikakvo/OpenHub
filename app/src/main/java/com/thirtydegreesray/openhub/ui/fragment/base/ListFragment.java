@@ -135,7 +135,7 @@ public abstract class ListFragment <P extends IBaseContract.Presenter, A extends
             }
         };
         adapter.registerAdapterDataObserver(observer);
-        recyclerView.setOnScrollListener(new ScrollListener());
+        recyclerView.addOnScrollListener(new ScrollListener());
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {

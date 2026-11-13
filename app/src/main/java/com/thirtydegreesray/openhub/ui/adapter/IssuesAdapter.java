@@ -100,8 +100,8 @@ public class IssuesAdapter extends BaseAdapter<IssuesAdapter.ViewHolder, Issue> 
         }
 
         public void onUserClick(){
-            if(getAdapterPosition() != RecyclerView.NO_POSITION) {
-                Issue issue = data.get(getAdapterPosition());
+            if(getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+                Issue issue = data.get(getBindingAdapterPosition());
                 ProfileActivity.show((Activity) context, userAvatar, issue.getUser().getLogin(),
                         issue.getUser().getAvatarUrl());
             }

@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.adapter;
 
+import androidx.core.content.ContextCompat;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import androidx.annotation.NonNull;
@@ -57,7 +58,7 @@ public class TopicsAdapter extends BaseAdapter<TopicsAdapter.ViewHolder, Topic> 
             holder.image.setImageResource(R.drawable.ic_topic);
         } else {
             holder.image.setPadding(0, 0, 0, 0);
-            int transparentColor = context.getResources().getColor(R.color.transparent);
+            int transparentColor = ContextCompat.getColor(context, R.color.transparent);
             holder.image.setBackgroundColor(transparentColor);
             holder.image.setImageTintList(null);
             GlideApp.with(fragment)

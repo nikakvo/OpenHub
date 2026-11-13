@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -49,7 +50,7 @@ public class IssueCrossReferencedSource implements Parcelable {
     protected IssueCrossReferencedSource(Parcel in) {
         int tmpType = in.readInt();
         this.type = tmpType == -1 ? null : Type.values()[tmpType];
-        this.issue = in.readParcelable(Issue.class.getClassLoader());
+        this.issue = ParcelCompat.readParcelable(in, Issue.class.getClassLoader(), Issue.class);
     }
 
     public static final Parcelable.Creator<IssueCrossReferencedSource> CREATOR = new Parcelable.Creator<IssueCrossReferencedSource>() {

@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.mvp.model;
 
+import androidx.core.os.ParcelCompat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -157,7 +158,7 @@ public class Milestone implements Parcelable {
         this.number = in.readInt();
         this.title = in.readString();
         this.description = in.readString();
-        this.creator = in.readParcelable(User.class.getClassLoader());
+        this.creator = ParcelCompat.readParcelable(in, User.class.getClassLoader(), User.class);
         this.openIssues = in.readInt();
         this.closedIssues = in.readInt();
         int tmpState = in.readInt();

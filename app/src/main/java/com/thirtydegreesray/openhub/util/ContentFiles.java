@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.util;
 
+import androidx.core.content.IntentCompat;
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -110,14 +111,13 @@ public final class ContentFiles {
 
     /** Files of an ACTION_SEND / ACTION_SEND_MULTIPLE intent. */
     @NonNull
-    @SuppressWarnings("deprecation")
     public static ArrayList<UploadItem> fromShareIntent(@NonNull Context context, @NonNull Intent intent) {
         ArrayList<Uri> uris = new ArrayList<>();
         if (Intent.ACTION_SEND_MULTIPLE.equals(intent.getAction())) {
-            ArrayList<Uri> list = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            ArrayList<Uri> list = IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, Uri.class);
             if (list != null) uris.addAll(list);
         } else {
-            Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            Uri uri = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri.class);
             if (uri != null) uris.add(uri);
         }
         if (uris.isEmpty() && intent.getClipData() != null) {
