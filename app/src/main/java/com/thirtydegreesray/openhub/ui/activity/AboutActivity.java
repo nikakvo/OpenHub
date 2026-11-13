@@ -62,6 +62,15 @@ import java.security.MessageDigest;
 
 public class AboutActivity extends AppCompatActivity {
 
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(newBase);
+        // the app's texts in the app language, the keyboard keeps the phone's languages
+        // (AppCompat builds its own configuration from the base, so set it on top)
+        applyOverrideConfiguration(com.thirtydegreesray.openhub.util.AppUtils.appLanguageConfiguration());
+    }
+
+
     /** Taps on the version that open the easter egg. */
     private static final int EGG_TAPS = 7;
     /** A longer pause between taps starts counting again. */

@@ -33,7 +33,7 @@ public class AppApplication extends Application {
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
+        super.attachBaseContext(com.thirtydegreesray.openhub.util.AppUtils.withAppLanguage(base));
 //        MultiDex.install(this);
     }
 

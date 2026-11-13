@@ -52,6 +52,15 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 @OptIn(markerClass = UnstableApi.class)
 public class VideoPlayerActivity extends AppCompatActivity {
 
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(newBase);
+        // the app's texts in the app language, the keyboard keeps the phone's languages
+        // (AppCompat builds its own configuration from the base, so set it on top)
+        applyOverrideConfiguration(com.thirtydegreesray.openhub.util.AppUtils.appLanguageConfiguration());
+    }
+
+
     private static final String EXTRA_URL = "url";
     private static final String STATE_POSITION = "position";
 

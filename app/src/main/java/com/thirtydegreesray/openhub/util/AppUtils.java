@@ -64,22 +64,46 @@ public class AppUtils {
 
 
     /**
-     * The app is English only. Android 13+ keeps the language of each app in the system
-     * (LocaleManager, also shown in the app's system settings), older versions get it
-     * from AppCompat for every screen. Called once when the app starts.
+     * The app is English only, for its own texts and the Android texts it shows (menus,
+     * dialogs). Only the app's resources get the language: the system and the keyboard keep
+     * the phone's languages. Called once when the app starts.
      */
     public static void applyAppLanguage(@NonNull Context context) {
-        Locale locale = getLocale(PrefUtils.getLanguage());
-        Locale.setDefault(locale);
+        Locale.setDefault(getLocale(PrefUtils.getLanguage()));
+        // 3.16.0 test builds stored "en" as the system app language (the keyboard then
+        // offered English only): remove it again
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             LocaleManager manager = context.getSystemService(LocaleManager.class);
-            LocaleList wanted = new LocaleList(locale);
-            if (manager != null && !wanted.equals(manager.getApplicationLocales())) {
-                manager.setApplicationLocales(wanted);
+            if (manager != null && !manager.getApplicationLocales().isEmpty()) {
+                manager.setApplicationLocales(LocaleList.getEmptyLocaleList());
             }
-        } else {
-            AppCompatDelegate.setApplicationLocales(LocaleListCompat.create(locale));
+        } else if (!AppCompatDelegate.getApplicationLocales().isEmpty()) {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList());
         }
+    }
+
+    /** Only the app language, applied over a screen's configuration. */
+    @NonNull
+    public static Configuration appLanguageConfiguration() {
+        Configuration configuration = new Configuration();
+        configuration.setLocale(getLocale(PrefUtils.getLanguage()));
+        return configuration;
+    }
+
+    /**
+     * {@code base} with the app language for its resources (attachBaseContext of the
+     * application and the screens), the current way to replace updateConfiguration.
+     */
+    @NonNull
+    public static Context withAppLanguage(@NonNull Context base) {
+        Locale locale = getLocale(PrefUtils.getLanguage());
+        Configuration current = base.getResources().getConfiguration();
+        if (locale.equals(current.getLocales().get(0)) && current.getLocales().size() == 1) {
+            return base;
+        }
+        Configuration configuration = new Configuration(current);
+        configuration.setLocale(locale);
+        return base.createConfigurationContext(configuration);
     }
 
     /**

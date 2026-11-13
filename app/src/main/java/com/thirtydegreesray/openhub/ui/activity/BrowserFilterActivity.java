@@ -19,6 +19,15 @@ import com.thirtydegreesray.openhub.util.AppOpener;
 
 public class BrowserFilterActivity extends AppCompatActivity {
 
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(newBase);
+        // the app's texts in the app language, the keyboard keeps the phone's languages
+        // (AppCompat builds its own configuration from the base, so set it on top)
+        applyOverrideConfiguration(com.thirtydegreesray.openhub.util.AppUtils.appLanguageConfiguration());
+    }
+
+
     /** Opens the notifications inbox (from the background check's summary notification). */
     public static final String NOTIFICATIONS = "notifications";
     /**
