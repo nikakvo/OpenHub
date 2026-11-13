@@ -740,6 +740,15 @@
         <item quantity="other">%d artifacts</item>
     </plurals>
 
+    <!-- Filter field of the repository lists -->
+    <string name="repo_filter_hint">Filter by name, description, language or topic</string>
+    <string name="repo_filter_clear">Clear the filter</string>
+    <string name="repo_filter_loading">%1$d matches · loading all repositories (%2$d so far)…</string>
+    <string name="repo_filter_count">%1$d of %2$d repositories</string>
+    <string name="repo_filter_partial">%1$d of %2$d loaded repositories · the rest could not be loaded</string>
+    <string name="repo_filter_first">%1$d of the first %2$d repositories</string>
+    <string name="repo_filter_no_match">No repository matches \"%s\".</string>
+
     <!-- Release feed of starred repositories -->
     <string name="release_feed_title">Releases</string>
     <string name="release_feed_new">New</string>

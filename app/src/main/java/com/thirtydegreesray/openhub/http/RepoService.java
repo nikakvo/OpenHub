@@ -73,6 +73,38 @@ public interface RepoService {
             @Query("direction") String direction
     );
 
+    /** The same lists with 100 per page, for the filter that needs all repositories. */
+    @NonNull @GET("users/{user}/starred")
+    Observable<Response<ArrayList<Repository>>> getStarredReposPage(
+            @Header("forceNetWork") boolean forceNetWork,
+            @Path("user") @NonNull String user,
+            @Query("page") int page,
+            @Query("per_page") int perPage,
+            @Query("sort") String sort,
+            @Query("direction") String direction
+    );
+
+    @NonNull @GET("user/repos")
+    Observable<Response<ArrayList<Repository>>> getUserReposPage(
+            @Header("forceNetWork") boolean forceNetWork,
+            @Query("page") int page,
+            @Query("per_page") int perPage,
+            @Query("type") String type,
+            @Query("sort") String sort,
+            @Query("direction") String direction
+    );
+
+    @NonNull @GET("users/{user}/repos")
+    Observable<Response<ArrayList<Repository>>> getUserPublicReposPage(
+            @Header("forceNetWork") boolean forceNetWork,
+            @Path("user") @NonNull String user,
+            @Query("page") int page,
+            @Query("per_page") int perPage,
+            @Query("type") String type,
+            @Query("sort") String sort,
+            @Query("direction") String direction
+    );
+
     /**
      * Check if you are starring a repository
      */

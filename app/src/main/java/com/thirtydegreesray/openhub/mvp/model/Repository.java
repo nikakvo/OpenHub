@@ -10,6 +10,7 @@ import com.google.gson.annotations.SerializedName;
 import com.thirtydegreesray.openhub.dao.LocalRepo;
 import com.thirtydegreesray.openhub.mvp.model.filter.TrendingSince;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -27,6 +28,8 @@ public class Repository implements Parcelable {
     @SerializedName("html_url") private String htmlUrl;
     private String description;
     private String language;
+    /** GitHub topics (the list endpoints include them). */
+    private ArrayList<String> topics;
     private User owner;
 
     @SerializedName("default_branch") private String defaultBranch ;
@@ -144,6 +147,11 @@ public class Repository implements Parcelable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @androidx.annotation.Nullable
+    public ArrayList<String> getTopics() {
+        return topics;
     }
 
     public String getLanguage() {
@@ -404,6 +412,7 @@ public class Repository implements Parcelable {
         dest.writeInt(this.sinceStargazersCount);
         dest.writeInt(this.since == null ? -1 : this.since.ordinal());
         dest.writeByte(this.hasPullRequests == null ? (byte) -1 : this.hasPullRequests ? (byte) 1 : (byte) 0);
+        dest.writeStringList(this.topics);
 
     }
 
@@ -447,6 +456,7 @@ public class Repository implements Parcelable {
         this.since = tmpTrendingSince == -1 ? null : TrendingSince.values()[tmpTrendingSince];
         byte tmpHasPulls = in.readByte();
         this.hasPullRequests = tmpHasPulls == -1 ? null : tmpHasPulls == 1;
+        this.topics = in.createStringArrayList();
     }
 
     public static final Creator<Repository> CREATOR = new Creator<Repository>() {

@@ -2,6 +2,13 @@
 
 package com.thirtydegreesray.openhub.ui.fragment;
 
+import com.thirtydegreesray.openhub.util.AppUtils;
+import android.view.inputmethod.EditorInfo;
+import android.text.TextWatcher;
+import android.text.Editable;
+import android.widget.TextView;
+import android.widget.EditText;
+import androidx.core.os.BundleCompat;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -112,7 +119,64 @@ public class RepositoriesFragment extends ListFragment<RepositoriesPresenter, Re
 
     @Override
     protected int getLayoutId() {
-        return R.layout.fragment_list;
+        return hasFilterField() ? R.layout.fragment_repo_list : R.layout.fragment_list;
+    }
+
+    /** My, starred and a user's repositories get the filter field (read before the presenter). */
+    private boolean hasFilterField() {
+        RepositoriesType type = getArguments() == null ? null
+                : BundleCompat.getSerializable(getArguments(), "type", RepositoriesType.class);
+        return RepositoriesType.OWNED.equals(type) || RepositoriesType.PUBLIC.equals(type)
+                || RepositoriesType.STARRED.equals(type);
+    }
+
+    @Nullable private EditText filterEdit;
+    @Nullable private View filterClear;
+    @Nullable private TextView filterStatus;
+
+    @Override
+    protected void bindViews(View root) {
+        super.bindViews(root);
+        filterEdit = root.findViewById(R.id.repo_filter);
+        filterClear = root.findViewById(R.id.repo_filter_clear);
+        filterStatus = root.findViewById(R.id.repo_filter_status);
+        if (filterEdit == null) return;
+        filterEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (filterClear != null) filterClear.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+                if (mPresenter != null) mPresenter.setQuery(s.toString());
+            }
+        });
+        filterEdit.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                AppUtils.hideKeyboard(v);
+                return true;
+            }
+            return false;
+        });
+        if (filterClear != null) filterClear.setOnClickListener(v -> filterEdit.setText(""));
+    }
+
+    @Override
+    public void setFiltering(boolean filtering) {
+        setLoadMoreEnable(!filtering);
+        if (filtering) setCanLoadMore(false);
+    }
+
+    @Override
+    public void showFilterStatus(@Nullable String status) {
+        if (filterStatus == null) return;
+        filterStatus.setText(status);
+        filterStatus.setVisibility(status == null ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -155,6 +219,9 @@ public class RepositoriesFragment extends ListFragment<RepositoriesPresenter, Re
     protected String getEmptyTip() {
         if(RepositoriesType.TRENDING.equals(mPresenter.getType())){
             return String.format(getString(R.string.no_trending_repos), mPresenter.getLanguage().getName());
+        }
+        if (mPresenter.isFilterable() && !mPresenter.getQuery().isEmpty()) {
+            return getString(R.string.repo_filter_no_match, mPresenter.getQuery());
         }
         return getString(R.string.no_repository);
     }

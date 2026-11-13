@@ -22,6 +22,14 @@ public interface IRepositoriesContract {
 
         void showRepositories(ArrayList<Repository> repositoryList);
 
+        /** The filter field has text: no "load more" while the matches are shown. */
+        default void setFiltering(boolean filtering) {
+        }
+
+        /** The status line under the filter field, null to hide it. */
+        default void showFilterStatus(@androidx.annotation.Nullable String status) {
+        }
+
     }
 
     interface Presenter extends IBasePagerContract.Presenter<IRepositoriesContract.View> {

@@ -34,6 +34,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.thirtydegreesray.openhub.util.RepoFilter;
+import com.thirtydegreesray.openhub.util.AppLog;
+import io.reactivex.rxjava3.disposables.Disposable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +77,20 @@ public class RepositoriesPresenter extends BasePagerPresenter<IRepositoriesContr
     @AutoAccess Collection collection;
     @AutoAccess Topic topic;
 
+    /** The filter field: every repository of the list, 100 per page. */
+    static final int ALL_PER_PAGE = 100;
+    /** At most 5000 repositories are read for the filter. */
+    static final int ALL_MAX_PAGES = 50;
+
+    @NonNull private String query = "";
+    /** Every repository of the list (complete), null until read. */
+    @Nullable private ArrayList<Repository> allRepos;
+    /** Read so far while {@link #allLoad} runs. */
+    @Nullable private ArrayList<Repository> partialRepos;
+    @Nullable private Disposable allLoad;
+    private boolean allLoadFailed;
+    private boolean allTruncated;
+
     @Inject
     public RepositoriesPresenter(AppDatabase db) {
         super(db);
@@ -112,6 +129,7 @@ public class RepositoriesPresenter extends BasePagerPresenter<IRepositoriesContr
     @Override
     public void loadRepositories(final boolean isReLoad, final int page) {
         filter = getFilter();
+        if ((isReLoad || page == 1) && isFilterable()) resetAllRepos();
         if (type.equals(RepositoriesFragment.RepositoriesType.SEARCH)) {
             searchRepos(page);
             return;
@@ -149,8 +167,10 @@ public class RepositoriesPresenter extends BasePagerPresenter<IRepositoriesContr
                 }
                 if (response.body().size() == 0 && repos.size() != 0) {
                     mView.setCanLoadMore(false);
-                } else {
+                } else if (query.isEmpty()) {
                     mView.showRepositories(repos);
+                } else {
+                    publishFiltered();
                 }
             }
         };
@@ -241,6 +261,133 @@ public class RepositoriesPresenter extends BasePagerPresenter<IRepositoriesContr
         } else {
             mView.showLoadError(getErrorTip(error));
         }
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Filter field (my, starred and a user's repositories)
+    // ---------------------------------------------------------------------------------
+
+    /** Lists that get the filter field. */
+    public boolean isFilterable() {
+        return RepositoriesFragment.RepositoriesType.OWNED.equals(type)
+                || RepositoriesFragment.RepositoriesType.PUBLIC.equals(type)
+                || RepositoriesFragment.RepositoriesType.STARRED.equals(type);
+    }
+
+    @NonNull
+    public String getQuery() {
+        return query;
+    }
+
+    /** The text of the filter field changed. */
+    public void setQuery(@Nullable String text) {
+        String next = text == null ? "" : text.trim();
+        if (next.equals(query)) return;
+        query = next;
+        if (mView == null) return;
+        mView.setFiltering(!query.isEmpty());
+        if (query.isEmpty()) {
+            mView.showFilterStatus(null);
+            if (repos != null) mView.showRepositories(repos);
+            return;
+        }
+        if (allRepos == null && allLoad == null) loadAllRepos();
+        publishFiltered();
+    }
+
+    /** Shows the matches and a status with the real counts. */
+    private void publishFiltered() {
+        if (mView == null || query.isEmpty()) return;
+        List<Repository> source = allRepos != null ? allRepos
+                : partialRepos != null && (repos == null || partialRepos.size() >= repos.size())
+                ? partialRepos : repos;
+        ArrayList<Repository> shown = RepoFilter.filter(source, query);
+        mView.showRepositories(shown);
+        int total = source == null ? 0 : source.size();
+        String status;
+        if (allLoad != null) {
+            status = String.format(getString(R.string.repo_filter_loading), shown.size(), total);
+        } else if (allLoadFailed) {
+            status = String.format(getString(R.string.repo_filter_partial), shown.size(), total);
+        } else if (allTruncated) {
+            status = String.format(getString(R.string.repo_filter_first), shown.size(), total);
+        } else {
+            status = String.format(getString(R.string.repo_filter_count), shown.size(), total);
+        }
+        mView.showFilterStatus(status);
+    }
+
+    /** Reads every page (100 each) in the background, the list updates after each page. */
+    private void loadAllRepos() {
+        allLoadFailed = false;
+        allTruncated = false;
+        partialRepos = null;
+        final RepositoriesFilter listFilter = getFilter();
+        allLoad = Observable.<ArrayList<Repository>>create(emitter -> {
+            ArrayList<Repository> all = new ArrayList<>();
+            for (int page = 1; page <= ALL_MAX_PAGES && !emitter.isDisposed(); page++) {
+                Response<ArrayList<Repository>> response = allReposPage(listFilter, page).blockingFirst();
+                if (!response.isSuccessful() || response.body() == null) {
+                    throw new IOException("HTTP " + response.code());
+                }
+                all.addAll(response.body());
+                boolean last = response.body().size() < ALL_PER_PAGE;
+                if (!last && page == ALL_MAX_PAGES) allTruncated = true;
+                emitter.onNext(new ArrayList<>(all));
+                if (last) break;
+            }
+            emitter.onComplete();
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(list -> {
+                    partialRepos = list;
+                    publishFiltered();
+                }, error -> {
+                    AppLog.e("RepositoriesPresenter", "loadAllRepos", error);
+                    allLoad = null;
+                    allLoadFailed = true;
+                    publishFiltered();
+                }, () -> {
+                    allRepos = partialRepos != null ? partialRepos : new ArrayList<>();
+                    partialRepos = null;
+                    allLoad = null;
+                    publishFiltered();
+                });
+    }
+
+    @NonNull
+    private Observable<Response<ArrayList<Repository>>> allReposPage(
+            @NonNull RepositoriesFilter listFilter, int page) {
+        switch (type) {
+            case OWNED:
+                return getRepoService().getUserReposPage(true, page, ALL_PER_PAGE,
+                        listFilter.getType(), listFilter.getSort(), listFilter.getSortDirection());
+            case PUBLIC:
+                return getRepoService().getUserPublicReposPage(true, user, page, ALL_PER_PAGE,
+                        listFilter.getType(), listFilter.getSort(), listFilter.getSortDirection());
+            default:
+                return getRepoService().getStarredReposPage(true, user, page, ALL_PER_PAGE,
+                        listFilter.getSort(), listFilter.getSortDirection());
+        }
+    }
+
+    /** The list was loaded again or sorted otherwise: the complete list is read again. */
+    private void resetAllRepos() {
+        if (allLoad != null) allLoad.dispose();
+        allLoad = null;
+        allRepos = null;
+        partialRepos = null;
+        allLoadFailed = false;
+        allTruncated = false;
+        if (!query.isEmpty()) loadAllRepos();
+    }
+
+    @Override
+    public void detachView() {
+        if (allLoad != null) allLoad.dispose();
+        allLoad = null;
+        super.detachView();
     }
 
     public String getUser() {
