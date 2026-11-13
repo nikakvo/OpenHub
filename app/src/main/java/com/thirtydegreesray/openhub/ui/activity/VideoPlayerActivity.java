@@ -252,7 +252,6 @@ public class VideoPlayerActivity extends AppCompatActivity {
      * / pause button. On Android 12+ it opens by itself when the user goes home while the
      * video plays; before, {@link #onUserLeaveHint()} opens it.
      */
-    @androidx.annotation.RequiresApi(Build.VERSION_CODES.O)
     @NonNull
     private android.app.PictureInPictureParams pipParams() {
         android.app.PictureInPictureParams.Builder builder =
@@ -269,8 +268,8 @@ public class VideoPlayerActivity extends AppCompatActivity {
         String label = getString(playing ? R.string.video_pause : R.string.video_play);
         android.app.RemoteAction action = new android.app.RemoteAction(
                 android.graphics.drawable.Icon.createWithResource(this, playing
-                        ? androidx.media3.ui.R.drawable.exo_icon_pause
-                        : androidx.media3.ui.R.drawable.exo_icon_play),
+                        ? R.drawable.ic_pip_pause
+                        : R.drawable.ic_pip_play),
                 label, label, pending);
         builder.setActions(java.util.Collections.singletonList(action));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

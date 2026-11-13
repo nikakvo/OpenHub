@@ -14,7 +14,7 @@
         android:icon="@drawable/ic_sort_title"
         android:title="@string/sort"
         app:showAsAction="always">
-        <menu xmlns:android="http://schemas.android.com/apk/res/android">
+        <menu>
             <item
                 android:id="@+id/action_bast_match"
                 android:title="@string/best_match"/>

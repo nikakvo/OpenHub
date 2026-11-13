@@ -185,7 +185,7 @@
         <item >@color/material_amber_accent_700</item>
         <item >@color/material_blue_900</item>
         <item >@color/material_blue_accent_700</item>
-        <item >@color/material_blue_grey_900</item>
+        <item >@color/blue_grey_900</item>
         <item >@color/material_brown_900</item>
         <item >@color/material_cyan_900</item>
         <item >@color/material_cyan_accent_700</item>

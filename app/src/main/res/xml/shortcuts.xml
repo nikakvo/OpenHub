@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shortcuts xmlns:tools="http://schemas.android.com/tools"
-           xmlns:android="http://schemas.android.com/apk/res/android">
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
 
     <shortcut
         android:shortcutId="search"
@@ -8,8 +7,7 @@
         android:icon="@mipmap/ic_search"
         android:shortcutShortLabel="@string/search"
         android:shortcutLongLabel="@string/search"
-        android:shortcutDisabledMessage="@string/search"
-        tools:targetApi="n_mr1">
+        android:shortcutDisabledMessage="@string/search">
         <intent
             android:action="android.intent.action.VIEW"
             android:data="search"
@@ -24,8 +22,7 @@
         android:icon="@mipmap/ic_trending"
         android:shortcutShortLabel="@string/trending"
         android:shortcutLongLabel="@string/trending"
-        android:shortcutDisabledMessage="@string/trending"
-        tools:targetApi="n_mr1">
+        android:shortcutDisabledMessage="@string/trending">
         <intent
             android:action="android.intent.action.VIEW"
             android:data="trending"
