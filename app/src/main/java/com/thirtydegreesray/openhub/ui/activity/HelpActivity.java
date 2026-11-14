@@ -13,11 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
+import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.ui.widget.webview.CodeWebView;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
@@ -94,6 +96,14 @@ public class HelpActivity extends BaseActivity<IBaseContract.Presenter> {
                     return true;
                 }
                 return false;
+            }
+
+            @Override
+            public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                // Android closed the page's renderer: close Help instead of the whole app
+                CodeWebView.renderGone(view);
+                finish();
+                return true;
             }
         });
         if (savedInstanceState != null) web.restoreState(savedInstanceState);

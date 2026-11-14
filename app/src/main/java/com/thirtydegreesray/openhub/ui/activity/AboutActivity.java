@@ -128,9 +128,10 @@ public class AboutActivity extends AppCompatActivity {
         addItem(appItems, R.drawable.ic_code, getString(R.string.about_license),
                 getString(R.string.about_license_name), 0xFFE3B341,
                 v -> AppOpener.openInCustomTabsOrBrowser(this, getString(R.string.about_license_url)));
-        addItem(appItems, R.drawable.ic_pref_shield, getString(R.string.about_security),
-                getString(R.string.about_security_summary), 0xFFF85149,
-                v -> AppOpener.openInBrowser(this, getString(R.string.about_security_url)));
+        // its own icon and color: the red shield below means "intercepted" (Device security)
+        addItem(appItems, R.drawable.ic_issues, getString(R.string.about_security),
+                getString(R.string.about_security_summary), 0xFFA371F7,
+                v -> AppOpener.openInCustomTabsOrBrowser(this, getString(R.string.about_security_url)));
         securityRow = addItem(appItems, R.drawable.ic_pref_shield, getString(R.string.device_security),
                 getString(R.string.device_security_checking), SECURITY_GREY, v -> showSecurityDetails());
         String sha = signingSha256(this);

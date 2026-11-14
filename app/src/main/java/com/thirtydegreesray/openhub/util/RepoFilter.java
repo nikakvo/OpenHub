@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 
 import com.thirtydegreesray.openhub.mvp.model.Repository;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,12 +29,12 @@ public final class RepoFilter {
     private RepoFilter() {
     }
 
-    /** The words of a query, lower case; empty for a blank query. */
+    /** The words of a query, lower case and without accents; empty for a blank query. */
     @NonNull
     public static List<String> words(@Nullable String query) {
         List<String> words = new ArrayList<>();
         if (query == null) return words;
-        for (String word : query.trim().toLowerCase(Locale.ROOT).split("\\s+")) {
+        for (String word : lower(query).trim().split("\\s+")) {
             if (!word.isEmpty()) words.add(word);
         }
         return words;
@@ -82,8 +83,46 @@ public final class RepoFilter {
         return result;
     }
 
+    /**
+     * Lower case without accents on Latin letters, so "cancion" finds "canción" and "Canción"
+     * finds "cancion": a Latin letter is split from its marks (NFD) and the marks dropped; a
+     * few letters that do not split that way are mapped by hand. Other scripts stay as they are
+     * (Cyrillic й and и are different letters).
+     */
     @NonNull
-    private static String lower(@Nullable String text) {
-        return text == null ? "" : text.toLowerCase(Locale.ROOT);
+    static String lower(@Nullable String text) {
+        if (text == null || text.isEmpty()) return "";
+        String low = text.toLowerCase(Locale.ROOT);
+        StringBuilder out = null;
+        for (int i = 0; i < low.length(); i++) {
+            char c = low.charAt(i);
+            if (c <= 0x7F) {
+                if (out != null) out.append(c);
+                continue;
+            }
+            if (out == null) out = new StringBuilder(low.length()).append(low, 0, i);
+            switch (c) {
+                case '\u00df': out.append("ss"); continue; // ß
+                case '\u0142': out.append('l'); continue;  // ł
+                case '\u00f8': out.append('o'); continue;  // ø
+                case '\u0111': out.append('d'); continue;  // đ
+                case '\u0131': out.append('i'); continue;  // dotless i
+                case '\u00e6': out.append("ae"); continue; // æ
+                case '\u0153': out.append("oe"); continue; // œ
+                default: break;
+            }
+            if (c >= 0x0300 && c <= 0x036F) continue; // a loose accent mark (e.g. from "İ")
+            boolean latin = (c >= 0x00C0 && c <= 0x024F) || (c >= 0x1E00 && c <= 0x1EFF);
+            if (!latin) {
+                out.append(c);
+                continue;
+            }
+            String parts = Normalizer.normalize(String.valueOf(c), Normalizer.Form.NFD);
+            for (int k = 0; k < parts.length(); k++) {
+                char p = parts.charAt(k);
+                if (Character.getType(p) != Character.NON_SPACING_MARK) out.append(p);
+            }
+        }
+        return out == null ? low : out.toString();
     }
 }

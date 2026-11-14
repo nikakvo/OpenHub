@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
+import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -291,6 +292,30 @@ public class CodeWebView extends WebView {
             startActivity(request.getUrl());
             return true;
         }
+
+        /**
+         * Android closed the page's renderer (low memory, or it crashed): without this the
+         * whole app is closed. The page is taken off the screen; the rest of the screen stays.
+         */
+        @Override
+        public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+            renderGone(view);
+            return true;
+        }
+    }
+
+    /** Removes a WebView whose renderer is gone (it must not be used any more) and says so. */
+    public static void renderGone(@NonNull WebView view) {
+        ViewParent parent = view.getParent();
+        if (parent instanceof ViewGroup) ((ViewGroup) parent).removeView(view);
+        try {
+            view.destroy();
+        } catch (Exception ignored) {
+            // already gone
+        }
+        com.thirtydegreesray.openhub.util.Toasts.warning(view.getContext(),
+                view.getContext().getString(R.string.web_render_gone),
+                android.widget.Toast.LENGTH_LONG).show();
     }
 
     private String getCodeBackgroundColor(){

@@ -295,7 +295,8 @@ public final class AttachFlow {
                 .setTitle(title)
                 .setMessage(StringUtils.isBlank(message) ? "-" : message);
         if (offerWeb) {
-            builder.setPositiveButton(R.string.attach_open_web, (d, w) -> AppOpener.openInBrowser(activity,
+            // a Custom Tab over OpenHub (the browser's own GitHub sign-in); Back returns to the draft
+            builder.setPositiveButton(R.string.attach_open_web, (d, w) -> AppOpener.openInCustomTabsOrBrowser(activity,
                     StringUtils.isBlank(webUrl) ? "https://github.com/" + owner + "/" + repo + "/issues" : webUrl))
                     .setNegativeButton(R.string.close, null);
         } else {

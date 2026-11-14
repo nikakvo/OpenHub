@@ -48,4 +48,23 @@ public class RepoFilterTest {
         assertEquals(RepoFilter.OTHER, RepoFilter.score(null, null, null, null, null,
                 RepoFilter.words("")));
     }
+
+    @Test
+    public void accentsDoNotMatter() {
+        assertEquals("cancion", RepoFilter.lower("Canci\u00f3n"));
+        assertEquals("strasse uber", RepoFilter.lower("Stra\u00dfe \u00dcber"));
+        assertEquals("lodz", RepoFilter.lower("\u0141\u00f3d\u017a"));
+        assertTrue(score("canci\u00f3n-app", null, null, null, "cancion") > RepoFilter.NONE);
+        assertTrue(score("cancion-app", null, null, null, "Canci\u00f3n") > RepoFilter.NONE);
+        assertTrue(score("tool", "Gr\u00fc\u00dfe aus K\u00f6ln", null, null, "grusse koln") > RepoFilter.NONE);
+    }
+
+    @Test
+    public void otherScriptsKeepTheirLetters() {
+        // Cyrillic \u0439 (short i) is its own letter, not \u0438 with a mark
+        assertEquals("\u043c\u043e\u0439", RepoFilter.lower("\u041c\u043e\u0439"));
+        assertEquals(RepoFilter.NONE, score("\u043c\u043e\u0438", null, null, null, "\u043c\u043e\u0439"));
+        assertEquals("open hub", RepoFilter.lower("Open Hub"));
+        assertEquals("", RepoFilter.lower(null));
+    }
 }

@@ -147,6 +147,17 @@ final class HtmlSpanner {
      * order it gets the spans: a higher priority for the outer block keeps the inner
      * marker or bar next to its own text instead of at the left edge.
      */
+    /**
+     * The grey text color of a quote or the footnotes. Android applies text spans in priority
+     * order, the last one wins: a high priority puts this one first, so links and mentions
+     * inside keep their own color, like on github.com.
+     */
+    private void greyText(int start) {
+        if (out.length() <= start) return;
+        out.setSpan(new ForegroundColorSpan(style.secondaryColor), start, out.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE | (250 << Spanned.SPAN_PRIORITY_SHIFT));
+    }
+
     private void marginSpan(@NonNull Object what, int start) {
         if (out.length() <= start) return;
         int priority = Math.max(1, 200 - marginDepth);
@@ -257,7 +268,7 @@ final class HtmlSpanner {
                 children(e);
                 marginDepth--;
                 marginSpan(new QuoteStyle.BarSpan(style.quoteBar, style.quoteBarWidth, style.quoteGap), start);
-                span(new ForegroundColorSpan(style.secondaryColor), start);
+                greyText(start);
                 close(gap());
                 return;
             case "ul": case "ol":
@@ -424,7 +435,7 @@ final class HtmlSpanner {
         tightNext = true;
         children(e);
         span(new RelativeSizeSpan(0.85f), start);
-        span(new ForegroundColorSpan(style.secondaryColor), start);
+        greyText(start);
         close(gap());
     }
 
@@ -567,6 +578,14 @@ final class HtmlSpanner {
         if (only != null && looksLikeImage(href, only)) {
             // a picture GitHub links to itself: a tap opens it in the viewer
             image(only, true);
+            return;
+        }
+        if (href.startsWith("#") && (a.hasAttr("data-footnote-ref") || href.startsWith("#fn")
+                || href.startsWith("#user-content-fn"))) {
+            // a footnote number ([1]): link-colored like github.com (a list row cannot jump to it)
+            int start = out.length();
+            children(a);
+            span(new ForegroundColorSpan(linkColorFallback()), start);
             return;
         }
         if (href.isEmpty() || href.startsWith("#") || href.startsWith("javascript:")) {

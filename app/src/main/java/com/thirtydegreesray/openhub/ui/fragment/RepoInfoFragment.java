@@ -744,7 +744,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
                 .setTitle(R.string.fork_conflict_title)
                 .setMessage(getString(R.string.fork_conflict_message, state.label(), state.branch))
-                .setPositiveButton(R.string.fork_open_on_github, (d, w) -> AppOpener.openInBrowser(requireContext(),
+                .setPositiveButton(R.string.fork_open_on_github, (d, w) -> AppOpener.openInCustomTabsOrBrowser(requireContext(),
                         ForkSync.conflictUrl(state.owner + "/" + state.repo, state.branch,
                                 state.parentFullName, state.upstream)))
                 .setNegativeButton(R.string.close, null);
@@ -898,10 +898,10 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         return null;
     }
 
-    /** github.com/{fork}/actions in the browser (OpenHub may own github.com links). */
+    /** github.com/{fork}/actions in a Custom Tab or the browser (OpenHub may own github.com links). */
     private void openForkActionsPage(@NonNull ForkState state) {
         if (!isAdded()) return;
-        AppOpener.openInBrowser(requireContext(), "https://github.com/" + state.owner + "/" + state.repo + "/actions");
+        AppOpener.openInCustomTabsOrBrowser(requireContext(), "https://github.com/" + state.owner + "/" + state.repo + "/actions");
     }
 
     /**

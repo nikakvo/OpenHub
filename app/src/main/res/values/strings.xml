@@ -136,6 +136,7 @@
     <string name="use_custom_tabs">Use Custom Tabs</string>
     <string name="custom_tabs_desc">Open web links in a tab of your default browser on top of OpenHub; Back returns to the app</string>
     <string name="use_custom_tabs_tips">Opened in a Custom Tab. Turn it off in Settings.</string>
+    <string name="web_render_gone">Android closed the page to free memory. Open it again.</string>
     <string name="language">Language</string>
     <string name="logout">Logout</string>
 

@@ -1,6 +1,7 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
 import com.thirtydegreesray.openhub.util.ErrorTexts;
+import com.thirtydegreesray.openhub.util.PullLinks;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.Activity;
 import android.content.Context;
@@ -114,7 +115,9 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
             matcher = API_URL.matcher(url);
             if (!matcher.find()) return null;
         }
-        return createIntent(context, matcher.group(1), matcher.group(2), Integer.parseInt(matcher.group(3)));
+        // .../pull/12/files opens the Files tab, .../pull/12/commits the Commits tab
+        return createIntent(context, matcher.group(1), matcher.group(2), Integer.parseInt(matcher.group(3)))
+                .putExtra("tab", PullLinks.tab(url));
     }
 
     public static boolean isPullUrl(@NonNull String url) {
