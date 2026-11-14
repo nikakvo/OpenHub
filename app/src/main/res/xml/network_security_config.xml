@@ -2,11 +2,10 @@
 <!-- Encrypted connections only, checked against the certificates of the system.
      Certificates added by the user (or by another app) are not trusted, so a proxy or a
      changed network cannot read the GitHub token.
-     The hosts that receive the sign-in also must chain to one of the root keys of the
-     certificate authorities GitHub uses (DigiCert, Sectigo, GlobalSign, Let's Encrypt;
-     the same keys as util/TlsAnchors.java, TlsAnchorsTest compares them). The pins end on
-     the expiration day (= TlsAnchors.CHECK_UNTIL_DAY): after it only the system check stays,
-     so the app never locks itself out. -->
+     The hosts that receive the sign-in also must chain to one of the public root keys of
+     util/TlsAnchors.java (Mozilla's list for websites plus GitHub's own certificate
+     authorities; TlsAnchorsTest compares them). The list is wide and the pins have no end
+     date, so the app keeps working when GitHub changes its certificate authority. -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
@@ -17,10 +16,42 @@
         <domain includeSubdomains="false">api.github.com</domain>
         <domain includeSubdomains="false">uploads.github.com</domain>
         <domain includeSubdomains="false">github.com</domain>
-        <pin-set expiration="2028-05-14">
+        <pin-set>
             <pin digest="SHA-256">vRU+17BDT2iGsXvOi76E7TQMcTLXAqj0+jGPdW7L1vM=</pin> <!-- AAA Certificate Services -->
+            <pin digest="SHA-256">L8VmekuaJnjtasatJUZfy/YJS/zZUECXx6j6R63l6Ig=</pin> <!-- AC RAIZ FNMT-RCM -->
+            <pin digest="SHA-256">RTt0gJtpAZYn8vhDAB21lQzdHUU3EFPn89/bw3FBE8Y=</pin> <!-- AC RAIZ FNMT-RCM SERVIDORES SEGUROS -->
+            <pin digest="SHA-256">BVcK5usPzrQhDm23lIa3CUyvIAQB4Um2Z3RBtfJeRJs=</pin> <!-- ACCVRAIZ1 -->
+            <pin digest="SHA-256">JdSRPPWHCXQU0p0m9sGxlCzW1k6vRdD8+BUmrbqW0yQ=</pin> <!-- Actalis Authentication Root CA -->
+            <pin digest="SHA-256">++MBgDH5WGvL9Bcn5Be30cRcL0f5O+NyoXuWtQdX1aI=</pin> <!-- Amazon Root CA 1 -->
+            <pin digest="SHA-256">f0KW/FtqTjs108NpYj42SrGvOB2PpxIVM8nWxjPqJGE=</pin> <!-- Amazon Root CA 2 -->
+            <pin digest="SHA-256">NqvDJlas/GRcYbcWE8S/IceH9cq77kg0jVhZeAPXq8k=</pin> <!-- Amazon Root CA 3 -->
+            <pin digest="SHA-256">9+ze1cZgR9KO1kZrVDxA4HQ6voHRCSVNz4RdTCx4U8U=</pin> <!-- Amazon Root CA 4 -->
+            <pin digest="SHA-256">mlL/ajy241OghWfg3Jw5WzANYKIikquMGMFlaymDrpA=</pin> <!-- ANF Secure Server Root CA -->
+            <pin digest="SHA-256">YIljx4xFXm40sHJGis4JVs/xjTRkP58wW3Fi+hgZefw=</pin> <!-- Atos TrustedRoot Root CA ECC TLS 2021 -->
+            <pin digest="SHA-256">98p3phDj1CRHJAaS29V8/RPPBCrNIGLmpiuHue2Bwac=</pin> <!-- Atos TrustedRoot Root CA RSA TLS 2021 -->
+            <pin digest="SHA-256">Ow1ztL5KhUrcPlHX75+kiu+7LN2CTWe9x9fQmiq8LUM=</pin> <!-- Autoridad de Certificacion Firmaprofesional CIF A62634068 -->
+            <pin digest="SHA-256">68VfIeiNSe3oHAB1qwizxzuB8PM+N9dkGh0BtuYC3J0=</pin> <!-- BJCA Global Root CA1 -->
+            <pin digest="SHA-256">zJSloDGf93pMyt2CHExZZ05E1SgWy9Hf4sdhNwrU0hw=</pin> <!-- BJCA Global Root CA2 -->
+            <pin digest="SHA-256">WVWuKRV0qTE0LPdFDhZlLt4eD7MJfhVx36wRyRVgFWQ=</pin> <!-- Buypass Class 2 Root CA -->
+            <pin digest="SHA-256">sD2HsFbQjMnU5nXvGcqDq1NTIWioJYWYvnLm2Fx918E=</pin> <!-- Buypass Class 3 Root CA -->
+            <pin digest="SHA-256">cCEWzNi/I+FkZvDg26DtaiOanBzWqPWmazmvNZUCA4U=</pin> <!-- CA Disig Root R2 -->
+            <pin digest="SHA-256">HvZGJdqi5dQz10Sa4xogDRAl4AEqj+z6cJMvi1mbdd0=</pin> <!-- Certainly Root E1 -->
+            <pin digest="SHA-256">P5Pz/PedIl0hPu9qSj9Yhc+E/j16ejwRVTUXaIwOIQA=</pin> <!-- Certainly Root R1 -->
+            <pin digest="SHA-256">joBG7EysAVpQfODS0BVKS0Do5CsxZc+lRlcUNREtF+U=</pin> <!-- Certigna Root CA -->
+            <pin digest="SHA-256">y617HThISd8JRrfujn9ffOOu2Hb9p7ydMNixbyn/LFM=</pin> <!-- certSIGN ROOT CA G2 -->
+            <pin digest="SHA-256">3ntpMunERYLODeB6vat+6pDHXW0qBzMd9XvVy4hVPRM=</pin> <!-- Certum EC-384 CA -->
+            <pin digest="SHA-256">qiYwp7YXsE0KKUureoyqpQFubb5gSDeoOoVxn6tmfrU=</pin> <!-- Certum Trusted Network CA -->
+            <pin digest="SHA-256">aztX6eyI0bs9AWN/8zx2mLPJdYJV6fAeqRePPn87K1I=</pin> <!-- Certum Trusted Network CA 2 -->
+            <pin digest="SHA-256">aB3EgsKWyEAsbrsg5oMJo7yEZSOuNLmEqE7ml6MxLbc=</pin> <!-- Certum Trusted Root CA -->
+            <pin digest="SHA-256">3V7RwJD59EgGG6qUprsRAXVE6e76ogzHFM5sYz9dxik=</pin> <!-- CFCA EV ROOT -->
             <pin digest="SHA-256">58qRu/uxh4gFezqAcERupSkRYBlBAvfcw7mEjGPLnNU=</pin> <!-- COMODO ECC Certification Authority -->
             <pin digest="SHA-256">grX4Ta9HpZx6tSHkmCrvpApTQGo67CYDnvprLg5yRME=</pin> <!-- COMODO RSA Certification Authority -->
+            <pin digest="SHA-256">YD928oyf66g+x1HttmyNdSPqQP5J/nRCdin1Dau89Vo=</pin> <!-- D-TRUST BR Root CA 1 2020 -->
+            <pin digest="SHA-256">rHb2OkbnYbWswyWXBckgy38FY9JI2NGA+TSvaAmaFfk=</pin> <!-- D-TRUST BR Root CA 2 2023 -->
+            <pin digest="SHA-256">nTfkqYnqs4gtEWBS/ItYRGcCy1k3JuRgTDeVlAxxA+I=</pin> <!-- D-TRUST EV Root CA 1 2020 -->
+            <pin digest="SHA-256">51PN2fE0E8fKnNqCli+MDOXtE9FlcxKVSvUmfrLLfHk=</pin> <!-- D-TRUST EV Root CA 2 2023 -->
+            <pin digest="SHA-256">7KDxgUAs56hlKzG00DbfJH46MLf0GlDZHsT5CwBrQ6E=</pin> <!-- D-TRUST Root Class 3 CA 2 2009 -->
+            <pin digest="SHA-256">/zQvtsTIvTCkcG9zSJU58Z5uSMwF9GJUZU9mENvFQOk=</pin> <!-- D-TRUST Root Class 3 CA 2 EV 2009 -->
             <pin digest="SHA-256">I/Lt/z7ekCWanjD0Cvj5EqXls2lOaThEA0H2Bg4BT/o=</pin> <!-- DigiCert Assured ID Root CA -->
             <pin digest="SHA-256">8ca6Zwz8iOTfUpc8rkIPCgid1HQUT+WAbEIAZOFZEik=</pin> <!-- DigiCert Assured ID Root G2 -->
             <pin digest="SHA-256">Fe7TOVlLME+M+Ee0dzcdjW/sYfTbKwGvWJ58U7Ncrkw=</pin> <!-- DigiCert Assured ID Root G3 -->
@@ -31,6 +62,10 @@
             <pin digest="SHA-256">oC+voZLIy4HLE0FVT5wFtxzKKokLDRKY1oNkfJYe+98=</pin> <!-- DigiCert TLS ECC P384 Root G5 -->
             <pin digest="SHA-256">ape1HIIZ6T5d7GS61YBs3rD4NVvkfnVwELcCRW4Bqv0=</pin> <!-- DigiCert TLS RSA4096 Root G5 -->
             <pin digest="SHA-256">Wd8xe/qfTwq3ylFNd3IpaqLHZbh2ZNCLluVzmeNkcpw=</pin> <!-- DigiCert Trusted Root G4 -->
+            <pin digest="SHA-256">QkMWJ+p2zHhpf5FeNFWxsuyC/y9jgO5kI+88CEC35jE=</pin> <!-- e-Szigno Root CA 2017 -->
+            <pin digest="SHA-256">R0h5AKG+ue4IzLwRFqjsVfRUtjiZQxnwUbmEAjztZCM=</pin> <!-- e-Szigno TLS Root CA 2023 -->
+            <pin digest="SHA-256">N2oacIKlk9zMINVh0Rnpq40w8RzDIdCjf6QfDfKE4Bw=</pin> <!-- emSign Root CA - G1 -->
+            <pin digest="SHA-256">zrGUEcZQUsdX+UHrgmyWlB5NCNCWx9t+fqPE+ME/GhM=</pin> <!-- GDCA TrustAUTH R5 ROOT -->
             <pin digest="SHA-256">CLOmM1/OXvSPjw5UOYbAf9GKOxImEp9hhku9W90fHMk=</pin> <!-- GlobalSign ECC Root CA - R4 -->
             <pin digest="SHA-256">fg6tdrtoGdwvVFEahDVPboswe53YIFjqbABPAdndpd8=</pin> <!-- GlobalSign ECC Root CA - R5 -->
             <pin digest="SHA-256">K87oWBWM9UZfyddvDfoxL+8lpNyoUB2ptGtn0fv6G2Q=</pin> <!-- GlobalSign Root CA -->
@@ -38,12 +73,73 @@
             <pin digest="SHA-256">aCdH+LpiG4fN07wpXtXKvOciocDANj0daLOJKNJ4fx4=</pin> <!-- GlobalSign Root CA - R6 -->
             <pin digest="SHA-256">4EoCLOMvTM8sf2BGKHuCijKpCfXnUUR/g/0scfb9gXM=</pin> <!-- GlobalSign Root E46 -->
             <pin digest="SHA-256">rn+WLLnmp9v3uDP7GPqbcaiRdd+UnCMrap73yz3yu/w=</pin> <!-- GlobalSign Root R46 -->
+            <pin digest="SHA-256">Ko8tivDrEjiY90yGasP6ZpBU4jwXvHqVvQI0GS3GNdA=</pin> <!-- Go Daddy Root Certificate Authority - G2 -->
+            <pin digest="SHA-256">hxqRlPTu1bMS/0DITB1SSu0vd4u/8l8TjPgfaAp63Gc=</pin> <!-- GTS Root R1 -->
+            <pin digest="SHA-256">QXnt2YHvdHR3tJYmQIr0Paosp6t/nggsEGD4QJZ3Q0g=</pin> <!-- GTS Root R3 -->
+            <pin digest="SHA-256">mEflZT5enoR1FuXLgYYGqnVEoZvmf9c2bVBpiOjYQ0c=</pin> <!-- GTS Root R4 -->
+            <pin digest="SHA-256">/HhDAOyN9NPRutdjg1GCkY1Sqf8COL32laHNm9uYMhw=</pin> <!-- HARICA TLS ECC Root CA 2021 -->
+            <pin digest="SHA-256">aTyaprJFs7AmFjd1CGPq22wkihblLW9LyQyGu/MtcEI=</pin> <!-- HARICA TLS RSA Root CA 2021 -->
+            <pin digest="SHA-256">u1IIbQY56NszJ3Wsj06ENdks6wD04k8o/A6r4kB3LoA=</pin> <!-- Hellenic Academic and Research Institutions ECC RootCA 2015 -->
+            <pin digest="SHA-256">UMyGupbbMmPHmkPq0HVT2fVmWeaQfnLYwCZjehzchdw=</pin> <!-- Hellenic Academic and Research Institutions RootCA 2015 -->
+            <pin digest="SHA-256">ecqvU0fm5KlMjniphJb8dAIPgJ7eE/Ig+rYQTI3tMp8=</pin> <!-- HiPKI Root CA - G1 -->
+            <pin digest="SHA-256">JUHlO6WzsHrL5wl6xKA+BAwRz3ptSmfLIT1Vi1AWegY=</pin> <!-- Hongkong Post Root CA 3 -->
+            <pin digest="SHA-256">B+hU8mp8vTiZJ6oEG/7xts0h3RQ4GK2UfcZVqeWH/og=</pin> <!-- IdenTrust Commercial Root CA 1 -->
+            <pin digest="SHA-256">WN1h/rNup9JYckNxcJFJyxITN4ZMrLLQmZrSBznQZHc=</pin> <!-- IdenTrust Public Sector Root CA 1 -->
             <pin digest="SHA-256">C5+lpZ7tcVwmwQIMcRtPbsQtWLABXhQzejna0wHFr8M=</pin> <!-- ISRG Root X1 -->
             <pin digest="SHA-256">diGVwiVYbubAI3RW4hB9xU8e/CH2GnkuvVFZE8zmgzI=</pin> <!-- ISRG Root X2 -->
+            <pin digest="SHA-256">lSwgOcAkPrUV3XPYP8NkMYSHT+sIYqmDdzHtm0dC4Xo=</pin> <!-- Izenpe.com -->
+            <pin digest="SHA-256">YWFnIBQzrqbI5eMHCvyvZ0kYj4FL0auxea6NrTq/Juw=</pin> <!-- Microsec e-Szigno Root CA 2009 -->
+            <pin digest="SHA-256">NfU84SZGEeAzQP434ex9TMmGxWE9ynD9BKpEVF8tryg=</pin> <!-- Microsoft ECC Root Certificate Authority 2017 -->
+            <pin digest="SHA-256">svcpi1K/LDysTd/nLeTWgqxYlXWVmC8rYjAa9ZfGmcU=</pin> <!-- Microsoft RSA Root Certificate Authority 2017 -->
+            <pin digest="SHA-256">eG/6V4YYw7mjERdeUIFvTdoGBcOGnyluvFlDvwn06QQ=</pin> <!-- NAVER Global Root Certification Authority -->
+            <pin digest="SHA-256">9Iut199qBmkNCuMTc7EoVfje2xRRfzYqMTEBzJjMazU=</pin> <!-- NetLock Arany (Class Gold) Főtanúsítvány -->
+            <pin digest="SHA-256">1DndgPHjvFyeXxPov/eoiH353Bw+Gddq9wyPjZhe7yI=</pin> <!-- OISTE Server Root ECC G1 -->
+            <pin digest="SHA-256">uWThQdOlXK4YDqahqNSil94m8RgzxnNWnRlvtTOphxA=</pin> <!-- OISTE Server Root RSA G1 -->
+            <pin digest="SHA-256">FJ8u5juaXlgDJAp3DcmR/C40ReYoMcJFpJvE8fc4/5w=</pin> <!-- OISTE WISeKey Global Root GB CA -->
+            <pin digest="SHA-256">/Tcb6pdV/2DIgoyEm45SFd5TLWGwCYVfoK1jDZDu+C4=</pin> <!-- OISTE WISeKey Global Root GC CA -->
+            <pin digest="SHA-256">hqaPBQA0EmpUDTnbLF+RfvZqlPuWGfoezYJ86ka6DLA=</pin> <!-- QuoVadis Root CA 1 G3 -->
+            <pin digest="SHA-256">SkntvS+PgjC9VZKzE1c/4cFypF+pgBHMHt27Nq3j/OU=</pin> <!-- QuoVadis Root CA 2 G3 -->
+            <pin digest="SHA-256">80OOI7POUyUi+s8weSP1j9GGCOm6et3DDpUrQ8SWFsM=</pin> <!-- QuoVadis Root CA 3 G3 -->
+            <pin digest="SHA-256">KUZ54Pl//UdPGVZ7NjgjlOG0lg4DCXXmY1NFIDSjxeo=</pin> <!-- SECOM TLS ECC Root CA 2024 -->
+            <pin digest="SHA-256">8OC2++i3TU+C2O2Pi9aj0IPcGds9LO2xBhzLdthI7n0=</pin> <!-- SECOM TLS RSA Root CA 2024 -->
             <pin digest="SHA-256">sLVjNUaFYfW7n6EtgBeEpjOlcnBdNPMrZDRF36iwBdE=</pin> <!-- Sectigo Public Server Authentication Root E46 -->
             <pin digest="SHA-256">Douxi77vs4G+Ib/BogbTFymEYq0QSFXwSgVCaZcI09Q=</pin> <!-- Sectigo Public Server Authentication Root R46 -->
+            <pin digest="SHA-256">WBzBWCEWlpTDnCmRtT6Tq5RaQrB2Zhd0wuzzijMjrOo=</pin> <!-- SecureSign Root CA14 -->
+            <pin digest="SHA-256">8AEfkvz5vjbHpbNue8hiqyDpTvNv6opWHbCo13UMH1E=</pin> <!-- SecureSign Root CA15 -->
+            <pin digest="SHA-256">Mym/oTtgB6tfw3E/CssolCbi+8mcxcEQqRSxOVcWALY=</pin> <!-- Security Communication ECC RootCA1 -->
+            <pin digest="SHA-256">M4BwmvOwlr48wqQFSBQsClIAKNsJ4st3riIGYWq2y7Q=</pin> <!-- Security Communication RootCA2 -->
+            <pin digest="SHA-256">NIdnza073SiyuN1TUa7DDGjOxc1p0nbfOCfbxPWAZGQ=</pin> <!-- SSL.com EV Root Certification Authority ECC -->
+            <pin digest="SHA-256">fNZ8JI9p2D/C+bsB3LH3rWejY9BGBDeW0JhMOiMfa7A=</pin> <!-- SSL.com EV Root Certification Authority RSA R2 -->
+            <pin digest="SHA-256">oyD01TTXvpfBro3QSZc1vIlcMjrdLTiL/M9mLCPX+Zo=</pin> <!-- SSL.com Root Certification Authority ECC -->
+            <pin digest="SHA-256">0cRTd+vc1hjNFlHcLgLCHXUeWqn80bNDH/bs9qMTSPo=</pin> <!-- SSL.com Root Certification Authority RSA -->
+            <pin digest="SHA-256">G/ANXI8TwJTdF+AFBM8IiIUPEv0Gf6H5LA/b9guG4yE=</pin> <!-- SSL.com TLS ECC Root CA 2022 -->
+            <pin digest="SHA-256">K89VOmb1cJAN3TK6bf4ezAbJGC1mLcG2Dh97dnwr3VQ=</pin> <!-- SSL.com TLS RSA Root CA 2022 -->
+            <pin digest="SHA-256">gI1os/q0iEpflxrOfRBVDXqVoWN3Tz7Dav/7IT++THQ=</pin> <!-- Starfield Root Certificate Authority - G2 -->
+            <pin digest="SHA-256">KwccWaCgrnaw6tsrrSO61FgLacNgG2MMLq8GE6+oP5I=</pin> <!-- Starfield Services Root Certificate Authority - G2 -->
+            <pin digest="SHA-256">68l4rg3Z5YItaxllJZb2IMk9fK76lSGRywUKYyypAF8=</pin> <!-- SwissSign RSA TLS Root CA 2022 - 1 -->
+            <pin digest="SHA-256">bjZLYTPe79y7ISc8X0RaIK+8BQONWwIcDCFTA5AWNFs=</pin> <!-- SZAFIR ROOT CA2 -->
+            <pin digest="SHA-256">YQbA46CimYMYdRJ719PMGFmAPVEcrBHrbghA3RZvwQ4=</pin> <!-- T-TeleSec GlobalRoot Class 2 -->
+            <pin digest="SHA-256">jXZ3ZLPL2giSnQcqIqVh9NzdG8V9PL3clIxH0rR/kSI=</pin> <!-- T-TeleSec GlobalRoot Class 3 -->
+            <pin digest="SHA-256">6rDeWkZBkBCwGy1VVT/BEaqCtD2Tle3+rqqMduatGZU=</pin> <!-- Telekom Security TLS ECC Root 2020 -->
+            <pin digest="SHA-256">DgXpuyOGnraJ3FaDnc7EdaOudfprULxaSXg2DL5nMyM=</pin> <!-- Telekom Security TLS RSA Root 2023 -->
+            <pin digest="SHA-256">TIIdfYmt8IwelRySuEG0o8GCYbnOQm8zfMDjgFSZug4=</pin> <!-- Telia EC TLS Root CA v3 -->
+            <pin digest="SHA-256">wrPDGkophQqo889HKhFp/3G0FlefakSC7HdEuD35iKw=</pin> <!-- Telia Root CA v2 -->
+            <pin digest="SHA-256">U2z9ropiV78UJmxDKFlY0Pm5N+MGjiohU3QXATOp/8w=</pin> <!-- Telia RSA TLS Root CA v3 -->
+            <pin digest="SHA-256">hoWthQ9/Vs0WlDvLcLQ05zVuG4vcYTQG4uqN5GCStjY=</pin> <!-- TrustAsia Global Root CA G3 -->
+            <pin digest="SHA-256">B6KQTUv/lgTqEzGumQ6f/jMSMuaey4oIzUnY40dX20E=</pin> <!-- TrustAsia Global Root CA G4 -->
+            <pin digest="SHA-256">9GMuWHAcC9fa/H44MTVexDP8E3d94oZoPo7FCWTfBFI=</pin> <!-- TrustAsia TLS ECC Root CA -->
+            <pin digest="SHA-256">ViiHLiRf5mFIuAut6snED2JS5kL6lZWuzks+ili4/UY=</pin> <!-- TrustAsia TLS RSA Root CA -->
+            <pin digest="SHA-256">VeAL4nfOsFRSmfJP2fh34qzzKFLbQ//NKbynSzm0yfo=</pin> <!-- TUBITAK Kamu SM SSL Kok Sertifikasi - Surum 1 -->
+            <pin digest="SHA-256">yUImLAx8CpW7FStxxCVW3b6aBPqDeDc1UNK3zifZUqM=</pin> <!-- TunTrust Root CA -->
+            <pin digest="SHA-256">BmALlMAxi7aWfwx3h8yKEDKhecTpXjxXYLMuKQ9/7Js=</pin> <!-- TWCA CYBER Root CA -->
+            <pin digest="SHA-256">xES1tmzl1x4bXkDyc4XJXL/SSgW1b3DKwJkvD1DDN5w=</pin> <!-- TWCA Global Root CA -->
+            <pin digest="SHA-256">ksRoeWJu8swezqUMcvteOFhECV8hy/Oyg8uC5rn8alg=</pin> <!-- TWCA Root Certification Authority -->
+            <pin digest="SHA-256">XEGnOrLDXfzXcfb9bj6PrJtGnThsrdpWqVtkbrSMyjQ=</pin> <!-- UCA Extended Validation Root -->
+            <pin digest="SHA-256">ElXKvoFS+mTflC96R0F+KflsHOEb+MhOy+KBXMEoCBA=</pin> <!-- UCA Global G2 Root -->
             <pin digest="SHA-256">ICGRfpgmOUXIWcQ/HXPLQTkFPEFPoDyjvH7ohhQpjzs=</pin> <!-- USERTrust ECC Certification Authority -->
             <pin digest="SHA-256">x4QzPSC810K5/cMjb05Qm4k3Bw5zBn4lTdO/nEW/Td4=</pin> <!-- USERTrust RSA Certification Authority -->
+            <pin digest="SHA-256">oka4Ivls/swVUVblR2lXhFSSrPMhh+yKLvEtiWGNcR0=</pin> <!-- vTrus ECC Root CA -->
+            <pin digest="SHA-256">4GZH5SYQFgw+g8QtIuOaqHUMWE1sJK+u1UphFkdCAAo=</pin> <!-- vTrus Root CA -->
         </pin-set>
     </domain-config>
     <!-- Debug builds only: a developer may look at the app's own traffic with a proxy -->

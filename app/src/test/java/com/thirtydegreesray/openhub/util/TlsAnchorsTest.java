@@ -1,6 +1,7 @@
 package com.thirtydegreesray.openhub.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -8,8 +9,6 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,7 +29,7 @@ public class TlsAnchorsTest {
         assertEquals(TlsAnchors.ALL.size(), TlsChainCheck.keys(TlsAnchors.ALL).size());
         Set<String> names = new HashSet<>();
         for (TlsAnchors.Anchor anchor : TlsAnchors.ALL) assertTrue(anchor.name, names.add(anchor.name));
-        assertTrue(TlsAnchors.ALL.size() >= 20);
+        assertTrue(TlsAnchors.ALL.size() >= 100);
     }
 
     @Test
@@ -49,10 +48,22 @@ public class TlsAnchorsTest {
     }
 
     @Test
-    public void expirationIsTheSameDayEverywhere() throws Exception {
-        assertTrue(config().contains("<pin-set expiration=\"" + TlsAnchors.CHECK_UNTIL_DAY + "\">"));
-        long ms = LocalDate.parse(TlsAnchors.CHECK_UNTIL_DAY).atStartOfDay(ZoneOffset.UTC)
-                .toInstant().toEpochMilli();
-        assertEquals(ms, TlsAnchors.CHECK_UNTIL_MS);
+    public void pinsNeverEnd() throws Exception {
+        // no end date: the check stays on for years without an update
+        assertTrue(config().contains("<pin-set>"));
+        assertFalse(config().contains("expiration="));
+    }
+
+    @Test
+    public void githubsAuthoritiesAndThePublicListAreIn() {
+        Set<String> names = new HashSet<>();
+        for (TlsAnchors.Anchor anchor : TlsAnchors.ALL) names.add(anchor.name);
+        for (String name : new String[]{"ISRG Root X1", "ISRG Root X2", "DigiCert Global Root G2",
+                "DigiCert Global Root CA", "USERTrust ECC Certification Authority",
+                "Sectigo Public Server Authentication Root E46", "GlobalSign Root R46",
+                "GTS Root R1", "Amazon Root CA 1", "Microsoft RSA Root Certificate Authority 2017"}) {
+            assertTrue(name, names.contains(name));
+        }
+        assertTrue(TlsAnchors.ALL.size() >= 100);
     }
 }

@@ -57,9 +57,9 @@ public final class TlsGuard implements Interceptor {
         return h.equals("api.github.com") || h.equals("uploads.github.com") || h.equals("github.com");
     }
 
-    /** False in debug builds and after {@link TlsAnchors#CHECK_UNTIL_MS}. */
+    /** False in debug builds only. */
     public static boolean isActive() {
-        return !BuildConfig.DEBUG && System.currentTimeMillis() < TlsAnchors.CHECK_UNTIL_MS;
+        return !BuildConfig.DEBUG;
     }
 
     @NonNull
