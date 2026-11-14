@@ -88,6 +88,9 @@ app goes to them; see [Credits](#credits).
 * GitHub collections and featured topics
 * Search repositories and users, with a search history (× forgets one search, or clear
   all)
+* **Filter** field in My repos, Starred repos and the repository lists of every profile:
+  narrows the list while you type (name, description, language, topics) and searches the
+  whole list, not only the repositories already loaded
 * Bookmarks and a trace of what you viewed (swipe to remove, or clear the trace)
 * **Pull down to reload** on every screen that shows GitHub data (repository, profile,
   files, pull requests, discussions, releases, logs and more); lists also update
