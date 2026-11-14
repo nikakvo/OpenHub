@@ -89,8 +89,8 @@ app goes to them; see [Credits](#credits).
 * Search repositories and users, with a search history (× forgets one search, or clear
   all)
 * **Filter** field in My repos, Starred repos and the repository lists of every profile:
-  narrows the list while you type (name, description, language, topics) and searches the
-  whole list, not only the repositories already loaded
+  narrows the list while you type (name, description, language, topics; case and accents do
+  not matter) and searches the whole list, not only the repositories already loaded
 * Bookmarks and a trace of what you viewed (swipe to remove, or clear the trace)
 * **Pull down to reload** on every screen that shows GitHub data (repository, profile,
   files, pull requests, discussions, releases, logs and more); lists also update
@@ -192,6 +192,8 @@ app goes to them; see [Credits](#credits).
   close, reopen and delete
 * Comments with a Markdown editor and preview; drafts drawn on the phone link URLs,
   `@mentions` and `#123` like github.com
+* **Unsent comments are kept**: a new comment on an issue, pull request, discussion or gist
+  stays when you leave without sending it, also after closing the app
 * Manage labels in your own repositories
 * Your created, assigned and mentioned issues
 * Commit details, changed files and diffs
