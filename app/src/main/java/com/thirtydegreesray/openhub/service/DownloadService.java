@@ -119,6 +119,8 @@ public class DownloadService extends Service {
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         executor = Executors.newFixedThreadPool(MAX_PARALLEL);
         client = new OkHttpClient.Builder()
+                // only GitHub's own certificates carry the sign-in (TlsGuard)
+                .addNetworkInterceptor(com.thirtydegreesray.openhub.util.TlsGuard.INSTANCE)
                 .addInterceptor(FreshTokenInterceptor.INSTANCE)
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)

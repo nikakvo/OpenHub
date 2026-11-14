@@ -1,11 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Encrypted connections only, checked against the certificates of the system.
      Certificates added by the user (or by another app) are not trusted, so a proxy or a
-     changed network cannot read the GitHub token. -->
+     changed network cannot read the GitHub token.
+     The hosts that receive the sign-in also must chain to one of the root keys of the
+     certificate authorities GitHub uses (DigiCert, Sectigo, GlobalSign, Let's Encrypt;
+     the same keys as util/TlsAnchors.java, TlsAnchorsTest compares them). The pins end on
+     the expiration day (= TlsAnchors.CHECK_UNTIL_DAY): after it only the system check stays,
+     so the app never locks itself out. -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
             <certificates src="system"/>
         </trust-anchors>
     </base-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">api.github.com</domain>
+        <domain includeSubdomains="false">uploads.github.com</domain>
+        <domain includeSubdomains="false">github.com</domain>
+        <pin-set expiration="2028-05-14">
+            <pin digest="SHA-256">vRU+17BDT2iGsXvOi76E7TQMcTLXAqj0+jGPdW7L1vM=</pin> <!-- AAA Certificate Services -->
+            <pin digest="SHA-256">58qRu/uxh4gFezqAcERupSkRYBlBAvfcw7mEjGPLnNU=</pin> <!-- COMODO ECC Certification Authority -->
+            <pin digest="SHA-256">grX4Ta9HpZx6tSHkmCrvpApTQGo67CYDnvprLg5yRME=</pin> <!-- COMODO RSA Certification Authority -->
+            <pin digest="SHA-256">I/Lt/z7ekCWanjD0Cvj5EqXls2lOaThEA0H2Bg4BT/o=</pin> <!-- DigiCert Assured ID Root CA -->
+            <pin digest="SHA-256">8ca6Zwz8iOTfUpc8rkIPCgid1HQUT+WAbEIAZOFZEik=</pin> <!-- DigiCert Assured ID Root G2 -->
+            <pin digest="SHA-256">Fe7TOVlLME+M+Ee0dzcdjW/sYfTbKwGvWJ58U7Ncrkw=</pin> <!-- DigiCert Assured ID Root G3 -->
+            <pin digest="SHA-256">r/mIkG3eEpVdm+u/ko/cwxzOMo1bk4TyHIlByibiA5E=</pin> <!-- DigiCert Global Root CA -->
+            <pin digest="SHA-256">i7WTqTvh0OioIruIfFR4kMPnBqrS2rdiVPl/s2uC/CY=</pin> <!-- DigiCert Global Root G2 -->
+            <pin digest="SHA-256">uUwZgwDOxcBXrQcntwu+kYFpkiVkOaezL0WYEZ3anJc=</pin> <!-- DigiCert Global Root G3 -->
+            <pin digest="SHA-256">WoiWRyIOVNa9ihaBciRSC7XHjliYS9VwUGOIud4PB18=</pin> <!-- DigiCert High Assurance EV Root CA -->
+            <pin digest="SHA-256">oC+voZLIy4HLE0FVT5wFtxzKKokLDRKY1oNkfJYe+98=</pin> <!-- DigiCert TLS ECC P384 Root G5 -->
+            <pin digest="SHA-256">ape1HIIZ6T5d7GS61YBs3rD4NVvkfnVwELcCRW4Bqv0=</pin> <!-- DigiCert TLS RSA4096 Root G5 -->
+            <pin digest="SHA-256">Wd8xe/qfTwq3ylFNd3IpaqLHZbh2ZNCLluVzmeNkcpw=</pin> <!-- DigiCert Trusted Root G4 -->
+            <pin digest="SHA-256">CLOmM1/OXvSPjw5UOYbAf9GKOxImEp9hhku9W90fHMk=</pin> <!-- GlobalSign ECC Root CA - R4 -->
+            <pin digest="SHA-256">fg6tdrtoGdwvVFEahDVPboswe53YIFjqbABPAdndpd8=</pin> <!-- GlobalSign ECC Root CA - R5 -->
+            <pin digest="SHA-256">K87oWBWM9UZfyddvDfoxL+8lpNyoUB2ptGtn0fv6G2Q=</pin> <!-- GlobalSign Root CA -->
+            <pin digest="SHA-256">cGuxAXyFXFkWm61cF4HPWX8S0srS9j0aSqN0k4AP+4A=</pin> <!-- GlobalSign Root CA - R3 -->
+            <pin digest="SHA-256">aCdH+LpiG4fN07wpXtXKvOciocDANj0daLOJKNJ4fx4=</pin> <!-- GlobalSign Root CA - R6 -->
+            <pin digest="SHA-256">4EoCLOMvTM8sf2BGKHuCijKpCfXnUUR/g/0scfb9gXM=</pin> <!-- GlobalSign Root E46 -->
+            <pin digest="SHA-256">rn+WLLnmp9v3uDP7GPqbcaiRdd+UnCMrap73yz3yu/w=</pin> <!-- GlobalSign Root R46 -->
+            <pin digest="SHA-256">C5+lpZ7tcVwmwQIMcRtPbsQtWLABXhQzejna0wHFr8M=</pin> <!-- ISRG Root X1 -->
+            <pin digest="SHA-256">diGVwiVYbubAI3RW4hB9xU8e/CH2GnkuvVFZE8zmgzI=</pin> <!-- ISRG Root X2 -->
+            <pin digest="SHA-256">sLVjNUaFYfW7n6EtgBeEpjOlcnBdNPMrZDRF36iwBdE=</pin> <!-- Sectigo Public Server Authentication Root E46 -->
+            <pin digest="SHA-256">Douxi77vs4G+Ib/BogbTFymEYq0QSFXwSgVCaZcI09Q=</pin> <!-- Sectigo Public Server Authentication Root R46 -->
+            <pin digest="SHA-256">ICGRfpgmOUXIWcQ/HXPLQTkFPEFPoDyjvH7ohhQpjzs=</pin> <!-- USERTrust ECC Certification Authority -->
+            <pin digest="SHA-256">x4QzPSC810K5/cMjb05Qm4k3Bw5zBn4lTdO/nEW/Td4=</pin> <!-- USERTrust RSA Certification Authority -->
+        </pin-set>
+    </domain-config>
+    <!-- Debug builds only: a developer may look at the app's own traffic with a proxy -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system"/>
+            <certificates src="user" overridePins="true"/>
+        </trust-anchors>
+    </debug-overrides>
 </network-security-config>

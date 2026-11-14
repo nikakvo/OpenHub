@@ -56,6 +56,8 @@ public final class GitHubExplore {
             Pattern.compile("^https?://(?:www\\.)?github\\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/?$");
 
     private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
+            // only GitHub's own certificates carry the sign-in (TlsGuard)
+            .addNetworkInterceptor(com.thirtydegreesray.openhub.util.TlsGuard.INSTANCE)
             .addInterceptor(FreshTokenInterceptor.INSTANCE)
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)

@@ -16,6 +16,15 @@
 
     <!-- Android 11+ package visibility: apps we hand links, shares and downloads to. -->
     <queries>
+        <!-- About - Device security: root managers that are installed (shown, never blocked) -->
+        <package android:name="com.topjohnwu.magisk"/>
+        <package android:name="io.github.huskydg.magisk"/>
+        <package android:name="io.github.vvb2060.magisk"/>
+        <package android:name="me.weishu.kernelsu"/>
+        <package android:name="com.rifsxd.ksunext"/>
+        <package android:name="com.sukisu.ultra"/>
+        <package android:name="me.bmax.apatch"/>
+        <package android:name="org.lsposed.manager"/>
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <category android:name="android.intent.category.BROWSABLE"/>

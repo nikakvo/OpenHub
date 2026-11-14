@@ -49,6 +49,8 @@ public final class SignOut {
         if (!isRevocable(token)) return;
         try {
             OkHttpClient client = new OkHttpClient.Builder()
+                    // only GitHub's own certificates carry the sign-in (TlsGuard)
+                    .addNetworkInterceptor(com.thirtydegreesray.openhub.util.TlsGuard.INSTANCE)
                     .connectTimeout(15, TimeUnit.SECONDS)
                     .readTimeout(15, TimeUnit.SECONDS)
                     .build();

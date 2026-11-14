@@ -338,6 +338,8 @@ public final class TokenRefresher {
                 if (client == null) {
                     // its own client: never the interceptors that call back into here
                     client = new OkHttpClient.Builder()
+                            // only GitHub's own certificates carry the sign-in (TlsGuard)
+                            .addNetworkInterceptor(com.thirtydegreesray.openhub.util.TlsGuard.INSTANCE)
                             .connectTimeout(15, TimeUnit.SECONDS)
                             .readTimeout(20, TimeUnit.SECONDS)
                             .writeTimeout(20, TimeUnit.SECONDS)

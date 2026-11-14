@@ -37,6 +37,7 @@ import androidx.cardview.widget.CardView;
 
 import com.thirtydegreesray.openhub.BuildConfig;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.util.DeviceSecurity;
 import com.thirtydegreesray.openhub.ui.widget.MatrixRainView;
 import com.thirtydegreesray.openhub.ui.widget.MatrixWelcomeView;
 import com.thirtydegreesray.openhub.util.AppIcons;
@@ -130,6 +131,8 @@ public class AboutActivity extends AppCompatActivity {
         addItem(appItems, R.drawable.ic_pref_shield, getString(R.string.about_security),
                 getString(R.string.about_security_summary), 0xFFF85149,
                 v -> AppOpener.openInBrowser(this, getString(R.string.about_security_url)));
+        securityRow = addItem(appItems, R.drawable.ic_pref_shield, getString(R.string.device_security),
+                getString(R.string.device_security_checking), 0xFF3FB950, v -> showSecurityDetails());
         String sha = signingSha256(this);
         if (sha != null) {
             String shortSha = sha.substring(0, 8) + "..." + sha.substring(sha.length() - 6);
@@ -175,6 +178,92 @@ public class AboutActivity extends AppCompatActivity {
             terminalRow(fork, 0xFFA371F7);
             terminalRow(self, 0xFF39FF7A);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // live: modules, certificates or a proxy may have changed while the screen was away
+        checkSecurity(false);
+    }
+
+    @Nullable private View securityRow;
+    @Nullable private DeviceSecurity.Report securityReport;
+    private boolean securityChecking;
+
+    /** Runs the device checks in the background and updates the row (and the dialog). */
+    private void checkSecurity(boolean showWhenDone) {
+        if (securityChecking) return;
+        securityChecking = true;
+        final android.content.Context app = getApplicationContext();
+        new Thread(() -> {
+            DeviceSecurity.Report report = DeviceSecurity.check(app);
+            runOnUiThread(() -> {
+                securityChecking = false;
+                if (isFinishing() || isDestroyed()) return;
+                securityReport = report;
+                if (securityRow != null) {
+                    ((TextView) securityRow.findViewById(R.id.about_item_subtitle))
+                            .setText(securitySummary(report));
+                }
+                if (showWhenDone) showSecurityDetails();
+            });
+        }, "device-security").start();
+    }
+
+    @NonNull
+    private String securitySummary(@NonNull DeviceSecurity.Report report) {
+        java.util.List<String> parts = new java.util.ArrayList<>();
+        switch (report.connection) {
+            case VERIFIED: parts.add(getString(R.string.device_security_summary_ok)); break;
+            case INTERCEPTED: parts.add(getString(R.string.device_security_summary_intercepted)); break;
+            case REFUSED_BY_ANDROID: parts.add(getString(R.string.device_security_summary_refused)); break;
+            case CHECK_OFF: parts.add(getString(R.string.device_security_summary_off)); break;
+            default: parts.add(getString(R.string.device_security_summary_not_checked)); break;
+        }
+        if (!report.root.isEmpty()) parts.add(getString(R.string.device_security_summary_root));
+        if (!report.hooks.isEmpty()) parts.add(getString(R.string.device_security_summary_hooks));
+        return android.text.TextUtils.join(" \u00b7 ", parts);
+    }
+
+    private void showSecurityDetails() {
+        DeviceSecurity.Report report = securityReport;
+        if (report == null) {
+            checkSecurity(true);
+            return;
+        }
+        StringBuilder text = new StringBuilder();
+        text.append(report.root.isEmpty() ? getString(R.string.device_security_root_none)
+                : getString(R.string.device_security_root_found, android.text.TextUtils.join(", ", report.root)));
+        text.append("\n\n").append(report.hooks.isEmpty() ? getString(R.string.device_security_hooks_none)
+                : getString(R.string.device_security_hooks_found, android.text.TextUtils.join(", ", report.hooks)));
+        text.append("\n\n").append(report.userCertificates == 0
+                ? getString(R.string.device_security_user_certs_none)
+                : getResources().getQuantityString(R.plurals.device_security_user_certs,
+                report.userCertificates, report.userCertificates));
+        int connection;
+        switch (report.connection) {
+            case VERIFIED: connection = R.string.device_security_conn_verified; break;
+            case INTERCEPTED: connection = R.string.device_security_conn_intercepted; break;
+            case REFUSED_BY_ANDROID: connection = R.string.device_security_conn_refused; break;
+            case CHECK_OFF: connection = R.string.device_security_conn_off; break;
+            default: connection = R.string.device_security_conn_not_checked; break;
+        }
+        text.append("\n\n").append(getString(connection));
+        text.append("\n\n").append(getString(R.string.device_security_note));
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(R.string.device_security)
+                .setMessage(text)
+                .setPositiveButton(R.string.close, null)
+                .setNeutralButton(R.string.device_security_check_again, (d, w) -> {
+                    securityReport = null;
+                    if (securityRow != null) {
+                        ((TextView) securityRow.findViewById(R.id.about_item_subtitle))
+                                .setText(R.string.device_security_checking);
+                    }
+                    checkSecurity(true);
+                })
+                .show();
     }
 
     /** The glowing icon, the decoding name and the version line at the top. */

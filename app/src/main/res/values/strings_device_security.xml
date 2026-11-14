@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Interception notice (TlsGuard) -->
+    <string name="tls_intercepted_title">Connection intercepted</string>
+    <string name="tls_intercepted_message">The connection to %1$s is being intercepted: the certificate is not GitHub\'s own. OpenHub did not send the request, so your sign-in did not travel over this connection.\n\nThis happens when certificate checks are switched off in OpenHub (an SSL unpinning module) or a proxy certificate was added to the system. Your account is kept. When the interception stops, OpenHub works again at once.</string>
+    <string name="tls_intercepted_details">Details</string>
+
+    <!-- About - Device security -->
+    <string name="device_security">Device security</string>
+    <string name="device_security_checking">Checking…</string>
+    <string name="device_security_root_found">Root: %s</string>
+    <string name="device_security_root_none">Root: not found (root can be hidden)</string>
+    <string name="device_security_hooks_found">Hooking in OpenHub: %s</string>
+    <string name="device_security_hooks_none">Hooking in OpenHub: not found</string>
+    <plurals name="device_security_user_certs">
+        <item quantity="one">User certificates: %d installed, OpenHub does not trust it</item>
+        <item quantity="other">User certificates: %d installed, OpenHub does not trust them</item>
+    </plurals>
+    <string name="device_security_user_certs_none">User certificates: none</string>
+    <string name="device_security_conn_verified">Connection to GitHub: verified, GitHub\'s own certificate</string>
+    <string name="device_security_conn_refused">Connection to GitHub: a proxy or the network tried to intercept it, Android refused it</string>
+    <string name="device_security_conn_intercepted">Connection to GitHub: intercepted. Certificate checks are switched off in OpenHub (SSL unpinning module); OpenHub\'s own check stops every request with your sign-in</string>
+    <string name="device_security_conn_not_checked">Connection to GitHub: not checked (no connection)</string>
+    <string name="device_security_conn_off">Connection to GitHub: Android\'s check only (the extra check is off in this build)</string>
+    <string name="device_security_summary_ok">GitHub connection verified</string>
+    <string name="device_security_summary_intercepted">GitHub connection intercepted</string>
+    <string name="device_security_summary_refused">Interception refused by Android</string>
+    <string name="device_security_summary_not_checked">GitHub connection not checked</string>
+    <string name="device_security_summary_off">Android\'s check only</string>
+    <string name="device_security_summary_root">root found</string>
+    <string name="device_security_summary_hooks">hooking found</string>
+    <string name="device_security_note">This is your phone and your choice: OpenHub keeps working with root and modules. It only makes sure your GitHub sign-in is sent to GitHub and nobody else.</string>
+    <string name="device_security_check_again">Check again</string>
+</resources>

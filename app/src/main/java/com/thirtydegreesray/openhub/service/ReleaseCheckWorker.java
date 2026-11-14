@@ -58,6 +58,8 @@ public class ReleaseCheckWorker extends Worker {
 
         String token = loadToken();
         OkHttpClient client = new OkHttpClient.Builder()
+                // only GitHub's own certificates carry the sign-in (TlsGuard)
+                .addNetworkInterceptor(com.thirtydegreesray.openhub.util.TlsGuard.INSTANCE)
                 .addInterceptor(FreshTokenInterceptor.INSTANCE)
                 .connectTimeout(20, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)

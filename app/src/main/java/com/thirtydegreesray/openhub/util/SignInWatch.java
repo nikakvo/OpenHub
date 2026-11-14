@@ -45,6 +45,12 @@ public final class SignInWatch implements Application.ActivityLifecycleCallbacks
         return resumed.get() != null;
     }
 
+    /** The screen of OpenHub in front, or null. */
+    @Nullable
+    public static Activity resumedActivity() {
+        return resumed.get();
+    }
+
     public static void report(@Nullable String token) {
         AuthUser user = AppData.INSTANCE.getAuthUser();
         if (user == null || StringUtils.isBlank(token)) return;

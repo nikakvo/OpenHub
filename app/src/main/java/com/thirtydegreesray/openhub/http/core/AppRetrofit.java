@@ -62,6 +62,8 @@ public enum  AppRetrofit {
             Cache cache = new Cache(FileUtil.getHttpImageCacheDir(AppApplication.get()),
                     AppConfig.HTTP_MAX_CACHE_SIZE);
             baseClient = new OkHttpClient.Builder()
+                    // only GitHub's own certificates carry the sign-in (TlsGuard)
+                    .addNetworkInterceptor(com.thirtydegreesray.openhub.util.TlsGuard.INSTANCE)
                     .connectTimeout(timeOut, TimeUnit.MILLISECONDS)
                     .addNetworkInterceptor(new NetworkBaseInterceptor())
                     .cache(cache)

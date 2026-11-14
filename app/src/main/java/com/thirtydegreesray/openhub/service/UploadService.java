@@ -163,6 +163,8 @@ public class UploadService extends Service {
         // One upload at a time: parallel uploads only split the same uplink.
         executor = Executors.newSingleThreadExecutor();
         client = new OkHttpClient.Builder()
+                // only GitHub's own certificates carry the sign-in (TlsGuard)
+                .addNetworkInterceptor(com.thirtydegreesray.openhub.util.TlsGuard.INSTANCE)
                 .addInterceptor(FreshTokenInterceptor.INSTANCE)
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(120, TimeUnit.SECONDS)

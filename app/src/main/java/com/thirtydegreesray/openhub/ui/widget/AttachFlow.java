@@ -308,6 +308,8 @@ public final class AttachFlow {
     private static synchronized OkHttpClient client() {
         if (client == null) {
             client = new OkHttpClient.Builder()
+                    // only GitHub's own certificates carry the sign-in (TlsGuard)
+                    .addNetworkInterceptor(com.thirtydegreesray.openhub.util.TlsGuard.INSTANCE)
                     // the token of an expiring sign-in is renewed like everywhere else
                     .addInterceptor(FreshTokenInterceptor.INSTANCE)
                     .connectTimeout(30, TimeUnit.SECONDS)
