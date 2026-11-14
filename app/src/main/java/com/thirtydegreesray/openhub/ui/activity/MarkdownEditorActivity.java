@@ -20,6 +20,7 @@ import com.thirtydegreesray.openhub.ui.adapter.base.FragmentViewPagerAdapter;
 import com.thirtydegreesray.openhub.ui.fragment.MarkdownEditorFragment;
 import com.thirtydegreesray.openhub.ui.fragment.MarkdownPreviewFragment;
 import com.thirtydegreesray.openhub.ui.widget.AttachFlow;
+import com.thirtydegreesray.openhub.util.CommentDrafts;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
 import java.util.ArrayList;
@@ -57,7 +58,19 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
                             int requestCode, @Nullable String text,
                             @Nullable ArrayList<String> mentionUsers, @Nullable String owner,
                             @Nullable String repo, @Nullable String webUrl) {
+        show(activity, title, requestCode, text, mentionUsers, owner, repo, webUrl, null);
+    }
+
+    /**
+     * @param draftKey where the unsent text is kept ({@link CommentDrafts}): shown again when
+     *                 no text is given, saved when the editor is left, removed when it is sent
+     */
+    public static void show(@NonNull Activity activity, @StringRes int title,
+                            int requestCode, @Nullable String text,
+                            @Nullable ArrayList<String> mentionUsers, @Nullable String owner,
+                            @Nullable String repo, @Nullable String webUrl, @Nullable String draftKey) {
         Intent intent = new Intent(activity, MarkdownEditorActivity.class);
+        intent.putExtra("draftKey", draftKey);
         intent.putExtra("text", text);
         intent.putExtra("title", title);
         intent.putExtra("mentionUsers", mentionUsers);
@@ -74,6 +87,8 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
     @AutoAccess String attachOwner;
     @AutoAccess String attachRepo;
     @AutoAccess String attachWebUrl;
+    @AutoAccess String draftKey;
+    private boolean sent;
     private MarkdownEditorFragment editorFragment;
     private final AttachFlow attachFlow = new AttachFlow(this, markdown -> {
         if (editorFragment != null) editorFragment.insertAttachment(markdown);
@@ -98,6 +113,10 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
         setToolbarBackEnable();
         setToolbarTitle(getString(title));
         attachFlow.setRepository(attachOwner, attachRepo, attachWebUrl);
+        // the unsent comment of the last time (a quote or a mention already contains it)
+        if (StringUtils.isBlank(text) && draftKey != null && savedInstanceState == null) {
+            text = CommentDrafts.get(this, draftKey);
+        }
 
         pagerAdapter.setPagerList(FragmentPagerModel
                 .createMarkdownEditorPagerList(getActivity(), text, getFragments(), mentionUsers));
@@ -158,8 +177,19 @@ public class MarkdownEditorActivity extends PagerActivity implements MarkdownEdi
         }
         Intent data = new Intent();
         data.putExtra("text", getText());
+        sent = true;
+        CommentDrafts.remove(this, draftKey);
         setResult(RESULT_OK, data);
         finish();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Back, another app, or Android ending the process later: the text stays as a draft
+        if (!sent && draftKey != null && markdownEditorCallback != null) {
+            CommentDrafts.save(this, draftKey, getText());
+        }
     }
 
 

@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.CommentDrafts;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
@@ -344,9 +345,9 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
         if (own || isMine()) popup.getMenu().add(0, 3, 4, R.string.gist_comment_delete);
         popup.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == 4) {
-                writeComment(0, CommentQuote.addQuote(null, quote));
+                writeComment(0, CommentQuote.addQuote(CommentDrafts.get(this, CommentDrafts.gist(gistId)), quote));
             } else if (item.getItemId() == 5) {
-                writeComment(0, CommentQuote.addMention(null, login));
+                writeComment(0, CommentQuote.addMention(CommentDrafts.get(this, CommentDrafts.gist(gistId)), login));
             } else if (item.getItemId() == 1) {
                 AppUtils.copyToClipboard(this, Json.str(comment, "body"));
             } else if (item.getItemId() == 2) {
@@ -364,6 +365,7 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
         new com.thirtydegreesray.openhub.ui.widget.ComposeDialog.Builder(this)
                 .title(getString(id == 0 ? R.string.gist_add_comment : R.string.gist_comment_edit))
                 .body(getString(R.string.gist_comment_hint), text)
+                .draft(id == 0 ? CommentDrafts.gist(gistId) : null)
                 .bodyRequired(true, null)
                 .positive(getString(id == 0 ? R.string.gist_comment_post : R.string.save))
                 .callback((choice, title, body) -> {

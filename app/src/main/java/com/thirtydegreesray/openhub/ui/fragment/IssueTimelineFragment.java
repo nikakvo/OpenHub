@@ -176,10 +176,10 @@ public class IssueTimelineFragment extends ListFragment<IssueTimelinePresenter, 
                         dialog.dismiss();
                         switch (ids.get(which)){
                             case 1:
-                                page.showAddCommentPage(CommentQuote.addQuote(null, quote));
+                                page.showAddCommentPage(CommentQuote.addQuote(page.commentDraft(), quote));
                                 break;
                             case 2:
-                                page.showAddCommentPage(CommentQuote.addMention(null, login));
+                                page.showAddCommentPage(CommentQuote.addMention(page.commentDraft(), login));
                                 break;
                             case 3:
                                 AppOpener.shareText(getActivity(), issueEvent.getHtmlUrl());

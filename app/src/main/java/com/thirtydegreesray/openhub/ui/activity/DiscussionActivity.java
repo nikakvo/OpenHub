@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.CommentDrafts;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
@@ -453,6 +454,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
                 .repo(owner + "/" + repo)
                 .attach(attachFlow())
                 .body(getString(R.string.diff_comment_hint), text)
+                .draft(CommentDrafts.discussion(owner, repo, number, replyTo))
                 .bodyRequired(true, null)
                 .positive(getString(R.string.comment));
         if (header != null) dialog.header(header);
@@ -487,11 +489,13 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         menu.setOnMenuItemClickListener(menuItem -> {
             String id = Json.str(item, "id");
             if (menuItem.getItemId() == 5) {
-                compose(thread, header, CommentQuote.addQuote(null, quote));
+                compose(thread, header, CommentQuote.addQuote(
+                        CommentDrafts.get(this, CommentDrafts.discussion(owner, repo, number, thread)), quote));
                 return true;
             }
             if (menuItem.getItemId() == 6) {
-                compose(thread, header, CommentQuote.addMention(null, login));
+                compose(thread, header, CommentQuote.addMention(
+                        CommentDrafts.get(this, CommentDrafts.discussion(owner, repo, number, thread)), login));
                 return true;
             }
             switch (menuItem.getItemId()) {

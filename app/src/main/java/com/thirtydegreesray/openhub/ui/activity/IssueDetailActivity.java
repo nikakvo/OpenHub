@@ -38,6 +38,7 @@ import com.thirtydegreesray.openhub.ui.widget.ZoomAbleFloatingActionButton;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.CommentDrafts;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 
@@ -304,7 +305,21 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
         MarkdownEditorActivity.show(getActivity(), R.string.comment, ADD_COMMENT_REQUEST_CODE,
                 text, issueTimelineFragment == null ? null : issueTimelineFragment.getIssueUsersExceptMe(),
                 issue == null ? null : issue.getRepoAuthorName(), issue == null ? null : issue.getRepoName(),
-                issue == null ? null : issue.getHtmlUrl());
+                issue == null ? null : issue.getHtmlUrl(), commentDraftKey());
+    }
+
+    /** Where the unsent new comment of this issue is kept; null before the issue is loaded. */
+    @Nullable
+    private String commentDraftKey() {
+        Issue issue = mPresenter.getIssue();
+        if (issue == null || issue.getRepoAuthorName() == null || issue.getRepoName() == null) return null;
+        return CommentDrafts.issue(issue.getRepoAuthorName(), issue.getRepoName(), issue.getNumber());
+    }
+
+    /** The unsent new comment of this issue, null when there is none. */
+    @Nullable
+    public String commentDraft() {
+        return CommentDrafts.get(this, commentDraftKey());
     }
 
     /** Whether a new comment can be written here (not on a locked issue, like the comment button). */

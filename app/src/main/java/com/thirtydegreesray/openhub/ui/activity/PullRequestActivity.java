@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.CommentDrafts;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullLinks;
 import com.thirtydegreesray.openhub.util.PullRefresh;
@@ -992,6 +993,12 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         comment(null);
     }
 
+    /** The unsent conversation comment, null when there is none. */
+    @Nullable
+    private String commentDraft() {
+        return CommentDrafts.get(this, CommentDrafts.pull(owner, repo, number));
+    }
+
     /** A new conversation comment; {@code text} is written in the box already (a quote, a mention). */
     private void comment(@Nullable String text) {
         new ComposeDialog.Builder(this)
@@ -999,6 +1006,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                 .repo(owner + "/" + repo)
                 .attach(attachFlow())
                 .body(getString(R.string.pull_comment_hint), text)
+                .draft(CommentDrafts.pull(owner, repo, number))
                 .bodyRequired(true, null)
                 .positive(getString(R.string.pull_comment))
                 .callback((choice, title, body) -> {
@@ -1219,9 +1227,9 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         menu.setOnMenuItemClickListener(item -> {
             long id = comment.get("id").getAsLong();
             if (item.getItemId() == 4) {
-                comment(CommentQuote.addQuote(null, quote));
+                comment(CommentQuote.addQuote(commentDraft(), quote));
             } else if (item.getItemId() == 5) {
-                comment(CommentQuote.addMention(null, login));
+                comment(CommentQuote.addMention(commentDraft(), login));
             } else if (item.getItemId() == 1) {
                 new ComposeDialog.Builder(this)
                         .title(getString(R.string.comment_edit))

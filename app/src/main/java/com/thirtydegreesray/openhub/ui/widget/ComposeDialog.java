@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.util.CommentDrafts;
 
 /**
  * A dialog to write Markdown with Write / Preview, optionally with a one-line title
@@ -52,6 +53,7 @@ public final class ComposeDialog {
         private boolean checkDefault;
         @Nullable private boolean[] checkResult;
         @Nullable private AttachFlow attachFlow;
+        @Nullable private String draftKey;
 
         public Builder(@NonNull Context context) {
             this.context = context;
@@ -92,6 +94,15 @@ public final class ComposeDialog {
         }
 
         /** The paperclip "Attach image or video" in the editor (repositories you can write to). */
+        /**
+         * Keeps the unsent text under this key ({@link CommentDrafts}): saved while typing,
+         * shown again next time when no text is given, removed when it is sent.
+         */
+        public Builder draft(@Nullable String key) {
+            this.draftKey = key;
+            return this;
+        }
+
         public Builder attach(@Nullable AttachFlow flow) {
             this.attachFlow = flow;
             return this;
@@ -117,12 +128,25 @@ public final class ComposeDialog {
             TextInputEditText titleEdit = view.findViewById(R.id.title_edit);
             MarkdownWritePreview editor = new MarkdownWritePreview(view, repoFullName);
             editor.setHint(bodyHint);
+            if (bodyText == null && draftKey != null) bodyText = CommentDrafts.get(context, draftKey);
             if (bodyText != null) {
                 editor.getEditText().setText(bodyText);
                 // the cursor after the text (a quote or a mention is followed by the answer)
                 editor.getEditText().setSelection(editor.getEditText().length());
             }
             if (attachFlow != null && !noBody) editor.enableAttach(attachFlow);
+            boolean[] sent = {false};
+            if (draftKey != null && !noBody) {
+                CommentDrafts.save(context, draftKey, bodyText); // a quote added to the draft counts too
+                editor.getEditText().addTextChangedListener(new android.text.TextWatcher() {
+                    @Override public void beforeTextChanged(CharSequence t, int a, int b, int c) { }
+                    @Override public void onTextChanged(CharSequence t, int a, int b, int c) { }
+                    @Override
+                    public void afterTextChanged(android.text.Editable text) {
+                        if (!sent[0]) CommentDrafts.save(context, draftKey, text.toString());
+                    }
+                });
+            }
 
             if (choices != null) {
                 group.setVisibility(View.VISIBLE);
@@ -196,6 +220,8 @@ public final class ComposeDialog {
                         return;
                     }
                     if (checkResult != null && checkResult.length > 0) checkResult[0] = check.isChecked();
+                    sent[0] = true;
+                    CommentDrafts.remove(context, draftKey);
                     dialog.dismiss();
                     if (callback != null) callback.onDone(selected, title, body);
                 });
