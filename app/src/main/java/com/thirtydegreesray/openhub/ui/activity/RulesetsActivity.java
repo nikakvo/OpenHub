@@ -32,6 +32,7 @@ import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import com.thirtydegreesray.openhub.util.RulesetForm;
@@ -282,8 +283,7 @@ public class RulesetsActivity extends BaseActivity<IBaseContract.Presenter> {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(onSuccess::accept, error -> {
-                    showErrorToast(StringUtils.isBlank(error.getMessage())
-                            ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                     if (onError != null) onError.accept(error);
                 }));
     }

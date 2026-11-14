@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -407,7 +408,7 @@ public class MilestonesActivity extends BaseActivity<IBaseContract.Presenter> {
                 .subscribe(onSuccess, error -> {
                     loader.setVisibility(View.GONE);
                     if (withProgress) dismissProgressDialog();
-                    showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                 }));
     }
 

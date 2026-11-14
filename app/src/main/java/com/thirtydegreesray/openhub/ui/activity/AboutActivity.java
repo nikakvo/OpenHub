@@ -132,7 +132,7 @@ public class AboutActivity extends AppCompatActivity {
                 getString(R.string.about_security_summary), 0xFFF85149,
                 v -> AppOpener.openInBrowser(this, getString(R.string.about_security_url)));
         securityRow = addItem(appItems, R.drawable.ic_pref_shield, getString(R.string.device_security),
-                getString(R.string.device_security_checking), 0xFF3FB950, v -> showSecurityDetails());
+                getString(R.string.device_security_checking), SECURITY_GREY, v -> showSecurityDetails());
         String sha = signingSha256(this);
         if (sha != null) {
             String shortSha = sha.substring(0, 8) + "..." + sha.substring(sha.length() - 6);
@@ -205,10 +205,28 @@ public class AboutActivity extends AppCompatActivity {
                 if (securityRow != null) {
                     ((TextView) securityRow.findViewById(R.id.about_item_subtitle))
                             .setText(securitySummary(report));
+                    tintSecurityIcon(securityColor(report.connection));
                 }
                 if (showWhenDone) showSecurityDetails();
             });
         }, "device-security").start();
+    }
+
+    /** Shield colors: grey while unknown, then the real result of the connection test. */
+    private static final int SECURITY_GREY = 0xFF8B949E;
+
+    private static int securityColor(@NonNull DeviceSecurity.Connection connection) {
+        switch (connection) {
+            case VERIFIED: return 0xFF3FB950;
+            case REFUSED_BY_ANDROID: return 0xFFD29922;
+            case INTERCEPTED: return 0xFFF85149;
+            default: return SECURITY_GREY;
+        }
+    }
+
+    private void tintSecurityIcon(int color) {
+        if (securityRow == null || DrawerIcons.STYLE_PLAIN.equals(DrawerIcons.getStyle(this))) return;
+        ((ImageView) securityRow.findViewById(R.id.about_item_icon)).setColorFilter(color);
     }
 
     @NonNull
@@ -239,7 +257,10 @@ public class AboutActivity extends AppCompatActivity {
                 : getString(R.string.device_security_hooks_found, android.text.TextUtils.join(", ", report.hooks)));
         text.append("\n\n").append(report.userCertificates == 0
                 ? getString(R.string.device_security_user_certs_none)
-                : getResources().getQuantityString(R.plurals.device_security_user_certs,
+                : getResources().getQuantityString(DeviceSecurity.isDebugBuild()
+                        // debug builds trust user certificates (network security config)
+                        ? R.plurals.device_security_user_certs_debug
+                        : R.plurals.device_security_user_certs,
                 report.userCertificates, report.userCertificates));
         int connection;
         switch (report.connection) {
@@ -260,6 +281,7 @@ public class AboutActivity extends AppCompatActivity {
                     if (securityRow != null) {
                         ((TextView) securityRow.findViewById(R.id.about_item_subtitle))
                                 .setText(R.string.device_security_checking);
+                        tintSecurityIcon(SECURITY_GREY);
                     }
                     checkSecurity(true);
                 })

@@ -44,6 +44,7 @@ import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.GraphQl;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.PullRefresh;
@@ -458,7 +459,7 @@ public class TagsActivity extends BaseActivity<IBaseContract.Presenter> {
 
     @NonNull
     private static String errorText(@NonNull Throwable error) {
-        return StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+        return ErrorTexts.of(error);
     }
 
     @Override

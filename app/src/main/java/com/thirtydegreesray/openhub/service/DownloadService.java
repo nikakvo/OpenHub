@@ -36,6 +36,7 @@ import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.util.Checksums;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.StringUtils;
 
 import java.io.File;
@@ -525,7 +526,8 @@ public class DownloadService extends Service {
                     notificationManager.cancel(id);
                     toast(getString(R.string.download_cancel), false);
                 } else {
-                    String reason = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
+                    String reason = ErrorTexts.kind(e) != ErrorTexts.Kind.OTHER ? ErrorTexts.of(e)
+                            : e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
                     notifyFinished(this, false, getString(R.string.download_failed) + ": " + reason, null);
                     toast(getString(R.string.download_failed) + ": " + reason, false);
                 }

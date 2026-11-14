@@ -47,6 +47,7 @@ import com.thirtydegreesray.openhub.ui.activity.ProfileActivity;
 import com.thirtydegreesray.openhub.ui.activity.PullRequestsActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepoListActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepositoryActivity;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import com.thirtydegreesray.openhub.ui.activity.UserListActivity;
 import com.thirtydegreesray.openhub.ui.fragment.base.BaseFragment;
@@ -261,8 +262,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                 }, error -> {
                     if (readmeEdit == null) return;
                     readmeEdit.setEnabled(true);
-                    showErrorToast(StringUtils.isBlank(error.getMessage())
-                            ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                 });
     }
 
@@ -735,7 +735,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                     if (error instanceof GitHubApi.ApiException && ((GitHubApi.ApiException) error).code == 409) {
                         showConflict(state);
                     } else {
-                        showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                        showErrorToast(ErrorTexts.of(error));
                     }
                 });
     }
@@ -794,7 +794,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                 }, error -> {
                     hideProgress();
                     if (!isAdded()) return;
-                    showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                 });
     }
 
@@ -937,7 +937,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
                     hideProgress();
                     WorkflowChanges.markChanged();
                     if (!isAdded()) return;
-                    showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                     if (mPresenter != null) checkFork(mPresenter.getRepository());
                 });
     }

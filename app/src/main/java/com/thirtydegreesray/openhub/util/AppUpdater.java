@@ -81,8 +81,7 @@ public final class AppUpdater {
                 }, error -> {
                     if (manual && !activity.isFinishing()) {
                         Toasts.error(activity, activity.getString(R.string.update_check_failed,
-                                StringUtils.isBlank(error.getMessage()) ? error.toString()
-                                        : error.getMessage())).show();
+                                ErrorTexts.of(error))).show();
                     }
                 });
     }

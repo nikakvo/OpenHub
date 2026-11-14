@@ -11,6 +11,7 @@ import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.mvp.model.UploadItem;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.ContentFiles;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.RepoChanges;
 import com.thirtydegreesray.openhub.util.RepoCommitter;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -144,8 +145,7 @@ public final class RepoFileActions {
                     if (done != null) done.onDone();
                 }, error -> {
                     if (!activity.isFinishing()) dialog.dismiss();
-                    Toasts.error(activity.getApplicationContext(), StringUtils.isBlank(error.getMessage())
-                            ? error.toString() : error.getMessage()).show();
+                    Toasts.error(activity.getApplicationContext(), ErrorTexts.of(error)).show();
                 });
     }
 }

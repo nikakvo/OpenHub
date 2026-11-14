@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.Activity;
 import android.content.Context;
@@ -1372,8 +1373,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(onSuccess::accept, error -> {
-                    showErrorToast(StringUtils.isBlank(error.getMessage())
-                            ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                     if (onError != null) onError.accept(error);
                 }));
     }

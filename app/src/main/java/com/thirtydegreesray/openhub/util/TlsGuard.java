@@ -34,24 +34,13 @@ import okhttp3.Response;
  * travels over such a connection) and the screen in front says why. Nothing crashes and
  * nothing is deleted: without the interception everything works again at once.
  *
+ * The request then fails with an {@link InterceptedException}.
+ *
  * Debug builds skip it, so a developer can look at the app's traffic with a proxy.
  */
 public final class TlsGuard implements Interceptor {
 
     public static final TlsGuard INSTANCE = new TlsGuard();
-
-    /** The request was stopped: the connection is not GitHub's own. */
-    public static final class InterceptedException extends IOException {
-        @NonNull public final String host;
-        @NonNull public final TlsChainCheck.Result result;
-
-        InterceptedException(@NonNull String host, @NonNull TlsChainCheck.Result result) {
-            super("The connection to " + host + " is being intercepted (" + result
-                    + "). OpenHub did not send the request.");
-            this.host = host;
-            this.result = result;
-        }
-    }
 
     /** Sessions already found GitHub's own, with their host (a connection carries many requests). */
     private final Map<SSLSession, String> checked =

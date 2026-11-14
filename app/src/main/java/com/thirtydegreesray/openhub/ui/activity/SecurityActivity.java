@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
@@ -413,7 +414,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         footerText.setVisibility(View.GONE);
         emptyBox.setVisibility(View.VISIBLE);
         turnOnBn.setVisibility(View.GONE);
-        String message = StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+        String message = ErrorTexts.of(error);
         int code = error instanceof GitHubApi.ApiException ? ((GitHubApi.ApiException) error).code : 0;
         String lower = message.toLowerCase(Locale.ROOT);
         boolean off = (code == 403 || code == 404) && (lower.contains("disabled")
@@ -1371,8 +1372,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(onSuccess::accept, error -> {
-                    showErrorToast(StringUtils.isBlank(error.getMessage())
-                            ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                     if (onError != null) onError.accept(error);
                 }));
     }

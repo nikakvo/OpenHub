@@ -36,6 +36,7 @@ import com.thirtydegreesray.openhub.http.error.HttpErrorCode;
 import com.thirtydegreesray.openhub.http.error.HttpPageNoFoundError;
 import com.thirtydegreesray.openhub.http.error.UnauthorizedError;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.NetHelper;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -337,14 +338,17 @@ public abstract class BasePresenter<V extends IBaseContract.View> implements IBa
         if(error == null){
             return errorTip;
         }
-        if(error instanceof UnknownHostException){
+        if (ErrorTexts.kind(error) != ErrorTexts.Kind.OTHER) {
+            // certificate problems: a short sentence, not Java's exception text
+            errorTip = ErrorTexts.of(error);
+        } else if(error instanceof UnknownHostException){
             errorTip = getString(R.string.no_network_tip);
         } else if (error instanceof SocketTimeoutException) {
             errorTip = getString(R.string.load_timeout_tip);
         } else if (error instanceof HttpError) {
             errorTip = error.getMessage();
         } else {
-            errorTip = StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+            errorTip = ErrorTexts.of(error);
         }
         return errorTip;
     }

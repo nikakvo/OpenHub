@@ -24,6 +24,7 @@ import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.MarkdownWritePreview;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.GistChanges;
 import com.thirtydegreesray.openhub.util.GitHubHelper;
 import com.thirtydegreesray.openhub.util.Json;
@@ -179,7 +180,7 @@ public class GistEditActivity extends BaseActivity<IBaseContract.Presenter> {
                     loading = false;
                 }, error -> {
                     loader.setVisibility(View.GONE);
-                    showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                     finish();
                 }));
     }
@@ -242,7 +243,7 @@ public class GistEditActivity extends BaseActivity<IBaseContract.Presenter> {
                     invalidateBack();
                     loader.setVisibility(View.GONE);
                     saveBn.setEnabled(true);
-                    String message = StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+                    String message = ErrorTexts.of(error);
                     if (error instanceof GitHubApi.ApiException && ((GitHubApi.ApiException) error).code == 404) {
                         message = getString(R.string.gist_scope_missing) + "\n(" + message + ")";
                     }

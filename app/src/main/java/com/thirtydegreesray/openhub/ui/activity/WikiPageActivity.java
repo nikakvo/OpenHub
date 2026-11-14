@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
@@ -182,7 +183,7 @@ public class WikiPageActivity extends BaseActivity<IBaseContract.Presenter> {
                     webView.setMdSource(html, null, true);
                 }, error -> {
                     showRefreshing(false);
-                    String message = StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+                    String message = ErrorTexts.of(error);
                     if (!shown) showEmpty(getString(R.string.wiki_page_failed, message));
                     else showErrorToast(message);
                 }));

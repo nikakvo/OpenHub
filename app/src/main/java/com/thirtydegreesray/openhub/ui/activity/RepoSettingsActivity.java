@@ -33,6 +33,7 @@ import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
@@ -694,8 +695,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(onSuccess::accept, error -> {
-                    showErrorToast(StringUtils.isBlank(error.getMessage())
-                            ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                     if (onError != null) onError.accept(error);
                 }));
     }

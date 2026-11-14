@@ -31,6 +31,7 @@ import com.thirtydegreesray.openhub.http.IssueFieldService;
 import com.thirtydegreesray.openhub.http.IssueService;
 import com.thirtydegreesray.openhub.mvp.model.Issue;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.GraphQl;
 import com.thirtydegreesray.openhub.util.IssueFields;
 import com.thirtydegreesray.openhub.util.Json;
@@ -547,8 +548,7 @@ public class IssueFieldsBox {
                     onSuccess.accept(result);
                 }, error -> {
                     activity.dismissProgressDialog();
-                    activity.showErrorToast(StringUtils.isBlank(error.getMessage())
-                            ? error.toString() : error.getMessage());
+                    activity.showErrorToast(ErrorTexts.of(error));
                 }));
     }
 

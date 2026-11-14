@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
@@ -644,7 +645,7 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(onSuccess::accept, error -> {
-                    String message = StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+                    String message = ErrorTexts.of(error);
                     if (error instanceof GitHubApi.ApiException && ((GitHubApi.ApiException) error).code == 404
                             && gist != null) {
                         message = getString(R.string.gist_scope_missing) + "\n(" + message + ")";

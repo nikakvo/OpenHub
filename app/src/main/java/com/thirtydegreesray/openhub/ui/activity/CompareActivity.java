@@ -27,6 +27,7 @@ import com.thirtydegreesray.openhub.mvp.model.CommitFile;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.fragment.CommitFilesFragment;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.RepoCommitter;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -374,6 +375,6 @@ public class CompareActivity extends BaseActivity<IBaseContract.Presenter>
 
     @NonNull
     private static String message(@NonNull Throwable error) {
-        return StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+        return ErrorTexts.of(error);
     }
 }

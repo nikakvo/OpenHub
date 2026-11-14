@@ -25,6 +25,7 @@ import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.dao.AuthUser;
 import com.thirtydegreesray.openhub.http.UserService;
 import com.thirtydegreesray.openhub.mvp.model.User;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.TokenCrypto;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.ReleaseService;
@@ -420,8 +421,7 @@ public class ShareUploadActivity extends BaseActivity<IBaseContract.Presenter> {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(onSuccess::accept, error -> {
-                    showErrorToast(StringUtils.isBlank(error.getMessage())
-                            ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                     if (onError != null) onError.accept(error);
                 }));
     }

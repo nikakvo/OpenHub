@@ -4,6 +4,9 @@
     <string name="tls_intercepted_title">Connection intercepted</string>
     <string name="tls_intercepted_message">The connection to %1$s is being intercepted: the certificate is not GitHub\'s own. OpenHub did not send the request, so your sign-in did not travel over this connection.\n\nThis happens when certificate checks are switched off in OpenHub (an SSL unpinning module) or a proxy certificate was added to the system. Your account is kept. When the interception stops, OpenHub works again at once.</string>
     <string name="tls_intercepted_details">Details</string>
+    <!-- short texts for toasts (HyperOS shows two lines) -->
+    <string name="tls_intercepted_toast">Connection to GitHub intercepted: request not sent</string>
+    <string name="tls_refused_toast">Android refused the certificate of this connection</string>
 
     <!-- About - Device security -->
     <string name="device_security">Device security</string>
@@ -15,6 +18,10 @@
     <plurals name="device_security_user_certs">
         <item quantity="one">User certificates: %d installed, OpenHub does not trust it</item>
         <item quantity="other">User certificates: %d installed, OpenHub does not trust them</item>
+    </plurals>
+    <plurals name="device_security_user_certs_debug">
+        <item quantity="one">User certificates: %d installed, this debug build trusts it</item>
+        <item quantity="other">User certificates: %d installed, this debug build trusts them</item>
     </plurals>
     <string name="device_security_user_certs_none">User certificates: none</string>
     <string name="device_security_conn_verified">Connection to GitHub: verified, GitHub\'s own certificate</string>

@@ -71,6 +71,8 @@ public final class SignInWatch implements Application.ActivityLifecycleCallbacks
     @Override
     public void onActivityResumed(@NonNull Activity activity) {
         resumed = new WeakReference<>(activity);
+        // a "Connection intercepted" report that came while no screen could show it
+        InterceptionNotice.onResumed();
     }
 
     @Override

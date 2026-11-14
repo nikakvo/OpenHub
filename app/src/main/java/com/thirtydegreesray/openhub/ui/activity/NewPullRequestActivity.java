@@ -27,6 +27,7 @@ import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.MarkdownWritePreview;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.PullChanges;
 import com.thirtydegreesray.openhub.util.RepoChanges;
@@ -288,8 +289,7 @@ public class NewPullRequestActivity extends BaseActivity<IBaseContract.Presenter
                     }
                     canCreate = true;
                     createBn.setEnabled(true);
-                }, error -> compareText.setText(StringUtils.isBlank(error.getMessage())
-                        ? error.toString() : error.getMessage()));
+                }, error -> compareText.setText(ErrorTexts.of(error)));
         disposables.add(comparing);
     }
 
@@ -341,8 +341,7 @@ public class NewPullRequestActivity extends BaseActivity<IBaseContract.Presenter
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(onSuccess::accept, error -> {
-                    showErrorToast(StringUtils.isBlank(error.getMessage())
-                            ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                     if (onError != null) onError.accept(error);
                 }));
     }

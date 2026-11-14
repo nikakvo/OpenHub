@@ -34,6 +34,7 @@ import com.thirtydegreesray.openhub.ui.widget.CommitDialog;
 import com.thirtydegreesray.openhub.ui.widget.MarkdownWritePreview;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.RepoChanges;
 import com.thirtydegreesray.openhub.util.RepoCommitter;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -210,8 +211,7 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
                     loader.setVisibility(View.GONE);
                     new AlertDialog.Builder(this)
                             .setTitle(R.string.file_cannot_edit)
-                            .setMessage(StringUtils.isBlank(error.getMessage()) ? error.toString()
-                                    : error.getMessage())
+                            .setMessage(ErrorTexts.of(error))
                             .setPositiveButton(R.string.ok, (d, w) -> finish())
                             .setOnCancelListener(d -> finish())
                             .show();
@@ -299,7 +299,7 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
                             .show();
                 }, error -> {
                     loader.setVisibility(View.GONE);
-                    showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                 }));
     }
 
@@ -330,7 +330,7 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
                         String reason = error instanceof GitHubApi.ApiException
                                 && ((GitHubApi.ApiException) error).code == 404
                                 ? getString(R.string.file_not_on_branch, path, target)
-                                : StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+                                : ErrorTexts.of(error);
                         showErrorToast(reason);
                     }));
         };
@@ -414,8 +414,7 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
                     committing = false;
                     commitBn.setEnabled(true);
                     invalidateBack();
-                    showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString()
-                            : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                 }));
     }
 

@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
@@ -145,7 +146,7 @@ public class CodeSearchActivity extends BaseActivity<IBaseContract.Presenter> {
                     if (shown == 0) searchPaths();
                 }, error -> {
                     loader.setVisibility(View.GONE);
-                    String message = StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+                    String message = ErrorTexts.of(error);
                     if (error instanceof GitHubApi.ApiException && ((GitHubApi.ApiException) error).code == 403) {
                         // code search allows only a few searches per minute
                         message = getString(R.string.code_search_rate_limit);

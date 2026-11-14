@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.Activity;
 import android.content.Intent;
@@ -183,7 +184,7 @@ public class ReleaseFeedActivity extends BaseActivity<IBaseContract.Presenter> {
                 }, error -> {
                     loading = false;
                     refreshLayout.setRefreshing(false);
-                    showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                     render();
                 }));
     }

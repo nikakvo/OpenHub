@@ -37,6 +37,7 @@ import com.thirtydegreesray.openhub.mvp.model.Issue;
 import com.thirtydegreesray.openhub.ui.activity.IssueDetailActivity;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.util.ButtonStyles;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -861,7 +862,7 @@ public class SubIssuesBox {
     }
 
     private static String message(Throwable error) {
-        return StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+        return ErrorTexts.of(error);
     }
 
     private static int dp(Context ctx, int value) {

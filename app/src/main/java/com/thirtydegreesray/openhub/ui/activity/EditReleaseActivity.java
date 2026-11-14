@@ -43,6 +43,7 @@ import com.thirtydegreesray.openhub.ui.widget.MarkdownWritePreview;
 import com.thirtydegreesray.openhub.ui.widget.TextInputDialog;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ContentFiles;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.ReleaseChanges;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
@@ -827,8 +828,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(onSuccess::accept, error -> {
-                    showErrorToast(StringUtils.isBlank(error.getMessage())
-                            ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                     if (onError != null) onError.accept(error);
                 }));
     }

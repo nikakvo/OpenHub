@@ -29,6 +29,7 @@ import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.SingleFragmentActivity;
 import com.thirtydegreesray.openhub.ui.fragment.ReleasesFragment;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.ReleaseChanges;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
@@ -365,7 +366,7 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
 
     @NonNull
     private static String message(@NonNull Throwable error) {
-        return StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+        return ErrorTexts.of(error);
     }
 
     @Override

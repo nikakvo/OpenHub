@@ -9,6 +9,7 @@ import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.IssueService;
 import com.thirtydegreesray.openhub.mvp.model.Milestone;
 import com.thirtydegreesray.openhub.mvp.model.User;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.IssueTemplates;
 import com.thirtydegreesray.openhub.util.Json;
 import java.util.List;
@@ -365,7 +366,7 @@ public class EditIssueActivity extends BaseActivity<EditIssuePresenter>
                 }, error -> {
                     if (withProgress) {
                         dismissProgressDialog();
-                        showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                        showErrorToast(ErrorTexts.of(error));
                     }
                 }));
     }

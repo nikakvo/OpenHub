@@ -47,6 +47,7 @@ import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ButtonStyles;
 import com.thirtydegreesray.openhub.util.DeployKeys;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.Json;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -468,7 +469,7 @@ public class DeployKeysActivity extends BaseActivity<IBaseContract.Presenter> {
 
     @NonNull
     private static String errorText(@NonNull Throwable error) {
-        return StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+        return ErrorTexts.of(error);
     }
 
     @Override

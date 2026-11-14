@@ -36,6 +36,7 @@ import com.thirtydegreesray.openhub.mvp.model.Repository;
 import com.thirtydegreesray.openhub.mvp.model.User;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.GitignorePickerDialog;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
@@ -475,8 +476,7 @@ public class CreateRepositoryActivity extends BaseActivity<IBaseContract.Present
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(onSuccess::accept, error -> {
                     if (showError) {
-                        showErrorToast(StringUtils.isBlank(error.getMessage())
-                                ? error.toString() : error.getMessage());
+                        showErrorToast(ErrorTexts.of(error));
                     }
                     if (onError != null) onError.accept(error);
                 }));

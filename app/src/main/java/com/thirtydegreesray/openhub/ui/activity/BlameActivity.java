@@ -29,6 +29,7 @@ import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BlameLines;
 import com.thirtydegreesray.openhub.util.BundleHelper;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.GitHubLinks;
 import com.thirtydegreesray.openhub.util.GraphQl;
 import com.thirtydegreesray.openhub.util.Json;
@@ -162,7 +163,7 @@ public class BlameActivity extends BaseActivity<IBaseContract.Presenter> {
                     rows.clear();
                     note = null;
                     adapter.notifyDataSetChanged();
-                    String message = StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+                    String message = ErrorTexts.of(error);
                     emptyText.setText(message);
                     emptyText.setVisibility(View.VISIBLE);
                 }));

@@ -37,6 +37,7 @@ import com.thirtydegreesray.openhub.mvp.model.UploadItem;
 import com.thirtydegreesray.openhub.ui.activity.ReleaseInfoActivity;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ContentFiles;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.ReleaseChanges;
 import com.thirtydegreesray.openhub.util.ReleaseChecksums;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -825,6 +826,7 @@ public class UploadService extends Service {
 
     @NonNull
     private static String reason(@NonNull Exception e) {
+        if (ErrorTexts.kind(e) != ErrorTexts.Kind.OTHER) return ErrorTexts.of(e);
         return StringUtils.isBlank(e.getMessage()) ? e.getClass().getSimpleName() : e.getMessage();
     }
 

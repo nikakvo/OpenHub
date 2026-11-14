@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
@@ -202,7 +203,7 @@ public class JobLogActivity extends BaseActivity<IBaseContract.Presenter> {
                     if (running) schedulePoll();
                 }, error -> {
                     loader.setVisibility(View.GONE);
-                    String text = StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage();
+                    String text = ErrorTexts.of(error);
                     if (log == null) showMessage(text);
                     else showErrorToast(text);
                 }));

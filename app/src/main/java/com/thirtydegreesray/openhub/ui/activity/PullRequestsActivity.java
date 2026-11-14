@@ -1,6 +1,7 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
 import com.thirtydegreesray.openhub.util.ArchivedPulls;
+import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.Intent;
@@ -199,7 +200,7 @@ public class PullRequestsActivity extends BaseActivity<IBaseContract.Presenter> 
                     }
                 }, error -> {
                     loader.setVisibility(View.GONE);
-                    showErrorToast(StringUtils.isBlank(error.getMessage()) ? error.toString() : error.getMessage());
+                    showErrorToast(ErrorTexts.of(error));
                 }));
     }
 
