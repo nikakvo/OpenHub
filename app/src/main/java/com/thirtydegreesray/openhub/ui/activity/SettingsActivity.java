@@ -41,6 +41,8 @@ public class SettingsActivity extends SingleFragmentActivity<SettingsPresenter, 
 
     View rootLayout;
     @AutoAccess boolean recreated = false;
+    // Settings no longer finishes itself when it goes to the background (the old color dialog
+    // that could not be saved is gone): Back from a system page returns here.
 
     @Override
     protected void setupActivityComponent(AppComponent appComponent) {
@@ -113,18 +115,6 @@ public class SettingsActivity extends SingleFragmentActivity<SettingsPresenter, 
     @Override
     public void finishActivity() {
         super.finishActivity();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-//      finish setting activity to avoid  java.io.NotSerializableException
-//      com.thirtydegreesray.openhub.ui.widget.colorChooser.ColorChooserPreference
-//      android.os.Parcel.writeSerializable(Parcel.java:1761)
-        if(recreated){
-            super.onSaveInstanceState(outState);
-        } else {
-            finish();
-        }
     }
 
     @Override
