@@ -384,11 +384,21 @@ final class HtmlSpanner {
             case "noscript": case "head": case "title": case "meta": case "link":
                 return true;
             default:
-                // the hidden "Footnotes" heading, the permalink icons of headings and the
-                // back links of footnotes (a list row cannot jump back to the reference)
+                // the hidden "Footnotes" heading, the permalink icons of headings, the back
+                // links of footnotes (a list row cannot jump back to the reference), and the
+                // quoted email of a reply sent by email (github.com hides it behind "..." too)
                 return e.hasClass("sr-only") || e.hasAttr("hidden")
+                        || e.hasClass("email-hidden-reply") || e.hasClass("email-hidden-toggle")
+                        || hiddenByStyle(e)
                         || (tag.equals("a") && (e.hasClass("anchor") || e.hasAttr("data-footnote-backref")));
         }
+    }
+
+    /** style="display: none" (GitHub hides parts of its HTML this way). */
+    static boolean hiddenByStyle(@NonNull Element e) {
+        String style = e.attr("style");
+        if (style.isEmpty()) return false;
+        return style.replace(" ", "").toLowerCase(java.util.Locale.ROOT).contains("display:none");
     }
 
     /**
