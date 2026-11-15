@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
@@ -241,7 +242,7 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
             return;
         }
         final int[] source = {0};
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.branches_new_source)
                 .setSingleChoiceItems(sources, 0, (dialog, which) -> source[0] = which)
                 .setPositiveButton(R.string.ok, (dialog, which) -> askNewBranchName(sources[source[0]]))
@@ -284,7 +285,7 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void delete(@NonNull String branch) {
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.branches_delete_title)
                 .setMessage(getString(R.string.branches_delete_message, branch))
                 .setPositiveButton(R.string.delete, (d, w) -> run(() -> {
@@ -330,7 +331,7 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void showProtectionDialog(@NonNull String branch, @NonNull JsonObject current) {
-        View view = LayoutInflater.from(new AlertDialog.Builder(this).getContext()).inflate(R.layout.dialog_branch_protection, null);
+        View view = LayoutInflater.from(new ScreenDialog.Builder(this).getContext()).inflate(R.layout.dialog_branch_protection, null);
         SwitchCompat protect = view.findViewById(R.id.protect_switch);
         View options = view.findViewById(R.id.protection_options);
         CheckBox requirePr = view.findViewById(R.id.require_pr_check);
@@ -366,7 +367,7 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
         requirePr.setOnCheckedChangeListener((v, c) -> refresh.run());
         refresh.run();
 
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(getString(R.string.protection_title, branch))
                 .setView(view)
                 .setPositiveButton(R.string.save, (d, w) -> {
@@ -451,7 +452,7 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
                 String from = !StringUtils.isBlank(name) ? name : Json.str(rule, "ruleset_source");
                 if (!StringUtils.isBlank(from)) text.append("  (").append(from).append(')');
             }
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this)
+            AlertDialog.Builder dialog = new ScreenDialog.Builder(this)
                     .setTitle(getString(R.string.branches_rules_title, branch))
                     .setMessage(text.length() == 0 ? getString(R.string.branches_rules_none, branch) : text)
                     .setPositiveButton(R.string.ok, null)

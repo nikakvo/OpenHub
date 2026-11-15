@@ -9,6 +9,7 @@ import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.IssueService;
 import com.thirtydegreesray.openhub.mvp.model.Milestone;
 import com.thirtydegreesray.openhub.mvp.model.User;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.IssueTemplates;
 import com.thirtydegreesray.openhub.util.Json;
@@ -213,7 +214,7 @@ public class EditIssueActivity extends BaseActivity<EditIssuePresenter>
                 if (current == null) break;
                 for (User user : current) if (logins.get(i).equalsIgnoreCase(user.getLogin())) checked[i] = true;
             }
-            new AlertDialog.Builder(this)
+            new ScreenDialog.Builder(this)
                     .setTitle(R.string.issue_assignees)
                     .setMultiChoiceItems(logins.toArray(new CharSequence[0]), checked,
                             (d, which, isChecked) -> checked[which] = isChecked)
@@ -256,7 +257,7 @@ public class EditIssueActivity extends BaseActivity<EditIssuePresenter>
                 items[i + 1] = Json.str(m, "title");
                 if (current != null && current.getNumber() == Json.integer(m, "number")) selected = i + 1;
             }
-            new AlertDialog.Builder(this)
+            new ScreenDialog.Builder(this)
                     .setTitle(R.string.issue_milestone)
                     .setSingleChoiceItems(items, selected, (d, which) -> {
                         if (which == 0) {
@@ -299,7 +300,7 @@ public class EditIssueActivity extends BaseActivity<EditIssuePresenter>
                 items[i] = text;
             }
             items[templates.size()] = getString(R.string.issue_template_blank);
-            new AlertDialog.Builder(this)
+            new ScreenDialog.Builder(this)
                     .setTitle(R.string.issue_template_choose)
                     .setItems(items, (d, which) -> {
                         if (which < templates.size()) applyTemplate(templates.get(which));

@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.StringUtils;
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
@@ -173,7 +174,7 @@ public class LoginActivity extends BaseActivity<LoginPresenter>
         container.setPadding(padding, 0, padding, 0);
         container.addView(tokenEt);
 
-        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+        AlertDialog dialog = new ScreenDialog.Builder(getActivity())
                 .setTitle(R.string.token_login_title)
                 .setMessage(R.string.token_login_message)
                 .setView(container)

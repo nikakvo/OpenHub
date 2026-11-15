@@ -23,6 +23,7 @@ import android.widget.AutoCompleteTextView;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.common.AppEventBus;
@@ -218,7 +219,7 @@ public class SearchActivity extends PagerActivity<SearchPresenter>
         int count = mPresenter.getSearchRecordList().size();
         if (count == 0) return;
         if (historyBox != null) historyBox.dismissDropDown();
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.search_history_clear)
                 .setMessage(getResources().getQuantityString(R.plurals.search_history_clear_message, count, count))
                 .setPositiveButton(R.string.search_history_clear_bn, (dialog, which) -> {

@@ -23,6 +23,7 @@ import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.MarkdownWritePreview;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.GistChanges;
@@ -264,7 +265,7 @@ public class GistEditActivity extends BaseActivity<IBaseContract.Presenter> {
     protected void handleBack() {
         super.handleBack();
         if (!dirty || saving) return;
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.release_discard_title)
                 .setMessage(R.string.gist_discard_message)
                 .setPositiveButton(R.string.release_discard, (d, w) -> {

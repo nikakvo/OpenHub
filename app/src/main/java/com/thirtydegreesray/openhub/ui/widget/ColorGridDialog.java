@@ -11,9 +11,6 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
-import androidx.lifecycle.DefaultLifecycleObserver;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
 
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.util.ViewUtils;
@@ -50,7 +47,7 @@ public class ColorGridDialog {
         grid.setClipToPadding(false);
         grid.setSelector(android.R.color.transparent);
 
-        final AlertDialog dialog = new AlertDialog.Builder(activity)
+        final AlertDialog dialog = new ScreenDialog.Builder(activity)
                 .setTitle(title)
                 .setView(grid)
                 .setNegativeButton(R.string.cancel, null)
@@ -94,19 +91,7 @@ public class ColorGridDialog {
             listener.onColorSelected(colors[position]);
             dialog.dismiss();
         });
-        // closed together with its screen (rotation, theme change): otherwise Android removes
-        // the window itself and logs "has leaked window"
-        if (activity instanceof LifecycleOwner) {
-            final Lifecycle lifecycle = ((LifecycleOwner) activity).getLifecycle();
-            final DefaultLifecycleObserver closer = new DefaultLifecycleObserver() {
-                @Override
-                public void onDestroy(@NonNull LifecycleOwner owner) {
-                    if (dialog.isShowing()) dialog.dismiss();
-                }
-            };
-            lifecycle.addObserver(closer);
-            dialog.setOnDismissListener(d -> lifecycle.removeObserver(closer));
-        }
+        // closes together with its screen: ScreenDialog.Builder
         dialog.show();
     }
 

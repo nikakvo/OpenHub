@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.HelpPage;
 
 import android.content.Intent;
@@ -501,7 +502,7 @@ public class MainActivity extends BaseDrawerActivity<MainPresenter>
     }
 
     private void logout() {
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setCancelable(true)
                 .setTitle(R.string.warning_dialog_tile)
                 .setMessage(R.string.logout_warning)

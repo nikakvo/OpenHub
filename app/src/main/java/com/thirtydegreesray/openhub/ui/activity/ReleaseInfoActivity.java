@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.Activity;
 import android.content.Intent;
@@ -265,7 +266,7 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
             } else if (item.getItemId() == 2) {
                 AppUtils.copyToClipboard(this, asset.getDownloadUrl());
             } else if (item.getItemId() == 3) {
-                new AlertDialog.Builder(this)
+                new ScreenDialog.Builder(this)
                         .setTitle(R.string.release_delete_file)
                         .setMessage(getString(R.string.release_delete_file_message, asset.getName()))
                         .setPositiveButton(R.string.delete, (d, w) -> mPresenter.deleteAsset(asset))
@@ -410,7 +411,7 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
         }
         String message = getString(R.string.release_publish_message, release.getTagName());
         if (pending > 0) message += "\n\n" + getString(R.string.release_publish_incomplete_files);
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.release_publish)
                 .setMessage(message)
                 .setPositiveButton(R.string.release_publish, (d, w) -> mPresenter.publish())
@@ -419,7 +420,7 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
     }
 
     private void confirmDelete(@NonNull Release release) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+        AlertDialog.Builder builder = new ScreenDialog.Builder(this)
                 .setTitle(R.string.release_delete)
                 .setNegativeButton(R.string.cancel, null);
         String title = StringUtils.isBlank(release.getTagName())

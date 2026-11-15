@@ -41,6 +41,7 @@ import com.thirtydegreesray.openhub.http.ReleaseService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
@@ -395,7 +396,7 @@ public class TagsActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void confirmDelete(@NonNull TagRows.Entry entry, @Nullable JsonObject release) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(R.string.tags_delete);
+        AlertDialog.Builder builder = new ScreenDialog.Builder(this).setTitle(R.string.tags_delete);
         if (release != null && Json.bool(release, "immutable")) {
             // GitHub refuses it; say so instead of offering a button that cannot work
             builder.setMessage(getString(R.string.tags_delete_immutable, releaseName(release, entry.name)))

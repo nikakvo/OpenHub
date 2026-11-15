@@ -33,6 +33,7 @@ import com.thirtydegreesray.openhub.mvp.presenter.IssueDetailPresenter;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.fragment.IssueTimelineFragment;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.ui.widget.SubIssuesBox;
 import com.thirtydegreesray.openhub.ui.widget.ZoomAbleFloatingActionButton;
 import com.thirtydegreesray.openhub.util.AppOpener;
@@ -407,7 +408,7 @@ public class IssueDetailActivity extends BaseActivity<IssueDetailPresenter>
         String msg = String.format(getString(R.string.toggle_issue_warning),
                 mPresenter.getIssue().getState().equals(Issue.IssueState.open) ?
                 getString(R.string.close) : getString(R.string.reopen));
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setTitle(R.string.warning_dialog_tile)
                 .setMessage(msg)
                 .setPositiveButton(R.string.confirm, (dialog, which) -> mPresenter.toggleIssueState())

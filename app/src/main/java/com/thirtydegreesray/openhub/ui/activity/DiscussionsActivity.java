@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
@@ -284,7 +285,7 @@ public class DiscussionsActivity extends BaseActivity<IBaseContract.Presenter> {
             names[i + 1] = Json.str(categories.get(i), "name");
             if (Json.str(categories.get(i), "id").equals(categoryId)) selected = i + 1;
         }
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.discussion_category)
                 .setSingleChoiceItems(names, selected, (d, which) -> {
                     categoryId = which == 0 ? null : Json.str(categories.get(which - 1), "id");

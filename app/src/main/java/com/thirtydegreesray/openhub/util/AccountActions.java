@@ -15,6 +15,7 @@ import com.thirtydegreesray.openhub.dao.AuthUserDao;
 import com.thirtydegreesray.openhub.http.core.AppRetrofit;
 import com.thirtydegreesray.openhub.ui.activity.LoginActivity;
 import com.thirtydegreesray.openhub.ui.activity.SplashActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,7 @@ public final class AccountActions {
 
     /** Asks first, then removes the account in use from the phone (and revokes its sign-in). */
     public static void confirmLogout(@NonNull Activity activity) {
-        new AlertDialog.Builder(activity)
+        new ScreenDialog.Builder(activity)
                 .setCancelable(true)
                 .setTitle(R.string.warning_dialog_tile)
                 .setMessage(R.string.logout_warning)

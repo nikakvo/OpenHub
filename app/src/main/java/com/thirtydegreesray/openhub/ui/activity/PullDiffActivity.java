@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
@@ -729,7 +730,7 @@ public class PullDiffActivity extends BaseActivity<IBaseContract.Presenter> {
                         })
                         .show();
             } else if (item.getItemId() == 2) {
-                new AlertDialog.Builder(this)
+                new ScreenDialog.Builder(this)
                         .setTitle(R.string.comment_delete)
                         .setMessage(R.string.comment_delete_message)
                         .setPositiveButton(R.string.delete, (d, w) -> run(() -> {

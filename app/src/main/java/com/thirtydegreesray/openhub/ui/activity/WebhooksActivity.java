@@ -34,6 +34,7 @@ import com.thirtydegreesray.openhub.http.WebhookService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
@@ -259,7 +260,7 @@ public class WebhooksActivity extends BaseActivity<IBaseContract.Presenter> {
                     return true;
                 case 2:
                     if (active) {
-                        new AlertDialog.Builder(this)
+                        new ScreenDialog.Builder(this)
                                 .setTitle(R.string.webhooks_turn_off)
                                 .setMessage(getString(R.string.webhooks_turn_off_message, Webhooks.host(url)))
                                 .setPositiveButton(R.string.webhooks_turn_off, (d, w) -> setActive(id, false))
@@ -277,7 +278,7 @@ public class WebhooksActivity extends BaseActivity<IBaseContract.Presenter> {
                     showSuccessToast(getString(R.string.webhooks_url_copied));
                     return true;
                 case 5:
-                    new AlertDialog.Builder(this)
+                    new ScreenDialog.Builder(this)
                             .setTitle(R.string.webhooks_delete)
                             .setMessage(getString(R.string.webhooks_delete_message, url))
                             .setPositiveButton(R.string.delete, (d, w) -> deleteHook(id))
@@ -442,7 +443,7 @@ public class WebhooksActivity extends BaseActivity<IBaseContract.Presenter> {
             String payloadText = payload == null ? ""
                     : new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(payload);
 
-            Context ctx = new AlertDialog.Builder(this).getContext();
+            Context ctx = new ScreenDialog.Builder(this).getContext();
             int pad = getResources().getDimensionPixelSize(R.dimen.spacing_large);
             LinearLayout box = new LinearLayout(ctx);
             box.setOrientation(LinearLayout.VERTICAL);
@@ -456,7 +457,7 @@ public class WebhooksActivity extends BaseActivity<IBaseContract.Presenter> {
             ScrollView scroll = new ScrollView(ctx);
             scroll.addView(box);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+            AlertDialog.Builder builder = new ScreenDialog.Builder(this)
                     .setTitle(Webhooks.deliveryTitle(Json.str(delivery, "event"), Json.str(delivery, "action")))
                     .setView(scroll)
                     .setPositiveButton(R.string.close, null);

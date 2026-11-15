@@ -41,7 +41,7 @@ public class ChooseLabelsDialog implements BaseViewHolder.OnItemClickListener {
         adapter.setData(labels);
         recyclerView.setAdapter(adapter);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+        AlertDialog.Builder builder = new ScreenDialog.Builder(activity)
                 .setTitle(R.string.choose_labels)
                 .setView(recyclerView)
                 .setNegativeButton(R.string.cancel, null)

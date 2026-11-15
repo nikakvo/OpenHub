@@ -26,6 +26,7 @@ import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.MarkdownWritePreview;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.Json;
@@ -200,7 +201,7 @@ public class NewPullRequestActivity extends BaseActivity<IBaseContract.Presenter
     private void chooseTarget() {
         if (parentFullName == null) return;
         String[] items = {parentFullName, self()};
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.new_pull_target)
                 .setSingleChoiceItems(items, isCrossRepository() ? 0 : 1, (dialog, which) -> {
                     dialog.dismiss();
@@ -238,7 +239,7 @@ public class NewPullRequestActivity extends BaseActivity<IBaseContract.Presenter
     private void pickFrom(int title, @NonNull List<String> names, @Nullable String current,
                           @NonNull Consumer<String> onPick) {
         String[] items = names.toArray(new String[0]);
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(title)
                 .setSingleChoiceItems(items, current == null ? -1 : names.indexOf(current), (dialog, which) -> {
                     dialog.dismiss();

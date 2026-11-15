@@ -30,6 +30,7 @@ import com.thirtydegreesray.openhub.http.RulesetService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
@@ -225,7 +226,7 @@ public class RulesetsActivity extends BaseActivity<IBaseContract.Presenter> {
     private void delete(@NonNull JsonObject ruleset) {
         long id = Json.integer(ruleset, "id");
         String name = Json.str(ruleset, "name");
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.rulesets_delete_title)
                 .setMessage(getString(R.string.rulesets_delete_message, name))
                 .setPositiveButton(R.string.delete, (d, w) -> run(() -> {
@@ -238,7 +239,7 @@ public class RulesetsActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void createRuleset() {
         String[] targets = {getString(R.string.ruleset_target_branch), getString(R.string.ruleset_target_tag)};
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.rulesets_new)
                 .setItems(targets, (dialog, which) -> editor.launch(RulesetEditActivity.createNewIntent(this,
                         owner, repo, which == 0 ? RulesetForm.TARGET_BRANCH : RulesetForm.TARGET_TAG, null)))

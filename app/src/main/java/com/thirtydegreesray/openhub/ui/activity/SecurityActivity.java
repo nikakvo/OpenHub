@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
@@ -728,7 +729,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         }
 
         String alertState = Json.str(alert, "state");
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+        AlertDialog.Builder builder = new ScreenDialog.Builder(this)
                 .setTitle(title(alert))
                 .setMessage(message)
                 .setPositiveButton(R.string.open_in_browser, (d, w) ->
@@ -767,7 +768,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         }
         String[] texts = new String[labels.length];
         for (int i = 0; i < labels.length; i++) texts[i] = getString(labels[i]);
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(forTab == TAB_SECRET_SCANNING ? R.string.security_resolve : R.string.security_dismiss)
                 .setItems(texts, (d, which) -> TextInputDialog.show(this, R.string.security_comment,
                         R.string.security_comment, "", false, true,
@@ -844,7 +845,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
 
     /** @param existing null: a new secret; else a new value for this one */
     private void editSecret(@Nullable String existing) {
-        View view = LayoutInflater.from(new AlertDialog.Builder(this).getContext())
+        View view = LayoutInflater.from(new ScreenDialog.Builder(this).getContext())
                 .inflate(R.layout.dialog_secret, null);
         TextInputLayout nameLayout = view.findViewById(R.id.secret_name_layout);
         TextInputEditText nameEdit = view.findViewById(R.id.secret_name);
@@ -856,7 +857,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
             nameEdit.setEnabled(false);
             valueEdit.requestFocus();
         }
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new ScreenDialog.Builder(this)
                 .setTitle(existing == null ? R.string.secrets_add : R.string.secrets_update)
                 .setView(view)
                 .setPositiveButton(R.string.save, null)
@@ -912,7 +913,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void deleteSecret(@NonNull String name) {
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.delete)
                 .setMessage(getString(R.string.secrets_delete_message, name))
                 .setPositiveButton(R.string.delete, (d, w) -> run(() -> {
@@ -995,7 +996,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
 
         // radio buttons and, when there are no environments, a note below them (an
         // AlertDialog shows either a message or a list, never both)
-        android.content.Context dialogContext = new AlertDialog.Builder(this).getContext();
+        android.content.Context dialogContext = new ScreenDialog.Builder(this).getContext();
         int pad = Math.round(getResources().getDisplayMetrics().density * 20);
         LinearLayout box = new LinearLayout(dialogContext);
         box.setOrientation(LinearLayout.VERTICAL);
@@ -1021,7 +1022,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         android.widget.ScrollView scroll = new android.widget.ScrollView(dialogContext);
         scroll.addView(box);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new ScreenDialog.Builder(this)
                 .setTitle(R.string.scope_choose)
                 .setView(scroll)
                 .setNegativeButton(R.string.cancel, null)
@@ -1080,7 +1081,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
 
     /** @param existing null: a new variable; else this one (its name can change too) */
     private void editVariable(@Nullable JsonObject existing) {
-        View view = LayoutInflater.from(new AlertDialog.Builder(this).getContext())
+        View view = LayoutInflater.from(new ScreenDialog.Builder(this).getContext())
                 .inflate(R.layout.dialog_secret, null);
         TextInputLayout nameLayout = view.findViewById(R.id.secret_name_layout);
         TextInputEditText nameEdit = view.findViewById(R.id.secret_name);
@@ -1092,7 +1093,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
             nameEdit.setText(oldName);
             valueEdit.setText(Json.str(existing, "value"));
         }
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new ScreenDialog.Builder(this)
                 .setTitle(existing == null ? R.string.variables_add : R.string.variables_edit)
                 .setView(view)
                 .setPositiveButton(R.string.save, null)
@@ -1146,7 +1147,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void deleteVariable(@NonNull String name) {
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.delete)
                 .setMessage(getString(R.string.variables_delete_message, name))
                 .setPositiveButton(R.string.delete, (d, w) -> run(() -> {
@@ -1266,7 +1267,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void showSettingsDialog(@NonNull Boolean[] states) {
-        android.content.Context dialogContext = new AlertDialog.Builder(this).getContext();
+        android.content.Context dialogContext = new ScreenDialog.Builder(this).getContext();
         int pad = Math.round(getResources().getDisplayMetrics().density * 24);
         LinearLayout box = new LinearLayout(dialogContext);
         box.setOrientation(LinearLayout.VERTICAL);
@@ -1303,11 +1304,14 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         }
         android.widget.ScrollView scroll = new android.widget.ScrollView(dialogContext);
         scroll.addView(box);
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.security_settings)
                 .setView(scroll)
                 .setPositiveButton(R.string.close, null)
-                .setOnDismissListener(d -> load())
+                // not when the dialog only closes because the screen goes away (rotation)
+                .setOnDismissListener(d -> {
+                    if (!isFinishing() && !isDestroyed() && !isChangingConfigurations()) load();
+                })
                 .show();
     }
 

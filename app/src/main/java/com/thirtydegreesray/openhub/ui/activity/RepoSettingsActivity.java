@@ -26,6 +26,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.AccountChanges;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.RepoSettingsService;
@@ -386,7 +387,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
             }, error -> dismissProgressDialog());
         };
         if (!normalized.equals(repo)) {
-            new AlertDialog.Builder(this)
+            new ScreenDialog.Builder(this)
                     .setTitle(R.string.settings_rename_title)
                     .setMessage(getString(R.string.settings_rename_message, repo, normalized))
                     .setPositiveButton(R.string.rename, (d, w) -> save.run())
@@ -403,7 +404,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
         String[] labels = {getString(R.string.settings_pulls_policy_all),
                 getString(R.string.settings_pulls_policy_collaborators)};
         int current = "collaborators_only".equals(str("pull_request_creation_policy")) ? 1 : 0;
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.settings_pulls_policy)
                 .setSingleChoiceItems(labels, current, (dialog, which) -> {
                     dialog.dismiss();
@@ -427,12 +428,12 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
             dismissProgressDialog();
             String current = str("default_branch");
             String[] items = names.toArray(new String[0]);
-            new AlertDialog.Builder(this)
+            new ScreenDialog.Builder(this)
                     .setTitle(R.string.settings_default_branch)
                     .setSingleChoiceItems(items, names.indexOf(current), (dialog, which) -> {
                         dialog.dismiss();
                         if (items[which].equals(current)) return;
-                        new AlertDialog.Builder(this)
+                        new ScreenDialog.Builder(this)
                                 .setTitle(R.string.settings_default_branch)
                                 .setMessage(getString(R.string.settings_default_branch_confirm, items[which]))
                                 .setPositiveButton(R.string.ok, (d, w) -> {
@@ -493,7 +494,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
         String[] items = new String[labels.length];
         for (int i = 0; i < labels.length; i++) items[i] = getString(labels[i]);
         int checked = indexOf(options, str(titleKey), str(messageKey));
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(title)
                 .setSingleChoiceItems(items, checked, (dialog, which) -> {
                     dialog.dismiss();
@@ -525,7 +526,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
     // ---------------------------------------------------------------------------------
 
     private void confirmVisibility(boolean makePrivate) {
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.settings_visibility)
                 .setMessage(getString(makePrivate ? R.string.settings_make_private_message
                         : R.string.settings_make_public_message, owner + "/" + repo))
@@ -540,7 +541,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
     }
 
     private void confirmArchive(boolean archive) {
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(archive ? R.string.settings_archive : R.string.settings_unarchive)
                 .setMessage(archive ? R.string.settings_archive_message : R.string.settings_unarchive_message)
                 .setPositiveButton(archive ? R.string.settings_archive : R.string.settings_unarchive, (d, w) -> {
@@ -568,7 +569,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
         form.addView(newOwner);
         form.addView(hint);
         form.addView(confirm);
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new ScreenDialog.Builder(this)
                 .setTitle(R.string.settings_transfer)
                 .setView(form)
                 .setPositiveButton(R.string.settings_transfer_button, null)
@@ -600,7 +601,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
 
     /** The token cannot delete repositories: say how to allow it. */
     private void explainDeleteScope() {
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.settings_delete)
                 .setMessage(R.string.settings_delete_scope_help)
                 .setPositiveButton(R.string.settings_open_tokens, (d, w) ->
@@ -618,7 +619,7 @@ public class RepoSettingsActivity extends BaseActivity<IBaseContract.Presenter> 
         confirm.setHint(owner + "/" + repo);
         confirm.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         frame.addView(confirm);
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new ScreenDialog.Builder(this)
                 .setTitle(R.string.settings_delete)
                 .setMessage(getString(R.string.settings_delete_message, owner + "/" + repo))
                 .setView(frame)

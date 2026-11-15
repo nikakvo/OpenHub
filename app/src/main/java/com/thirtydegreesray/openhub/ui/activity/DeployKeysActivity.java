@@ -42,6 +42,7 @@ import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
@@ -241,7 +242,7 @@ public class DeployKeysActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void confirmDelete(@NonNull JsonObject key, @NonNull String fingerprint) {
         String title = keyTitle(key);
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.deploy_keys_delete)
                 .setMessage(getString(R.string.deploy_keys_delete_message, title,
                         fingerprint.isEmpty() ? "#" + Json.lng(key, "id") : fingerprint))
@@ -282,7 +283,7 @@ public class DeployKeysActivity extends BaseActivity<IBaseContract.Presenter> {
     // ---------------------------------------------------------------------------------
 
     private void showAddDialog() {
-        Context ctx = new AlertDialog.Builder(this).getContext();
+        Context ctx = new ScreenDialog.Builder(this).getContext();
         int pad = getResources().getDimensionPixelSize(R.dimen.spacing_large);
         LinearLayout box = new LinearLayout(ctx);
         box.setOrientation(LinearLayout.VERTICAL);
@@ -336,7 +337,7 @@ public class DeployKeysActivity extends BaseActivity<IBaseContract.Presenter> {
         android.widget.ScrollView scroll = new android.widget.ScrollView(ctx);
         scroll.addView(box);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new ScreenDialog.Builder(this)
                 .setTitle(R.string.deploy_keys_add)
                 .setView(scroll)
                 .setPositiveButton(R.string.deploy_keys_add, null)

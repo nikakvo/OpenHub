@@ -42,7 +42,7 @@ public final class CommitDialog {
      */
     public static void show(@NonNull Context context, @NonNull String branch, @Nullable String defaultBranch,
                             @NonNull String defaultMessage, @NonNull Callback callback) {
-        View view = LayoutInflater.from(new AlertDialog.Builder(context).getContext()).inflate(R.layout.dialog_commit, null);
+        View view = LayoutInflater.from(new ScreenDialog.Builder(context).getContext()).inflate(R.layout.dialog_commit, null);
         TextInputLayout messageLayout = view.findViewById(R.id.message_layout);
         TextInputEditText messageEdit = view.findViewById(R.id.message_edit);
         TextInputEditText descriptionEdit = view.findViewById(R.id.description_edit);
@@ -72,7 +72,7 @@ public final class CommitDialog {
             pullCurrentCheck.setVisibility(offerPull && !checked ? View.VISIBLE : View.GONE);
         });
 
-        AlertDialog dialog = new AlertDialog.Builder(context)
+        AlertDialog dialog = new ScreenDialog.Builder(context)
                 .setTitle(R.string.commit_title)
                 .setView(view)
                 .setPositiveButton(R.string.commit_button, null)

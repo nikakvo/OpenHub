@@ -69,7 +69,7 @@ public class EditLabelDialog implements DialogInterface.OnDismissListener,
         bindViews(contentView);
         initContentView();
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+        AlertDialog.Builder builder = new ScreenDialog.Builder(activity)
                 .setTitle(isEditMode ? R.string.edit_label : R.string.create_label)
                 .setView(contentView)
                 .setOnDismissListener(this)
@@ -239,7 +239,7 @@ public class EditLabelDialog implements DialogInterface.OnDismissListener,
     }
 
     private void showDeleteLabelWarning(){
-        new AlertDialog.Builder(activity)
+        new ScreenDialog.Builder(activity)
                 .setTitle(R.string.warning_dialog_tile)
                 .setMessage(R.string.delete_label_warning)
                 .setNegativeButton(R.string.cancel, null)

@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import com.thirtydegreesray.openhub.AppConfig;
 import com.thirtydegreesray.openhub.BuildConfig;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.richtext.RichText;
 import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.http.ReleaseService;
@@ -115,7 +116,7 @@ public final class AppUpdater {
         scroll.addView(notes);
 
         final ReleaseAsset apk = findApk(release);
-        new AlertDialog.Builder(activity)
+        new ScreenDialog.Builder(activity)
                 .setTitle(R.string.update_title)
                 .setView(scroll)
                 .setPositiveButton(apk != null ? R.string.update_download : R.string.update_open_release,

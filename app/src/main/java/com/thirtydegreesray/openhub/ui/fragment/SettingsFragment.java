@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.fragment;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.GitHubLinkOwner;
 import com.thirtydegreesray.openhub.util.ReleaseWatcher;
 import android.widget.Toast;
@@ -147,7 +148,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             items[i] = GitHubNotifier.formatInterval(presets[i]);
             if (presets[i] == current) checked = i;
         }
-        new AlertDialog.Builder(getContext())
+        new ScreenDialog.Builder(getContext())
                 .setTitle(R.string.github_notifications_interval)
                 .setSingleChoiceItems(items, checked, (dialog, which) -> {
                     dialog.dismiss();
@@ -233,7 +234,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     private void confirmClearCache() {
         if (getContext() == null) return;
-        new AlertDialog.Builder(getContext())
+        new ScreenDialog.Builder(getContext())
                 .setTitle(R.string.clear_cache)
                 .setMessage(getString(R.string.clear_cache_message, cacheSize))
                 .setPositiveButton(R.string.clear_cache_bn, (dialog, which) -> clearCache())
@@ -334,7 +335,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         items[presets.length] = checked == presets.length
                 ? getString(R.string.release_check_custom) + " (" + ReleaseWatcher.formatInterval(current) + ")"
                 : getString(R.string.release_check_custom);
-        new AlertDialog.Builder(getContext())
+        new ScreenDialog.Builder(getContext())
                 .setTitle(R.string.release_check_interval)
                 .setSingleChoiceItems(items, checked, (dialog, which) -> {
                     dialog.dismiss();
@@ -358,7 +359,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         int padding = getResources().getDimensionPixelSize(R.dimen.spacing_x_large);
         container.setPadding(padding, padding / 2, padding, 0);
         container.addView(input);
-        new AlertDialog.Builder(getContext())
+        new ScreenDialog.Builder(getContext())
                 .setTitle(R.string.release_check_interval)
                 .setView(container)
                 .setNegativeButton(R.string.cancel, null)
@@ -388,7 +389,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         final String[] items = repos.toArray(new String[0]);
         final boolean[] checked = new boolean[items.length];
         java.util.Arrays.fill(checked, true);
-        new AlertDialog.Builder(getContext())
+        new ScreenDialog.Builder(getContext())
                 .setTitle(R.string.watched_releases)
                 .setMultiChoiceItems(items, checked, (dialog, which, isChecked) -> checked[which] = isChecked)
                 .setNeutralButton(R.string.check_now, (dialog, which) -> {
@@ -412,7 +413,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 = Arrays.asList(getResources().getStringArray(R.array.theme_array));
         String theme = PrefUtils.getTheme();
         int selectIndex = valueList.indexOf(theme);
-        new AlertDialog.Builder(getContext())
+        new ScreenDialog.Builder(getContext())
                 .setCancelable(true)
                 .setTitle(R.string.choose_theme)
                 .setSingleChoiceItems(R.array.theme_array, selectIndex, (dialog1, which) -> {
@@ -439,7 +440,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             items[i] = getString(DrawerIcons.label(DrawerIcons.STYLES[i]));
             if (DrawerIcons.STYLES[i].equals(current)) checked = i;
         }
-        new AlertDialog.Builder(getContext())
+        new ScreenDialog.Builder(getContext())
                 .setTitle(R.string.menu_icons_title)
                 .setSingleChoiceItems(items, checked, (dialog, which) -> {
                     dialog.dismiss();
@@ -468,7 +469,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             items[i] = getString(DrawerHeader.label(DrawerHeader.STYLES[i]));
             if (DrawerHeader.STYLES[i].equals(current)) checked = i;
         }
-        new AlertDialog.Builder(getContext())
+        new ScreenDialog.Builder(getContext())
                 .setTitle(R.string.menu_header_title)
                 .setSingleChoiceItems(items, checked, (dialog, which) -> {
                     dialog.dismiss();
@@ -497,7 +498,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             items[i] = getString(AppIcons.label(AppIcons.ICONS[i]));
             if (AppIcons.ICONS[i].equals(current)) checked = i;
         }
-        new AlertDialog.Builder(getContext())
+        new ScreenDialog.Builder(getContext())
                 .setTitle(R.string.app_icon_title)
                 .setSingleChoiceItems(items, checked, (dialog, which) -> {
                     dialog.dismiss();
@@ -579,7 +580,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     private void logout() {
-        new AlertDialog.Builder(getContext())
+        new ScreenDialog.Builder(getContext())
                 .setCancelable(true)
                 .setTitle(R.string.warning_dialog_tile)
                 .setMessage(R.string.logout_warning)
@@ -592,7 +593,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     private void showChooseStartPageDialog(){
-        new AlertDialog.Builder(getContext())
+        new ScreenDialog.Builder(getContext())
                 .setCancelable(true)
                 .setTitle(R.string.start_page)
                 .setSingleChoiceItems(R.array.start_pages_name, getStartPageIndex(), (dialog, which) -> {

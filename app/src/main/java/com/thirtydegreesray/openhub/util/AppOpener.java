@@ -41,6 +41,7 @@ import com.thirtydegreesray.openhub.ui.activity.ReleaseInfoActivity;
 import com.thirtydegreesray.openhub.ui.activity.ReleasesActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepositoryActivity;
 import com.thirtydegreesray.openhub.ui.activity.ViewerActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -467,7 +468,7 @@ public class AppOpener {
         final PackageManager pm = activity.getPackageManager();
         final int iconSize = (int) (32 * activity.getResources().getDisplayMetrics().density);
         final int pad = (int) (16 * activity.getResources().getDisplayMetrics().density);
-        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(activity);
+        androidx.appcompat.app.AlertDialog.Builder builder = new ScreenDialog.Builder(activity);
         // rows inflated with the dialog's own theme and its text color, so the names are
         // readable in dark themes too
         android.content.res.TypedArray colors = builder.getContext()

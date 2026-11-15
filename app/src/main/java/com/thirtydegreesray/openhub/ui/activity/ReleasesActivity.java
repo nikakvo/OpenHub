@@ -20,6 +20,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.http.GitHubApi;
@@ -175,7 +176,7 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
     }
 
     private void showCleanUpDialog(@NonNull AllReleases all) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new ScreenDialog.Builder(this);
         // the builder's context, so the radio buttons and check boxes get dialog text colors
         android.content.Context ctx = builder.getContext();
         int pad = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20,
@@ -266,7 +267,7 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
             if (release.isDraft()) names.append(" (").append(getString(R.string.release_draft_badge)).append(")");
             shown++;
         }
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.releases_clean_up)
                 .setMessage(getResources().getQuantityString(confirmText(toDelete, withTags),
                         toDelete.size(), toDelete.size(), names.toString()))
@@ -348,7 +349,7 @@ public class ReleasesActivity extends SingleFragmentActivity<IBaseContract.Prese
                                     notes.add(getString(R.string.releases_clean_up_tags_kept,
                                             String.join(", ", tagsKept)));
                                 }
-                                new AlertDialog.Builder(this)
+                                new ScreenDialog.Builder(this)
                                         .setTitle(getResources().getQuantityString(
                                                 R.plurals.releases_clean_up_done, deleted, deleted))
                                         .setMessage(String.join("\n\n", notes))

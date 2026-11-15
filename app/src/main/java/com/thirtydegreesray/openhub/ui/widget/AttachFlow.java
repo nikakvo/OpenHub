@@ -291,7 +291,7 @@ public final class AttachFlow {
 
     private void showProblem(@NonNull String title, @Nullable String message, boolean offerWeb) {
         if (activity.isFinishing()) return;
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+        AlertDialog.Builder builder = new ScreenDialog.Builder(activity)
                 .setTitle(title)
                 .setMessage(StringUtils.isBlank(message) ? "-" : message);
         if (offerWeb) {

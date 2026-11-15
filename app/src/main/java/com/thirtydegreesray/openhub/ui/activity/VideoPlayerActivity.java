@@ -32,6 +32,7 @@ import androidx.media3.ui.PlayerView;
 
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.http.core.MediaHttp;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.Attachments;
 import com.thirtydegreesray.openhub.util.StringUtils;
@@ -211,7 +212,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         if (isFinishing()) return;
         // the reason in Media3's words, e.g. ERROR_CODE_DECODING_FORMAT_UNSUPPORTED
         String message = getString(R.string.video_cannot_play, error.getErrorCodeName());
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.video_cannot_play_title)
                 .setMessage(message)
                 .setPositiveButton(R.string.open_in_browser, (d, w) -> {

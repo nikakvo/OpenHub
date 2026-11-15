@@ -44,7 +44,7 @@ public class DownloadSourceDialog {
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(adapter);
 
-        new AlertDialog.Builder(context)
+        new ScreenDialog.Builder(context)
                 .setCancelable(true)
                 .setTitle(R.string.download)
                 .setView(recyclerView)

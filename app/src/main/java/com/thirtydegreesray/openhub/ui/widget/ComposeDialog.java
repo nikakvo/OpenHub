@@ -122,7 +122,7 @@ public final class ComposeDialog {
         }
 
         public void show() {
-            View view = LayoutInflater.from(new AlertDialog.Builder(context).getContext()).inflate(R.layout.dialog_pr_compose, null);
+            View view = LayoutInflater.from(new ScreenDialog.Builder(context).getContext()).inflate(R.layout.dialog_pr_compose, null);
             RadioGroup group = view.findViewById(R.id.choice_group);
             TextInputLayout titleLayout = view.findViewById(R.id.title_layout);
             TextInputEditText titleEdit = view.findViewById(R.id.title_edit);
@@ -181,7 +181,7 @@ public final class ComposeDialog {
                 if (titleText != null) titleEdit.setText(titleText);
             }
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(context)
+            AlertDialog.Builder builder = new ScreenDialog.Builder(context)
                     .setTitle(dialogTitle)
                     .setView(view)
                     .setPositiveButton(positive, null)

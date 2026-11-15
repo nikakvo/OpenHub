@@ -34,6 +34,7 @@ import com.thirtydegreesray.openhub.http.RulesetService;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
@@ -423,7 +424,7 @@ public class RulesetEditActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void delete() {
         String name = form == null ? "" : form.name;
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.rulesets_delete_title)
                 .setMessage(getString(R.string.rulesets_delete_message, name))
                 .setPositiveButton(R.string.delete, (d, w) -> {
@@ -467,7 +468,7 @@ public class RulesetEditActivity extends BaseActivity<IBaseContract.Presenter> {
                         : Json.str(v, "actor.type") + " " + Json.integer(v, "actor.id");
                 labels[i] = (i == 0 ? getString(R.string.ruleset_history_current) + " · " : "") + when + " · " + who;
             }
-            new AlertDialog.Builder(this)
+            new ScreenDialog.Builder(this)
                     .setTitle(R.string.ruleset_history)
                     .setItems(labels, (dialog, which) -> {
                         if (which == 0 || !canEdit) return;

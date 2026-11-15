@@ -34,6 +34,7 @@ import com.thirtydegreesray.openhub.http.GitHubApi;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
@@ -276,7 +277,7 @@ public class WorkflowsActivity extends BaseActivity<IBaseContract.Presenter> {
                     setEnabled(workflow, true);
                     return true;
                 case 3:
-                    new AlertDialog.Builder(this)
+                    new ScreenDialog.Builder(this)
                             .setTitle(R.string.workflow_disable)
                             .setMessage(getString(R.string.workflow_disable_message, workflowName(workflow)))
                             .setPositiveButton(R.string.workflow_disable, (d, w) -> setEnabled(workflow, false))
@@ -420,7 +421,7 @@ public class WorkflowsActivity extends BaseActivity<IBaseContract.Presenter> {
                 return true;
             } else if (item.getItemId() == 2) {
                 long id = Json.lng(cache, "id");
-                new AlertDialog.Builder(this)
+                new ScreenDialog.Builder(this)
                         .setTitle(R.string.caches_delete)
                         .setMessage(getString(R.string.caches_delete_message, key,
                                 StringUtils.getSizeString(Json.lng(cache, "size_in_bytes"))))
@@ -475,7 +476,7 @@ public class WorkflowsActivity extends BaseActivity<IBaseContract.Presenter> {
             long size = 0;
             for (long[] cache : caches) size += cache[1];
             int total = caches.size();
-            new AlertDialog.Builder(this)
+            new ScreenDialog.Builder(this)
                     .setTitle(R.string.caches_delete_all)
                     .setMessage(getString(R.string.caches_delete_all_message,
                             getResources().getQuantityString(R.plurals.caches_count, total, total),
@@ -516,7 +517,7 @@ public class WorkflowsActivity extends BaseActivity<IBaseContract.Presenter> {
                 getString(R.string.caches_sort_created)};
         int checked = 0;
         for (int i = 0; i < values.length; i++) if (values[i].equals(cacheSort)) checked = i;
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.caches_sort)
                 .setSingleChoiceItems(labels, checked, (dialog, which) -> {
                     dialog.dismiss();

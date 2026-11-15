@@ -23,6 +23,7 @@ public class LoadingDialog extends AlertDialog {
 
     public LoadingDialog(@NonNull Context context) {
         super(context);
+        ScreenDialog.closeWithScreen(context, this);
     }
 
     @Override

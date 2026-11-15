@@ -24,6 +24,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.thirtydegreesray.openhub.AppData;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.AccountChanges;
 import com.thirtydegreesray.openhub.common.GlideApp;
 import com.thirtydegreesray.openhub.http.GitHubApi;
@@ -191,7 +192,7 @@ public class CreateRepositoryActivity extends BaseActivity<IBaseContract.Present
             items[i + 1] = orgs.get(i).getLogin();
             if (orgs.get(i).getLogin().equals(org)) checked = i + 1;
         }
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.repo_create_owner)
                 .setSingleChoiceItems(items, checked, (dialog, which) -> {
                     if (which == 0) {
@@ -378,7 +379,7 @@ public class CreateRepositoryActivity extends BaseActivity<IBaseContract.Present
             items[i + 1] = licenses.get(i).getName();
             if (licenses.get(i).getKey().equals(licenseKey)) checked = i + 1;
         }
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.repo_create_license)
                 .setSingleChoiceItems(items, checked, (dialog, which) -> {
                     if (which == 0) {

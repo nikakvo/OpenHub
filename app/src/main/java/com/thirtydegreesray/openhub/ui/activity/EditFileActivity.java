@@ -32,6 +32,7 @@ import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.CommitDialog;
 import com.thirtydegreesray.openhub.ui.widget.MarkdownWritePreview;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
@@ -209,7 +210,7 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
                     showText(text);
                 }, error -> {
                     loader.setVisibility(View.GONE);
-                    new AlertDialog.Builder(this)
+                    new ScreenDialog.Builder(this)
                             .setTitle(R.string.file_cannot_edit)
                             .setMessage(ErrorTexts.of(error))
                             .setPositiveButton(R.string.ok, (d, w) -> finish())
@@ -289,7 +290,7 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
                 .subscribe(names -> {
                     loader.setVisibility(View.GONE);
                     String[] items = names.toArray(new String[0]);
-                    new AlertDialog.Builder(this)
+                    new ScreenDialog.Builder(this)
                             .setTitle(R.string.file_choose_branch)
                             .setSingleChoiceItems(items, names.indexOf(branch), (dialog, which) -> {
                                 dialog.dismiss();
@@ -338,7 +339,7 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
             load.run();
             return;
         }
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.file_switch_branch_title)
                 .setMessage(getString(R.string.file_switch_branch_message, target))
                 .setPositiveButton(R.string.file_switch_branch, (d, w) -> load.run())
@@ -431,7 +432,7 @@ public class EditFileActivity extends BaseActivity<IBaseContract.Presenter> {
     protected void handleBack() {
         super.handleBack();
         if (!dirty || committing) return;
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.release_discard_title)
                 .setMessage(R.string.file_discard_message)
                 .setPositiveButton(R.string.release_discard, (d, w) -> {

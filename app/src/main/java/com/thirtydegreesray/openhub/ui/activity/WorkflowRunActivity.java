@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
@@ -466,7 +467,7 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
             names[i] = files.get(i).getName() + "  (" + StringUtils.getSizeString(files.get(i).length()) + ")";
             checked[i] = true;
         }
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.artifact_choose_files)
                 .setMultiChoiceItems(names, checked, (d, which, isChecked) -> checked[which] = isChecked)
                 .setNegativeButton(R.string.cancel, null)
@@ -529,13 +530,13 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
 
     /** @param jobId a single job, or 0 for the run ({@code failedOnly} for failed jobs) */
     private void confirmRerun(long jobId, boolean failedOnly) {
-        CheckBox debug = new CheckBox(new AlertDialog.Builder(this).getContext());
+        CheckBox debug = new CheckBox(new ScreenDialog.Builder(this).getContext());
         debug.setText(R.string.run_debug_logging);
         int pad = getResources().getDimensionPixelSize(R.dimen.spacing_large);
         LinearLayout box = new LinearLayout(this);
         box.setPadding(pad, 0, pad, 0);
         box.addView(debug);
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.run_rerun_title)
                 .setMessage(R.string.run_rerun_message)
                 .setView(box)
@@ -555,7 +556,7 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void confirmCancel(boolean force) {
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.run_cancel_title)
                 .setMessage(force ? R.string.run_force_cancel_message : R.string.run_cancel_message)
                 .setNegativeButton(R.string.close, null)

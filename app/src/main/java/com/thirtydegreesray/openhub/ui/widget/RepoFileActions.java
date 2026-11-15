@@ -107,7 +107,7 @@ public final class RepoFileActions {
         if (replaced.isEmpty()) {
             ask.run();
         } else {
-            new AlertDialog.Builder(activity)
+            new ScreenDialog.Builder(activity)
                     .setTitle(R.string.share_upload_replace_title)
                     .setMessage(activity.getString(R.string.file_upload_replace, String.join(", ", replaced)))
                     .setPositiveButton(R.string.share_upload_replace, (d, w) -> ask.run())

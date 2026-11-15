@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.DatePickerDialog;
@@ -270,7 +271,7 @@ public class MilestonesActivity extends BaseActivity<IBaseContract.Presenter> {
 
     /** @param existing null: a new milestone */
     private void edit(@Nullable JsonObject existing) {
-        View view = LayoutInflater.from(new AlertDialog.Builder(this).getContext())
+        View view = LayoutInflater.from(new ScreenDialog.Builder(this).getContext())
                 .inflate(R.layout.dialog_milestone, null);
         TextInputLayout titleLayout = view.findViewById(R.id.milestone_title_layout);
         TextInputEditText titleEdit = view.findViewById(R.id.milestone_title_edit);
@@ -297,7 +298,7 @@ public class MilestonesActivity extends BaseActivity<IBaseContract.Presenter> {
             Calendar today = Calendar.getInstance();
             int[] start = due[0] != null ? due[0] : new int[]{today.get(Calendar.YEAR),
                     today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH)};
-            new DatePickerDialog(new AlertDialog.Builder(this).getContext(), (picker, y, m, d) -> {
+            new DatePickerDialog(new ScreenDialog.Builder(this).getContext(), (picker, y, m, d) -> {
                 due[0] = new int[]{y, m, d};
                 showDue.run();
             }, start[0], start[1], start[2]).show();
@@ -307,7 +308,7 @@ public class MilestonesActivity extends BaseActivity<IBaseContract.Presenter> {
             showDue.run();
         });
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new ScreenDialog.Builder(this)
                 .setTitle(existing == null ? R.string.milestone_new : R.string.milestone_edit)
                 .setView(view)
                 .setPositiveButton(R.string.save, null)
@@ -358,7 +359,7 @@ public class MilestonesActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void delete(int number, @NonNull String title) {
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.delete)
                 .setMessage(getString(R.string.milestone_delete_message, title))
                 .setPositiveButton(R.string.delete, (d, w) -> run(() -> {

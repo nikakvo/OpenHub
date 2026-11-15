@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.ReleaseWatcher;
 import com.thirtydegreesray.openhub.util.RepoChanges;
 
@@ -345,7 +346,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
         String owner = getIntent().getStringExtra("owner");
         String name = getIntent().getStringExtra("repoName");
         String fullName = owner + "/" + name;
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setTitle(R.string.repo_not_found_title)
                 .setMessage(getString(R.string.repo_not_found_message, fullName))
                 .setPositiveButton(R.string.open_in_browser, (dialog, which) -> {
@@ -413,7 +414,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(branchesAdapter);
 
-        final AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+        final AlertDialog alertDialog = new ScreenDialog.Builder(getActivity())
                 .setCancelable(true)
                 .setTitle(getString(R.string.select_branch))
                 .setView(recyclerView)
@@ -445,7 +446,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
         String user = AppData.INSTANCE.getLoggedUser().getName();
         user = StringUtils.isBlank(user) ? AppData.INSTANCE.getLoggedUser().getLogin() : user;
         message = String.format(message, user, StarWishesHelper.getInstalledDays());
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setTitle(R.string.openhub_wishes)
                 .setMessage(message)
                 .setNegativeButton(R.string.star_next_time, new DialogInterface.OnClickListener() {
@@ -467,7 +468,7 @@ public class RepositoryActivity extends PagerActivity<RepositoryPresenter>
     }
 
     private void forkRepo(){
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setCancelable(true)
                 .setTitle(R.string.warning_dialog_tile)
                 .setMessage(R.string.fork_warning_msg)

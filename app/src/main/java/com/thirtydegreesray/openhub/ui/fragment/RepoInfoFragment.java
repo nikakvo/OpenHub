@@ -47,6 +47,7 @@ import com.thirtydegreesray.openhub.ui.activity.ProfileActivity;
 import com.thirtydegreesray.openhub.ui.activity.PullRequestsActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepoListActivity;
 import com.thirtydegreesray.openhub.ui.activity.RepositoryActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import com.thirtydegreesray.openhub.ui.activity.UserListActivity;
@@ -672,7 +673,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         if (state == null) return;
         String label = state.label();
         if (state.behind == 0) {
-            new AlertDialog.Builder(requireActivity())
+            new ScreenDialog.Builder(requireActivity())
                     .setTitle(R.string.fork_sync_title)
                     .setMessage(getString(R.string.fork_not_behind, label))
                     .setPositiveButton(R.string.close, null)
@@ -681,7 +682,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         }
         String newCommits = getResources().getQuantityString(R.plurals.fork_new_commits,
                 state.behind, state.behind);
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
+        AlertDialog.Builder builder = new ScreenDialog.Builder(requireActivity())
                 .setTitle(R.string.fork_sync_title)
                 .setPositiveButton(R.string.fork_update_branch, (d, w) -> syncFork(state))
                 .setNegativeButton(R.string.cancel, null);
@@ -741,7 +742,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
     }
 
     private void showConflict(@NonNull ForkState state) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
+        AlertDialog.Builder builder = new ScreenDialog.Builder(requireActivity())
                 .setTitle(R.string.fork_conflict_title)
                 .setMessage(getString(R.string.fork_conflict_message, state.label(), state.branch))
                 .setPositiveButton(R.string.fork_open_on_github, (d, w) -> AppOpener.openInCustomTabsOrBrowser(requireContext(),
@@ -756,7 +757,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
     }
 
     private void confirmDiscard(@NonNull ForkState state) {
-        new AlertDialog.Builder(requireActivity())
+        new ScreenDialog.Builder(requireActivity())
                 .setTitle(R.string.fork_discard_title)
                 .setMessage(getResources().getQuantityString(R.plurals.fork_discard_message,
                         state.ahead, state.ahead, state.branch, state.label()))
@@ -809,7 +810,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
             mPresenter.reloadReadMe();
             checkFork(mPresenter.getRepository());
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
+        AlertDialog.Builder builder = new ScreenDialog.Builder(requireActivity())
                 .setTitle(R.string.fork_synced_title)
                 .setNegativeButton(R.string.close, null);
         String note = workflowsNote(state);
@@ -946,7 +947,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
         ForkState state = forkState;
         if (state == null) return;
         if (state.ahead == 0) {
-            new AlertDialog.Builder(requireActivity())
+            new ScreenDialog.Builder(requireActivity())
                     .setTitle(R.string.fork_contribute)
                     .setMessage(getString(R.string.fork_not_ahead, state.label()))
                     .setPositiveButton(R.string.close, null)
@@ -954,7 +955,7 @@ public class RepoInfoFragment extends BaseFragment<RepoInfoPresenter>
             return;
         }
         String own = getResources().getQuantityString(R.plurals.fork_own_commits, state.ahead, state.ahead);
-        new AlertDialog.Builder(requireActivity())
+        new ScreenDialog.Builder(requireActivity())
                 .setTitle(R.string.fork_contribute)
                 .setMessage(getString(R.string.fork_contribute_message, state.branch, own, state.label()))
                 .setPositiveButton(R.string.fork_open_pull, (d, w) -> startActivity(

@@ -14,6 +14,7 @@ import androidx.appcompat.view.ContextThemeWrapper;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.ui.activity.AboutActivity;
 import com.thirtydegreesray.openhub.ui.activity.SplashActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 
 import java.lang.ref.WeakReference;
 
@@ -79,7 +80,7 @@ public final class InterceptionNotice {
         // the user's theme, also over the start screen (its own theme is a plain light one)
         Context themed = new ContextThemeWrapper(activity,
                 ThemeHelper.getTheme(PrefUtils.getTheme(), PrefUtils.getAccentColor()));
-        AlertDialog.Builder builder = new AlertDialog.Builder(themed)
+        AlertDialog.Builder builder = new ScreenDialog.Builder(themed)
                 .setTitle(R.string.tls_intercepted_title)
                 .setMessage(activity.getString(R.string.tls_intercepted_message, host))
                 .setPositiveButton(R.string.close, (d, w) -> closedAt = SystemClock.elapsedRealtime())

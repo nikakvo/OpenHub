@@ -15,6 +15,7 @@ import com.thirtydegreesray.openhub.inject.module.ActivityModule;
 import com.thirtydegreesray.openhub.mvp.contract.ISplashContract;
 import com.thirtydegreesray.openhub.mvp.presenter.SplashPresenter;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.ui.widget.SignInPrompt;
 
 /**
@@ -41,7 +42,7 @@ public class SplashActivity extends BaseActivity<SplashPresenter> implements ISp
 
     @Override
     public void showRetry(String message) {
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.splash_offline_title)
                 .setMessage(getString(R.string.splash_offline_message, message))
                 .setCancelable(false)

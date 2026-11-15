@@ -26,6 +26,7 @@ import com.thirtydegreesray.openhub.mvp.model.Branch;
 import com.thirtydegreesray.openhub.mvp.model.CommitFile;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.fragment.CommitFilesFragment;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.Json;
@@ -229,7 +230,7 @@ public class CompareActivity extends BaseActivity<IBaseContract.Presenter>
         }
         if (names.isEmpty()) return;
         String current = forBase ? base : head;
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(forBase ? R.string.compare_base : R.string.compare_head)
                 .setSingleChoiceItems(labels.toArray(new String[0]), Math.max(-1, names.indexOf(current)),
                         (dialog, which) -> {

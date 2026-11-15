@@ -41,7 +41,7 @@ public final class TextInputDialog {
     public static void show(@NonNull Context context, @StringRes int title, @StringRes int hint,
                             @Nullable String initial, boolean fileName, boolean allowEmpty,
                             @NonNull Callback callback) {
-        View view = LayoutInflater.from(new AlertDialog.Builder(context).getContext()).inflate(R.layout.dialog_text_input, null);
+        View view = LayoutInflater.from(new ScreenDialog.Builder(context).getContext()).inflate(R.layout.dialog_text_input, null);
         TextInputLayout layout = view.findViewById(R.id.input_layout);
         TextInputEditText edit = view.findViewById(R.id.input_edit);
         layout.setHint(context.getString(hint));
@@ -55,7 +55,7 @@ public final class TextInputDialog {
             edit.setSelection(0, end);
         }
 
-        AlertDialog dialog = new AlertDialog.Builder(context)
+        AlertDialog dialog = new ScreenDialog.Builder(context)
                 .setTitle(title)
                 .setView(view)
                 .setPositiveButton(R.string.ok, null)

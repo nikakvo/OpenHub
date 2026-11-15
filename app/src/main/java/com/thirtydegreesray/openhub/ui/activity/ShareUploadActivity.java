@@ -25,6 +25,7 @@ import com.thirtydegreesray.openhub.dao.AppDatabase;
 import com.thirtydegreesray.openhub.dao.AuthUser;
 import com.thirtydegreesray.openhub.http.UserService;
 import com.thirtydegreesray.openhub.mvp.model.User;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.TokenCrypto;
 import com.thirtydegreesray.openhub.http.GitHubApi;
@@ -304,7 +305,7 @@ public class ShareUploadActivity extends BaseActivity<IBaseContract.Presenter> {
             }
             items[i + first] = label;
         }
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(getString(R.string.share_upload_choose_release, owner + "/" + repo))
                 .setItems(items, (dialog, which) -> {
                     if (which == 0) {
@@ -387,7 +388,7 @@ public class ShareUploadActivity extends BaseActivity<IBaseContract.Presenter> {
         }
         StringBuilder list = new StringBuilder();
         for (ReleaseAsset asset : clashes) list.append("\n• ").append(asset.getName());
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.share_upload_replace_title)
                 .setMessage(getString(R.string.share_upload_replace_message) + "\n" + list)
                 .setPositiveButton(R.string.share_upload_replace, (d, w) -> {

@@ -31,6 +31,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.state.DataAutoAccess;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.AppApplication;
@@ -476,7 +477,7 @@ BaseActivity<P extends IBaseContract.Presenter>
 
     @Override
     public void showTipDialog(String content) {
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setCancelable(true)
                 .setTitle("提示")
                 .setMessage(content)
@@ -493,7 +494,7 @@ BaseActivity<P extends IBaseContract.Presenter>
     @Override
     public void showConfirmDialog(String msn, String title, String confirmText
             , DialogInterface.OnClickListener confirmListener) {
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setCancelable(true)
                 .setTitle(title)
                 .setMessage(msn)

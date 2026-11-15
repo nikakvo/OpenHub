@@ -66,7 +66,7 @@ public final class ReviewDialog {
                                       int number, @NonNull Runnable onDiscarded) {
         int count = ReviewDrafts.count(context, owner, repo, number);
         if (count == 0) return;
-        new AlertDialog.Builder(context)
+        new ScreenDialog.Builder(context)
                 .setTitle(R.string.review_discard)
                 .setMessage(context.getResources().getQuantityString(R.plurals.review_discard_message, count, count))
                 .setPositiveButton(R.string.delete, (d, w) -> {

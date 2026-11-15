@@ -37,6 +37,7 @@ import androidx.cardview.widget.CardView;
 
 import com.thirtydegreesray.openhub.BuildConfig;
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.DeviceSecurity;
 import com.thirtydegreesray.openhub.ui.widget.MatrixRainView;
 import com.thirtydegreesray.openhub.ui.widget.MatrixWelcomeView;
@@ -273,7 +274,7 @@ public class AboutActivity extends AppCompatActivity {
         }
         text.append("\n\n").append(getString(connection));
         text.append("\n\n").append(getString(R.string.device_security_note));
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.device_security)
                 .setMessage(text)
                 .setPositiveButton(R.string.close, null)
@@ -364,6 +365,7 @@ public class AboutActivity extends AppCompatActivity {
     private void showEgg() {
         if (egg != null && egg.isShowing()) return;
         Dialog dialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        ScreenDialog.closeWithScreen(this, dialog);
         View root = LayoutInflater.from(this).inflate(R.layout.dialog_matrix_egg, null);
         dialog.setContentView(root);
         MatrixRainView rain = root.findViewById(R.id.egg_rain);

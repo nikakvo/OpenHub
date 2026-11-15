@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.CommentDrafts;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
@@ -384,7 +385,7 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void deleteComment(long id) {
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.gist_comment_delete)
                 .setMessage(R.string.gist_comment_delete_message)
                 .setPositiveButton(R.string.delete, (d, w) -> {
@@ -493,7 +494,7 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
             showWarningToast(getString(R.string.gist_last_file));
             return;
         }
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.gist_file_delete)
                 .setMessage(getString(R.string.gist_file_delete_message, name))
                 .setNegativeButton(R.string.cancel, null)
@@ -562,7 +563,7 @@ public class GistActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void deleteGist() {
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.gist_delete)
                 .setMessage(R.string.gist_delete_message)
                 .setNegativeButton(R.string.cancel, null)

@@ -57,7 +57,7 @@ public final class SignInPrompt {
         // the user's theme, also over the start screen (its own theme is a plain light one)
         Context themed = new ContextThemeWrapper(activity,
                 ThemeHelper.getTheme(PrefUtils.getTheme(), PrefUtils.getAccentColor()));
-        new AlertDialog.Builder(themed)
+        new ScreenDialog.Builder(themed)
                 .setTitle(R.string.sign_in_again_title)
                 .setMessage(message)
                 .setCancelable(leave == null)

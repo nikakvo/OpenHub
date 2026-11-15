@@ -331,7 +331,7 @@ public class IssueFieldsBox {
             if (type != null && t.name.equalsIgnoreCase(type.name)) checked = i + 1;
         }
         final int current = checked;
-        new AlertDialog.Builder(activity)
+        new ScreenDialog.Builder(activity)
                 .setTitle(R.string.issue_type_pick)
                 .setSingleChoiceItems(names, checked, (dialog, which) -> {
                     dialog.dismiss();
@@ -383,7 +383,7 @@ public class IssueFieldsBox {
     }
 
     private void editText(IssueFields.Field f, @Nullable Issue.FieldValue v, boolean has, boolean number) {
-        Context ctx = new AlertDialog.Builder(activity).getContext();
+        Context ctx = new ScreenDialog.Builder(activity).getContext();
         LinearLayout layout = new LinearLayout(ctx);
         layout.setOrientation(LinearLayout.VERTICAL);
         int pad = dp(ctx, 20);
@@ -410,7 +410,7 @@ public class IssueFieldsBox {
         layout.addView(input, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+        AlertDialog.Builder builder = new ScreenDialog.Builder(activity)
                 .setTitle(f.name)
                 .setView(layout)
                 .setNegativeButton(R.string.cancel, null)
@@ -444,7 +444,7 @@ public class IssueFieldsBox {
             Calendar local = Calendar.getInstance();
             day.set(local.get(Calendar.YEAR), local.get(Calendar.MONTH), local.get(Calendar.DAY_OF_MONTH));
         }
-        DatePickerDialog dialog = new DatePickerDialog(new AlertDialog.Builder(activity).getContext(),
+        DatePickerDialog dialog = new DatePickerDialog(new ScreenDialog.Builder(activity).getContext(),
                 (picker, y, m, d) -> setValue(f, new com.google.gson.JsonPrimitive(IssueFields.day(y, m, d))),
                 day.get(Calendar.YEAR), day.get(Calendar.MONTH), day.get(Calendar.DAY_OF_MONTH));
         dialog.setTitle(f.name);
@@ -466,7 +466,7 @@ public class IssueFieldsBox {
             if (!picked.isEmpty() && picked.get(0).equals(f.options.get(i).name)) checked = i + 1;
         }
         final int current = checked;
-        new AlertDialog.Builder(activity)
+        new ScreenDialog.Builder(activity)
                 .setTitle(f.name)
                 .setSingleChoiceItems(names, checked, (dialog, which) -> {
                     dialog.dismiss();
@@ -487,7 +487,7 @@ public class IssueFieldsBox {
             names[i] = f.options.get(i).name;
             checked[i] = picked.contains(names[i]);
         }
-        new AlertDialog.Builder(activity)
+        new ScreenDialog.Builder(activity)
                 .setTitle(f.name)
                 .setMultiChoiceItems(names, checked, (dialog, which, isChecked) -> checked[which] = isChecked)
                 .setNegativeButton(R.string.cancel, null)

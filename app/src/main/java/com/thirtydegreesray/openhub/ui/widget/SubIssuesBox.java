@@ -468,7 +468,7 @@ public class SubIssuesBox {
     }
 
     private void confirmRemove(SubIssues.Entry e) {
-        new AlertDialog.Builder(activity)
+        new ScreenDialog.Builder(activity)
                 .setTitle(R.string.sub_issue_remove)
                 .setMessage(activity.getString(R.string.sub_issue_remove_message,
                         SubIssues.label(e, owner, repo), e.title))
@@ -485,7 +485,7 @@ public class SubIssuesBox {
     private void chooseAdd() {
         String[] items = {activity.getString(R.string.sub_issue_add_existing),
                 activity.getString(R.string.sub_issue_create_new)};
-        new AlertDialog.Builder(activity)
+        new ScreenDialog.Builder(activity)
                 .setTitle(R.string.sub_issue_add)
                 .setItems(items, (d, which) -> {
                     if (which == 0) pickExisting(MODE_SUB);
@@ -498,7 +498,7 @@ public class SubIssuesBox {
         String[] items = {activity.getString(R.string.issue_add_blocked_by),
                 activity.getString(R.string.issue_add_blocking),
                 activity.getString(R.string.issue_add_relates_to)};
-        new AlertDialog.Builder(activity)
+        new ScreenDialog.Builder(activity)
                 .setTitle(R.string.issue_relationship_add)
                 .setItems(items, (d, which) -> pickExisting(which == 0 ? MODE_BLOCKED_BY
                         : which == 1 ? MODE_BLOCKING : MODE_RELATES))
@@ -516,7 +516,7 @@ public class SubIssuesBox {
         int message = mode == MODE_BLOCKED_BY ? R.string.issue_remove_blocked_by_message
                 : mode == MODE_BLOCKING ? R.string.issue_remove_blocking_message
                 : R.string.issue_remove_relates_message;
-        new AlertDialog.Builder(activity)
+        new ScreenDialog.Builder(activity)
                 .setTitle(R.string.issue_relationship_remove)
                 .setMessage(activity.getString(message, label, e.title))
                 .setNegativeButton(R.string.cancel, null)
@@ -568,7 +568,7 @@ public class SubIssuesBox {
     }
 
     private void pickExisting(int mode) {
-        Context ctx = new AlertDialog.Builder(activity).getContext();
+        Context ctx = new ScreenDialog.Builder(activity).getContext();
         LinearLayout layout = new LinearLayout(ctx);
         layout.setOrientation(LinearLayout.VERTICAL);
         int pad = dp(ctx, 20);
@@ -598,7 +598,7 @@ public class SubIssuesBox {
                 new ArrayList<>());
         listView.setAdapter(adapter);
 
-        AlertDialog dialog = new AlertDialog.Builder(activity)
+        AlertDialog dialog = new ScreenDialog.Builder(activity)
                 .setTitle(mode == MODE_SUB ? R.string.sub_issue_add_existing
                         : mode == MODE_BLOCKED_BY ? R.string.issue_add_blocked_by
                         : mode == MODE_BLOCKING ? R.string.issue_add_blocking : R.string.issue_add_relates_to)
@@ -787,7 +787,7 @@ public class SubIssuesBox {
             add(e.id, false, label, false);
             return;
         }
-        new AlertDialog.Builder(activity)
+        new ScreenDialog.Builder(activity)
                 .setTitle(R.string.sub_issue_move_title)
                 .setMessage(activity.getString(R.string.sub_issue_move_message, label))
                 .setNegativeButton(R.string.cancel, null)

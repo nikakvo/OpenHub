@@ -28,6 +28,7 @@ import com.thirtydegreesray.openhub.ui.activity.ActionsActivity;
 import com.thirtydegreesray.openhub.ui.activity.WorkflowRunActivity;
 import com.thirtydegreesray.openhub.ui.adapter.ActionsAdapter;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.RunChanges;
@@ -133,7 +134,7 @@ public class ActionsFragment extends ListFragment<ActionsPresenter, ActionsAdapt
         if (getActivity() == null) return;
         String title = StringUtils.isBlank(run.getName()) ? "#" + run.getRunNumber()
                 : run.getName() + " #" + run.getRunNumber();
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+        AlertDialog.Builder builder = new ScreenDialog.Builder(getActivity())
                 .setTitle(title)
                 .setNegativeButton(R.string.close, null)
                 .setNeutralButton(R.string.open_in_browser, (dialog, which) ->
@@ -218,7 +219,7 @@ public class ActionsFragment extends ListFragment<ActionsPresenter, ActionsAdapt
             if (!workflow.isActive()) label += " (" + getString(R.string.actions_workflow_disabled) + ")";
             items[i + offset] = label;
         }
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setTitle(forRun ? R.string.actions_run_workflow : R.string.actions_filter_workflow)
                 .setItems(items, (dialog, which) -> {
                     if (!forRun && which == 0) {
@@ -253,7 +254,7 @@ public class ActionsFragment extends ListFragment<ActionsPresenter, ActionsAdapt
         content.addView(inputsEt);
 
         String title = StringUtils.isBlank(workflow.getName()) ? workflow.getFileName() : workflow.getName();
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setTitle(title)
                 .setView(content)
                 .setNegativeButton(R.string.cancel, null)

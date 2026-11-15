@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.CommentDrafts;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
@@ -358,7 +359,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
                     optionParams.topMargin = dp(4);
                     optionParams.bottomMargin = dp(4);
                     row.setLayoutParams(optionParams);
-                    row.setOnClickListener(v -> new AlertDialog.Builder(this)
+                    row.setOnClickListener(v -> new ScreenDialog.Builder(this)
                             .setTitle(R.string.discussion_poll_vote_title)
                             .setMessage(getString(R.string.discussion_poll_vote_message, text))
                             .setPositiveButton(R.string.discussion_poll_vote_bn, (dialog, which) -> mutate(
@@ -513,7 +514,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
                             .show();
                     break;
                 case 2:
-                    new AlertDialog.Builder(this)
+                    new ScreenDialog.Builder(this)
                             .setTitle(R.string.comment_delete)
                             .setMessage(R.string.comment_delete_message)
                             .setPositiveButton(R.string.delete, (d, w) -> mutate(
@@ -598,7 +599,7 @@ public class DiscussionActivity extends BaseActivity<IBaseContract.Presenter> {
         if (discussion == null) return;
         final String[] reasons = {"RESOLVED", "OUTDATED", "DUPLICATE"};
         final int[] chosen = {0};
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.discussion_close_title)
                 .setSingleChoiceItems(new String[]{getString(R.string.discussion_reason_resolved),
                         getString(R.string.discussion_reason_outdated),

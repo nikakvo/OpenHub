@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import android.view.View;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
@@ -169,7 +170,7 @@ public class IssueTimelineFragment extends ListFragment<IssueTimelinePresenter, 
             labels.add(getString(R.string.delete));
             ids.add(5);
         }
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setItems(labels.toArray(new String[0]), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -199,7 +200,7 @@ public class IssueTimelineFragment extends ListFragment<IssueTimelinePresenter, 
     }
 
     private void showDeleteCommentWarning(final int position, final String commentId){
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setCancelable(true)
                 .setTitle(R.string.warning_dialog_tile)
                 .setMessage(R.string.delete_comment_warning)

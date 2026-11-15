@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.CommentDrafts;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullLinks;
@@ -1127,7 +1128,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
         if (reopen) {
             change.run();
         } else {
-            new AlertDialog.Builder(this)
+            new ScreenDialog.Builder(this)
                     .setTitle(R.string.pull_close)
                     .setMessage(R.string.pull_close_message)
                     .setPositiveButton(R.string.pull_close, (d, w) -> change.run())
@@ -1167,7 +1168,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
      */
     private void toggleArchived() {
         boolean unarchive = archived;
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(unarchive ? R.string.pull_unarchive : R.string.pull_archive)
                 .setMessage(unarchive ? R.string.pull_unarchive_message : R.string.pull_archive_message)
                 .setPositiveButton(unarchive ? R.string.pull_unarchive : R.string.pull_archive, (d, w) -> {
@@ -1184,7 +1185,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void deleteBranch() {
         String branch = Json.str(pull, "head.ref");
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.pull_delete_branch)
                 .setMessage(getString(R.string.branches_delete_message, branch))
                 .setPositiveButton(R.string.delete, (d, w) -> run(() -> {
@@ -1246,7 +1247,7 @@ public class PullRequestActivity extends BaseActivity<IBaseContract.Presenter> {
                         })
                         .show();
             } else if (item.getItemId() == 2) {
-                new AlertDialog.Builder(this)
+                new ScreenDialog.Builder(this)
                         .setTitle(R.string.comment_delete)
                         .setMessage(R.string.comment_delete_message)
                         .setPositiveButton(R.string.delete, (d, w) -> run(() -> {

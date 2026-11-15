@@ -26,6 +26,7 @@ import com.thirtydegreesray.openhub.ui.adapter.TraceAdapter;
 import com.thirtydegreesray.openhub.ui.adapter.base.StickyHeaderDecoration;
 import com.thirtydegreesray.openhub.ui.adapter.base.ItemTouchHelperCallback;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.LocalChanges;
 
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class TraceFragment extends ListFragment<TracePresenter, TraceAdapter>
             @Override
             public boolean onMenuItemSelected(@NonNull MenuItem item) {
                 if (item.getItemId() == R.id.action_clear_trace) {
-                    new AlertDialog.Builder(requireContext())
+                    new ScreenDialog.Builder(requireContext())
                             .setTitle(R.string.trace_clear_title)
                             .setMessage(R.string.trace_clear_message)
                             .setNegativeButton(R.string.cancel, null)

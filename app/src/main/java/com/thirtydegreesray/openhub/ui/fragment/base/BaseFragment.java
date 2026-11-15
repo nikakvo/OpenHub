@@ -5,6 +5,7 @@ package com.thirtydegreesray.openhub.ui.fragment.base;
 import com.thirtydegreesray.openhub.ui.widget.LoadingDialog;
 import androidx.lifecycle.Lifecycle;
 import androidx.core.view.MenuProvider;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -318,7 +319,7 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
 
     @Override
     public void showTipDialog(String content) {
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setCancelable(true)
                 .setTitle("提示")
                 .setMessage(content)
@@ -335,7 +336,7 @@ public abstract class BaseFragment<P extends IBaseContract.Presenter>
     @Override
     public void showConfirmDialog(String msn, String title, String confirmText
             , DialogInterface.OnClickListener confirmListener) {
-        new AlertDialog.Builder(getActivity())
+        new ScreenDialog.Builder(getActivity())
                 .setCancelable(true)
                 .setTitle(title)
                 .setMessage(msn)

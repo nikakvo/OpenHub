@@ -40,6 +40,7 @@ import com.thirtydegreesray.openhub.mvp.model.UploadItem;
 import com.thirtydegreesray.openhub.service.UploadService;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.MarkdownWritePreview;
+import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
 import com.thirtydegreesray.openhub.ui.widget.TextInputDialog;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ContentFiles;
@@ -418,7 +419,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
             return;
         }
         String[] items = tags.toArray(new String[0]);
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.release_choose_tag)
                 .setItems(items, (dialog, which) -> {
                     tagEdit.setText(items[which]);
@@ -440,7 +441,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
             if (names.isEmpty()) return;
             String[] items = names.toArray(new String[0]);
             int checked = target == null ? -1 : names.indexOf(target);
-            new AlertDialog.Builder(this)
+            new ScreenDialog.Builder(this)
                     .setTitle(R.string.release_target)
                     .setSingleChoiceItems(items, checked, (dialog, which) -> {
                         target = items[which];
@@ -486,7 +487,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
         if (StringUtils.isBlank(textOf(bodyEdit))) {
             apply.run();
         } else {
-            new AlertDialog.Builder(this)
+            new ScreenDialog.Builder(this)
                     .setTitle(R.string.release_generate_notes)
                     .setMessage(R.string.release_replace_notes)
                     .setPositiveButton(R.string.release_replace, (d, w) -> apply.run())
@@ -794,7 +795,7 @@ public class EditReleaseActivity extends BaseActivity<IBaseContract.Presenter> {
     protected void handleBack() {
         super.handleBack();
         if (!dirty || saving) return;
-        new AlertDialog.Builder(this)
+        new ScreenDialog.Builder(this)
                 .setTitle(R.string.release_discard_title)
                 .setMessage(R.string.release_discard_message)
                 .setPositiveButton(R.string.release_discard, (d, w) -> {
