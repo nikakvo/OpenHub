@@ -1,14 +1,11 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
 import android.annotation.SuppressLint;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebResourceRequest;
@@ -25,6 +22,7 @@ import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUpdater;
+import com.thirtydegreesray.openhub.util.GitHubLinkOwner;
 import com.thirtydegreesray.openhub.util.MatrixScreen;
 import com.thirtydegreesray.openhub.util.PrefUtils;
 import com.thirtydegreesray.openhub.util.ViewUtils;
@@ -110,19 +108,11 @@ public class HelpActivity extends BaseActivity<IBaseContract.Presenter> {
         else web.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "UTF-8", null);
     }
 
-    /** A link in the help that opens Android's "Open by default" page of OpenHub. */
+    /** A link in the help that opens the "Open by default" page that helps now (GitHubLinkOwner). */
     private static final String OPEN_LINKS_ACTION = "openhub-action:open-links";
 
     private void openLinkSettings() {
-        Uri app = Uri.parse("package:" + getPackageName());
-        Intent intent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                ? new Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, app)
-                : new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app);
-        try {
-            startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app));
-        }
+        GitHubLinkOwner.openSettings(this);
     }
 
     @Override

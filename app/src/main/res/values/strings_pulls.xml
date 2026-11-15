@@ -107,7 +107,9 @@
     <string name="open_links_summary_on">On: github.com links from other apps open here</string>
     <string name="open_links_summary_off">Off: github.com links from other apps open in the browser. Tap to allow</string>
     <string name="open_links_summary_old">Android asks which app opens github.com links. Tap for the app settings</string>
-    <string name="open_links_hint">Turn on Open supported links, then Add link and tick github.com</string>
+    <string name="open_links_hint">Open supported links on, then Add link: github.com</string>
+    <string name="open_links_summary_other">Off: github.com links open in %1$s. Tap, then choose In your browser for %1$s</string>
+    <string name="open_links_hint_other">%1$s has github.com. Choose In your browser here</string>
     <string name="diff_tip">Tap a line to comment on it. To comment on several lines, long-press the first line, then tap the last one.</string>
     <string name="diff_too_large">GitHub does not show this diff (binary file or too large).</string>
     <string name="diff_not_found">The file is no longer part of this pull request.</string>

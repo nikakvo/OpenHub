@@ -2,6 +2,7 @@
 
 package com.thirtydegreesray.openhub.ui.fragment;
 
+import com.thirtydegreesray.openhub.util.GitHubLinkOwner;
 import com.thirtydegreesray.openhub.util.ReleaseWatcher;
 import android.widget.Toast;
 import android.text.InputType;
@@ -10,9 +11,6 @@ import android.widget.FrameLayout;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.verify.domain.DomainVerificationManager;
-import android.content.pm.verify.domain.DomainVerificationUserState;
-import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.os.Bundle;
@@ -296,44 +294,19 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     /**
-     * Since Android 12 an app only opens web links of sites it owns, unless the user
-     * allows it under "Open by default". github.com can never be verified for OpenHub,
-     * so the user has to add it there once; this shows whether that was done.
+     * Since Android 12 an app only opens web links of sites it owns, unless the user allows it
+     * under "Open by default"; an app with github.com verified (the official GitHub app) wins
+     * over that. The summary says which app really opens the links ({@link GitHubLinkOwner}).
      */
     private void updateOpenLinksSummary() {
         Preference pref = findPreference(OPEN_LINKS);
         if (pref == null || getContext() == null) return;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            pref.setSummary(R.string.open_links_summary_old);
-            return;
-        }
-        boolean allowed = false;
-        try {
-            DomainVerificationManager manager = getContext().getSystemService(DomainVerificationManager.class);
-            DomainVerificationUserState state = manager.getDomainVerificationUserState(getContext().getPackageName());
-            if (state != null && state.isLinkHandlingAllowed()) {
-                Integer github = state.getHostToStateMap().get("github.com");
-                allowed = github != null && github != DomainVerificationUserState.DOMAIN_STATE_NONE;
-            }
-        } catch (Exception ignored) {
-        }
-        pref.setSummary(allowed ? R.string.open_links_summary_on : R.string.open_links_summary_off);
+        pref.setSummary(GitHubLinkOwner.summary(getContext()));
     }
 
     private void openLinkSettings() {
         if (getContext() == null) return;
-        Uri app = Uri.parse("package:" + getContext().getPackageName());
-        Intent intent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                ? new Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, app)
-                : new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app);
-        try {
-            startActivity(intent);
-        } catch (Exception e) {
-            startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app));
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Toasts.info(getContext(), getString(R.string.open_links_hint), android.widget.Toast.LENGTH_LONG).show();
-        }
+        GitHubLinkOwner.openSettings(getContext());
     }
 
     private static final String WATCHED_RELEASES = "watchedReleases";
