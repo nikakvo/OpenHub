@@ -1,6 +1,7 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
 import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.DatePickerDialog;
@@ -233,7 +234,7 @@ public class MilestonesActivity extends BaseActivity<IBaseContract.Presenter> {
         int number = Json.integer(milestone, "number");
         String title = Json.str(milestone, "title");
         boolean open = "open".equals(Json.str(milestone, "state"));
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.milestone_issues);
         if (canWrite) {
             popup.getMenu().add(0, 2, 1, R.string.milestone_edit);

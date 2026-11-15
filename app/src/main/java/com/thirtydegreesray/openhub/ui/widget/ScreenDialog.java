@@ -16,7 +16,8 @@ import androidx.lifecycle.LifecycleOwner;
  * Dialogs that close together with their screen. When a screen is rebuilt (rotation, theme or
  * font change, Android ending it) a dialog that is still open is otherwise removed by Android
  * itself, which logs "has leaked window". {@link Builder} is used for every AlertDialog of the
- * app; {@link #closeWithScreen} for other dialogs.
+ * app, {@link ScreenPopupMenu} for popup menus, {@link #closeWithScreen} for other dialogs.
+ * Toolbar overflow menus: {@link com.thirtydegreesray.openhub.util.ScreenMenus}.
  */
 public final class ScreenDialog {
 
@@ -48,6 +49,13 @@ public final class ScreenDialog {
      * dismiss listener is not touched.
      */
     public static void closeWithScreen(@NonNull Context context, @NonNull Dialog dialog) {
+        closeWithScreen(context, () -> {
+            if (dialog.isShowing()) dialog.dismiss();
+        });
+    }
+
+    /** Runs {@code close} when the screen of {@code context} is destroyed (popup menus). */
+    public static void closeWithScreen(@NonNull Context context, @NonNull Runnable close) {
         LifecycleOwner owner = owner(context);
         if (owner == null) return;
         Lifecycle lifecycle = owner.getLifecycle();
@@ -57,7 +65,7 @@ public final class ScreenDialog {
             public void onDestroy(@NonNull LifecycleOwner source) {
                 source.getLifecycle().removeObserver(this);
                 try {
-                    if (dialog.isShowing()) dialog.dismiss();
+                    close.run();
                 } catch (Exception ignored) {
                     // the window is already gone
                 }

@@ -1,6 +1,7 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
 import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.Activity;
 import android.content.Intent;
@@ -224,7 +225,7 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
             AppUtils.copyToClipboard(this, asset.getDownloadUrl());
             return;
         }
-        PopupMenu popup = new PopupMenu(this, anchor, android.view.Gravity.NO_GRAVITY,
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, android.view.Gravity.NO_GRAVITY,
                 R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.copy_link);
         popup.getMenu().add(0, 2, 1, R.string.copy_sha256);
@@ -251,7 +252,7 @@ public class ReleaseInfoActivity extends BaseActivity<ReleaseInfoPresenter>
     }
 
     private void showAssetMenu(@NonNull View anchor, @NonNull ReleaseAsset asset) {
-        PopupMenu popup = new PopupMenu(this, anchor, android.view.Gravity.NO_GRAVITY,
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, android.view.Gravity.NO_GRAVITY,
                 R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.rename);
         popup.getMenu().add(0, 2, 1, R.string.copy_link);

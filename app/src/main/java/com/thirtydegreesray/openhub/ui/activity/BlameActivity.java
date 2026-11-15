@@ -25,6 +25,7 @@ import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BlameLines;
@@ -174,7 +175,7 @@ public class BlameActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void showRangeActions(@NonNull View anchor, @NonNull BlameLines.Range range) {
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.blame_open_commit);
         popup.getMenu().add(0, 2, 1, R.string.blame_copy_sha);
         popup.setOnMenuItemClickListener(item -> {

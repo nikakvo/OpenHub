@@ -1,6 +1,7 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
 import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
@@ -189,7 +190,7 @@ public class BranchesActivity extends BaseActivity<IBaseContract.Presenter> {
             browse(name);
             return;
         }
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.branches_browse);
         if (!isDefault && defaultBranch != null) {
             popup.getMenu().add(0, 5, 0, getString(R.string.branches_compare, defaultBranch));

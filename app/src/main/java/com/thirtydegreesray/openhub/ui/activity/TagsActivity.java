@@ -42,6 +42,7 @@ import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
@@ -316,7 +317,7 @@ public class TagsActivity extends BaseActivity<IBaseContract.Presenter> {
     private static final int ACTION_BROWSER = 10;
 
     private void showActions(@NonNull View anchor, @NonNull TagRows.Entry entry, @Nullable JsonObject release) {
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         Menu menu = popup.getMenu();
         int order = 0;
         if (release != null && Json.lng(release, "databaseId") > 0) {

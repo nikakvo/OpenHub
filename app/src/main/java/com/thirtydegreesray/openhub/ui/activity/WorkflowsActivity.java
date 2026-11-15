@@ -35,6 +35,7 @@ import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
@@ -257,7 +258,7 @@ public class WorkflowsActivity extends BaseActivity<IBaseContract.Presenter> {
     private void showWorkflowActions(@NonNull View anchor, @NonNull JsonObject workflow) {
         String state = Json.str(workflow, "state");
         String path = Json.str(workflow, "path");
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.workflow_show_runs);
         if (canWrite && WorkflowStates.canEnable(state)) popup.getMenu().add(0, 2, 1, R.string.workflow_enable);
         if (canWrite && WorkflowStates.canDisable(state)) popup.getMenu().add(0, 3, 2, R.string.workflow_disable);
@@ -411,7 +412,7 @@ public class WorkflowsActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void showCacheActions(@NonNull View anchor, @NonNull JsonObject cache) {
         String key = Json.str(cache, "key");
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.caches_copy_key);
         if (canWrite) popup.getMenu().add(0, 2, 1, R.string.caches_delete);
         popup.setOnMenuItemClickListener(item -> {

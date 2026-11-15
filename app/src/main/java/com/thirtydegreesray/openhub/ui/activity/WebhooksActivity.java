@@ -35,6 +35,7 @@ import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
@@ -246,7 +247,7 @@ public class WebhooksActivity extends BaseActivity<IBaseContract.Presenter> {
         long id = Json.lng(hook, "id");
         String url = hookUrlOf(hook);
         boolean active = Json.bool(hook, "active");
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.webhooks_deliveries);
         popup.getMenu().add(0, 2, 1, active ? R.string.webhooks_turn_off : R.string.webhooks_turn_on);
         popup.getMenu().add(0, 3, 2, R.string.webhooks_ping);
@@ -401,7 +402,7 @@ public class WebhooksActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void showDeliveryActions(@NonNull View anchor, @NonNull JsonObject delivery) {
         long id = Json.lng(delivery, "id");
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.webhooks_details);
         popup.getMenu().add(0, 2, 1, R.string.webhooks_redeliver);
         popup.setOnMenuItemClickListener(item -> {

@@ -1,6 +1,7 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
 import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
@@ -830,7 +831,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         ((TextView) row.findViewById(R.id.setting_summary)).setText(updated == null ? ""
                 : getString(R.string.secrets_updated, StringUtils.getNewsTimeStr(this, updated)));
         row.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(this, v, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+            PopupMenu popup = new ScreenPopupMenu(this, v, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
             popup.getMenu().add(0, 1, 0, R.string.secrets_update);
             popup.getMenu().add(0, 2, 1, R.string.delete);
             popup.setOnMenuItemClickListener(item -> {
@@ -1060,7 +1061,7 @@ public class SecurityActivity extends BaseActivity<IBaseContract.Presenter> {
         summary.setMaxLines(4);
         summary.setEllipsize(android.text.TextUtils.TruncateAt.END);
         row.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(this, v, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+            PopupMenu popup = new ScreenPopupMenu(this, v, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
             popup.getMenu().add(0, 1, 0, R.string.variables_edit);
             popup.getMenu().add(0, 2, 1, R.string.variables_copy_value);
             popup.getMenu().add(0, 3, 2, R.string.delete);

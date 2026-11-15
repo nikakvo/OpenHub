@@ -26,6 +26,7 @@ import com.thirtydegreesray.openhub.ui.activity.base.PagerActivity;
 import com.thirtydegreesray.openhub.ui.adapter.FilePathAdapter;
 import com.thirtydegreesray.openhub.ui.adapter.RepoFilesAdapter;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 
 import android.content.Intent;
@@ -168,7 +169,7 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
 
     private void showAddMenu(View anchor) {
         if (!canEdit()) return;
-        PopupMenu popup = new PopupMenu(requireContext(), anchor, android.view.Gravity.NO_GRAVITY,
+        PopupMenu popup = new ScreenPopupMenu(requireContext(), anchor, android.view.Gravity.NO_GRAVITY,
                 R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.file_create);
         popup.getMenu().add(0, 2, 1, R.string.file_upload);
@@ -185,7 +186,7 @@ public class RepoFilesFragment extends ListFragment<RepoFilesPresenter, RepoFile
     }
 
     private void showFileMenu(@NonNull View anchor, @NonNull FileModel file) {
-        PopupMenu popup = new PopupMenu(requireContext(), anchor, android.view.Gravity.NO_GRAVITY,
+        PopupMenu popup = new ScreenPopupMenu(requireContext(), anchor, android.view.Gravity.NO_GRAVITY,
                 R.attr.popup_menu_theme, 0);
         boolean edit = canEdit() && !file.isDir();
         if (edit) popup.getMenu().add(0, 1, 0, R.string.file_edit);

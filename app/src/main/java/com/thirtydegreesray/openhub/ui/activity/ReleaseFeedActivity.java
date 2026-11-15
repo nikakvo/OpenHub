@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.app.Activity;
@@ -291,7 +292,7 @@ public class ReleaseFeedActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void showRowMenu(@NonNull View anchor, @NonNull Row row) {
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         Menu menu = popup.getMenu();
         menu.add(0, 1, 0, R.string.release_feed_open_repo);
         menu.add(0, 2, 1, R.string.download);

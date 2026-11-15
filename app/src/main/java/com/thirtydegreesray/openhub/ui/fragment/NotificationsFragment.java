@@ -33,6 +33,7 @@ import com.thirtydegreesray.openhub.ui.activity.RepositoryActivity;
 import com.thirtydegreesray.openhub.ui.adapter.NotificationsAdapter;
 import com.thirtydegreesray.openhub.ui.adapter.base.DoubleTypesModel;
 import com.thirtydegreesray.openhub.ui.fragment.base.ListFragment;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.NotificationLinks;
@@ -146,7 +147,7 @@ public class NotificationsFragment extends ListFragment<NotificationsPresenter, 
     public boolean onItemLongClick(int position, @NonNull View view) {
         if (adapter.getItemViewType(position) == 0) return super.onItemLongClick(position, view);
         Notification notification = adapter.getData().get(position).getM2();
-        PopupMenu menu = new PopupMenu(requireContext(), view, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu menu = new ScreenPopupMenu(requireContext(), view, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         if (notification.isUnread()) menu.getMenu().add(0, 1, 0, R.string.notification_mark_read);
         menu.getMenu().add(0, 2, 1, R.string.notification_mark_done);
         menu.getMenu().add(0, 3, 2, R.string.notification_unsubscribe);

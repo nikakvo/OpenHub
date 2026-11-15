@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
 
 import com.thirtydegreesray.openhub.R;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 
 /**
  * Popup menus of long cards (comments) open where the finger is. Anchored to the card
@@ -46,7 +47,7 @@ public final class TouchAnchor {
     @NonNull
     public static PopupMenu popup(@NonNull Activity activity, @NonNull View card) {
         View anchor = anchorAt(activity, card);
-        PopupMenu menu = new PopupMenu(activity, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu menu = new ScreenPopupMenu(activity, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         if (anchor != card) {
             menu.setOnDismissListener(m -> {
                 if (anchor.getParent() instanceof ViewGroup) {

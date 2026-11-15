@@ -1,6 +1,7 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
 import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
@@ -412,7 +413,7 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void showArtifactMenu(@NonNull View anchor, @NonNull Artifact artifact) {
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.download);
         popup.getMenu().add(0, 2, 1, R.string.artifact_to_release);
         popup.setOnMenuItemClickListener(item -> {
@@ -504,7 +505,7 @@ public class WorkflowRunActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void showJobMenu(@NonNull View anchor, @NonNull JsonObject job) {
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, R.string.run_log);
         if ("completed".equals(Json.str(job, "status")) && isCompleted()) {
             popup.getMenu().add(0, 2, 1, R.string.run_rerun_job);

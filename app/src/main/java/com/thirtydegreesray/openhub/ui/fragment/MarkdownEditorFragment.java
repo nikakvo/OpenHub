@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.EditText;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.state.AutoAccess;
 import com.thirtydegreesray.openhub.R;
 import com.thirtydegreesray.openhub.inject.component.AppComponent;
@@ -148,7 +149,7 @@ public class MarkdownEditorFragment extends BaseFragment
     private void showMentionView(){
         if(mentionUsers != null && mentionUsers.size() > 0){
             if(popupMenu == null){
-                popupMenu = new PopupMenu(getActivity(), addMention, Gravity.BOTTOM,
+                popupMenu = new ScreenPopupMenu(getActivity(), addMention, Gravity.BOTTOM,
                         R.attr.popup_menu_theme, 0);
                 Menu menu = popupMenu.getMenu();
                 for(String loginId : mentionUsers){

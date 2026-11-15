@@ -1,5 +1,6 @@
 package com.thirtydegreesray.openhub.ui.activity;
 
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
 import com.thirtydegreesray.openhub.util.PullRefresh;
 import android.content.Context;
@@ -284,7 +285,7 @@ public class CodeSearchActivity extends BaseActivity<IBaseContract.Presenter> {
         String htmlUrl = Json.str(item, "html_url");
         row.setOnClickListener(v -> ViewerActivity.show(this, url, htmlUrl));
         row.setOnLongClickListener(v -> {
-            PopupMenu menu = new PopupMenu(this, v, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+            PopupMenu menu = new ScreenPopupMenu(this, v, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
             menu.getMenu().add(0, 1, 0, R.string.copy_path);
             menu.getMenu().add(0, 2, 1, R.string.copy_url);
             menu.getMenu().add(0, 3, 2, R.string.open_in_browser);

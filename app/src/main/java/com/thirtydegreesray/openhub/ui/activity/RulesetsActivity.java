@@ -31,6 +31,7 @@ import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.BundleHelper;
 import com.thirtydegreesray.openhub.util.ErrorTexts;
@@ -194,7 +195,7 @@ public class RulesetsActivity extends BaseActivity<IBaseContract.Presenter> {
 
     private void showMenu(@NonNull View anchor, @NonNull JsonObject ruleset) {
         boolean canEdit = isAdmin && isOwn(ruleset);
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         popup.getMenu().add(0, 1, 0, canEdit ? R.string.edit : R.string.rulesets_view);
         boolean disabled = RulesetForm.ENFORCEMENT_DISABLED.equals(Json.str(ruleset, "enforcement"));
         if (canEdit) {

@@ -43,6 +43,7 @@ import com.thirtydegreesray.openhub.inject.component.AppComponent;
 import com.thirtydegreesray.openhub.mvp.contract.base.IBaseContract;
 import com.thirtydegreesray.openhub.ui.activity.base.BaseActivity;
 import com.thirtydegreesray.openhub.ui.widget.ScreenDialog;
+import com.thirtydegreesray.openhub.ui.widget.ScreenPopupMenu;
 import com.thirtydegreesray.openhub.util.AppOpener;
 import com.thirtydegreesray.openhub.util.AppUtils;
 import com.thirtydegreesray.openhub.util.BundleHelper;
@@ -218,7 +219,7 @@ public class DeployKeysActivity extends BaseActivity<IBaseContract.Presenter> {
     }
 
     private void showKeyActions(@NonNull View anchor, @NonNull JsonObject key, @NonNull String fingerprint) {
-        PopupMenu popup = new PopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu popup = new ScreenPopupMenu(this, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         if (!fingerprint.isEmpty()) popup.getMenu().add(0, 1, 0, R.string.deploy_keys_copy_fingerprint);
         popup.getMenu().add(0, 2, 1, R.string.deploy_keys_copy_key);
         popup.getMenu().add(0, 3, 2, R.string.deploy_keys_delete);

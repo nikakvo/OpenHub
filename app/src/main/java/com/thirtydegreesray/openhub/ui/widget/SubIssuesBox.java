@@ -435,7 +435,7 @@ public class SubIssuesBox {
     }
 
     private void showRowMenu(View anchor, SubIssues.Entry e, int index) {
-        PopupMenu menu = new PopupMenu(activity, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
+        PopupMenu menu = new ScreenPopupMenu(activity, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         Menu m = menu.getMenu();
         boolean many = subs != null && subs.size() > 1;
         if (many && index > 0) m.add(0, 1, 0, R.string.sub_issue_move_up);
