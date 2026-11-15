@@ -13,8 +13,11 @@ import androidx.appcompat.widget.Toolbar;
 
 /**
  * Closes the open overflow menu (three dots) of every toolbar of a screen, and an open text
- * drop-down (the search history), before the screen saves its state or goes away. Without this a menu that is open while the phone is rotated
- * leaks its window ("has leaked window"), and the toolbar opens it again on the new screen.
+ * drop-down (the search history) and the long-press menu of a list, before the screen saves
+ * its state or goes away. Without this a menu that is open while the phone is rotated leaks
+ * its window ("has leaked window"), and the toolbar opens it again on the new screen.
+ * The menus close at once because the app themes give them no fade-out (OhPopupMenu in
+ * styles.xml): with a fade-out Android keeps the window until the fade has ended.
  */
 public final class ScreenMenus implements Application.ActivityLifecycleCallbacks {
 
@@ -41,6 +44,12 @@ public final class ScreenMenus implements Application.ActivityLifecycleCallbacks
     private static void close(@NonNull Activity activity) {
         try {
             if (activity.getWindow() != null) closeToolbarMenus(activity.getWindow().peekDecorView());
+        } catch (Exception ignored) {
+            // no window
+        }
+        try {
+            // the long-press menu of the news list (a context menu)
+            activity.closeContextMenu();
         } catch (Exception ignored) {
             // no window
         }

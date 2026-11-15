@@ -129,7 +129,7 @@ public final class MainMenuDrawer {
     /** Switch to another account, add one, or log out (like the start screen's menu). */
     private static void showAccounts(@NonNull AppCompatActivity activity, @NonNull Dialog dialog,
                                      @NonNull View anchor) {
-        androidx.appcompat.widget.PopupMenu popup = new androidx.appcompat.widget.PopupMenu(
+        PopupMenu popup = new ScreenPopupMenu(
                 activity, anchor, Gravity.NO_GRAVITY, R.attr.popup_menu_theme, 0);
         List<AuthUser> others = AccountActions.others();
         for (int i = 0; i < others.size(); i++) {

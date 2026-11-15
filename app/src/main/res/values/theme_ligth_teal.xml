@@ -44,6 +44,10 @@
         <item name="android:contextPopupMenuStyle">@style/ContextPopupThemeLightTeal</item>
         <item name="popup_menu_theme">@style/PopupMenuLightTeal</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+        <!-- Menus close at once, without a fade-out (see OhPopupMenu in styles.xml). -->
+        <item name="popupMenuStyle">@style/OhPopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/OhPopupMenu.Overflow</item>
+        <item name="listPopupWindowStyle">@style/OhListPopupWindow</item>
     </style>
 
     <style name="DialogThemeLightTeal" parent="Theme.AppCompat.Light.Dialog.Alert">
@@ -56,6 +60,10 @@
         <item name="colorPrimaryDark">@color/light_teal_color_primary_dark</item>
         <item name="colorAccent">@color/light_teal_color_accent</item>
         <item name="android:windowBackground">@color/light_teal_window_background</item>
+        <!-- Menus close at once, without a fade-out (see OhPopupMenu in styles.xml). -->
+        <item name="popupMenuStyle">@style/OhPopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/OhPopupMenu.Overflow</item>
+        <item name="listPopupWindowStyle">@style/OhListPopupWindow</item>
     </style>
 
     <style name="AppbarThemeLightTeal" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
@@ -64,6 +72,7 @@
 
     <style name="PopupMenuLightTeal" parent="Widget.AppCompat.Light.PopupMenu">
         <item name="android:popupBackground">@color/light_teal_window_background</item>
+        <item name="android:popupExitTransition">@android:transition/no_transition</item>
     </style>
 
     <style name="PopupThemeLightTeal" parent="ThemeOverlay.AppCompat.Light">
@@ -77,6 +86,7 @@
          ~  a contextPopupMenuStyle on Android N, set bellow can fix it.
         -->
         <item name="android:overlapAnchor">true</item>
+        <item name="android:popupExitTransition">@android:transition/no_transition</item>
     </style>
 
     <style name="ThemeLightTeal.LightBlue" parent="ThemeLightTeal" >

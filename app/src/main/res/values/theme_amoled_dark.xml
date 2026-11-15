@@ -53,6 +53,10 @@
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
+        <!-- Menus close at once, without a fade-out (see OhPopupMenu in styles.xml). -->
+        <item name="popupMenuStyle">@style/OhPopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/OhPopupMenu.Overflow</item>
+        <item name="listPopupWindowStyle">@style/OhListPopupWindow</item>
     </style>
 
     <style name="DialogThemeAmoledDark" parent="Theme.AppCompat.Dialog.Alert">
@@ -66,6 +70,10 @@
         <item name="colorAccent">@color/amoled_dark_color_accent</item>
         <item name="android:windowBackground">@color/amoled_dark_color_window_background</item>
         <item name="android:textColorHint">@color/amoled_dark_text_color_secondary</item>
+        <!-- Menus close at once, without a fade-out (see OhPopupMenu in styles.xml). -->
+        <item name="popupMenuStyle">@style/OhPopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/OhPopupMenu.Overflow</item>
+        <item name="listPopupWindowStyle">@style/OhListPopupWindow</item>
     </style>
 
     <style name="AppbarThemeAmoledDark" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
@@ -74,6 +82,7 @@
 
     <style name="PopupMenuAmoledDark" parent="Widget.AppCompat.PopupMenu">
         <item name="android:popupBackground">@color/amoled_dark_color_window_background</item>
+        <item name="android:popupExitTransition">@android:transition/no_transition</item>
     </style>
 
     <style name="PopupThemeAmoledDark" parent="ThemeOverlay.AppCompat.Dark">
@@ -87,6 +96,7 @@
          ~  a contextPopupMenuStyle on Android N, set bellow can fix it.
         -->
         <item name="android:overlapAnchor">true</item>
+        <item name="android:popupExitTransition">@android:transition/no_transition</item>
     </style>
 
     <style name="ThemeAmoledDark.LightBlue" parent="ThemeAmoledDark">

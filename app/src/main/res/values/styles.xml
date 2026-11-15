@@ -20,6 +20,30 @@
         <!--<item name="android:windowLightStatusBar" tools:targetApi="m">true</item>-->
         <item name="android:windowBackground">@drawable/splash_screen_drawable</item>
         <!--<item name="icon_color">@color/white</item> &lt;!&ndash; to display the icons properly since this theme is the default &ndash;&gt;-->
+        <!-- Menus close at once, without a fade-out (see OhPopupMenu in styles.xml). -->
+        <item name="popupMenuStyle">@style/OhPopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/OhPopupMenu.Overflow</item>
+        <item name="listPopupWindowStyle">@style/OhListPopupWindow</item>
+    </style>
+
+    <!--
+     ~  Popup menus, the toolbar menu (three dots) and list popups close at once, without the
+     ~  fade-out. Android removes a menu window only when its fade-out has ended; when the
+     ~  screen is rebuilt (rotation, theme or font change) no frame is drawn in between, so the
+     ~  menu window was still there and Android reported it as leaked.
+     ~  Every app theme points popupMenuStyle / actionOverflowMenuStyle / listPopupWindowStyle
+     ~  here (PopupStylesTest checks it). @null would not work: Android then reuses the fade-in.
+    -->
+    <style name="OhPopupMenu" parent="Widget.AppCompat.Light.PopupMenu">
+        <item name="android:popupExitTransition">@android:transition/no_transition</item>
+    </style>
+
+    <style name="OhPopupMenu.Overflow" parent="Widget.AppCompat.Light.PopupMenu.Overflow">
+        <item name="android:popupExitTransition">@android:transition/no_transition</item>
+    </style>
+
+    <style name="OhListPopupWindow" parent="Widget.AppCompat.ListPopupWindow">
+        <item name="android:popupExitTransition">@android:transition/no_transition</item>
     </style>
 
     <style name="Toolbar.TitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">

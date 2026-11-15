@@ -60,6 +60,8 @@ final class HtmlSpanner {
     /** How many margin blocks (lists, quotes) the current text is inside. */
     private int marginDepth;
     private boolean inPre;
+    /** Inside the text of a reply sent by email: where it starts, else -1. */
+    private int keepLines = -1;
     /** where the last empty line between blocks ends: never two of them in a row */
     private int blankAt = -1;
     /** the text right after an alert's title follows on the next line */
@@ -175,7 +177,30 @@ final class HtmlSpanner {
             out.append(raw);
             return;
         }
-        String s = node.getWholeText().replaceAll("[ \\t\\n\\r\\f]+", " ");
+        if (keepLines >= 0) {
+            // a reply sent by email: its lines stay lines, at most one empty line between them
+            String[] lines = node.getWholeText().replace("\r", "").split("\n", -1);
+            for (int i = 0; i < lines.length; i++) {
+                if (i > 0) emailLineBreak();
+                inline(lines[i]);
+            }
+            return;
+        }
+        inline(node.getWholeText());
+    }
+
+    private void emailLineBreak() {
+        if (pending != NONE) flush();
+        int end = out.length();
+        while (end > keepLines && out.charAt(end - 1) == ' ') end--;
+        if (end < out.length()) out.delete(end, out.length());
+        if (out.length() <= keepLines) return;
+        if (out.length() >= 2 && out.charAt(out.length() - 1) == '\n' && out.charAt(out.length() - 2) == '\n') return;
+        out.append('\n');
+    }
+
+    private void inline(@NonNull String raw) {
+        String s = raw.replaceAll("[ \\t\\n\\r\\f]+", " ");
         if (s.isEmpty()) return;
         if (s.trim().isEmpty()) {
             // only a space: between two words, not at the start of a line or a block
@@ -226,6 +251,10 @@ final class HtmlSpanner {
             case "div":
                 if (e.hasClass("markdown-alert")) {
                     alert(e);
+                    return;
+                }
+                if (e.hasClass("email-fragment") && keepLines < 0 && !inPre) {
+                    emailFragment(e);
                     return;
                 }
                 start = open(LINE);
@@ -553,6 +582,25 @@ final class HtmlSpanner {
     private static Element taskBox(@NonNull Element li) {
         Element first = li.selectFirst("> input[type=checkbox], > p > input[type=checkbox]");
         return first;
+    }
+
+    /**
+     * The text of a comment sent by email ({@code div.email-fragment}): github.com keeps its
+     * line breaks, so they stay here too instead of running into one paragraph.
+     */
+    private void emailFragment(@NonNull Element e) {
+        int start = open(gap());
+        keepLines = start;
+        try {
+            children(e);
+        } finally {
+            keepLines = -1;
+        }
+        int end = out.length();
+        while (end > start && (out.charAt(end - 1) == '\n' || out.charAt(end - 1) == ' ')) end--;
+        if (end < out.length()) out.delete(end, out.length());
+        if (blankAt > out.length()) blankAt = -1;
+        close(gap());
     }
 
     private void pre(@NonNull Element e) {
