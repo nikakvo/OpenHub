@@ -55,7 +55,9 @@ app goes to them; see [Credits](#credits).
 * Built-in updater with an on/off switch; GitHub links from other apps open in the app
   (repositories, also `.git` links, files, folders, wiki pages, issues, pull requests,
   releases, profiles and their repositories, stars, followers and following); a file link
-  to a branch that does not exist says so and offers the default branch
+  to a branch that does not exist says so and offers the default branch; Settings shows
+  which app really opens github.com links (another app with github.com, such as the official
+  GitHub app, wins) and opens that app's Open by default page
 * The side menu on every screen (≡ always at the top left, Back right next to it), to jump
   anywhere without pressing Back many times
 * **Matrix rain** side menu: slowly falling green characters behind your account and down
@@ -74,7 +76,8 @@ app goes to them; see [Credits](#credits).
 * Light, dark and AMOLED dark themes, many accent colors, colored or plain side menu icons
 * Comments look like on github.com (GitHub's own rendering): pictures, tables, task lists,
   alerts with GitHub's icons, quotes, nested lists, footnotes, keys, bold `@mentions` and
-  folded sections that open on a tap; a tap on a table opens it full screen
+  folded sections that open on a tap; a tap on a table opens it full screen; a comment sent
+  by email shows only the new text, without the quoted email
 * **Quote reply** and **Mention `@name`** in the long-press menu of every comment (issues,
   pull requests, discussions, gists)
 * Code highlighting for 193 languages; a copy button on every code block and code file
